@@ -4,6 +4,8 @@ import { createRouteHandlerClient } from
   '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
+export const dynamic = 'force-dynamic'
+
 const stripe = new Stripe(
   process.env.STRIPE_SECRET_KEY!
 )
