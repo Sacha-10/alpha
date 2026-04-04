@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0A0A0F;
+  --card: #12121A;
+  --hover: #1A1A28;
+  --blue: #2D6FFF;
+  --cyan: #00E5FF;
+  --red: #FF3D57;
+  --green: #00E5B0;
+  --primary: #F0F4FF;
+  --secondary: #8892AA;
+  --border: #1E2035;
+  --radius: 12px;
+  --transition: 200ms ease;
+  --shadow: 0 0 40px rgba(45, 111, 255, 0.08);
+}
+
+* {
+  transition: var(--transition);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--primary);
+  font-family: var(--font-inter), sans-serif;
+}
+
+.font-mono {
+  font-family: var(--font-jetbrains-mono), monospace;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.card:hover {
+  border-color: var(--blue);
+}
+
+.btn-primary {
+  background: var(--blue);
+  color: white;
+  border-radius: var(--radius);
+  padding: 12px 24px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  box-shadow: 0 0 20px rgba(45, 111, 255, 0.3);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 24px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-outline:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.glow-blue {
+  box-shadow: 0 0 40px rgba(45, 111, 255, 0.15);
+}
+
+@layer utilities {
+  .hover\:glow-blue:hover {
+    box-shadow: 0 0 40px rgba(45, 111, 255, 0.15);
+  }
+}
+
+@keyframes landing-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-landing-marquee {
+  animation: landing-marquee 45s linear infinite;
+}

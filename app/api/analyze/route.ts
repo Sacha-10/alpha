@@ -1,0 +1,95 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createRouteHandlerClient } from 
+  '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
+import { analyzeTrades } from '@/lib/openai'
+
+const PLAN_LIMITS: Record<string, number> = {
+  starter: 4,
+  pro: 24,
+  elite: 999999,
+}
+
+export async function POST(req: NextRequest) {
+  const supabase = createRouteHandlerClient({ 
+    cookies 
+  })
+  
+  const { data: { user } } = await 
+    supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Non autorisé' }, 
+      { status: 401 }
+    )
+  }
+  
+  const { data: userData } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+  
+  if (!userData) {
+    return NextResponse.json(
+      { error: 'Utilisateur introuvable' },
+      { status: 404 }
+    )
+  }
+  
+  // Reset mensuel automatique
+  const today = new Date()
+  const resetDate = new Date(userData.analyses_reset_date)
+  if (today >= resetDate) {
+    const nextReset = new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      1
+    )
+    await supabase.from('users')
+      .update({ 
+        analyses_used: 0,
+        analyses_reset_date: nextReset.toISOString()
+      })
+      .eq('id', user.id)
+    userData.analyses_used = 0
+  }
+  
+  const limit = PLAN_LIMITS[
+    userData.subscription_plan || 'starter'
+  ]
+  
+  if (userData.analyses_used >= limit) {
+    return NextResponse.json(
+      { 
+        error: `Vous avez utilisé toutes vos analyses 
+        ce mois-ci. Passez au plan supérieur 
+        pour continuer.`,
+        upgrade: true
+      },
+      { status: 403 }
+    )
+  }
+  
+  const { trades } = await req.json()
+  const report = await analyzeTrades(trades)
+  
+  await supabase.from('users')
+    .update({ 
+      analyses_used: userData.analyses_used + 1 
+    })
+    .eq('id', user.id)
+  
+  await supabase.from('analyses')
+    .insert({
+      user_id: user.id,
+      report,
+      created_at: new Date().toISOString()
+    })
+  
+  return NextResponse.json({
+    ...report,
+    analysesLeft: limit - userData.analyses_used - 1,
+    analysesLimit: limit,
+  })
+}
