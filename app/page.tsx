@@ -20,6 +20,8 @@ const fadeInUp = {
   transition: { duration: 0.5 },
 };
 
+const viewOnce = { once: true } as const;
+
 const MARQUEE =
   "Compatible avec Binance · MT4 · MT5 · TradingView · FTMO · MyForexFunds · The Funded Trader · E8 Funding";
 
@@ -67,7 +69,7 @@ function HeroDashboardMockup() {
     <motion.div
       initial={{ opacity: 0, y: 36 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={viewOnce}
       transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
       className="mx-auto mt-16 max-w-4xl [perspective:1000px]"
     >
@@ -205,7 +207,7 @@ function HeroDashboardMockup() {
               key={s.label}
               initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={viewOnce}
               transition={{ delay: 0.15 + i * 0.06, duration: 0.45 }}
               className="rounded-lg p-3.5 font-mono"
               style={{
@@ -242,7 +244,7 @@ function HeroDashboardMockup() {
                 key={b.name}
                 initial={{ opacity: 0, y: 8 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={viewOnce}
                 transition={{ delay: 0.35 + i * 0.07 }}
                 className="inline-flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs font-medium"
                 style={{
@@ -354,18 +356,30 @@ export default function HomePage() {
 
       <main className="relative z-10 pt-24">
         {/* HERO */}
-        <section className="relative mx-auto max-w-6xl px-6 pb-20 pt-12 md:pb-28 md:pt-16">
-          <motion.div
-            initial={fadeInUp.initial}
-            whileInView={fadeInUp.animate}
-            viewport={{ once: true }}
-            transition={fadeInUp.transition}
-            className="mx-auto max-w-3xl text-center"
-          >
+        <motion.section
+          initial={fadeInUp.initial}
+          whileInView={fadeInUp.animate}
+          viewport={viewOnce}
+          transition={fadeInUp.transition}
+          className="relative mx-auto max-w-6xl px-6 pb-20 pt-12 md:pb-28 md:pt-16"
+        >
+          <div className="mx-auto max-w-3xl text-center">
             <motion.div
               className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue/30 bg-blue/10 px-4 py-2 text-sm font-medium text-blue"
-              animate={{ opacity: [0.85, 1, 0.85] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              animate={{
+                opacity: [0.82, 1, 0.82],
+                scale: [1, 1.035, 1],
+                boxShadow: [
+                  "0 0 0 0 rgba(45, 111, 255, 0)",
+                  "0 0 28px 0 rgba(45, 111, 255, 0.28)",
+                  "0 0 0 0 rgba(45, 111, 255, 0)",
+                ],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
             >
               <Zap className="h-4 w-4 shrink-0" aria-hidden />
               Journal de Trading propulsé par l&apos;IA
@@ -394,43 +408,42 @@ export default function HomePage() {
                 <ChevronRight className="h-4 w-4 opacity-70" aria-hidden />
               </Link>
             </div>
-          </motion.div>
+          </div>
 
           <HeroDashboardMockup />
-        </section>
+        </motion.section>
 
         {/* SOCIAL PROOF */}
-        <motion.div
+        <motion.section
           initial={fadeInUp.initial}
           whileInView={fadeInUp.animate}
-          viewport={{ once: true }}
+          viewport={viewOnce}
           transition={fadeInUp.transition}
+          aria-label="Plateformes compatibles"
           className="border-y border-border py-4 text-secondary"
         >
           <div className="overflow-hidden">
-            <div className="animate-landing-marquee flex w-max whitespace-nowrap">
-              <span className="px-8 text-sm">{MARQUEE}</span>
-              <span className="px-8 text-sm" aria-hidden>
+            <div className="animate-landing-marquee whitespace-nowrap">
+              <span className="inline-block shrink-0 px-10 text-sm">{MARQUEE}</span>
+              <span className="inline-block shrink-0 px-10 text-sm" aria-hidden>
                 {MARQUEE}
               </span>
             </div>
           </div>
-        </motion.div>
+        </motion.section>
 
         {/* FONCTIONNALITÉS */}
-        <section
+        <motion.section
           id="fonctionnalites"
+          initial={fadeInUp.initial}
+          whileInView={fadeInUp.animate}
+          viewport={viewOnce}
+          transition={fadeInUp.transition}
           className="mx-auto max-w-6xl scroll-mt-28 px-6 py-20 md:py-28"
         >
-          <motion.h2
-            initial={fadeInUp.initial}
-            whileInView={fadeInUp.animate}
-            viewport={{ once: true }}
-            transition={fadeInUp.transition}
-            className="mx-auto mb-14 max-w-3xl text-center text-3xl font-bold text-primary md:text-4xl"
-          >
+          <h2 className="mx-auto mb-14 max-w-3xl text-center text-3xl font-bold text-primary md:text-4xl">
             Tout ce dont vous avez besoin pour progresser
-          </motion.h2>
+          </h2>
           <div className="grid gap-6 md:grid-cols-3">
             {[
               {
@@ -453,8 +466,8 @@ export default function HomePage() {
                 key={item.title}
                 initial={fadeInUp.initial}
                 whileInView={fadeInUp.animate}
-                viewport={{ once: true }}
-                transition={{ ...fadeInUp.transition, delay: i * 0.08 }}
+                viewport={viewOnce}
+                transition={{ ...fadeInUp.transition, delay: i * 0.1 }}
                 className="card hover:glow-blue p-6"
               >
                 <div className="mb-4">{item.icon}</div>
@@ -465,20 +478,18 @@ export default function HomePage() {
               </motion.div>
             ))}
           </div>
-        </section>
+        </motion.section>
 
         {/* TARIFS */}
-        <section
+        <motion.section
           id="tarifs"
+          initial={fadeInUp.initial}
+          whileInView={fadeInUp.animate}
+          viewport={viewOnce}
+          transition={fadeInUp.transition}
           className="mx-auto max-w-6xl scroll-mt-28 px-6 pb-24 md:pb-32"
         >
-          <motion.div
-            initial={fadeInUp.initial}
-            whileInView={fadeInUp.animate}
-            viewport={{ once: true }}
-            transition={fadeInUp.transition}
-            className="text-center"
-          >
+          <div className="text-center">
             <h2 className="text-3xl font-bold text-primary md:text-4xl">
               Des tarifs simples et transparents
             </h2>
@@ -520,15 +531,15 @@ export default function HomePage() {
                 </span>
               ) : null}
             </div>
-          </motion.div>
+          </div>
 
           <div className="mt-14 grid gap-8 lg:grid-cols-3">
             {/* Starter */}
             <motion.div
               initial={fadeInUp.initial}
               whileInView={fadeInUp.animate}
-              viewport={{ once: true }}
-              transition={{ ...fadeInUp.transition, delay: 0.05 }}
+              viewport={viewOnce}
+              transition={{ ...fadeInUp.transition, delay: 0 }}
               className="card flex flex-col p-8"
             >
               <h3 className="text-lg font-bold text-primary">Starter</h3>
@@ -571,7 +582,7 @@ export default function HomePage() {
             <motion.div
               initial={fadeInUp.initial}
               whileInView={fadeInUp.animate}
-              viewport={{ once: true }}
+              viewport={viewOnce}
               transition={{ ...fadeInUp.transition, delay: 0.1 }}
               className="card relative flex flex-col border-2 border-blue p-8 glow-blue"
             >
@@ -620,8 +631,8 @@ export default function HomePage() {
             <motion.div
               initial={fadeInUp.initial}
               whileInView={fadeInUp.animate}
-              viewport={{ once: true }}
-              transition={{ ...fadeInUp.transition, delay: 0.15 }}
+              viewport={viewOnce}
+              transition={{ ...fadeInUp.transition, delay: 0.2 }}
               className="card flex flex-col p-8"
             >
               <h3 className="text-lg font-bold text-primary">Elite</h3>
@@ -663,17 +674,17 @@ export default function HomePage() {
               </Link>
             </motion.div>
           </div>
-        </section>
+        </motion.section>
 
         {/* FOOTER */}
-        <footer className="border-t border-border">
-          <motion.div
-            initial={fadeInUp.initial}
-            whileInView={fadeInUp.animate}
-            viewport={{ once: true }}
-            transition={fadeInUp.transition}
-            className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 py-12 text-sm text-secondary md:flex-row md:justify-between"
-          >
+        <motion.footer
+          initial={fadeInUp.initial}
+          whileInView={fadeInUp.animate}
+          viewport={viewOnce}
+          transition={fadeInUp.transition}
+          className="border-t border-border"
+        >
+          <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 py-12 text-sm text-secondary md:flex-row md:justify-between">
             <div className="flex items-center gap-2">
               <TrendingUp
                 className="h-6 w-6 shrink-0"
@@ -696,8 +707,8 @@ export default function HomePage() {
             <p className="text-center md:text-right">
               © 2026 Alpha. Tous droits réservés.
             </p>
-          </motion.div>
-        </footer>
+          </div>
+        </motion.footer>
       </main>
     </div>
   );

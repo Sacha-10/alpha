@@ -83,14 +83,18 @@ body {
 }
 
 @keyframes landing-marquee {
-  0% {
-    transform: translateX(0);
+  from {
+    transform: translate3d(0, 0, 0);
   }
-  100% {
-    transform: translateX(-50%);
+  to {
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
 .animate-landing-marquee {
-  animation: landing-marquee 45s linear infinite;
+  display: flex;
+  width: max-content;
+  animation: landing-marquee 50s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
