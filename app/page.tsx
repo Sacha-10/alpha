@@ -23,6 +23,247 @@ const fadeInUp = {
 const MARQUEE =
   "Compatible avec Binance · MT4 · MT5 · TradingView · FTMO · MyForexFunds · The Funded Trader · E8 Funding";
 
+/** 31 points = jour 0 → jour 30, courbe equity réaliste (creux / rebonds). */
+const MOCK_EQUITY = [
+  100, 98.2, 95.1, 92.4, 89.8, 87.2, 84.5, 86.1, 88.7, 91.3, 89.6, 87.9, 85.4,
+  88.2, 92.8, 96.4, 94.1, 90.7, 87.3, 84.9, 87.5, 91.2, 95.6, 99.1, 97.4, 101.2,
+  104.8, 102.5, 106.3, 109.1, 112.4,
+];
+
+const MOCK_CHART = (() => {
+  const w = 560;
+  const h = 128;
+  const padX = 8;
+  const padY = 10;
+  const min = Math.min(...MOCK_EQUITY);
+  const max = Math.max(...MOCK_EQUITY);
+  const span = max - min || 1;
+  const n = MOCK_EQUITY.length;
+  const xs = MOCK_EQUITY.map((_, i) => padX + (i / (n - 1)) * (w - 2 * padX));
+  const ys = MOCK_EQUITY.map(
+    (v) => padY + (1 - (v - min) / span) * (h - 2 * padY)
+  );
+  const lineD = xs
+    .map((x, i) => `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${ys[i].toFixed(1)}`)
+    .join(" ");
+  const areaD = `${lineD} L ${xs[n - 1].toFixed(1)} ${h - padY} L ${padX} ${h - padY} Z`;
+  const markerKinds: Record<number, "low" | "high"> = {
+    6: "low",
+    14: "high",
+    19: "low",
+    30: "high",
+  };
+  const markers = [6, 14, 19, 30].map((i) => ({
+    i,
+    x: xs[i],
+    y: ys[i],
+    kind: markerKinds[i]!,
+  }));
+  return { w, h, lineD, areaD, markers };
+})();
+
+function HeroDashboardMockup() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 36 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+      className="mx-auto mt-16 max-w-4xl [perspective:1000px]"
+    >
+      <div
+        className="overflow-hidden rounded-[var(--radius)] border p-5 shadow-[0_0_60px_rgba(45,111,255,0.14),0_24px_48px_rgba(0,0,0,0.35)] md:p-6"
+        style={{
+          backgroundColor: "#12121A",
+          borderColor: "#1E2035",
+          transform: "rotateX(5deg)",
+          transformStyle: "preserve-3d",
+        }}
+      >
+        {/* Header chart */}
+        <div className="relative mb-5 flex items-start justify-between gap-4 border-b pb-4" style={{ borderColor: "#1E2035" }}>
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em]" style={{ color: "#8892AA" }}>
+              Courbe d&apos;equity
+            </p>
+            <p className="mt-1 text-lg font-semibold tracking-tight text-white">
+              30 jours
+            </p>
+          </div>
+          <motion.div
+            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+            style={{
+              backgroundColor: "rgba(0, 229, 176, 0.12)",
+              color: "#00E5B0",
+              border: "1px solid rgba(0, 229, 176, 0.35)",
+            }}
+            animate={{
+              scale: [1, 1.04, 1],
+              boxShadow: [
+                "0 0 0 0 rgba(0, 229, 176, 0.25)",
+                "0 0 0 8px rgba(0, 229, 176, 0)",
+                "0 0 0 0 rgba(0, 229, 176, 0)",
+              ],
+            }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <span className="relative flex h-2 w-2">
+              <span
+                className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"
+                style={{ backgroundColor: "#00E5B0" }}
+              />
+              <span
+                className="relative inline-flex h-2 w-2 rounded-full"
+                style={{ backgroundColor: "#00E5B0" }}
+              />
+            </span>
+            IA Active
+          </motion.div>
+        </div>
+
+        {/* Chart SVG */}
+        <div
+          className="relative overflow-hidden rounded-lg"
+          style={{
+            background: "linear-gradient(180deg, rgba(45,111,255,0.06) 0%, transparent 45%)",
+            border: "1px solid #1E2035",
+          }}
+        >
+          <svg
+            viewBox={`0 0 ${MOCK_CHART.w} ${MOCK_CHART.h}`}
+            className="h-auto w-full"
+            preserveAspectRatio="xMidYMid meet"
+            aria-hidden
+          >
+            <defs>
+              <linearGradient id="heroEqStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#2D6FFF" />
+                <stop offset="100%" stopColor="#00E5FF" />
+              </linearGradient>
+              <linearGradient id="heroEqFill" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#2D6FFF" stopOpacity="0.22" />
+                <stop offset="70%" stopColor="#00E5FF" stopOpacity="0.04" />
+                <stop offset="100%" stopColor="#12121A" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            {[0, 1, 2, 3].map((i) => (
+              <line
+                key={i}
+                x1={8}
+                y1={20 + i * 28}
+                x2={MOCK_CHART.w - 8}
+                y2={20 + i * 28}
+                stroke="#1E2035"
+                strokeWidth="0.5"
+                strokeDasharray="3 5"
+              />
+            ))}
+            <motion.path
+              d={MOCK_CHART.areaD}
+              fill="url(#heroEqFill)"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            />
+            <motion.path
+              d={MOCK_CHART.lineD}
+              fill="none"
+              stroke="url(#heroEqStroke)"
+              strokeWidth={2.25}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ pathLength: { duration: 1.85, ease: [0.22, 1, 0.36, 1] }, opacity: { duration: 0.3 } }}
+            />
+            {MOCK_CHART.markers.map((m, idx) => (
+              <motion.circle
+                key={m.i}
+                cx={m.x}
+                cy={m.y}
+                r={m.kind === "low" ? 3.5 : 3}
+                fill={m.kind === "low" ? "#FF3D57" : "#00E5FF"}
+                stroke="#12121A"
+                strokeWidth={1.5}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 1.1 + idx * 0.12, type: "spring", stiffness: 380, damping: 22 }}
+              />
+            ))}
+          </svg>
+        </div>
+
+        {/* Stats */}
+        <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {[
+            { label: "Win Rate", value: "68%", accent: "#00E5FF" },
+            { label: "Profit Factor", value: "1,84", accent: "#2D6FFF" },
+            { label: "Max Drawdown", value: "4,2%", accent: "#FF3D57" },
+            { label: "PnL", value: "+2 847 €", accent: "#00E5B0" },
+          ].map((s, i) => (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.15 + i * 0.06, duration: 0.45 }}
+              className="rounded-lg p-3.5 font-mono"
+              style={{
+                backgroundColor: "rgba(18, 18, 26, 0.9)",
+                border: "1px solid #1E2035",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+              }}
+            >
+              <p className="text-[10px] font-sans font-medium uppercase tracking-wider" style={{ color: "#8892AA" }}>
+                {s.label}
+              </p>
+              <p
+                className="mt-1.5 text-xl font-semibold tabular-nums tracking-tight text-white"
+                style={{ textShadow: `0 0 24px ${s.accent}33` }}
+              >
+                <span style={{ color: s.accent }}>{s.value}</span>
+              </p>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Biais */}
+        <div className="mt-5 border-t pt-4" style={{ borderColor: "#1E2035" }}>
+          <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.12em]" style={{ color: "#8892AA" }}>
+            Biais détectés
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { name: "Revenge Trading", level: "CRITIQUE", fg: "#FFB4B4", bg: "rgba(255, 61, 87, 0.12)", border: "rgba(255, 61, 87, 0.35)" },
+              { name: "FOMO", level: "ÉLEVÉ", fg: "#FFD89A", bg: "rgba(255, 180, 80, 0.1)", border: "rgba(255, 180, 80, 0.35)" },
+              { name: "Overtrading", level: "MOYEN", fg: "#C8D4E8", bg: "rgba(45, 111, 255, 0.1)", border: "rgba(45, 111, 255, 0.35)" },
+            ].map((b, i) => (
+              <motion.span
+                key={b.name}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.35 + i * 0.07 }}
+                className="inline-flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs font-medium"
+                style={{
+                  backgroundColor: b.bg,
+                  border: `1px solid ${b.border}`,
+                  color: b.fg,
+                }}
+              >
+                <span className="font-semibold text-white/95">{b.name}</span>
+                <span className="rounded bg-black/25 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide" style={{ color: b.fg }}>
+                  {b.level}
+                </span>
+              </motion.span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function HomePage() {
   const [scrolled, setScrolled] = useState(false);
   const [annual, setAnnual] = useState(false);
@@ -155,49 +396,7 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          <motion.div
-            initial={fadeInUp.initial}
-            whileInView={fadeInUp.animate}
-            viewport={{ once: true }}
-            transition={{ ...fadeInUp.transition, delay: 0.15 }}
-            className="mx-auto mt-16 max-w-4xl [perspective:1000px]"
-          >
-            <div
-              className="card overflow-hidden p-6 shadow-card md:p-8"
-              style={{ transform: "rotateX(5deg)" }}
-            >
-              <div className="mb-4 flex items-center justify-between gap-4 border-b border-border pb-4">
-                <p className="text-sm font-semibold text-primary">
-                  Aperçu tableau de bord
-                </p>
-                <span className="rounded-full bg-blue/15 px-3 py-1 text-xs font-medium text-blue">
-                  Live
-                </span>
-              </div>
-              <div className="grid gap-3 font-mono text-sm sm:grid-cols-2 lg:grid-cols-4">
-                {[
-                  { label: "Win Rate", value: "52,4 %", tone: "text-green" },
-                  { label: "Profit Factor", value: "1,18", tone: "text-cyan" },
-                  { label: "Drawdown", value: "6,2 %", tone: "text-red" },
-                  { label: "Sharpe Ratio", value: "0,87", tone: "text-primary" },
-                ].map((row) => (
-                  <div
-                    key={row.label}
-                    className="rounded-lg border border-border bg-background/80 p-4"
-                  >
-                    <p className="text-xs text-secondary">{row.label}</p>
-                    <p className={`mt-2 text-lg font-semibold tabular-nums ${row.tone}`}>
-                      {row.value}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-4 text-xs text-secondary">
-                Revenge Trading, Overtrading, FOMO — détectés automatiquement sur
-                votre historique.
-              </p>
-            </div>
-          </motion.div>
+          <HeroDashboardMockup />
         </section>
 
         {/* SOCIAL PROOF */}
