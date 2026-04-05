@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 
 const stripe = new Stripe(
   process.env.STRIPE_SECRET_KEY!
@@ -22,6 +22,8 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     )
   }
+
+  const admin = getSupabaseAdmin()
   
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
@@ -34,7 +36,7 @@ export async function POST(req: NextRequest) {
       1
     )
     
-    await supabaseAdmin.from('users').update({
+    await admin.from('users').update({
       subscription_status: 'active',
       subscription_plan: planName,
       analyses_limit: parseInt(analysesLimit),
@@ -52,7 +54,7 @@ export async function POST(req: NextRequest) {
     ) as Stripe.Customer
     
     if (customer.email) {
-      await supabaseAdmin.from('users').update({
+      await admin.from('users').update({
         subscription_status: 'inactive',
         subscription_plan: 'starter',
         analyses_limit: 4,
