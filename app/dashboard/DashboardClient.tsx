@@ -140,7 +140,7 @@ export default function DashboardClient() {
           <p className="text-sm text-slate-400">
             Envoyez un CSV : nous détectons MT4, Binance ou TradingView, puis
             appelons le modèle{" "}
-            <span className="font-mono text-slate-300">gpt-5.4-thinking</span>.
+            <span className="font-mono text-slate-300">gpt-5.4</span>.
           </p>
           <UploadZone loading={loading} onAnalyze={onAnalyzeFile} />
         </section>

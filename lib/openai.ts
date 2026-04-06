@@ -144,7 +144,7 @@ export async function analyzeTrades(
   async function callAPI(attempt: number): Promise<any> {
     try {
       const response = await client.chat.completions.create({
-        model: 'gpt-5.4-thinking',
+        model: 'gpt-5.4',
         max_tokens: 4000,
         temperature: 0.3,
         messages: [
@@ -168,11 +168,19 @@ export async function analyzeTrades(
       
       return JSON.parse(clean)
     } catch (error: any) {
-      console.error('[OpenAI Error]', {
+      let errorJson = ''
+      try {
+        errorJson = JSON.stringify(error)
+      } catch (jsonErr: any) {
+        errorJson = `JSON.stringify failed: ${jsonErr?.message || String(jsonErr)}`
+      }
+
+      console.error('[OpenAI Error - Detailed]', {
         message: error?.message,
         status: error?.status,
         code: error?.code,
         type: error?.type,
+        json: errorJson,
       })
       if (attempt < 2) {
         await new Promise(r => setTimeout(r, 1000))
