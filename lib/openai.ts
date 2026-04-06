@@ -167,7 +167,13 @@ export async function analyzeTrades(
         .trim()
       
       return JSON.parse(clean)
-    } catch (error) {
+    } catch (error: any) {
+      console.error('[OpenAI Error]', {
+        message: error?.message,
+        status: error?.status,
+        code: error?.code,
+        type: error?.type,
+      })
       if (attempt < 2) {
         await new Promise(r => setTimeout(r, 1000))
         return callAPI(attempt + 1)
