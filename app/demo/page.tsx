@@ -68,7 +68,7 @@ export default function DemoPage() {
         className="text-center mb-12"
       >
         <h1 className="text-4xl font-bold mb-4">
-          Découvrezz ce que l&apos;IA trouve dans un compte 
+          Découvrez ce que l&apos;IA trouve dans un compte 
           de trading réel
         </h1>
         <p className="text-secondary text-xl mb-2">
