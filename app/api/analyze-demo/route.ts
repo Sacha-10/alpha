@@ -6,6 +6,8 @@ import type { Trade } from '@/lib/parseCSV'
 export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
+  console.log('[analyze-demo] Route appelée')
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -20,24 +22,43 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const supabase = createClient(url, serviceKey)
+  let supabase
+  try {
+    supabase = createClient(url, serviceKey)
+  } catch (err) {
+    console.error('[analyze-demo] Échec étape: createClient Supabase', err)
+    return NextResponse.json(
+      { error: 'Erreur client base de données.' },
+      { status: 500 }
+    )
+  }
 
   let body: unknown
   try {
     body = await req.json()
-  } catch (parseErr) {
-    console.error('[analyze-demo] Corps JSON invalide:', parseErr)
+  } catch (err) {
+    console.error('[analyze-demo] Échec étape: parse JSON body', err)
     return NextResponse.json(
       { error: 'Requête invalide.' },
       { status: 400 }
     )
   }
 
-  const trades = (body as { trades?: unknown })?.trades
-  if (!Array.isArray(trades)) {
-    console.error('[analyze-demo] Champ trades absent ou non-tableau:', {
-      type: typeof trades,
-    })
+  let trades: Trade[]
+  try {
+    const raw = (body as { trades?: unknown })?.trades
+    if (!Array.isArray(raw)) {
+      console.error('[analyze-demo] Échec étape: validation trades (type)', {
+        type: typeof raw,
+      })
+      return NextResponse.json(
+        { error: 'Données trades invalides.' },
+        { status: 400 }
+      )
+    }
+    trades = raw as Trade[]
+  } catch (err) {
+    console.error('[analyze-demo] Échec étape: validation trades (exception)', err)
     return NextResponse.json(
       { error: 'Données trades invalides.' },
       { status: 400 }
@@ -50,62 +71,86 @@ export async function POST(req: NextRequest) {
     req.headers.get('x-real-ip') ||
     'unknown'
 
+  let existing: { ip_address: string } | null
   try {
-    const { data: existing, error: selectError } = await supabase
+    const { data, error: selectError } = await supabase
       .from('demo_usage')
       .select('ip_address')
       .eq('ip_address', ip)
       .maybeSingle()
 
     if (selectError) {
-      console.error('[analyze-demo] Supabase select demo_usage:', {
-        code: selectError.code,
-        message: selectError.message,
-        details: selectError.details,
-        hint: selectError.hint,
-        ip,
-      })
+      console.error(
+        '[analyze-demo] Échec étape: supabase select demo_usage (erreur API)',
+        {
+          code: selectError.code,
+          message: selectError.message,
+          details: selectError.details,
+          hint: selectError.hint,
+          ip,
+        }
+      )
       return NextResponse.json(
         { error: 'Erreur lors de la vérification démo.' },
         { status: 500 }
       )
     }
+    existing = data
+  } catch (err) {
+    console.error('[analyze-demo] Échec étape: supabase select demo_usage (exception)', err)
+    return NextResponse.json(
+      { error: 'Erreur lors de la vérification démo.' },
+      { status: 500 }
+    )
+  }
 
-    if (existing) {
-      return NextResponse.json(
-        {
-          error:
-            'Vous avez déjà utilisé votre analyse ' +
-            'démo. Créez un compte pour analyser vos ' +
-            'propres trades.',
-        },
-        { status: 429 }
-      )
-    }
+  if (existing) {
+    return NextResponse.json(
+      {
+        error:
+          'Vous avez déjà utilisé votre analyse ' +
+          'démo. Créez un compte pour analyser vos ' +
+          'propres trades.',
+      },
+      { status: 429 }
+    )
+  }
 
+  try {
     const { error: insertError } = await supabase
       .from('demo_usage')
       .insert({ ip_address: ip, used_at: new Date().toISOString() })
 
     if (insertError) {
-      console.error('[analyze-demo] Supabase insert demo_usage:', {
-        code: insertError.code,
-        message: insertError.message,
-        details: insertError.details,
-        hint: insertError.hint,
-        ip,
-      })
+      console.error(
+        '[analyze-demo] Échec étape: supabase insert demo_usage (erreur API)',
+        {
+          code: insertError.code,
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+          ip,
+        }
+      )
       return NextResponse.json(
         { error: 'Erreur lors de l’enregistrement démo.' },
         { status: 500 }
       )
     }
-
-    const tradesForOpenAI = (trades as Trade[]).slice(0, 20)
-    const report = await analyzeTrades(tradesForOpenAI)
-    return NextResponse.json(report)
   } catch (err) {
-    console.error('[analyze-demo] Échec analyse (OpenAI ou autre):', err)
+    console.error('[analyze-demo] Échec étape: supabase insert demo_usage (exception)', err)
+    return NextResponse.json(
+      { error: 'Erreur lors de l’enregistrement démo.' },
+      { status: 500 }
+    )
+  }
+
+  let report: unknown
+  try {
+    const tradesForOpenAI = trades.slice(0, 20)
+    report = await analyzeTrades(tradesForOpenAI)
+  } catch (err) {
+    console.error('[analyze-demo] Échec étape: OpenAI analyzeTrades', err)
     const message =
       err instanceof Error ? err.message : String(err)
     return NextResponse.json(
@@ -114,6 +159,16 @@ export async function POST(req: NextRequest) {
           message ||
           'Erreur lors de l’analyse. Réessayez plus tard.',
       },
+      { status: 500 }
+    )
+  }
+
+  try {
+    return NextResponse.json(report)
+  } catch (err) {
+    console.error('[analyze-demo] Échec étape: NextResponse.json(report)', err)
+    return NextResponse.json(
+      { error: 'Erreur lors de la construction de la réponse.' },
       { status: 500 }
     )
   }
