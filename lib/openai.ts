@@ -145,7 +145,7 @@ export async function analyzeTrades(
     try {
       const response = await client.chat.completions.create({
         model: 'gpt-5.4',
-        max_tokens: 4000,
+        max_completion_tokens: 4000,
         temperature: 0.3,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
