@@ -14,11 +14,33 @@ export default function DemoPage() {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('/api/analyze-demo', {
+      const url = `${window.location.origin}/api/analyze-demo`
+      const payload = { trades: demoTrades }
+      const body = JSON.stringify(payload)
+
+      console.log('[demo] Avant fetch', {
+        url,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ trades: demoTrades }),
+        tradesCount: demoTrades.length,
+        bodyLengthChars: body.length,
       })
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body,
+      })
+
+      console.log('[demo] Après fetch', {
+        status: res.status,
+        ok: res.ok,
+        statusText: res.statusText,
+        contentType: res.headers.get('content-type'),
+      })
+
       const data = await res.json()
       if (!res.ok) {
         setError(data.error || 'Erreur inconnue')
@@ -26,7 +48,8 @@ export default function DemoPage() {
       } else {
         setReport(data)
       }
-    } catch {
+    } catch (err) {
+      console.error('[demo] Erreur réseau ou lecture réponse', err)
       setError('Erreur de connexion. Réessayez.')
     } finally {
       setLoading(false)
