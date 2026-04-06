@@ -10,7 +10,7 @@ interface Props {
 }
 
 function ScoreCircle({ score, label }: { score: number; label: string }) {
-  const normalized = score < 10 ? score * 100 : score;
+  const normalized = score > 0 && score <= 1 ? score * 100 : score;
   const capped = Math.min(100, Math.max(0, normalized));
   const color =
     capped > 60 ? "#00E5B0" : capped >= 40 ? "#FFB800" : "#FF3D57";
@@ -87,6 +87,12 @@ export default function TradeReport({
   );
   const displayRate = (v: number) =>
     v <= 1 ? (v * 100).toFixed(1) : v.toFixed(1);
+
+  function sessionPctColorClasses(pct: number): { bar: string; text: string } {
+    if (pct < 40) return { bar: "#FF3D57", text: "text-red" };
+    if (pct <= 60) return { bar: "#FFB800", text: "text-orange-400" };
+    return { bar: "#00E5B0", text: "text-green" };
+  }
 
   const winRateNum = s.winRate <= 1 ? s.winRate * 100 : s.winRate;
   const ddNum =
@@ -273,6 +279,7 @@ export default function TradeReport({
             { name: "Tokyo", rate: tokyoRate },
           ].map((sess, i) => {
             const rateValue = Number(displayRate(sess.rate));
+            const se = sessionPctColorClasses(rateValue);
             return (
             <div key={i} className="rounded-xl bg-hover p-4 text-center">
               <p className="mb-2 text-sm text-secondary">{sess.name}</p>
@@ -281,13 +288,11 @@ export default function TradeReport({
                   className="h-full rounded-full"
                   style={{
                     width: `${Math.min(100, rateValue)}%`,
-                    background: rateValue >= 50 ? "#00E5B0" : "#FF3D57",
+                    background: se.bar,
                   }}
                 />
               </div>
-              <p
-                className={`font-mono font-bold ${rateValue >= 50 ? "text-green" : "text-red"}`}
-              >
+              <p className={`font-mono font-bold ${se.text}`}>
                 {displayRate(sess.rate)}%
               </p>
             </div>

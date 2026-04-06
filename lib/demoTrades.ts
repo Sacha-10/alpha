@@ -1,6 +1,6 @@
 import type { Trade } from './parseCSV'
 
-/** Fenêtre Tokyo → session 'Asian' (compat. Trade / parseCSV). */
+/** Tokyo = champ session 'Asian' (compat. Trade). */
 type TradeSession = Trade['session']
 
 interface SymbolSpec {
@@ -12,20 +12,17 @@ interface SymbolSpec {
   defaultLot: number
 }
 
-/** targetWins somme = 62 (= 6 Tokyo + 37 London + 19 NY), proches des win rates cibles par symbole. */
+/**
+ * 120 trades, 3 actifs. Gains symboles (priorité) : XAU 35/50 (70%), EUR 26/50 (52%), BTC 5/20 (25%) → 66 gains, WR global 55%.
+ * Sessions (20/60/40 trades) : 7 + 39 + 20 = 66 gains (~35% Tokyo, ~65% London, ~50% NY).
+ */
 const SYMBOL_SPECS: SymbolSpec[] = [
-  { symbol: 'EURUSD', count: 25, targetWins: 17, min: 1.075, max: 1.105, defaultLot: 0.4 },
-  { symbol: 'GBPUSD', count: 20, targetWins: 11, min: 1.25, max: 1.29, defaultLot: 0.4 },
-  { symbol: 'USDJPY', count: 10, targetWins: 5, min: 145, max: 152, defaultLot: 0.35 },
-  { symbol: 'XAUUSD', count: 15, targetWins: 10, min: 3700, max: 4200, defaultLot: 0.25 },
-  { symbol: 'BTCUSDT', count: 15, targetWins: 6, min: 70000, max: 88000, defaultLot: 0.15 },
-  { symbol: 'ETHUSD', count: 10, targetWins: 5, min: 2200, max: 3700, defaultLot: 0.25 },
-  { symbol: 'NAS100', count: 10, targetWins: 4, min: 17000, max: 19500, defaultLot: 0.35 },
-  { symbol: 'SP500', count: 5, targetWins: 2, min: 5000, max: 5700, defaultLot: 0.4 },
-  { symbol: 'GBPJPY', count: 10, targetWins: 2, min: 185, max: 195, defaultLot: 0.3 },
+  { symbol: 'XAUUSD', count: 50, targetWins: 35, min: 2800, max: 3100, defaultLot: 0.3 },
+  { symbol: 'EURUSD', count: 50, targetWins: 26, min: 1.075, max: 1.105, defaultLot: 0.35 },
+  { symbol: 'BTCUSD', count: 20, targetWins: 5, min: 70000, max: 88000, defaultLot: 0.12 },
 ]
 
-const START_DATE_UTC = new Date(Date.UTC(2025, 10, 1, 0, 0, 0, 0))
+const START_DATE_UTC = new Date(Date.UTC(2025, 10, 3, 0, 0, 0, 0))
 
 const SESSION_TEMPLATE: TradeSession[] = [
   ...Array(20).fill('Asian' as const),
@@ -33,21 +30,17 @@ const SESSION_TEMPLATE: TradeSession[] = [
   ...Array(40).fill('New York' as const),
 ]
 
-const TOKYO_WINS = 6
-const LONDON_WINS = 37
-const NEW_YORK_WINS = 19
+const TOKYO_WINS = 7
+const LONDON_WINS = 39
+const NEW_YORK_WINS = 20
 
-const FOMO_INDEXES = new Set([2, 11, 23, 34, 45, 57, 68, 79, 91, 102])
-const EARLY_TP_INDEXES = new Set([
-  4, 8, 14, 19, 26, 31, 39, 44, 51, 56, 62, 71, 77, 85, 94,
-])
-const MOVING_SL_INDEXES = new Set([40, 58, 72, 88, 103])
-const FRIDAY_BLOCK = new Set([110, 111, 112, 113, 114, 115, 116, 117])
+/** FOMO 4 | Coupure TP 5 | Moving SL 3 | Revenge 3 trades (2×0.2 + 1 oversize) */
+const FOMO_INDEXES = new Set([5, 18, 71, 95])
+const EARLY_TP_INDEXES = new Set([7, 22, 38, 52, 89])
+const MOVING_SL_INDEXES = new Set([41, 66, 108])
 
-const REVENGE = [
-  { a: 20, b: 21, oversize: 22, bigLot: 1.75 },
-  { a: 64, b: 65, oversize: 66, bigLot: 1.9 },
-]
+/** Une série revenge : 2 pertes 0.2 lot + 1 perte 1.2-1.5 lot (≤800€ max dans rawPnl). */
+const REVENGE = [{ a: 28, b: 29, oversize: 30, bigLot: 1.35 }]
 
 function revengeIdxSet(): Set<number> {
   const s = new Set<number>()
@@ -61,7 +54,7 @@ function revengeIdxSet(): Set<number> {
 
 const REVENGE_INDICES = revengeIdxSet()
 
-function rng(seed = 20260406): () => number {
+function rng(seed = 20260412): () => number {
   let s = seed
   return () => {
     s = (s * 1664525 + 1013904223) % 4294967296
@@ -79,15 +72,13 @@ function shuffleInPlace<T>(arr: T[], r: () => number): void {
 }
 
 function decimalsFor(symbol: string): number {
-  if (symbol === 'EURUSD' || symbol === 'GBPUSD') return 5
-  if (symbol.includes('JPY')) return 3
-  if (symbol === 'XAUUSD' || symbol === 'BTCUSDT' || symbol === 'ETHUSD') return 2
-  return 1
+  if (symbol === 'EURUSD') return 5
+  if (symbol === 'XAUUSD' || symbol === 'BTCUSD') return 2
+  return 5
 }
 
 function pipScale(symbol: string): number {
-  if (symbol === 'EURUSD' || symbol === 'GBPUSD') return 10000
-  if (symbol.includes('JPY')) return 100
+  if (symbol === 'EURUSD') return 10000
   return 1
 }
 
@@ -105,12 +96,13 @@ function randInRange(a: number, b: number): number {
   return a + rand() * (b - a)
 }
 
+/** Lots 0.1-0.5 : +100/+500, -50/-250 | Lots ≥1 revenge : pertes -200/-800 max */
 function rawPnlEur(lot: number, win: boolean, highVol: boolean): number {
   if (win) {
     if (lot >= 1) return Math.round(randInRange(120, 480))
     return Math.round(randInRange(100, 500))
   }
-  if (lot >= 1) return -Math.round(randInRange(200, 1200))
+  if (lot >= 1) return -Math.round(randInRange(200, 800))
   const lossCap = highVol ? 280 : 250
   return -Math.round(randInRange(50, lossCap))
 }
@@ -157,7 +149,7 @@ function balanceEarlyTpSessions(rows: Row[]): void {
       )
       const j = rows.findIndex(
         (r, idx) =>
-          r.session !== sess && !EARLY_TP_INDEXES.has(idx) && !FRIDAY_BLOCK.has(idx)
+          r.session !== sess && !EARLY_TP_INDEXES.has(idx)
       )
       if (i >= 0 && j >= 0) {
         const tmp = rows[i].session
@@ -171,8 +163,7 @@ function balanceEarlyTpSessions(rows: Row[]): void {
 }
 
 function assignWinsForSessions(rows: Row[]): void {
-  const fixedLoss = (i: number) =>
-    FRIDAY_BLOCK.has(i) || REVENGE_INDICES.has(i) || MOVING_SL_INDEXES.has(i)
+  const fixedLoss = (i: number) => REVENGE_INDICES.has(i) || MOVING_SL_INDEXES.has(i)
   const fixedWin = (i: number) => EARLY_TP_INDEXES.has(i)
 
   for (const sess of ['Asian', 'London', 'New York'] as TradeSession[]) {
@@ -212,7 +203,7 @@ function countSymWins(rows: Row[], sym: string): number {
 }
 
 function fixedLossSlot(i: number): boolean {
-  return FRIDAY_BLOCK.has(i) || REVENGE_INDICES.has(i) || MOVING_SL_INDEXES.has(i)
+  return REVENGE_INDICES.has(i) || MOVING_SL_INDEXES.has(i)
 }
 
 function refineSymbolTargets(rows: Row[]): void {
@@ -233,12 +224,11 @@ function refineSymbolTargets(rows: Row[]): void {
             r.symbol === spec.symbol &&
             !r.win &&
             !EARLY_TP_INDEXES.has(i) &&
-            !FRIDAY_BLOCK.has(i) &&
-            !REVENGE_INDICES.has(i)
+            !fixedLossSlot(i)
         )
         if (idxLoss < 0) continue
         const sess = rows[idxLoss].session
-        const donor = rows.findIndex(
+        let donor = rows.findIndex(
           (r, i) =>
             r.win &&
             r.session === sess &&
@@ -246,21 +236,17 @@ function refineSymbolTargets(rows: Row[]): void {
             !EARLY_TP_INDEXES.has(i) &&
             countSymWins(rows, r.symbol) > specBySym[r.symbol].targetWins
         )
+        if (donor < 0) {
+          donor = rows.findIndex(
+            (r, i) =>
+              r.win &&
+              r.session === sess &&
+              r.symbol !== spec.symbol &&
+              !EARLY_TP_INDEXES.has(i)
+          )
+        }
         if (donor >= 0) {
           rows[donor].win = false
-          rows[idxLoss].win = true
-          moved = true
-          continue
-        }
-        const anyDonor = rows.findIndex(
-          (r, i) =>
-            r.win &&
-            r.session === sess &&
-            r.symbol !== spec.symbol &&
-            !EARLY_TP_INDEXES.has(i)
-        )
-        if (anyDonor >= 0) {
-          rows[anyDonor].win = false
           rows[idxLoss].win = true
           moved = true
         }
@@ -290,7 +276,6 @@ function refineSymbolTargets(rows: Row[]): void {
 
 function applyStructureOverrides(rows: Row[]): void {
   for (const i of EARLY_TP_INDEXES) rows[i].win = true
-  for (const i of FRIDAY_BLOCK) rows[i].win = false
   for (const s of REVENGE) {
     rows[s.a].win = false
     rows[s.b].win = false
@@ -301,15 +286,14 @@ function applyStructureOverrides(rows: Row[]): void {
   }
   for (const i of MOVING_SL_INDEXES) {
     const base =
-      SYMBOL_SPECS.find(sp => sp.symbol === rows[i].symbol)?.defaultLot ?? 0.3
+      SYMBOL_SPECS.find(sp => sp.symbol === rows[i].symbol)?.defaultLot ?? 0.25
     rows[i].lotSize = Number((base * 2).toFixed(2))
     rows[i].win = false
   }
 }
 
 function rebalanceSessionWins(rows: Row[]): void {
-  const fixedLoss = (i: number) =>
-    FRIDAY_BLOCK.has(i) || REVENGE_INDICES.has(i) || MOVING_SL_INDEXES.has(i)
+  const fixedLoss = (i: number) => REVENGE_INDICES.has(i) || MOVING_SL_INDEXES.has(i)
   const fixedWin = (i: number) => EARLY_TP_INDEXES.has(i)
 
   for (const sess of ['Asian', 'London', 'New York'] as TradeSession[]) {
@@ -332,6 +316,16 @@ function rebalanceSessionWins(rows: Row[]): void {
   }
 }
 
+/** Mardi & Jeudi favorisés pour gains ; L & V pour pertes (UTCDay: 0=Dim …). */
+function dayOffsetForRow(index: number, win: boolean): number {
+  const week = Math.floor((index * 173) / 120) + Math.floor(index / 7)
+  const inner = index % 7
+  const prefWin = inner % 2 === 0 ? 2 : 4
+  const prefLoss = inner % 2 === 0 ? 1 : 5
+  const d = win ? prefWin : prefLoss
+  return week * 7 + d + Math.floor(index / 15) * 3
+}
+
 function buildRows(): Row[] {
   const symbolsFlat: { symbol: string; min: number; max: number; defaultLot: number }[] = []
   for (const s of SYMBOL_SPECS) {
@@ -348,20 +342,20 @@ function buildRows(): Row[] {
   const sessions = [...SESSION_TEMPLATE]
   shuffleInPlace(sessions, rand)
 
-  const rows: Row[] = symbolsFlat.map((s, i) => ({
-    symbol: s.symbol,
+  const rows: Row[] = symbolsFlat.map((symRow, i) => ({
+    symbol: symRow.symbol,
     session: sessions[i],
     win: false,
-    lotSize: s.defaultLot,
-    min: s.min,
-    max: s.max,
+    lotSize: symRow.defaultLot,
+    min: symRow.min,
+    max: symRow.max,
     fomo: FOMO_INDEXES.has(i),
     earlyTp: EARLY_TP_INDEXES.has(i),
     movingSl: MOVING_SL_INDEXES.has(i),
     direction: i % 2 === 0 ? 'BUY' : 'SELL',
-    dayOffset: Math.floor(i * 1.47) % 170,
+    dayOffset: 0,
     hour: 0,
-    minute: (i * 11) % 60,
+    minute: (i * 13) % 60,
   }))
 
   balanceEarlyTpSessions(rows)
@@ -373,6 +367,7 @@ function buildRows(): Row[] {
   rebalanceSessionWins(rows)
 
   for (let i = 0; i < rows.length; i++) {
+    rows[i].dayOffset = dayOffsetForRow(i, rows[i].win)
     rows[i].hour = sessionToHourUTC(rows[i].session, i)
   }
 
@@ -396,11 +391,7 @@ function buildTrade(row: Row, index: number, profitLoss: number): Trade {
   const span = row.max - row.min
   const entryPrice = roundPrice(row.symbol, row.min + rand() * span)
   const riskPct =
-    row.symbol === 'BTCUSDT' || row.symbol === 'ETHUSD'
-      ? 0.008
-      : row.symbol === 'XAUUSD'
-        ? 0.0028
-        : 0.0016
+    row.symbol === 'BTCUSD' ? 0.007 : row.symbol === 'XAUUSD' ? 0.0025 : 0.0016
   const riskDist = entryPrice * riskPct
   const rewardDist = row.earlyTp ? riskDist * 0.55 : riskDist * 1.75
   const move = row.win
@@ -426,7 +417,7 @@ function buildTrade(row: Row, index: number, profitLoss: number): Trade {
   const open = new Date(START_DATE_UTC)
   open.setUTCDate(open.getUTCDate() + row.dayOffset)
   open.setUTCHours(row.hour, row.minute, 0, 0)
-  const duration = row.fomo ? 20 + (index % 30) : 40 + (index % 120)
+  const duration = row.fomo ? 20 + (index % 28) : 40 + (index % 100)
   const close = new Date(open.getTime() + duration * 60000)
   const commission = -Math.max(1.5, Number((row.lotSize * 6.5).toFixed(2)))
   const pipDiff =
@@ -453,17 +444,19 @@ function buildTrade(row: Row, index: number, profitLoss: number): Trade {
 
 function finalizePnls(rows: Row[]): Trade[] {
   const fee = (lot: number) => -Math.max(1.5, Number((lot * 6.5).toFixed(2)))
-  const pnls: number[] = rows.map((r, i) => rawPnlEur(r.lotSize, r.win, r.movingSl || r.fomo) + fee(r.lotSize))
+  const pnls: number[] = rows.map(
+    (r, i) => rawPnlEur(r.lotSize, r.win, r.movingSl || r.fomo) + fee(r.lotSize)
+  )
 
-  const targetMid = -950
+  const targetMid = -600
   let sum = pnls.reduce((a, b) => a + b, 0)
   for (let iter = 0; iter < 120; iter++) {
-    if (sum <= -500 && sum >= -1500) break
-    const adj = Math.max(-35, Math.min(35, (targetMid - sum) / pnls.length))
+    if (sum <= -250 && sum >= -1000) break
+    const adj = Math.max(-30, Math.min(30, (targetMid - sum) / pnls.length))
     for (let i = 0; i < pnls.length; i++) {
       const r = rows[i]
       const capHi = r.win ? (r.lotSize >= 1 ? 480 : 500) : r.lotSize >= 1 ? -200 : -50
-      const capLo = r.win ? (r.lotSize >= 1 ? 120 : 100) : r.lotSize >= 1 ? -1200 : -250
+      const capLo = r.win ? (r.lotSize >= 1 ? 120 : 100) : r.lotSize >= 1 ? -800 : -250
       const w = r.win ? 0.35 : -0.65
       pnls[i] = Math.min(capHi, Math.max(capLo, pnls[i] + adj * w))
     }
@@ -473,18 +466,19 @@ function finalizePnls(rows: Row[]): Trade[] {
   for (let i = 0; i < pnls.length; i++) {
     const r = rows[i]
     if (r.win) pnls[i] = Math.min(500, Math.max(100, pnls[i]))
-    else if (r.lotSize >= 1) pnls[i] = Math.min(-200, Math.max(-1200, pnls[i]))
+    else if (r.lotSize >= 1)
+      pnls[i] = Math.min(-200, Math.max(-800, pnls[i]))
     else pnls[i] = Math.min(-50, Math.max(-250, pnls[i]))
   }
 
   sum = pnls.reduce((a, b) => a + b, 0)
-  for (let guard = 0; guard < 120 && (sum > -500 || sum < -1500); guard++) {
-    if (sum > -500) {
+  for (let guard = 0; guard < 120 && (sum > -250 || sum < -1000); guard++) {
+    if (sum > -250) {
       const idx = pnls.findIndex((_, i) => !rows[i].win && rows[i].lotSize < 1)
-      if (idx >= 0) pnls[idx] = Math.max(-250, pnls[idx] - 20)
+      if (idx >= 0) pnls[idx] = Math.max(-250, pnls[idx] - 18)
     } else {
       const idx = pnls.findIndex((_, i) => rows[i].win)
-      if (idx >= 0) pnls[idx] = Math.min(500, pnls[idx] + 15)
+      if (idx >= 0) pnls[idx] = Math.min(500, pnls[idx] + 12)
     }
     sum = pnls.reduce((a, b) => a + b, 0)
   }
@@ -497,11 +491,11 @@ function finalizePnls(rows: Row[]): Trade[] {
   }
   const order = pnls.map((_, i) => i).sort((a, b) => openMs(rows[a]) - openMs(rows[b]))
   let dd = equityDrawdownPct(order.map(i => pnls[i]))
-  for (let tries = 0; tries < 80 && (dd < 7 || dd > 15); tries++) {
-    const factor = dd < 7 ? 1.035 : 0.965
+  for (let tries = 0; tries < 90 && (dd < 7 || dd > 15); tries++) {
+    const factor = dd < 7 ? 1.03 : 0.97
     for (let i = 0; i < pnls.length; i++) {
       if (!rows[i].win) {
-        const lo = rows[i].lotSize >= 1 ? -1200 : -250
+        const lo = rows[i].lotSize >= 1 ? -800 : -250
         pnls[i] = Math.max(lo, Math.round(pnls[i] * factor))
       }
     }
