@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import { analyzeTrades } from '@/lib/openai'
 import type { Trade } from '@/lib/parseCSV'
 
+export const maxDuration = 60
+
 export async function POST(req: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -99,7 +101,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const report = await analyzeTrades(trades as Trade[])
+    const tradesForOpenAI = (trades as Trade[]).slice(0, 20)
+    const report = await analyzeTrades(tradesForOpenAI)
     return NextResponse.json(report)
   } catch (err) {
     console.error('[analyze-demo] Échec analyse (OpenAI ou autre):', err)
