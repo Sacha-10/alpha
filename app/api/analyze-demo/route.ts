@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
 
   let report: unknown
   try {
-    const tradesForOpenAI = trades.slice(0, 20)
+    const tradesForOpenAI = trades.slice(0, 100)
     report = await analyzeTrades(tradesForOpenAI)
   } catch (err) {
     console.error('[analyze-demo] Échec étape: OpenAI analyzeTrades', err)

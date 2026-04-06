@@ -1,941 +1,264 @@
 import { Trade } from './parseCSV'
 
-function makeDate(
-  daysAgo: number,
-  hour: number,
-  minute: number
-): Date {
-  const d = new Date()
-  d.setDate(d.getDate() - daysAgo)
-  d.setHours(hour, minute, 0, 0)
-  return d
+type SessionType = 'Tokyo' | 'London' | 'New York'
+
+interface SymbolPlan {
+  symbol: string
+  trades: number
+  wins: number
+  min: number
+  max: number
+  lot: number
 }
 
-function getSession(hour: number): Trade['session'] {
-  if (hour >= 7 && hour < 16) return 'London'
-  if (hour >= 13 && hour < 22) return 'New York'
-  if (hour >= 0 && hour < 8) return 'Asian'
+interface TradeBlueprint {
+  symbol: string
+  win: boolean
+  session: SessionType
+  dayOffset: number
+  hour: number
+  minute: number
+  lotSize: number
+  direction: 'BUY' | 'SELL'
+  fomo?: boolean
+  earlyProfitCut?: boolean
+  movingStopLoss?: boolean
+}
+
+const SYMBOL_PLANS: SymbolPlan[] = [
+  { symbol: 'EURUSD', trades: 25, wins: 18, min: 1.075, max: 1.105, lot: 0.5 },
+  { symbol: 'GBPUSD', trades: 15, wins: 9, min: 1.25, max: 1.29, lot: 0.4 },
+  { symbol: 'USDJPY', trades: 25, wins: 13, min: 145, max: 152, lot: 0.4 },
+  { symbol: 'GBPJPY', trades: 4, wins: 1, min: 185, max: 195, lot: 0.3 },
+  { symbol: 'XAUUSD', trades: 12, wins: 8, min: 3700, max: 4200, lot: 0.12 },
+  { symbol: 'BTCUSDT', trades: 11, wins: 5, min: 70000, max: 88000, lot: 0.08 },
+  { symbol: 'ETHUSD', trades: 10, wins: 5, min: 2200, max: 3700, lot: 0.3 },
+  { symbol: 'NAS100', trades: 10, wins: 4, min: 17000, max: 19500, lot: 0.2 },
+  { symbol: 'SP500', trades: 8, wins: 3, min: 5000, max: 5700, lot: 0.5 },
+]
+
+const START_DATE_UTC = new Date(Date.UTC(2025, 9, 6, 0, 0, 0, 0))
+
+const FOMO_INDEXES = new Set([9, 18, 27, 36, 45, 56, 67, 79, 93, 108])
+const EARLY_TP_INDEXES = new Set([6, 11, 15, 21, 26, 33, 38, 44, 50, 58, 63, 74, 82, 96, 114])
+const MOVING_SL_INDEXES = new Set([30, 49, 60, 88, 116])
+const FRIDAY_OVERTRADING_LOSSES = new Set([112, 113, 114, 115, 116, 117, 118, 119])
+
+// 2 séries revenge: 2 pertes 0.2 lot + 1 perte oversize (1.5-2.0)
+const REVENGE_SERIES = [
+  { normalA: 22, normalB: 23, oversize: 24, lot: 1.8 },
+  { normalA: 70, normalB: 71, oversize: 72, lot: 1.6 },
+]
+
+function rng(seed = 202604): () => number {
+  let s = seed
+  return () => {
+    s = (s * 1664525 + 1013904223) % 4294967296
+    return s / 4294967296
+  }
+}
+
+const rand = rng()
+
+function toSession(hour: number): Trade['session'] {
+  if (hour >= 2 && hour < 10) return 'Asian'
+  if (hour >= 8 && hour < 16) return 'London'
+  if (hour >= 14 && hour < 22) return 'New York'
   return 'Other'
 }
 
-export const demoTrades: Trade[] = [
-  // EURUSD - Meilleur symbole Win Rate 68%
-  // Trades gagnants London session
-  {
-    ticket: '001',
-    symbol: 'EURUSD',
-    direction: 'BUY',
-    lotSize: 0.5,
-    entryPrice: 1.0852,
-    exitPrice: 1.0875,
-    stopLoss: 1.0835,
-    takeProfit: 1.089,
-    openTime: makeDate(85, 9, 15),
-    closeTime: makeDate(85, 11, 30),
-    durationMinutes: 135,
-    commission: -3.5,
+function weekdayDateInWindow(index: number): { dayOffset: number; hour: number; minute: number } {
+  const week = Math.floor(index / 5)
+  const pos = index % 5
+  const preferredWeekday = [2, 1, 3, 4, 5][pos] // mer, mar, jeu, ven, sam
+  const dayOffset = week * 7 + preferredWeekday
+  const slot = index % 3
+  const hour = slot === 0 ? 9 : slot === 1 ? 15 : 3
+  const minute = (index * 7) % 60
+  return { dayOffset, hour, minute }
+}
+
+function clamp(v: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, v))
+}
+
+function decimalsFor(symbol: string): number {
+  if (symbol === 'EURUSD' || symbol === 'GBPUSD') return 5
+  if (symbol.includes('JPY')) return 3
+  if (symbol === 'XAUUSD') return 2
+  if (symbol === 'BTCUSDT' || symbol === 'ETHUSD') return 2
+  return 1
+}
+
+function pipScale(symbol: string): number {
+  if (symbol === 'EURUSD' || symbol === 'GBPUSD') return 10000
+  if (symbol.includes('JPY')) return 100
+  return 1
+}
+
+function roundPrice(symbol: string, value: number): number {
+  return Number(value.toFixed(decimalsFor(symbol)))
+}
+
+function buildBlueprints(): TradeBlueprint[] {
+  const blueprints: TradeBlueprint[] = []
+
+  for (const plan of SYMBOL_PLANS) {
+    for (let i = 0; i < plan.trades; i++) {
+      blueprints.push({
+        symbol: plan.symbol,
+        win: i < plan.wins,
+        session: i % 3 === 0 ? 'London' : i % 3 === 1 ? 'New York' : 'Tokyo',
+        ...weekdayDateInWindow(blueprints.length),
+        lotSize: plan.lot,
+        direction: (i + blueprints.length) % 2 === 0 ? 'BUY' : 'SELL',
+      })
+    }
+  }
+
+  // Friday 15-17 overtrading: 8 pertes consécutives
+  for (const index of FRIDAY_OVERTRADING_LOSSES) {
+    const bp = blueprints[index]
+    bp.win = false
+    bp.session = 'New York'
+    bp.hour = 15 + (index % 2)
+    bp.minute = (index * 5) % 60
+    bp.dayOffset = Math.floor(index / 5) * 7 + 4
+  }
+
+  // Revenge trading mandatory
+  for (const s of REVENGE_SERIES) {
+    blueprints[s.normalA].win = false
+    blueprints[s.normalB].win = false
+    blueprints[s.oversize].win = false
+    blueprints[s.normalA].lotSize = 0.2
+    blueprints[s.normalB].lotSize = 0.2
+    blueprints[s.oversize].lotSize = s.lot
+  }
+
+  // FOMO + early cut + moving SL labels
+  for (const index of FOMO_INDEXES) blueprints[index].fomo = true
+  for (const index of EARLY_TP_INDEXES) {
+    blueprints[index].earlyProfitCut = true
+    blueprints[index].win = true
+  }
+  for (const index of MOVING_SL_INDEXES) {
+    blueprints[index].movingStopLoss = true
+    blueprints[index].lotSize = blueprints[index].lotSize * 2
+    blueprints[index].win = false
+  }
+
+  return blueprints
+}
+
+function enforceSymbolWinTargets(blueprints: TradeBlueprint[]): void {
+  for (const plan of SYMBOL_PLANS) {
+    const indexes = blueprints
+      .map((bp, idx) => ({ bp, idx }))
+      .filter(x => x.bp.symbol === plan.symbol)
+      .map(x => x.idx)
+    let wins = indexes.filter(i => blueprints[i].win).length
+    while (wins > plan.wins) {
+      const idx = indexes.find(i => blueprints[i].win && !EARLY_TP_INDEXES.has(i))
+      if (idx === undefined) break
+      blueprints[idx].win = false
+      wins--
+    }
+    while (wins < plan.wins) {
+      const idx = indexes.find(i => !blueprints[i].win && !FRIDAY_OVERTRADING_LOSSES.has(i))
+      if (idx === undefined) break
+      blueprints[idx].win = true
+      wins++
+    }
+  }
+}
+
+function buildTrade(bp: TradeBlueprint, index: number): Trade {
+  const plan = SYMBOL_PLANS.find(p => p.symbol === bp.symbol)!
+  const priceSpan = plan.max - plan.min
+  const base = plan.min + rand() * priceSpan
+  const entryPrice = roundPrice(bp.symbol, base)
+
+  const riskPct = bp.symbol === 'BTCUSDT' || bp.symbol === 'ETHUSD' ? 0.009 : 0.0018
+  const movePctRaw = bp.fomo ? 0.0009 : riskPct
+  const movePct = bp.symbol === 'XAUUSD' ? 0.0035 : movePctRaw
+  const riskDistance = entryPrice * movePct
+  const rewardDistance = bp.earlyProfitCut ? riskDistance * 0.56 : riskDistance * 1.8
+
+  const dir = bp.direction
+  const exitMove = bp.win
+    ? bp.fomo
+      ? riskDistance * 0.18
+      : rewardDistance
+    : bp.movingStopLoss
+      ? riskDistance * 2.6
+      : riskDistance
+
+  const exitPrice = roundPrice(
+    bp.symbol,
+    dir === 'BUY'
+      ? entryPrice + (bp.win ? exitMove : -exitMove)
+      : entryPrice - (bp.win ? exitMove : -exitMove)
+  )
+
+  const stopLoss = roundPrice(
+    bp.symbol,
+    dir === 'BUY' ? entryPrice - riskDistance : entryPrice + riskDistance
+  )
+  const takeProfit = roundPrice(
+    bp.symbol,
+    dir === 'BUY' ? entryPrice + rewardDistance : entryPrice - rewardDistance
+  )
+
+  const dt = new Date(START_DATE_UTC)
+  dt.setUTCDate(dt.getUTCDate() + bp.dayOffset)
+  dt.setUTCHours(bp.hour, bp.minute, 0, 0)
+  const durationMinutes = bp.fomo ? 24 + (index % 22) : 45 + (index % 180)
+  const closeTime = new Date(dt.getTime() + durationMinutes * 60000)
+
+  const unitPnl =
+    bp.symbol === 'EURUSD' || bp.symbol === 'GBPUSD'
+      ? 10000
+      : bp.symbol.includes('JPY')
+        ? 900
+        : bp.symbol === 'XAUUSD'
+          ? 60
+          : bp.symbol === 'BTCUSDT'
+            ? 0.25
+            : bp.symbol === 'ETHUSD'
+              ? 8
+              : bp.symbol === 'NAS100'
+                ? 4
+                : 18
+  const signed = bp.win ? 1 : -1
+  const severeFactor = bp.movingStopLoss ? 2.4 : 1
+  const pnl = signed * Math.abs((exitMove / entryPrice) * unitPnl * bp.lotSize * severeFactor * 100)
+  const commission = -Math.max(1.5, Number((bp.lotSize * 7).toFixed(2)))
+  const profitLoss = Number((pnl + commission).toFixed(2))
+  const pipDiff = (dir === 'BUY' ? exitPrice - entryPrice : entryPrice - exitPrice) * pipScale(bp.symbol)
+  const profitLossPips = Number(pipDiff.toFixed(1))
+
+  return {
+    ticket: String(index + 1).padStart(3, '0'),
+    symbol: bp.symbol,
+    direction: dir,
+    lotSize: Number(bp.lotSize.toFixed(2)),
+    entryPrice,
+    exitPrice,
+    stopLoss: clamp(stopLoss, plan.min, plan.max),
+    takeProfit: clamp(takeProfit, plan.min, plan.max),
+    openTime: dt,
+    closeTime,
+    durationMinutes,
+    commission,
     swap: 0,
-    profitLoss: 115,
-    profitLossPips: 23,
-    session: 'London',
-  },
-  {
-    ticket: '002',
-    symbol: 'EURUSD',
-    direction: 'SELL',
-    lotSize: 0.5,
-    entryPrice: 1.091,
-    exitPrice: 1.0885,
-    stopLoss: 1.0928,
-    takeProfit: 1.087,
-    openTime: makeDate(83, 10, 0),
-    closeTime: makeDate(83, 12, 15),
-    durationMinutes: 135,
-    commission: -3.5,
-    swap: 0,
-    profitLoss: 125,
-    profitLossPips: 25,
-    session: 'London',
-  },
-  // FOMO - Entrée trop tardive
-  {
-    ticket: '003',
-    symbol: 'EURUSD',
-    direction: 'BUY',
-    lotSize: 0.8,
-    entryPrice: 1.0935,
-    exitPrice: 1.0918,
-    stopLoss: 1.091,
-    takeProfit: 1.096,
-    openTime: makeDate(82, 14, 45),
-    closeTime: makeDate(82, 15, 30),
-    durationMinutes: 45,
-    commission: -5.6,
-    swap: 0,
-    profitLoss: -136,
-    profitLossPips: -17,
-    session: 'London',
-  },
-  // Coupure prématurée profit EURUSD
-  {
-    ticket: '004',
-    symbol: 'EURUSD',
-    direction: 'BUY',
-    lotSize: 0.5,
-    entryPrice: 1.082,
-    exitPrice: 1.0838,
-    stopLoss: 1.0805,
-    takeProfit: 1.0865,
-    openTime: makeDate(80, 9, 30),
-    closeTime: makeDate(80, 10, 45),
-    durationMinutes: 75,
-    commission: -3.5,
-    swap: 0,
-    profitLoss: 90,
-    profitLossPips: 18,
-    session: 'London',
-  },
-  {
-    ticket: '005',
-    symbol: 'EURUSD',
-    direction: 'SELL',
-    lotSize: 0.5,
-    entryPrice: 1.095,
-    exitPrice: 1.0925,
-    stopLoss: 1.0968,
-    takeProfit: 1.09,
-    openTime: makeDate(78, 10, 15),
-    closeTime: makeDate(78, 13, 0),
-    durationMinutes: 165,
-    commission: -3.5,
-    swap: 0,
-    profitLoss: 125,
-    profitLossPips: 25,
-    session: 'London',
-  },
-  // GBPJPY - Pire symbole Win Rate 31%
-  {
-    ticket: '006',
-    symbol: 'GBPJPY',
-    direction: 'BUY',
-    lotSize: 0.3,
-    entryPrice: 183.5,
-    exitPrice: 182.8,
-    stopLoss: 183.0,
-    takeProfit: 184.5,
-    openTime: makeDate(77, 15, 30),
-    closeTime: makeDate(77, 16, 45),
-    durationMinutes: 75,
-    commission: -4.2,
-    swap: 0,
-    profitLoss: -214,
-    profitLossPips: -70,
-    session: 'London',
-  },
-  {
-    ticket: '007',
-    symbol: 'GBPJPY',
-    direction: 'SELL',
-    lotSize: 0.3,
-    entryPrice: 184.2,
-    exitPrice: 184.9,
-    stopLoss: 184.6,
-    takeProfit: 183.2,
-    openTime: makeDate(75, 16, 0),
-    closeTime: makeDate(75, 17, 30),
-    durationMinutes: 90,
-    commission: -4.2,
-    swap: 0,
-    profitLoss: -218,
-    profitLossPips: -70,
-    session: 'London',
-  },
-  // Revenge Trading - 3 pertes puis oversizing
-  {
-    ticket: '008',
-    symbol: 'GBPJPY',
-    direction: 'BUY',
-    lotSize: 0.3,
-    entryPrice: 183.8,
-    exitPrice: 183.2,
-    stopLoss: 183.4,
-    takeProfit: 184.8,
-    openTime: makeDate(74, 9, 0),
-    closeTime: makeDate(74, 10, 30),
-    durationMinutes: 90,
-    commission: -4.2,
-    swap: 0,
-    profitLoss: -196,
-    profitLossPips: -60,
-    session: 'London',
-  },
-  // Revenge trade oversizé après 3 pertes
-  {
-    ticket: '009',
-    symbol: 'GBPJPY',
-    direction: 'SELL',
-    lotSize: 1.2,
-    entryPrice: 184.5,
-    exitPrice: 185.2,
-    stopLoss: 185.0,
-    takeProfit: 183.0,
-    openTime: makeDate(74, 11, 0),
-    closeTime: makeDate(74, 12, 0),
-    durationMinutes: 60,
-    commission: -16.8,
-    swap: 0,
-    profitLoss: -876,
-    profitLossPips: -70,
-    session: 'London',
-  },
-  // XAUUSD trades
-  {
-    ticket: '010',
-    symbol: 'XAUUSD',
-    direction: 'BUY',
-    lotSize: 0.1,
-    entryPrice: 2318.5,
-    exitPrice: 2325.0,
-    stopLoss: 2312.0,
-    takeProfit: 2335.0,
-    openTime: makeDate(72, 9, 45),
-    closeTime: makeDate(72, 14, 30),
-    durationMinutes: 285,
-    commission: -7.0,
-    swap: 0,
-    profitLoss: 65,
-    profitLossPips: 65,
-    session: 'London',
-  },
-  {
-    ticket: '011',
-    symbol: 'XAUUSD',
-    direction: 'SELL',
-    lotSize: 0.1,
-    entryPrice: 2345.0,
-    exitPrice: 2338.0,
-    stopLoss: 2352.0,
-    takeProfit: 2325.0,
-    openTime: makeDate(70, 10, 30),
-    closeTime: makeDate(70, 15, 0),
-    durationMinutes: 270,
-    commission: -7.0,
-    swap: 0,
-    profitLoss: 70,
-    profitLossPips: 70,
-    session: 'London',
-  },
-  // Vendredi après-midi - sous-performance
-  {
-    ticket: '012',
-    symbol: 'EURUSD',
-    direction: 'BUY',
-    lotSize: 0.5,
-    entryPrice: 1.089,
-    exitPrice: 1.0872,
-    stopLoss: 1.087,
-    takeProfit: 1.092,
-    openTime: makeDate(69, 15, 30),
-    closeTime: makeDate(69, 16, 30),
-    durationMinutes: 60,
-    commission: -3.5,
-    swap: 0,
-    profitLoss: -93,
-    profitLossPips: -18,
-    session: 'New York',
-  },
-  {
-    ticket: '013',
-    symbol: 'GBPUSD',
-    direction: 'SELL',
-    lotSize: 0.4,
-    entryPrice: 1.272,
-    exitPrice: 1.2745,
-    stopLoss: 1.275,
-    takeProfit: 1.268,
-    openTime: makeDate(69, 16, 0),
-    closeTime: makeDate(69, 17, 0),
-    durationMinutes: 60,
-    commission: -2.8,
-    swap: 0,
-    profitLoss: -103,
-    profitLossPips: -25,
-    session: 'New York',
-  },
-  // NAS100 trades
-  {
-    ticket: '014',
-    symbol: 'NAS100',
-    direction: 'BUY',
-    lotSize: 0.2,
-    entryPrice: 17850.0,
-    exitPrice: 17920.0,
-    stopLoss: 17780.0,
-    takeProfit: 18000.0,
-    openTime: makeDate(67, 14, 30),
-    closeTime: makeDate(67, 16, 0),
-    durationMinutes: 90,
-    commission: -4.0,
-    swap: 0,
-    profitLoss: 140,
-    profitLossPips: 70,
-    session: 'New York',
-  },
-  {
-    ticket: '015',
-    symbol: 'NAS100',
-    direction: 'SELL',
-    lotSize: 0.2,
-    entryPrice: 18100.0,
-    exitPrice: 18250.0,
-    stopLoss: 18200.0,
-    takeProfit: 17800.0,
-    openTime: makeDate(65, 15, 0),
-    closeTime: makeDate(65, 15, 45),
-    durationMinutes: 45,
-    commission: -4.0,
-    swap: 0,
-    profitLoss: -304,
-    profitLossPips: -150,
-    session: 'New York',
-  },
-  // GBPUSD trades bons
-  {
-    ticket: '016',
-    symbol: 'GBPUSD',
-    direction: 'BUY',
-    lotSize: 0.4,
-    entryPrice: 1.265,
-    exitPrice: 1.268,
-    stopLoss: 1.263,
-    takeProfit: 1.27,
-    openTime: makeDate(63, 9, 0),
-    closeTime: makeDate(63, 11, 30),
-    durationMinutes: 150,
-    commission: -2.8,
-    swap: 0,
-    profitLoss: 117,
-    profitLossPips: 30,
-    session: 'London',
-  },
-  {
-    ticket: '017',
-    symbol: 'GBPUSD',
-    direction: 'SELL',
-    lotSize: 0.4,
-    entryPrice: 1.278,
-    exitPrice: 1.275,
-    stopLoss: 1.28,
-    takeProfit: 1.272,
-    openTime: makeDate(61, 10, 15),
-    closeTime: makeDate(61, 13, 45),
-    durationMinutes: 210,
-    commission: -2.8,
-    swap: 0,
-    profitLoss: 117,
-    profitLossPips: 30,
-    session: 'London',
-  },
-  // Coupure prématurée profit répétée
-  {
-    ticket: '018',
-    symbol: 'EURUSD',
-    direction: 'BUY',
-    lotSize: 0.5,
-    entryPrice: 1.078,
-    exitPrice: 1.0795,
-    stopLoss: 1.076,
-    takeProfit: 1.083,
-    openTime: makeDate(59, 9, 30),
-    closeTime: makeDate(59, 10, 15),
-    durationMinutes: 45,
-    commission: -3.5,
-    swap: 0,
-    profitLoss: 72,
-    profitLossPips: 15,
-    session: 'London',
-  },
-  {
-    ticket: '019',
-    symbol: 'XAUUSD',
-    direction: 'BUY',
-    lotSize: 0.1,
-    entryPrice: 2295.0,
-    exitPrice: 2302.0,
-    stopLoss: 2287.0,
-    takeProfit: 2320.0,
-    openTime: makeDate(57, 10, 0),
-    closeTime: makeDate(57, 11, 30),
-    durationMinutes: 90,
-    commission: -7.0,
-    swap: 0,
-    profitLoss: 70,
-    profitLossPips: 70,
-    session: 'London',
-  },
-  {
-    ticket: '020',
-    symbol: 'GBPJPY',
-    direction: 'BUY',
-    lotSize: 0.3,
-    entryPrice: 182.5,
-    exitPrice: 183.1,
-    stopLoss: 182.0,
-    takeProfit: 184.0,
-    openTime: makeDate(55, 9, 15),
-    closeTime: makeDate(55, 12, 0),
-    durationMinutes: 165,
-    commission: -4.2,
-    swap: 0,
-    profitLoss: 185,
-    profitLossPips: 60,
-    session: 'London',
-  },
-  {
-    ticket: '021',
-    symbol: 'EURUSD',
-    direction: 'SELL',
-    lotSize: 0.5,
-    entryPrice: 1.0875,
-    exitPrice: 1.085,
-    stopLoss: 1.0895,
-    takeProfit: 1.082,
-    openTime: makeDate(53, 9, 0),
-    closeTime: makeDate(53, 11, 0),
-    durationMinutes: 120,
-    commission: -3.5,
-    swap: 0,
-    profitLoss: 122,
-    profitLossPips: 25,
-    session: 'London',
-  },
-  {
-    ticket: '022',
-    symbol: 'NAS100',
-    direction: 'BUY',
-    lotSize: 0.2,
-    entryPrice: 17650.0,
-    exitPrice: 17580.0,
-    stopLoss: 17550.0,
-    takeProfit: 17850.0,
-    openTime: makeDate(52, 15, 30),
-    closeTime: makeDate(52, 16, 15),
-    durationMinutes: 45,
-    commission: -4.0,
-    swap: 0,
-    profitLoss: -144,
-    profitLossPips: -70,
-    session: 'New York',
-  },
-  {
-    ticket: '023',
-    symbol: 'GBPUSD',
-    direction: 'BUY',
-    lotSize: 0.4,
-    entryPrice: 1.268,
-    exitPrice: 1.271,
-    stopLoss: 1.266,
-    takeProfit: 1.274,
-    openTime: makeDate(50, 9, 45),
-    closeTime: makeDate(50, 12, 30),
-    durationMinutes: 165,
-    commission: -2.8,
-    swap: 0,
-    profitLoss: 117,
-    profitLossPips: 30,
-    session: 'London',
-  },
-  // 2ème série Revenge Trading
-  {
-    ticket: '024',
-    symbol: 'GBPJPY',
-    direction: 'SELL',
-    lotSize: 0.3,
-    entryPrice: 185.0,
-    exitPrice: 185.7,
-    stopLoss: 185.4,
-    takeProfit: 183.8,
-    openTime: makeDate(48, 14, 0),
-    closeTime: makeDate(48, 15, 30),
-    durationMinutes: 90,
-    commission: -4.2,
-    swap: 0,
-    profitLoss: -222,
-    profitLossPips: -70,
-    session: 'London',
-  },
-  {
-    ticket: '025',
-    symbol: 'GBPJPY',
-    direction: 'BUY',
-    lotSize: 0.3,
-    entryPrice: 184.8,
-    exitPrice: 184.2,
-    stopLoss: 184.3,
-    takeProfit: 186.0,
-    openTime: makeDate(48, 16, 0),
-    closeTime: makeDate(48, 17, 0),
-    durationMinutes: 60,
-    commission: -4.2,
-    swap: 0,
-    profitLoss: -196,
-    profitLossPips: -60,
-    session: 'New York',
-  },
-  // Revenge oversizé
-  {
-    ticket: '026',
-    symbol: 'EURUSD',
-    direction: 'BUY',
-    lotSize: 1.5,
-    entryPrice: 1.092,
-    exitPrice: 1.0895,
-    stopLoss: 1.09,
-    takeProfit: 1.098,
-    openTime: makeDate(47, 9, 0),
-    closeTime: makeDate(47, 9, 45),
-    durationMinutes: 45,
-    commission: -10.5,
-    swap: 0,
-    profitLoss: -385,
-    profitLossPips: -25,
-    session: 'London',
-  },
-  {
-    ticket: '027',
-    symbol: 'EURUSD',
-    direction: 'BUY',
-    lotSize: 0.5,
-    entryPrice: 1.084,
-    exitPrice: 1.0865,
-    stopLoss: 1.082,
-    takeProfit: 1.089,
-    openTime: makeDate(45, 10, 0),
-    closeTime: makeDate(45, 12, 30),
-    durationMinutes: 150,
-    commission: -3.5,
-    swap: 0,
-    profitLoss: 122,
-    profitLossPips: 25,
-    session: 'London',
-  },
-  {
-    ticket: '028',
-    symbol: 'XAUUSD',
-    direction: 'SELL',
-    lotSize: 0.1,
-    entryPrice: 2356.0,
-    exitPrice: 2349.0,
-    stopLoss: 2364.0,
-    takeProfit: 2335.0,
-    openTime: makeDate(43, 9, 30),
-    closeTime: makeDate(43, 14, 0),
-    durationMinutes: 270,
-    commission: -7.0,
-    swap: 0,
-    profitLoss: 70,
-    profitLossPips: 70,
-    session: 'London',
-  },
-  {
-    ticket: '029',
-    symbol: 'GBPUSD',
-    direction: 'SELL',
-    lotSize: 0.4,
-    entryPrice: 1.281,
-    exitPrice: 1.2785,
-    stopLoss: 1.283,
-    takeProfit: 1.275,
-    openTime: makeDate(41, 10, 15),
-    closeTime: makeDate(41, 13, 0),
-    durationMinutes: 165,
-    commission: -2.8,
-    swap: 0,
-    profitLoss: 97,
-    profitLossPips: 25,
-    session: 'London',
-  },
-  {
-    ticket: '030',
-    symbol: 'NAS100',
-    direction: 'BUY',
-    lotSize: 0.2,
-    entryPrice: 18200.0,
-    exitPrice: 18350.0,
-    stopLoss: 18100.0,
-    takeProfit: 18500.0,
-    openTime: makeDate(39, 14, 0),
-    closeTime: makeDate(39, 16, 30),
-    durationMinutes: 150,
-    commission: -4.0,
-    swap: 0,
-    profitLoss: 296,
-    profitLossPips: 150,
-    session: 'New York',
-  },
-  // Vendredi après-midi pertes
-  {
-    ticket: '031',
-    symbol: 'EURUSD',
-    direction: 'SELL',
-    lotSize: 0.5,
-    entryPrice: 1.086,
-    exitPrice: 1.0885,
-    stopLoss: 1.088,
-    takeProfit: 1.082,
-    openTime: makeDate(37, 15, 45),
-    closeTime: makeDate(37, 16, 45),
-    durationMinutes: 60,
-    commission: -3.5,
-    swap: 0,
-    profitLoss: -129,
-    profitLossPips: -25,
-    session: 'New York',
-  },
-  {
-    ticket: '032',
-    symbol: 'EURUSD',
-    direction: 'BUY',
-    lotSize: 0.5,
-    entryPrice: 1.082,
-    exitPrice: 1.0842,
-    stopLoss: 1.08,
-    takeProfit: 1.087,
-    openTime: makeDate(35, 9, 15),
-    closeTime: makeDate(35, 11, 45),
-    durationMinutes: 150,
-    commission: -3.5,
-    swap: 0,
-    profitLoss: 107,
-    profitLossPips: 22,
-    session: 'London',
-  },
-  {
-    ticket: '033',
-    symbol: 'GBPJPY',
-    direction: 'BUY',
-    lotSize: 0.3,
-    entryPrice: 183.2,
-    exitPrice: 183.8,
-    stopLoss: 182.7,
-    takeProfit: 184.7,
-    openTime: makeDate(33, 9, 0),
-    closeTime: makeDate(33, 12, 30),
-    durationMinutes: 210,
-    commission: -4.2,
-    swap: 0,
-    profitLoss: 185,
-    profitLossPips: 60,
-    session: 'London',
-  },
-  {
-    ticket: '034',
-    symbol: 'XAUUSD',
-    direction: 'BUY',
-    lotSize: 0.1,
-    entryPrice: 2280.0,
-    exitPrice: 2273.0,
-    stopLoss: 2270.0,
-    takeProfit: 2305.0,
-    openTime: makeDate(31, 10, 30),
-    closeTime: makeDate(31, 11, 15),
-    durationMinutes: 45,
-    commission: -7.0,
-    swap: 0,
-    profitLoss: -77,
-    profitLossPips: -70,
-    session: 'London',
-  },
-  {
-    ticket: '035',
-    symbol: 'EURUSD',
-    direction: 'SELL',
-    lotSize: 0.5,
-    entryPrice: 1.091,
-    exitPrice: 1.0885,
-    stopLoss: 1.093,
-    takeProfit: 1.086,
-    openTime: makeDate(29, 10, 0),
-    closeTime: makeDate(29, 13, 30),
-    durationMinutes: 210,
-    commission: -3.5,
-    swap: 0,
-    profitLoss: 122,
-    profitLossPips: 25,
-    session: 'London',
-  },
-  {
-    ticket: '036',
-    symbol: 'GBPUSD',
-    direction: 'BUY',
-    lotSize: 0.4,
-    entryPrice: 1.27,
-    exitPrice: 1.2728,
-    stopLoss: 1.268,
-    takeProfit: 1.276,
-    openTime: makeDate(27, 9, 30),
-    closeTime: makeDate(27, 12, 0),
-    durationMinutes: 150,
-    commission: -2.8,
-    swap: 0,
-    profitLoss: 109,
-    profitLossPips: 28,
-    session: 'London',
-  },
-  // FOMO trade - entrée trop tardive
-  {
-    ticket: '037',
-    symbol: 'NAS100',
-    direction: 'BUY',
-    lotSize: 0.3,
-    entryPrice: 18450.0,
-    exitPrice: 18320.0,
-    stopLoss: 18300.0,
-    takeProfit: 18700.0,
-    openTime: makeDate(25, 15, 15),
-    closeTime: makeDate(25, 16, 0),
-    durationMinutes: 45,
-    commission: -6.0,
-    swap: 0,
-    profitLoss: -396,
-    profitLossPips: -130,
-    session: 'New York',
-  },
-  {
-    ticket: '038',
-    symbol: 'EURUSD',
-    direction: 'BUY',
-    lotSize: 0.5,
-    entryPrice: 1.0795,
-    exitPrice: 1.0815,
-    stopLoss: 1.0775,
-    takeProfit: 1.085,
-    openTime: makeDate(23, 9, 0),
-    closeTime: makeDate(23, 11, 0),
-    durationMinutes: 120,
-    commission: -3.5,
-    swap: 0,
-    profitLoss: 97,
-    profitLossPips: 20,
-    session: 'London',
-  },
-  {
-    ticket: '039',
-    symbol: 'GBPJPY',
-    direction: 'SELL',
-    lotSize: 0.3,
-    entryPrice: 186.0,
-    exitPrice: 186.7,
-    stopLoss: 186.5,
-    takeProfit: 184.5,
-    openTime: makeDate(21, 14, 30),
-    closeTime: makeDate(21, 16, 0),
-    durationMinutes: 90,
-    commission: -4.2,
-    swap: 0,
-    profitLoss: -222,
-    profitLossPips: -70,
-    session: 'London',
-  },
-  {
-    ticket: '040',
-    symbol: 'XAUUSD',
-    direction: 'BUY',
-    lotSize: 0.1,
-    entryPrice: 2310.0,
-    exitPrice: 2317.0,
-    stopLoss: 2302.0,
-    takeProfit: 2335.0,
-    openTime: makeDate(19, 10, 15),
-    closeTime: makeDate(19, 14, 45),
-    durationMinutes: 270,
-    commission: -7.0,
-    swap: 0,
-    profitLoss: 70,
-    profitLossPips: 70,
-    session: 'London',
-  },
-  // 3ème série Revenge Trading
-  {
-    ticket: '041',
-    symbol: 'GBPJPY',
-    direction: 'BUY',
-    lotSize: 0.3,
-    entryPrice: 185.5,
-    exitPrice: 184.8,
-    stopLoss: 185.0,
-    takeProfit: 187.0,
-    openTime: makeDate(17, 9, 0),
-    closeTime: makeDate(17, 10, 30),
-    durationMinutes: 90,
-    commission: -4.2,
-    swap: 0,
-    profitLoss: -218,
-    profitLossPips: -70,
-    session: 'London',
-  },
-  {
-    ticket: '042',
-    symbol: 'GBPJPY',
-    direction: 'SELL',
-    lotSize: 0.3,
-    entryPrice: 185.2,
-    exitPrice: 185.85,
-    stopLoss: 185.6,
-    takeProfit: 183.8,
-    openTime: makeDate(17, 11, 0),
-    closeTime: makeDate(17, 12, 30),
-    durationMinutes: 90,
-    commission: -4.2,
-    swap: 0,
-    profitLoss: -202,
-    profitLossPips: -65,
-    session: 'London',
-  },
-  {
-    ticket: '043',
-    symbol: 'GBPJPY',
-    direction: 'BUY',
-    lotSize: 0.3,
-    entryPrice: 184.6,
-    exitPrice: 184.1,
-    stopLoss: 184.2,
-    takeProfit: 186.0,
-    openTime: makeDate(17, 13, 0),
-    closeTime: makeDate(17, 14, 0),
-    durationMinutes: 60,
-    commission: -4.2,
-    swap: 0,
-    profitLoss: -162,
-    profitLossPips: -50,
-    session: 'London',
-  },
-  // Revenge oversizé massif
-  {
-    ticket: '044',
-    symbol: 'EURUSD',
-    direction: 'BUY',
-    lotSize: 2.0,
-    entryPrice: 1.085,
-    exitPrice: 1.082,
-    stopLoss: 1.083,
-    takeProfit: 1.092,
-    openTime: makeDate(17, 14, 30),
-    closeTime: makeDate(17, 15, 15),
-    durationMinutes: 45,
-    commission: -14.0,
-    swap: 0,
-    profitLoss: -614,
-    profitLossPips: -30,
-    session: 'London',
-  },
-  // Récupération progressive
-  {
-    ticket: '045',
-    symbol: 'EURUSD',
-    direction: 'SELL',
-    lotSize: 0.5,
-    entryPrice: 1.09,
-    exitPrice: 1.0875,
-    stopLoss: 1.092,
-    takeProfit: 1.085,
-    openTime: makeDate(14, 10, 0),
-    closeTime: makeDate(14, 12, 30),
-    durationMinutes: 150,
-    commission: -3.5,
-    swap: 0,
-    profitLoss: 122,
-    profitLossPips: 25,
-    session: 'London',
-  },
-  {
-    ticket: '046',
-    symbol: 'GBPUSD',
-    direction: 'BUY',
-    lotSize: 0.4,
-    entryPrice: 1.262,
-    exitPrice: 1.265,
-    stopLoss: 1.26,
-    takeProfit: 1.269,
-    openTime: makeDate(12, 9, 30),
-    closeTime: makeDate(12, 12, 0),
-    durationMinutes: 150,
-    commission: -2.8,
-    swap: 0,
-    profitLoss: 117,
-    profitLossPips: 30,
-    session: 'London',
-  },
-  {
-    ticket: '047',
-    symbol: 'XAUUSD',
-    direction: 'SELL',
-    lotSize: 0.1,
-    entryPrice: 2340.0,
-    exitPrice: 2333.0,
-    stopLoss: 2348.0,
-    takeProfit: 2318.0,
-    openTime: makeDate(10, 10, 30),
-    closeTime: makeDate(10, 15, 0),
-    durationMinutes: 270,
-    commission: -7.0,
-    swap: 0,
-    profitLoss: 70,
-    profitLossPips: 70,
-    session: 'London',
-  },
-  {
-    ticket: '048',
-    symbol: 'EURUSD',
-    direction: 'BUY',
-    lotSize: 0.5,
-    entryPrice: 1.081,
-    exitPrice: 1.0832,
-    stopLoss: 1.079,
-    takeProfit: 1.087,
-    openTime: makeDate(7, 9, 0),
-    closeTime: makeDate(7, 11, 30),
-    durationMinutes: 150,
-    commission: -3.5,
-    swap: 0,
-    profitLoss: 107,
-    profitLossPips: 22,
-    session: 'London',
-  },
-  {
-    ticket: '049',
-    symbol: 'NAS100',
-    direction: 'SELL',
-    lotSize: 0.2,
-    entryPrice: 18350.0,
-    exitPrice: 18200.0,
-    stopLoss: 18450.0,
-    takeProfit: 18000.0,
-    openTime: makeDate(5, 14, 30),
-    closeTime: makeDate(5, 16, 30),
-    durationMinutes: 120,
-    commission: -4.0,
-    swap: 0,
-    profitLoss: 296,
-    profitLossPips: 150,
-    session: 'New York',
-  },
-  {
-    ticket: '050',
-    symbol: 'EURUSD',
-    direction: 'BUY',
-    lotSize: 0.5,
-    entryPrice: 1.078,
-    exitPrice: 1.0805,
-    stopLoss: 1.076,
-    takeProfit: 1.085,
-    openTime: makeDate(2, 9, 15),
-    closeTime: makeDate(2, 12, 0),
-    durationMinutes: 165,
-    commission: -3.5,
-    swap: 0,
-    profitLoss: 122,
-    profitLossPips: 25,
-    session: 'London',
-  },
-]
+    profitLoss,
+    profitLossPips,
+    session: toSession(bp.hour),
+  }
+}
+
+const blueprints = buildBlueprints()
+enforceSymbolWinTargets(blueprints)
+
+export const demoTrades: Trade[] = blueprints.map((bp, index) => buildTrade(bp, index))

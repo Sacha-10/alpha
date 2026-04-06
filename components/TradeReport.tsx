@@ -10,8 +10,9 @@ interface Props {
 }
 
 function ScoreCircle({ score, label }: { score: number; label: string }) {
+  const normalizedScore = score < 10 ? score * 100 : score;
   const color =
-    score >= 70 ? "#00E5B0" : score >= 40 ? "#FFB800" : "#FF3D57";
+    normalizedScore >= 70 ? "#00E5B0" : normalizedScore >= 40 ? "#FFB800" : "#FF3D57";
   return (
     <div className="flex flex-col items-center">
       <div className="relative h-24 w-24">
@@ -34,7 +35,7 @@ function ScoreCircle({ score, label }: { score: number; label: string }) {
             fill="none"
             stroke={color}
             strokeWidth="8"
-            strokeDasharray={`${score * 2.83} 283`}
+            strokeDasharray={`${normalizedScore * 2.83} 283`}
             strokeLinecap="round"
           />
         </svg>
@@ -42,7 +43,7 @@ function ScoreCircle({ score, label }: { score: number; label: string }) {
           className="absolute inset-0 flex items-center justify-center font-mono text-xl font-bold"
           style={{ color }}
         >
-          {score}
+          {normalizedScore.toFixed(0)}%
         </span>
       </div>
       <span className="mt-2 text-center text-sm text-secondary">{label}</span>
@@ -83,6 +84,8 @@ export default function TradeReport({
     100,
     Math.max(0, ((analysesLeft ?? 0) / limit) * 100)
   );
+  const displayRate = (value: number) =>
+    value < 1 ? (value * 100).toFixed(1) : value.toFixed(1);
 
   const keyStats: {
     label: string;
@@ -91,8 +94,8 @@ export default function TradeReport({
   }[] = [
     {
       label: "Win Rate",
-      value: `${s.winRate.toFixed(1)}%`,
-      positive: s.winRate >= 50,
+      value: `${displayRate(s.winRate)}%`,
+      positive: (s.winRate < 1 ? s.winRate * 100 : s.winRate) >= 50,
     },
     {
       label: "Profit Factor",
@@ -241,25 +244,28 @@ export default function TradeReport({
             { name: "London", rate: session.londonWinRate },
             { name: "New York", rate: session.newYorkWinRate },
             { name: "Asian", rate: session.asianWinRate },
-          ].map((sess, i) => (
+          ].map((sess, i) => {
+            const rateValue = sess.rate < 1 ? sess.rate * 100 : sess.rate;
+            return (
             <div key={i} className="rounded-xl bg-hover p-4 text-center">
               <p className="mb-2 text-sm text-secondary">{sess.name}</p>
               <div className="mb-2 h-3 w-full rounded-full bg-background">
                 <div
                   className="h-full rounded-full"
                   style={{
-                    width: `${sess.rate}%`,
-                    background: sess.rate >= 50 ? "#00E5B0" : "#FF3D57",
+                    width: `${rateValue}%`,
+                    background: rateValue >= 50 ? "#00E5B0" : "#FF3D57",
                   }}
                 />
               </div>
               <p
-                className={`font-mono font-bold ${sess.rate >= 50 ? "text-green" : "text-red"}`}
+                className={`font-mono font-bold ${rateValue >= 50 ? "text-green" : "text-red"}`}
               >
-                {sess.rate.toFixed(1)}%
+                {displayRate(sess.rate)}%
               </p>
             </div>
-          ))}
+            );
+          })}
         </div>
         <p className="text-sm italic text-secondary">{session.insight}</p>
       </motion.div>
@@ -295,12 +301,12 @@ export default function TradeReport({
             },
             {
               label: "Meilleur symbole",
-              value: `${patterns.bestSymbol.symbol} (${patterns.bestSymbol.winRate.toFixed(1)}%)`,
+              value: `${patterns.bestSymbol.symbol} (${displayRate(patterns.bestSymbol.winRate)}%)`,
               positive: true,
             },
             {
               label: "Pire symbole",
-              value: `${patterns.worstSymbol.symbol} (${patterns.worstSymbol.winRate.toFixed(1)}%)`,
+              value: `${patterns.worstSymbol.symbol} (${displayRate(patterns.worstSymbol.winRate)}%)`,
               positive: false,
             },
           ].map((p, i) => (
