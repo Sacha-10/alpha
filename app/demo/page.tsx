@@ -61,45 +61,6 @@ export default function DemoPage() {
   return (
     <main className="min-h-screen bg-background 
       text-primary p-8 max-w-6xl mx-auto">
-
-      <div
-        className="mb-6 rounded-lg border border-dashed 
-          border-secondary/80 bg-card/50 p-4 text-left 
-          text-sm font-mono text-secondary"
-        data-testid="demo-debug-state"
-      >
-        <p className="mb-2 text-xs font-sans font-semibold 
-          uppercase tracking-wide text-primary">
-          Debug — état React (page client)
-        </p>
-        <ul className="space-y-1">
-          <li>
-            <span className="text-primary">loading</span>
-            {' = '}
-            {String(loading)}
-          </li>
-          <li>
-            <span className="text-primary">used</span>
-            {' = '}
-            {String(used)}
-          </li>
-          <li>
-            <span className="text-primary">report</span>
-            {' = '}
-            {report ? 'présent' : 'null'}
-          </li>
-          <li>
-            <span className="text-primary">bouton visible</span>
-            {' = '}
-            {String(!report && !used)}
-          </li>
-          <li>
-            <span className="text-primary">error</span>
-            {' = '}
-            {error ? error.slice(0, 80) : '—'}
-          </li>
-        </ul>
-      </div>
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -107,7 +68,7 @@ export default function DemoPage() {
         className="text-center mb-12"
       >
         <h1 className="text-4xl font-bold mb-4">
-          Découvrez ce que l&apos;IA trouve dans un compte 
+          Découvrezz ce que l&apos;IA trouve dans un compte 
           de trading réel
         </h1>
         <p className="text-secondary text-xl mb-2">
@@ -121,11 +82,7 @@ export default function DemoPage() {
       {!report && !used && (
         <div className="text-center">
           <button
-            type="button"
-            onClick={() => {
-              console.log('[demo] clic bouton → handleDemo')
-              void handleDemo()
-            }}
+            onClick={handleDemo}
             disabled={loading}
             className="btn-primary text-xl px-12 py-4 
               disabled:opacity-50"
