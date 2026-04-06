@@ -144,7 +144,7 @@ export async function analyzeTrades(
   async function callAPI(attempt: number): Promise<any> {
     try {
       const response = await client.chat.completions.create({
-        model: 'gpt-5.4',
+        model: 'gpt-5.4-thinking',
         max_tokens: 4000,
         temperature: 0.3,
         messages: [
