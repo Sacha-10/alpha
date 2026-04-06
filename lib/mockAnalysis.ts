@@ -21,12 +21,12 @@ export function getStaticDemoAnalysis(): AiAnalysisResult {
     },
     sessionAnalysis: {
       bestSession: "New York",
-      worstSession: "Asian",
-      londonWinRate: 44,
-      newYorkWinRate: 52,
-      asianWinRate: 33,
+      worstSession: "Tokyo",
+      londonWinRate: 58,
+      newYorkWinRate: 48,
+      tokyoWinRate: 32,
       insight:
-        "Les meilleures séquences coïncident avec la session New York ; la liquidité asiatique amplifie les faux breakouts sur le métal.",
+        "Les meilleures séquences coïncident avec la session New York ; la liquidité Tokyo amplifie les faux breakouts sur le métal.",
     },
     psychologicalProfile: {
       overallScore: 58,

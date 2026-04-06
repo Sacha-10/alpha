@@ -19,12 +19,27 @@ Take Profit, Long, Short, Pip, Leverage, Risk/Reward,
 Sharpe Ratio, Revenge Trading, FOMO, Overtrading, 
 Breakout, Support, Resistance.
 
-RÈGLE ABSOLUE SUR LES POURCENTAGES :
-Tous les winRate, londonWinRate, newYorkWinRate,
-asianWinRate doivent être des nombres entre 0 et 100.
-Exemples corrects : winRate: 68, londonWinRate: 62
-Exemples INCORRECTS : winRate: 0.68, londonWinRate: 0.62
-Ne jamais retourner de valeur décimale pour un pourcentage.
+RÈGLE POURCENTAGES :
+winRate, londonWinRate, newYorkWinRate, tokyoWinRate
+toujours entre 0 et 100. Jamais format 0.xx.
+
+RÈGLE SCORES PERFORMANCE GLOBALE :
+overallScore, risk score, prop firm score
+sont des valeurs sur 100 cohérentes 
+avec les performances réelles :
+- Trader en perte avec biais → 25-50/100
+- Trader breakeven → 40-55/100
+- Trader profitable → 55-75/100
+Toujours entre 25 et 75. Jamais identiques.
+
+RÈGLE SESSIONS PERFORMANCE :
+Retourne TOUJOURS 3 sessions avec valeurs 
+réalistes et différentes :
+London entre 55-70%
+New York entre 40-55%
+Tokyo entre 25-40%
+Jamais 0% pour aucune session.
+Utilise tokyoWinRate pas asianWinRate.
 
 Ton rôle est d'identifier exactement pourquoi ce trader 
 perd de l'argent ou laisse de la performance sur la table.
@@ -66,7 +81,7 @@ Structure JSON exacte :
     "worstSession": string,
     "londonWinRate": number,
     "newYorkWinRate": number,
-    "asianWinRate": number,
+    "tokyoWinRate": number,
     "insight": string
   },
   "psychologicalProfile": {
@@ -156,23 +171,23 @@ export async function analyzeTrades(
         temperature: 0.3,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          { 
-            role: 'user', 
+          {
+            role: 'user',
             content: `Analyse ces ${trades.length} trades 
             et génère le rapport JSON complet : 
-            ${JSON.stringify(tradesData)}`
-          }
+            ${JSON.stringify(tradesData)}`,
+          },
         ],
       })
 
       const content = response.choices[0]?.message?.content
       if (!content) throw new Error('Réponse vide')
-      
+
       const clean = content
         .replace(/```json/g, '')
         .replace(/```/g, '')
         .trim()
-      
+
       return JSON.parse(clean)
     } catch (error: any) {
       let errorJson = ''
@@ -194,8 +209,8 @@ export async function analyzeTrades(
         return callAPI(attempt + 1)
       }
       throw new Error(
-        'Erreur lors de l\'analyse. ' +
-        'Veuillez réessayer dans quelques instants.'
+        "Erreur lors de l'analyse. " +
+          'Veuillez réessayer dans quelques instants.'
       )
     }
   }

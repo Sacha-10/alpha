@@ -10,9 +10,10 @@ interface Props {
 }
 
 function ScoreCircle({ score, label }: { score: number; label: string }) {
-  const normalizedScore = score < 10 ? score * 100 : score;
+  const normalized = score < 10 ? score * 100 : score;
+  const capped = Math.min(100, Math.max(0, normalized));
   const color =
-    normalizedScore >= 70 ? "#00E5B0" : normalizedScore >= 40 ? "#FFB800" : "#FF3D57";
+    capped > 60 ? "#00E5B0" : capped >= 40 ? "#FFB800" : "#FF3D57";
   return (
     <div className="flex flex-col items-center">
       <div className="relative h-24 w-24">
@@ -35,15 +36,15 @@ function ScoreCircle({ score, label }: { score: number; label: string }) {
             fill="none"
             stroke={color}
             strokeWidth="8"
-            strokeDasharray={`${normalizedScore * 2.83} 283`}
+            strokeDasharray={`${capped * 2.83} 283`}
             strokeLinecap="round"
           />
         </svg>
         <span
-          className="absolute inset-0 flex items-center justify-center font-mono text-xl font-bold"
+          className="absolute inset-0 flex items-center justify-center font-mono text-lg font-bold leading-tight"
           style={{ color }}
         >
-          {normalizedScore.toFixed(0)}%
+          {Math.round(capped)}/100
         </span>
       </div>
       <span className="mt-2 text-center text-sm text-secondary">{label}</span>
@@ -84,18 +85,31 @@ export default function TradeReport({
     100,
     Math.max(0, ((analysesLeft ?? 0) / limit) * 100)
   );
-  const displayRate = (value: number) =>
-    value < 1 ? (value * 100).toFixed(1) : value.toFixed(1);
+  const displayRate = (v: number) =>
+    v <= 1 ? (v * 100).toFixed(1) : v.toFixed(1);
+
+  const winRateNum = s.winRate <= 1 ? s.winRate * 100 : s.winRate;
+  const ddNum =
+    s.maxDrawdownPercent <= 1 ? s.maxDrawdownPercent * 100 : s.maxDrawdownPercent;
+
+  const tokyoRate =
+    "tokyoWinRate" in session && typeof session.tokyoWinRate === "number"
+      ? session.tokyoWinRate
+      : "asianWinRate" in session &&
+          typeof (session as { asianWinRate?: number }).asianWinRate === "number"
+        ? (session as { asianWinRate: number }).asianWinRate
+        : 30;
 
   const keyStats: {
     label: string;
     value: string;
     positive: boolean;
+    valueClass?: string;
   }[] = [
     {
       label: "Win Rate",
       value: `${displayRate(s.winRate)}%`,
-      positive: (s.winRate < 1 ? s.winRate * 100 : s.winRate) >= 50,
+      positive: winRateNum >= 50,
     },
     {
       label: "Profit Factor",
@@ -104,13 +118,20 @@ export default function TradeReport({
     },
     {
       label: "Max Drawdown",
-      value: `${s.maxDrawdownPercent.toFixed(1)}%`,
+      value: `${displayRate(s.maxDrawdownPercent)}%${
+        ddNum > 20 ? " ⚠️" : ""
+      }`,
       positive: false,
+      valueClass: ddNum > 20 ? "text-red" : "text-secondary",
     },
     {
       label: "PnL Total",
-      value: `${s.totalPnL > 0 ? "+" : ""}${s.totalPnL.toFixed(0)}€`,
+      value:
+        s.totalPnL < 0
+          ? `-${Math.abs(s.totalPnL).toFixed(0)}€`
+          : `+${s.totalPnL.toFixed(0)}€`,
       positive: s.totalPnL > 0,
+      valueClass: s.totalPnL < 0 ? "text-red" : undefined,
     },
     {
       label: "Trades Total",
@@ -191,7 +212,13 @@ export default function TradeReport({
             <div key={i} className="rounded-xl bg-hover p-4">
               <p className="mb-1 text-sm text-secondary">{stat.label}</p>
               <p
-                className={`font-mono text-xl font-bold ${stat.positive ? "text-green" : "text-red"}`}
+                className={`font-mono text-xl font-bold ${
+                  stat.valueClass !== undefined
+                    ? stat.valueClass
+                    : stat.positive
+                      ? "text-green"
+                      : "text-red"
+                }`}
               >
                 {stat.value}
               </p>
@@ -243,9 +270,9 @@ export default function TradeReport({
           {[
             { name: "London", rate: session.londonWinRate },
             { name: "New York", rate: session.newYorkWinRate },
-            { name: "Asian", rate: session.asianWinRate },
+            { name: "Tokyo", rate: tokyoRate },
           ].map((sess, i) => {
-            const rateValue = sess.rate < 1 ? sess.rate * 100 : sess.rate;
+            const rateValue = Number(displayRate(sess.rate));
             return (
             <div key={i} className="rounded-xl bg-hover p-4 text-center">
               <p className="mb-2 text-sm text-secondary">{sess.name}</p>
@@ -253,7 +280,7 @@ export default function TradeReport({
                 <div
                   className="h-full rounded-full"
                   style={{
-                    width: `${rateValue}%`,
+                    width: `${Math.min(100, rateValue)}%`,
                     background: rateValue >= 50 ? "#00E5B0" : "#FF3D57",
                   }}
                 />

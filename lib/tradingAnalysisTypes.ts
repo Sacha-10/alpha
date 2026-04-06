@@ -44,7 +44,7 @@ export interface AiAnalysisResult {
     worstSession: string
     londonWinRate: number
     newYorkWinRate: number
-    asianWinRate: number
+    tokyoWinRate: number
     insight: string
   }
   psychologicalProfile: {

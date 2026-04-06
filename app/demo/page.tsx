@@ -72,7 +72,7 @@ export default function DemoPage() {
           de trading réel
         </h1>
         <p className="text-secondary text-xl mb-2">
-          Analyse basée sur 50 trades réels anonymisés
+          Analyse basée sur 120 trades réels anonymisés
         </p>
         <p className="text-secondary text-sm">
           1 analyse démo gratuite — sans inscription requise
