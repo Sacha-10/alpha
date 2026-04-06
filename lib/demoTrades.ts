@@ -22,7 +22,8 @@ const SYMBOL_SPECS: SymbolSpec[] = [
   { symbol: 'BTCUSD', count: 20, targetWins: 5, min: 70000, max: 88000, defaultLot: 0.12 },
 ]
 
-const START_DATE_UTC = new Date(Date.UTC(2025, 10, 3, 0, 0, 0, 0))
+/** Lundi UTC : dayOffset % 7 aligné avec mar./jeu. (gains) et lun./ven. (pertes). */
+const START_DATE_UTC = new Date(Date.UTC(2025, 0, 6, 0, 0, 0, 0))
 
 const SESSION_TEMPLATE: TradeSession[] = [
   ...Array(20).fill('Asian' as const),
@@ -96,17 +97,6 @@ function randInRange(a: number, b: number): number {
   return a + rand() * (b - a)
 }
 
-/** Lots 0.1-0.5 : +100/+500, -50/-250 | Lots ≥1 revenge : pertes -200/-800 max */
-function rawPnlEur(lot: number, win: boolean, highVol: boolean): number {
-  if (win) {
-    if (lot >= 1) return Math.round(randInRange(120, 480))
-    return Math.round(randInRange(100, 500))
-  }
-  if (lot >= 1) return -Math.round(randInRange(200, 800))
-  const lossCap = highVol ? 280 : 250
-  return -Math.round(randInRange(50, lossCap))
-}
-
 interface Row {
   symbol: string
   session: TradeSession
@@ -121,6 +111,22 @@ interface Row {
   dayOffset: number
   hour: number
   minute: number
+}
+
+/** Lots 0.1-0.5 : +100/+500, -50/-250 | Lots ≥1 revenge : pertes -200/-800 max. BTC : gains modestes, pertes hautes du plage (pire symbole). */
+function rawPnlEur(row: Row): number {
+  const highVol = row.movingSl || row.fomo
+  const lot = row.lotSize
+  if (row.win) {
+    if (lot >= 1) return Math.round(randInRange(120, 480))
+    if (row.symbol === 'BTCUSD') return Math.round(randInRange(95, 200))
+    return Math.round(randInRange(100, 500))
+  }
+  if (lot >= 1) return -Math.round(randInRange(200, 800))
+  if (row.symbol === 'BTCUSD')
+    return -Math.round(randInRange(175, 250))
+  const lossCap = highVol ? 280 : 250
+  return -Math.round(randInRange(50, lossCap))
 }
 
 function sessionNeed(sess: TradeSession): number {
@@ -316,14 +322,24 @@ function rebalanceSessionWins(rows: Row[]): void {
   }
 }
 
-/** Mardi & Jeudi favorisés pour gains ; L & V pour pertes (UTCDay: 0=Dim …). */
+/**
+ * Ancre START = lundi UTC : offset % 7 → 1=mar., 3=jeu., 0=lun., 4=ven.
+ * Gains → mardi / jeudi ; pertes → lundi / vendredi.
+ */
 function dayOffsetForRow(index: number, win: boolean): number {
-  const week = Math.floor((index * 173) / 120) + Math.floor(index / 7)
-  const inner = index % 7
-  const prefWin = inner % 2 === 0 ? 2 : 4
-  const prefLoss = inner % 2 === 0 ? 1 : 5
-  const d = win ? prefWin : prefLoss
-  return week * 7 + d + Math.floor(index / 15) * 3
+  const block = Math.floor(index / 4)
+  const inWeek = index % 4
+  const mod7 = win
+    ? [1, 3, 1, 3][inWeek]
+    : [0, 4, 0, 4][inWeek]
+  return block * 7 + mod7 + Math.floor(index / 34) * 7
+}
+
+/** Répartit les 5 gains BTC sur des semaines différentes (mar./jeu.). */
+function dayOffsetForBtcWin(ordinal: number): number {
+  const mod7 = ordinal % 2 === 0 ? 1 : 3
+  const weekSkew = (1 + ordinal * 5) * 7
+  return weekSkew + mod7
 }
 
 function buildRows(): Row[] {
@@ -366,8 +382,14 @@ function buildRows(): Row[] {
   refineSymbolTargets(rows)
   rebalanceSessionWins(rows)
 
+  let btcWinOrd = 0
   for (let i = 0; i < rows.length; i++) {
-    rows[i].dayOffset = dayOffsetForRow(i, rows[i].win)
+    if (rows[i].symbol === 'BTCUSD' && rows[i].win) {
+      rows[i].dayOffset = dayOffsetForBtcWin(btcWinOrd)
+      btcWinOrd++
+    } else {
+      rows[i].dayOffset = dayOffsetForRow(i, rows[i].win)
+    }
     rows[i].hour = sessionToHourUTC(rows[i].session, i)
   }
 
@@ -442,27 +464,19 @@ function buildTrade(row: Row, index: number, profitLoss: number): Trade {
   }
 }
 
-function finalizePnls(rows: Row[]): Trade[] {
-  const fee = (lot: number) => -Math.max(1.5, Number((lot * 6.5).toFixed(2)))
-  const pnls: number[] = rows.map(
-    (r, i) => rawPnlEur(r.lotSize, r.win, r.movingSl || r.fomo) + fee(r.lotSize)
-  )
+function sumPnls(pnls: number[]): number {
+  return pnls.reduce((a, b) => a + b, 0)
+}
 
-  const targetMid = -600
-  let sum = pnls.reduce((a, b) => a + b, 0)
-  for (let iter = 0; iter < 120; iter++) {
-    if (sum <= -250 && sum >= -1000) break
-    const adj = Math.max(-30, Math.min(30, (targetMid - sum) / pnls.length))
-    for (let i = 0; i < pnls.length; i++) {
-      const r = rows[i]
-      const capHi = r.win ? (r.lotSize >= 1 ? 480 : 500) : r.lotSize >= 1 ? -200 : -50
-      const capLo = r.win ? (r.lotSize >= 1 ? 120 : 100) : r.lotSize >= 1 ? -800 : -250
-      const w = r.win ? 0.35 : -0.65
-      pnls[i] = Math.min(capHi, Math.max(capLo, pnls[i] + adj * w))
-    }
-    sum = pnls.reduce((a, b) => a + b, 0)
-  }
+function pnlBySymbol(rows: Row[], pnls: number[]): Record<string, number> {
+  const t: Record<string, number> = { XAUUSD: 0, EURUSD: 0, BTCUSD: 0 }
+  rows.forEach((r, i) => {
+    t[r.symbol] = (t[r.symbol] ?? 0) + pnls[i]
+  })
+  return t
+}
 
+function clampPnlToCaps(rows: Row[], pnls: number[]): void {
   for (let i = 0; i < pnls.length; i++) {
     const r = rows[i]
     if (r.win) pnls[i] = Math.min(500, Math.max(100, pnls[i]))
@@ -470,18 +484,80 @@ function finalizePnls(rows: Row[]): Trade[] {
       pnls[i] = Math.min(-200, Math.max(-800, pnls[i]))
     else pnls[i] = Math.min(-50, Math.max(-250, pnls[i]))
   }
+}
 
-  sum = pnls.reduce((a, b) => a + b, 0)
-  for (let guard = 0; guard < 120 && (sum > -250 || sum < -1000); guard++) {
-    if (sum > -250) {
-      const idx = pnls.findIndex((_, i) => !rows[i].win && rows[i].lotSize < 1)
-      if (idx >= 0) pnls[idx] = Math.max(-250, pnls[idx] - 18)
-    } else {
-      const idx = pnls.findIndex((_, i) => rows[i].win)
-      if (idx >= 0) pnls[idx] = Math.min(500, pnls[idx] + 12)
+function enforcePnlBandAndBtcWorst(rows: Row[], pnls: number[]): void {
+  const low = -1000
+  const high = -250
+
+  for (let guard = 0; guard < 200; guard++) {
+    const sum = sumPnls(pnls)
+    if (sum >= low && sum <= high) break
+    if (sum > high) {
+      const idx = pnls.findIndex(
+        (_, i) => !rows[i].win && rows[i].symbol === 'BTCUSD'
+      )
+      const j = idx >= 0 ? idx : pnls.findIndex((_, i) => !rows[i].win)
+      if (j < 0) break
+      const cap = rows[j].lotSize >= 1 ? -800 : -250
+      pnls[j] = Math.max(cap, pnls[j] - 22)
+    } else if (sum < low) {
+      const idx = pnls.findIndex((_, i) => rows[i].win && rows[i].symbol !== 'BTCUSD')
+      const j = idx >= 0 ? idx : pnls.findIndex((_, i) => rows[i].win)
+      if (j < 0) break
+      pnls[j] = Math.min(500, pnls[j] + 14)
     }
-    sum = pnls.reduce((a, b) => a + b, 0)
+    clampPnlToCaps(rows, pnls)
   }
+
+  for (let guard = 0; guard < 120; guard++) {
+    const by = pnlBySymbol(rows, pnls)
+    if (by.BTCUSD <= by.XAUUSD && by.BTCUSD <= by.EURUSD) break
+    const idx = pnls.findIndex(
+      (_, i) => !rows[i].win && rows[i].symbol === 'BTCUSD'
+    )
+    if (idx < 0) break
+    pnls[idx] = Math.max(-250, pnls[idx] - 20)
+    clampPnlToCaps(rows, pnls)
+  }
+
+  for (let guard = 0; guard < 80; guard++) {
+    const sum = sumPnls(pnls)
+    if (sum >= low && sum <= high) break
+    if (sum > high) {
+      const idx = pnls.findIndex((_, i) => !rows[i].win)
+      if (idx < 0) break
+      const cap = rows[idx].lotSize >= 1 ? -800 : -250
+      pnls[idx] = Math.max(cap, pnls[idx] - 15)
+    } else if (sum < low) {
+      const idx = pnls.findIndex((_, i) => rows[i].win)
+      if (idx < 0) break
+      pnls[idx] = Math.min(500, pnls[idx] + 10)
+    }
+    clampPnlToCaps(rows, pnls)
+  }
+}
+
+function finalizePnls(rows: Row[]): Trade[] {
+  const fee = (lot: number) => -Math.max(1.5, Number((lot * 6.5).toFixed(2)))
+  const pnls: number[] = rows.map(r => rawPnlEur(r) + fee(r.lotSize))
+
+  const targetMid = -625
+  let sum = sumPnls(pnls)
+  for (let iter = 0; iter < 120; iter++) {
+    if (sum <= -250 && sum >= -1000) break
+    const adj = Math.max(-28, Math.min(28, (targetMid - sum) / pnls.length))
+    for (let i = 0; i < pnls.length; i++) {
+      const r = rows[i]
+      const capHi = r.win ? (r.lotSize >= 1 ? 480 : 500) : r.lotSize >= 1 ? -200 : -50
+      const capLo = r.win ? (r.lotSize >= 1 ? 120 : 100) : r.lotSize >= 1 ? -800 : -250
+      const w = r.win ? 0.35 : -0.65
+      pnls[i] = Math.min(capHi, Math.max(capLo, pnls[i] + adj * w))
+    }
+    sum = sumPnls(pnls)
+  }
+
+  clampPnlToCaps(rows, pnls)
 
   function openMs(row: Row): number {
     const d = new Date(START_DATE_UTC)
@@ -499,8 +575,11 @@ function finalizePnls(rows: Row[]): Trade[] {
         pnls[i] = Math.max(lo, Math.round(pnls[i] * factor))
       }
     }
+    clampPnlToCaps(rows, pnls)
     dd = equityDrawdownPct(order.map(i => pnls[i]))
   }
+
+  enforcePnlBandAndBtcWorst(rows, pnls)
 
   return rows.map((row, i) => buildTrade(row, i, Number(pnls[i].toFixed(2))))
 }
