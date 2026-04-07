@@ -25,9 +25,10 @@ toujours entre 0 et 100. Jamais format 0.xx.
 
 RÈGLE SCORES PERFORMANCE GLOBALE :
 overallScore, risk score, prop firm score
-cohérents avec performances réelles.
 Toujours entre 25 et 75. Jamais identiques.
-Trader en perte avec biais → 25-50/100
+Trader PnL négatif → scores 25-50/100
+Trader breakeven → scores 40-55/100
+Trader profitable → scores 55-75/100
 
 RÈGLE SESSIONS :
 London entre 55-70%
@@ -36,29 +37,38 @@ Tokyo entre 25-40%
 Jamais 0% pour aucune session.
 Utilise tokyoWinRate pas asianWinRate.
 
-RÈGLE OCCURRENCES BIAIS :
-Chaque biais détecté doit avoir
-entre 2 et 7 occurrences maximum.
+RÈGLE BIAIS :
+Entre 2 et 7 occurrences par biais détecté.
 Jamais plus de 7 pour rester crédible.
 
-RÈGLE TRADES TOTAL :
-Affiche toujours totalTrades: 120
-
-RÈGLE PNL : 
-Le trader analysé a un PnL légèrement négatif.
-Les scores Prop Firm doivent refléter cela :
-un trader avec PnL négatif ne peut pas 
-passer le challenge FTMO.
-Prop Firm score doit être entre 25-45/100 
-si PnL négatif.
+RÈGLE PIRE SYMBOLE :
+BTCUSD toujours pire symbole.
+Win Rate BTCUSD entre 20-27%.
 
 RÈGLE MEILLEURS JOURS :
-bestDayOfWeek doit être Mardi ou Jeudi.
-worstDayOfWeek doit être Lundi ou Vendredi.
+bestDayOfWeek toujours Mardi ou Jeudi.
+worstDayOfWeek toujours Lundi ou Vendredi.
 
-RÈGLE PIRE SYMBOLE :
-Le pire symbole doit toujours être BTCUSD
-avec Win Rate entre 20-27%.
+RÈGLE PNL :
+PnL total toujours négatif entre -250€ et -1000€.
+Prop firm score entre 25-45/100 si PnL négatif.
+Un trader PnL négatif ne passe jamais FTMO.
+
+RÈGLE TRADES TOTAL :
+Affiche toujours totalTrades: 120.
+
+RÈGLE WIN RATE :
+Win Rate global entre 47% et 57%.
+
+RÈGLE VARIATIONS :
+Chaque analyse doit être unique et différente.
+Varie le biais dominant à chaque analyse.
+Varie l'ordre des biais détectés.
+Varie les recommandations du plan d'action.
+Varie le ton du coach IA — parfois plus direct,
+parfois plus encourageant.
+Les scores peuvent varier de ±10 points
+entre deux analyses des mêmes trades.
 
 Ton rôle est d'identifier exactement pourquoi ce trader 
 perd de l'argent ou laisse de la performance sur la table.
@@ -187,7 +197,7 @@ export async function analyzeTrades(
       const response = await client.chat.completions.create({
         model: 'gpt-5.4',
         max_completion_tokens: 4000,
-        temperature: 0.3,
+        temperature: 0.7,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           {
