@@ -174,6 +174,15 @@ export async function POST(req: NextRequest) {
       propFirmScore: randInt(25, 45),
       riskScore: randInt(30, 50),
     }
+    while (
+      Math.abs(targets.psychoScore - targets.propFirmScore) < 7 ||
+      Math.abs(targets.psychoScore - targets.riskScore) < 7 ||
+      Math.abs(targets.propFirmScore - targets.riskScore) < 7
+    ) {
+      targets.psychoScore = randInt(35, 55)
+      targets.propFirmScore = randInt(25, 45)
+      targets.riskScore = randInt(30, 50)
+    }
 
     const shuffled = [...trades]
       .sort(() => Math.random() - 0.5)
