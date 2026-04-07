@@ -162,7 +162,7 @@ export async function POST(req: NextRequest) {
   let report: unknown
   try {
     const targets = {
-      winRate: randInt(47, 57),
+      winRate: randInt(45, 65),
       pnl: -randInt(250, 1000),
       drawdown: randFloat(7, 15, 1),
       profitFactor: randFloat(0.7, 1.4, 2),
@@ -171,18 +171,18 @@ export async function POST(req: NextRequest) {
       londonWinRate: randInt(55, 70),
       newYorkWinRate: randInt(40, 55),
       tokyoWinRate: randInt(25, 40),
-      psychoScore: randInt(27, 55),
+      psychoScore: randInt(45, 65),
       propFirmScore: randInt(25, 45),
-      riskScore: randInt(30, 50),
+      riskScore: randInt(35, 55),
     }
     while (
       Math.abs(targets.psychoScore - targets.propFirmScore) < 7 ||
       Math.abs(targets.psychoScore - targets.riskScore) < 7 ||
       Math.abs(targets.propFirmScore - targets.riskScore) < 7
     ) {
-      targets.psychoScore = randInt(35, 55)
+      targets.psychoScore = randInt(45, 65)
       targets.propFirmScore = randInt(25, 45)
-      targets.riskScore = randInt(30, 50)
+      targets.riskScore = randInt(35, 55)
     }
 
     const shuffled = [...trades]

@@ -52,9 +52,12 @@ Tokyo entre 25-40%
 Jamais 0% pour aucune session.
 Utilise tokyoWinRate pas asianWinRate.
 
-RÈGLE BIAIS :
-Entre 2 et 7 occurrences par biais détecté.
-Jamais plus de 7 pour rester crédible.
+RÈGLE OCCURRENCES ET SÉVÉRITÉ BIAIS :
+- 2 à 3 occurrences → severity: FAIBLE
+- 4 à 5 occurrences → severity: MOYEN
+- 6 à 7 occurrences → severity: ÉLEVÉ
+Ne jamais dépasser 7 occurrences par biais.
+ÉLEVÉ est la sévérité maximale.
 
 RÈGLE PIRE SYMBOLE :
 BTCUSD toujours pire symbole.

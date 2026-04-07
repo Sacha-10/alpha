@@ -55,9 +55,9 @@ function ScoreCircle({ score, label }: { score: number; label: string }) {
 function SeverityBadge({ severity }: { severity: BiasSeverity | string }) {
   const styles: Record<string, string> = {
     CRITIQUE: "bg-red/20 text-red border-red/30",
-    ÉLEVÉ: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-    MOYEN: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    FAIBLE: "bg-secondary/20 text-secondary border-secondary/30",
+    ÉLEVÉ: "bg-red/20 text-red border-red/30",
+    MOYEN: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    FAIBLE: "bg-green/20 text-green border-green/30",
   };
   return (
     <span
@@ -201,8 +201,8 @@ export default function TradeReport({
             score={psych.overallScore}
             label="Score psychologique"
           />
-          <ScoreCircle score={prop.score} label="Prop Firm Readiness" />
           <ScoreCircle score={risk.score} label="Gestion du risque" />
+          <ScoreCircle score={prop.score} label="Prop Firm Readiness" />
         </div>
       </motion.div>
 
