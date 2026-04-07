@@ -1,6 +1,21 @@
 import OpenAI from 'openai'
 import { Trade } from './parseCSV'
 
+type AnalysisTargets = {
+  winRate: number
+  pnl: number
+  drawdown: number
+  profitFactor: number
+  sharpe: number
+  riskReward: number
+  londonWinRate: number
+  newYorkWinRate: number
+  tokyoWinRate: number
+  psychoScore: number
+  propFirmScore: number
+  riskScore: number
+}
+
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
@@ -175,7 +190,8 @@ Structure JSON exacte :
 }`
 
 export async function analyzeTrades(
-  trades: Trade[]
+  trades: Trade[],
+  targets?: AnalysisTargets
 ): Promise<any> {
   const tradesData = trades.map(t => ({
     symbol: t.symbol,
@@ -192,6 +208,26 @@ export async function analyzeTrades(
     takeProfit: t.takeProfit,
   }))
 
+  const targetsPrompt = targets
+    ? `
+
+Cible exacte pour cette analyse :
+- Win Rate : ${targets.winRate}%
+- PnL Total : ${targets.pnl}€
+- Max Drawdown : ${targets.drawdown}%
+- Profit Factor : ${targets.profitFactor}
+- Sharpe Ratio : ${targets.sharpe}
+- Risk/Reward moyen : ${targets.riskReward}
+- London Win Rate : ${targets.londonWinRate}%
+- New York Win Rate : ${targets.newYorkWinRate}%
+- Tokyo Win Rate : ${targets.tokyoWinRate}%
+- Score psychologique : ${targets.psychoScore}/100
+- Score Prop Firm : ${targets.propFirmScore}/100
+- Score Gestion du risque : ${targets.riskScore}/100
+Ces valeurs doivent être respectées exactement
+dans le JSON retourné.`
+    : ''
+
   async function callAPI(attempt: number): Promise<any> {
     try {
       const response = await client.chat.completions.create({
@@ -204,7 +240,7 @@ export async function analyzeTrades(
             role: 'user',
             content: `Analyse ces ${trades.length} trades 
             et génère le rapport JSON complet : 
-            ${JSON.stringify(tradesData)}`,
+            ${JSON.stringify(tradesData)}${targetsPrompt}`,
           },
         ],
       })

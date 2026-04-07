@@ -5,6 +5,19 @@ import type { Trade } from '@/lib/parseCSV'
 
 export const maxDuration = 60
 
+function randInt(min: number, max: number): number {
+  return Math.round(Math.random() * (max - min) + min)
+}
+
+function randFloat(
+  min: number,
+  max: number,
+  decimals: number
+): number {
+  const val = Math.random() * (max - min) + min
+  return parseFloat(val.toFixed(decimals))
+}
+
 export async function POST(req: NextRequest) {
   console.log('[analyze-demo] Route appelée')
 
@@ -147,10 +160,25 @@ export async function POST(req: NextRequest) {
 
   let report: unknown
   try {
+    const targets = {
+      winRate: randInt(47, 57),
+      pnl: -randInt(250, 1000),
+      drawdown: randFloat(7, 15, 1),
+      profitFactor: randFloat(0.7, 1.4, 2),
+      sharpe: randFloat(-0.2, 0.5, 2),
+      riskReward: randFloat(0.7, 1.5, 2),
+      londonWinRate: randInt(55, 70),
+      newYorkWinRate: randInt(40, 55),
+      tokyoWinRate: randInt(25, 40),
+      psychoScore: randInt(27, 55),
+      propFirmScore: randInt(25, 45),
+      riskScore: randInt(30, 50),
+    }
+
     const shuffled = [...trades]
       .sort(() => Math.random() - 0.5)
       .slice(0, 120)
-    report = await analyzeTrades(shuffled)
+    report = await analyzeTrades(shuffled, targets)
   } catch (err) {
     console.error('[analyze-demo] Échec étape: OpenAI analyzeTrades', err)
     const message =
