@@ -6,7 +6,8 @@ import type { Trade } from '@/lib/parseCSV'
 export const maxDuration = 60
 
 function randInt(min: number, max: number): number {
-  return Math.round(Math.random() * (max - min) + min)
+  return Math.min(max, Math.max(min,
+    Math.round(Math.random() * (max - min) + min)))
 }
 
 function randFloat(
@@ -15,7 +16,7 @@ function randFloat(
   decimals: number
 ): number {
   const val = Math.random() * (max - min) + min
-  return parseFloat(val.toFixed(decimals))
+  return Math.min(max, Math.max(min, parseFloat(val.toFixed(decimals))))
 }
 
 export async function POST(req: NextRequest) {

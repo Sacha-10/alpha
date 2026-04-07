@@ -323,23 +323,53 @@ function rebalanceSessionWins(rows: Row[]): void {
 }
 
 /**
- * Ancre START = lundi UTC : offset % 7 → 1=mar., 3=jeu., 0=lun., 4=ven.
- * Gains → mardi / jeudi ; pertes → lundi / vendredi.
+ * Répartition stricte par jour (120 trades) :
+ * - Mardi  : 27/38 gagnants (71.05%)
+ * - Jeudi  : 27/38 gagnants (71.05%)
+ * - Lundi  : 6/22 gagnants (27.27%)
+ * - Vendredi : 6/22 gagnants (27.27%)
+ * Cette structure garde Mardi/Jeudi équilibrés pour faire alterner bestDayOfWeek.
  */
-function dayOffsetForRow(index: number, win: boolean): number {
-  const block = Math.floor(index / 4)
-  const inWeek = index % 4
-  const mod7 = win
-    ? [1, 3, 1, 3][inWeek]
-    : [0, 4, 0, 4][inWeek]
-  return block * 7 + mod7 + Math.floor(index / 34) * 7
-}
+function assignDayOffsets(rows: Row[]): void {
+  const plans = [
+    { mod7: 1, total: 38, wins: 27 }, // Mardi
+    { mod7: 3, total: 38, wins: 27 }, // Jeudi
+    { mod7: 0, total: 22, wins: 6 },  // Lundi
+    { mod7: 4, total: 22, wins: 6 },  // Vendredi
+  ]
 
-/** Répartit les 5 gains BTC sur des semaines différentes (mar./jeu.). */
-function dayOffsetForBtcWin(ordinal: number): number {
-  const mod7 = ordinal % 2 === 0 ? 1 : 3
-  const weekSkew = (1 + ordinal * 5) * 7
-  return weekSkew + mod7
+  const winIdx = rows
+    .map((r, i) => (r.win ? i : -1))
+    .filter(i => i >= 0)
+  const lossIdx = rows
+    .map((r, i) => (!r.win ? i : -1))
+    .filter(i => i >= 0)
+
+  shuffleInPlace(winIdx, rand)
+  shuffleInPlace(lossIdx, rand)
+
+  const occurrences: Record<number, number> = {
+    0: 0,
+    1: 0,
+    3: 0,
+    4: 0,
+  }
+
+  for (const plan of plans) {
+    const losses = plan.total - plan.wins
+    for (let i = 0; i < plan.wins; i++) {
+      const idx = winIdx.pop()
+      if (idx === undefined) break
+      const week = occurrences[plan.mod7]++
+      rows[idx].dayOffset = week * 7 + plan.mod7
+    }
+    for (let i = 0; i < losses; i++) {
+      const idx = lossIdx.pop()
+      if (idx === undefined) break
+      const week = occurrences[plan.mod7]++
+      rows[idx].dayOffset = week * 7 + plan.mod7
+    }
+  }
 }
 
 function buildRows(): Row[] {
@@ -382,14 +412,8 @@ function buildRows(): Row[] {
   refineSymbolTargets(rows)
   rebalanceSessionWins(rows)
 
-  let btcWinOrd = 0
+  assignDayOffsets(rows)
   for (let i = 0; i < rows.length; i++) {
-    if (rows[i].symbol === 'BTCUSD' && rows[i].win) {
-      rows[i].dayOffset = dayOffsetForBtcWin(btcWinOrd)
-      btcWinOrd++
-    } else {
-      rows[i].dayOffset = dayOffsetForRow(i, rows[i].win)
-    }
     rows[i].hour = sessionToHourUTC(rows[i].session, i)
   }
 
