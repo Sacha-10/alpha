@@ -206,9 +206,9 @@ export async function POST(req: NextRequest) {
       londonWinRate: randInt(55, 70),
       newYorkWinRate: randInt(40, 55),
       tokyoWinRate: randInt(25, 40),
-      psychoScore: randInt(45, 65),
-      propFirmScore: randInt(25, 45),
-      riskScore: randInt(35, 55),
+      psychoScore: randInt(50, 65),
+      riskScore: randInt(35, 50),
+      propFirmScore: randInt(20, 35),
       targetBestSymbolWinRate,
       targetWorstSymbolWinRate,
       targetBestSymbol,
@@ -219,13 +219,22 @@ export async function POST(req: NextRequest) {
       targetWorstHour,
     }
     while (
-      Math.abs(targets.psychoScore - targets.propFirmScore) < 7 ||
       Math.abs(targets.psychoScore - targets.riskScore) < 7 ||
-      Math.abs(targets.propFirmScore - targets.riskScore) < 7
+      Math.abs(targets.psychoScore - targets.propFirmScore) < 7 ||
+      Math.abs(targets.riskScore - targets.propFirmScore) < 7
     ) {
-      targets.psychoScore = randInt(45, 65)
-      targets.propFirmScore = randInt(25, 45)
-      targets.riskScore = randInt(35, 55)
+      targets.psychoScore = randInt(50, 65)
+      targets.riskScore = randInt(35, 50)
+      targets.propFirmScore = randInt(20, 35)
+    }
+    while (
+      Math.abs(targets.londonWinRate - targets.newYorkWinRate) < 7 ||
+      Math.abs(targets.londonWinRate - targets.tokyoWinRate) < 7 ||
+      Math.abs(targets.newYorkWinRate - targets.tokyoWinRate) < 7
+    ) {
+      targets.londonWinRate = randInt(55, 70)
+      targets.newYorkWinRate = randInt(40, 55)
+      targets.tokyoWinRate = randInt(25, 40)
     }
 
     const shuffled = [...trades]
