@@ -161,6 +161,40 @@ export async function POST(req: NextRequest) {
 
   let report: unknown
   try {
+    const targetBestSymbolWinRate = randInt(62, 72)
+    const targetWorstSymbolWinRate = randInt(22, 32)
+
+    // Alternance égale meilleur/pire symbole
+    // EURUSD ne peut pas être meilleur ET pire
+    const symbolRoll = Math.random()
+    const targetBestSymbol = symbolRoll > 0.5
+      ? 'XAUUSD' : 'EURUSD'
+    const targetWorstSymbol = targetBestSymbol === 'EURUSD'
+      ? 'BTCUSD'
+      : (Math.random() > 0.5 ? 'BTCUSD' : 'EURUSD')
+
+    // Alternance égale meilleur/pire jour
+    const targetBestDay = Math.random() > 0.5
+      ? 'Mardi' : 'Jeudi'
+    const targetWorstDay = Math.random() > 0.5
+      ? 'Lundi' : 'Vendredi'
+
+    // Heures toujours sur plage 07h-22h par tranches de 2h
+    const hours = [
+      '07:00-09:00', '08:00-10:00', '09:00-11:00',
+      '10:00-12:00', '11:00-13:00', '12:00-14:00',
+      '13:00-15:00', '14:00-16:00', '15:00-17:00',
+      '16:00-18:00', '17:00-19:00', '18:00-20:00',
+      '19:00-21:00', '20:00-22:00'
+    ]
+    const targetBestHour = hours[
+      Math.floor(Math.random() * hours.length)]
+    let targetWorstHour
+    do {
+      targetWorstHour = hours[
+        Math.floor(Math.random() * hours.length)]
+    } while (targetWorstHour === targetBestHour)
+
     const targets = {
       winRate: randInt(45, 65),
       pnl: -randInt(250, 1000),
@@ -174,6 +208,14 @@ export async function POST(req: NextRequest) {
       psychoScore: randInt(45, 65),
       propFirmScore: randInt(25, 45),
       riskScore: randInt(35, 55),
+      targetBestSymbolWinRate,
+      targetWorstSymbolWinRate,
+      targetBestSymbol,
+      targetWorstSymbol,
+      targetBestDay,
+      targetWorstDay,
+      targetBestHour,
+      targetWorstHour,
     }
     while (
       Math.abs(targets.psychoScore - targets.propFirmScore) < 7 ||

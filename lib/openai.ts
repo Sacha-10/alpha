@@ -14,6 +14,14 @@ type AnalysisTargets = {
   psychoScore: number
   propFirmScore: number
   riskScore: number
+  targetBestSymbolWinRate: number
+  targetWorstSymbolWinRate: number
+  targetBestSymbol: string
+  targetWorstSymbol: string
+  targetBestDay: string
+  targetWorstDay: string
+  targetBestHour: string
+  targetWorstHour: string
 }
 
 const client = new OpenAI({
@@ -59,13 +67,17 @@ RÈGLE OCCURRENCES ET SÉVÉRITÉ BIAIS :
 Ne jamais dépasser 7 occurrences par biais.
 ÉLEVÉ est la sévérité maximale.
 
-RÈGLE PIRE SYMBOLE :
-BTCUSD toujours pire symbole.
-Win Rate BTCUSD entre 20-27%.
+RÈGLE SYMBOLES :
+Respecte exactement le meilleur et pire symbole
+indiqués dans les cibles avec leurs Win Rate exacts.
+EURUSD ne peut jamais être meilleur ET pire
+symbole en même temps.
 
-RÈGLE MEILLEURS JOURS :
-bestDayOfWeek toujours Mardi ou Jeudi.
-worstDayOfWeek toujours Lundi ou Vendredi.
+RÈGLE JOURS ET HEURES :
+Respecte exactement bestDayOfWeek, worstDayOfWeek,
+bestTimeOfDay et worstTimeOfDay indiqués dans les cibles.
+Les heures sont toujours sur des tranches de 2h
+entre 07:00 et 22:00 maximum.
 
 RÈGLE PNL :
 PnL total toujours négatif entre -250€ et -1000€.
@@ -227,6 +239,14 @@ Cible exacte pour cette analyse :
 - Score psychologique : ${targets.psychoScore}/100
 - Score Prop Firm : ${targets.propFirmScore}/100
 - Score Gestion du risque : ${targets.riskScore}/100
+- Meilleur symbole : ${targets.targetBestSymbol} 
+  Win Rate ${targets.targetBestSymbolWinRate}%
+- Pire symbole : ${targets.targetWorstSymbol} 
+  Win Rate ${targets.targetWorstSymbolWinRate}%
+- Meilleur jour : ${targets.targetBestDay}
+- Pire jour : ${targets.targetWorstDay}
+- Meilleure heure : ${targets.targetBestHour}
+- Pire heure : ${targets.targetWorstHour}
 Ces valeurs doivent être respectées exactement
 dans le JSON retourné.`
     : ''
