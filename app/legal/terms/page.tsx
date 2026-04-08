@@ -12,7 +12,7 @@ export default function TermsPage() {
             text-primary mb-3">
             1. Description du service
           </h2>
-          <p>[NomDuSaaS] est un outil d'analyse de 
+          <p>Alpha est un outil d'analyse de 
           trading propulsé par l'intelligence 
           artificielle. Il analyse vos historiques 
           de trades et génère des rapports de 
@@ -34,7 +34,7 @@ export default function TermsPage() {
             text-primary mb-3">
             3. Limitation de responsabilité
           </h2>
-          <p>[NomDuSaaS] est un outil d'aide à 
+          <p>Alpha est un outil d'aide à 
           la décision et ne constitue pas un conseil 
           financier. Nous ne sommes pas responsables 
           des pertes financières résultant de 

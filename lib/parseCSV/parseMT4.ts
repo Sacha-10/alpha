@@ -51,23 +51,29 @@ export function parseMT4(csvText: string): Trade[] {
     
     if (isMT5) {
       const openTime = new Date(cols[7])
-      const closeTime = new Date(cols[7])
+      const closeTime = new Date(cols[9])
+      const entryPrice = parseFloat(cols[4]) || 0
+      const exitPrice = parseFloat(cols[8]) || 0
+      const direction: Trade['direction'] = cols[2] === 'buy' ? 'BUY' : 'SELL'
+      const durationMinutes = Math.round(
+        (closeTime.getTime() - openTime.getTime()) / 60000
+      )
       return {
         ticket: cols[0],
         symbol: cols[1],
-        direction: cols[2] === 'buy' ? 'BUY' : 'SELL',
+        direction,
         lotSize: parseFloat(cols[3]) || 0,
-        entryPrice: parseFloat(cols[4]) || 0,
-        exitPrice: parseFloat(cols[4]) || 0,
+        entryPrice,
+        exitPrice,
         stopLoss: parseFloat(cols[5]) || null,
         takeProfit: parseFloat(cols[6]) || null,
         openTime,
         closeTime,
-        durationMinutes: 0,
-        commission: 0,
-        swap: 0,
-        profitLoss: 0,
-        profitLossPips: 0,
+        durationMinutes,
+        commission: parseFloat(cols[10]) || 0,
+        swap: parseFloat(cols[11]) || 0,
+        profitLoss: parseFloat(cols[12]) || 0,
+        profitLossPips: calcPips(cols[1], entryPrice, exitPrice, direction),
         session: getSession(openTime),
       } as Trade
     }

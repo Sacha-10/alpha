@@ -49,7 +49,7 @@ export default function PrivacyPage() {
           droit d'accès, de rectification, d'effacement 
           et de portabilité de vos données. Pour 
           exercer ces droits, contactez-nous à 
-          contact@[votredomaine].fr</p>
+          contact@alpha.app</p>
         </section>
         <section>
           <h2 className="text-xl font-bold 

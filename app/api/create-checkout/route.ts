@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
   
   const { searchParams } = new URL(req.url)
   const planKey = searchParams.get('plan') || 'starter'
-  const annual = searchParams.get('annual') === 'true'
+  const annual = searchParams.get('billing') === 'annual'
   const plan = PLANS[planKey]
   
   if (!plan) {
