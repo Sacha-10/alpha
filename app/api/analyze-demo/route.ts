@@ -164,14 +164,13 @@ export async function POST(req: NextRequest) {
     const targetBestSymbolWinRate = randInt(62, 72)
     const targetWorstSymbolWinRate = randInt(22, 32)
 
-    // Alternance égale meilleur/pire symbole
-    // EURUSD ne peut pas être meilleur ET pire
-    const symbolRoll = Math.random()
-    const targetBestSymbol = symbolRoll > 0.5
-      ? 'XAUUSD' : 'EURUSD'
-    const targetWorstSymbol = targetBestSymbol === 'EURUSD'
-      ? 'BTCUSD'
-      : (Math.random() > 0.5 ? 'BTCUSD' : 'EURUSD')
+    // EURUSD ne se situe jamais sur le meilleur
+    // ET le pire symbole en même temps
+    const bestSymbolRoll = Math.random()
+    const targetBestSymbol = bestSymbolRoll > 0.5 ? 'XAUUSD' : 'EURUSD'
+
+    const worstSymbolRoll = Math.random()
+    const targetWorstSymbol = worstSymbolRoll > 0.5 ? 'EURUSD' : 'BTCUSD'
 
     // Alternance égale meilleur/pire jour
     const targetBestDay = Math.random() > 0.5
@@ -181,19 +180,21 @@ export async function POST(req: NextRequest) {
 
     // Heures toujours sur plage 07h-22h par tranches de 2h
     const hours = [
-      '07:00-09:00', '08:00-10:00', '09:00-11:00',
-      '10:00-12:00', '11:00-13:00', '12:00-14:00',
-      '13:00-15:00', '14:00-16:00', '15:00-17:00',
-      '16:00-18:00', '17:00-19:00', '18:00-20:00',
-      '19:00-21:00', '20:00-22:00'
+      '07:00-09:00', '09:00-11:00', '11:00-13:00',
+      '13:00-15:00', '15:00-17:00', '17:00-19:00',
+      '20:00-22:00'
     ]
-    const targetBestHour = hours[
-      Math.floor(Math.random() * hours.length)]
-    let targetWorstHour
+    const bestHourIndex = Math.floor(
+      Math.random() * hours.length)
+    let worstHourIndex
     do {
-      targetWorstHour = hours[
-        Math.floor(Math.random() * hours.length)]
-    } while (targetWorstHour === targetBestHour)
+      worstHourIndex = Math.floor(
+        Math.random() * hours.length)
+    } while (
+      Math.abs(worstHourIndex - bestHourIndex) < 2
+    )
+    const targetBestHour = hours[bestHourIndex]
+    const targetWorstHour = hours[worstHourIndex]
 
     const targets = {
       winRate: randInt(45, 65),
