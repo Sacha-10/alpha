@@ -18,8 +18,21 @@
   --shadow: 0 0 40px rgba(45, 111, 255, 0.08);
 }
 
-* {
-  transition: var(--transition);
+*,
+*::before,
+*::after {
+  transition-property: color, background-color, border-color, box-shadow, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
 
 body {

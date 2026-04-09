@@ -1,57 +1,46 @@
 import { Trade } from './parseMT4'
 
+// Format Binance Futures : Date, Symbol, Side, Price, Qty, Realized Profit, Fee
+// Format Binance Spot    : Date, Pair,   Type, Price, Amount, Total, Fee, Fee Coin
+// Détecté via la présence de "Realized Profit" dans les headers
 export function parseBinance(csvText: string): Trade[] {
   const lines = csvText.split('\n').filter(Boolean)
-  const headers = lines[0].split(',').map(h => 
+  const headers = lines[0].split(',').map(h =>
     h.trim().replace(/"/g, ''))
-  
+
   const isFutures = headers.includes('Realized Profit')
   const trades: Trade[] = []
   const partialOrders: Record<string, any[]> = {}
-  
+
   lines.slice(1).forEach(line => {
-    const cols = line.split(',').map(c => 
+    const cols = line.split(',').map(c =>
       c.trim().replace(/"/g, ''))
-    
-    const symbol = isFutures ? cols[1] : cols[1]
-    const side = isFutures ? cols[2] : cols[2]
-    const price = parseFloat(
-      isFutures ? cols[3] : cols[3]
-    ) || 0
-    const qty = parseFloat(
-      isFutures ? cols[4] : cols[4]
-    ) || 0
-    const pnl = parseFloat(
-      isFutures ? cols[5] : '0'
-    ) || 0
-    const fee = parseFloat(
-      isFutures ? cols[6] : cols[6]
-    ) || 0
-    const time = new Date(
-      isFutures ? cols[0] : cols[0]
-    )
-    
+
+    const time = new Date(cols[0])
+    // Spot exporte parfois "BTC/USDT" — on normalise en "BTCUSDT"
+    const symbol = cols[1].replace('/', '')
+    const side = cols[2].toUpperCase() as 'BUY' | 'SELL'
+    const price = parseFloat(cols[3]) || 0
+    const qty = parseFloat(cols[4]) || 0
+    // cols[5] = Realized Profit (futures) ou Total montant (spot, non pertinent)
+    const pnl = isFutures ? (parseFloat(cols[5]) || 0) : 0
+    const fee = parseFloat(cols[6]) || 0
+
     if (!partialOrders[symbol]) {
       partialOrders[symbol] = []
     }
-    partialOrders[symbol].push({
-      symbol, side, price, qty, pnl, fee, time
-    })
-    
+    partialOrders[symbol].push({ symbol, side, price, qty, pnl, fee, time })
+
     if (partialOrders[symbol].length >= 2) {
       const orders = partialOrders[symbol]
+      const totalQty = orders.reduce((sum, o) => sum + o.qty, 0)
       const avgEntry = orders.reduce(
         (sum, o) => sum + o.price * o.qty, 0
-      ) / orders.reduce((sum, o) => sum + o.qty, 0)
-      const totalQty = orders.reduce(
-        (sum, o) => sum + o.qty, 0
-      )
-      const totalPnl = orders.reduce(
-        (sum, o) => sum + o.pnl, 0
-      )
-      const direction = orders[0].side === 'BUY' 
+      ) / totalQty
+      const totalPnl = orders.reduce((sum, o) => sum + o.pnl, 0)
+      const direction: Trade['direction'] = orders[0].side === 'BUY'
         ? 'BUY' : 'SELL'
-      
+
       trades.push({
         ticket: `${symbol}-${time.getTime()}`,
         symbol,
@@ -64,14 +53,13 @@ export function parseBinance(csvText: string): Trade[] {
         openTime: orders[0].time,
         closeTime: time,
         durationMinutes: Math.round(
-          (time.getTime() - orders[0].time.getTime()) 
-          / 60000
+          (time.getTime() - orders[0].time.getTime()) / 60000
         ),
         commission: fee,
         swap: 0,
-        profitLoss: totalPnl || 
-          (direction === 'BUY' 
-            ? (price - avgEntry) * totalQty 
+        profitLoss: totalPnl ||
+          (direction === 'BUY'
+            ? (price - avgEntry) * totalQty
             : (avgEntry - price) * totalQty),
         profitLossPips: 0,
         session: (() => {
@@ -85,6 +73,6 @@ export function parseBinance(csvText: string): Trade[] {
       partialOrders[symbol] = []
     }
   })
-  
+
   return trades.filter(t => t.symbol && t.entryPrice > 0)
 }

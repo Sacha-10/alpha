@@ -48,17 +48,27 @@ export async function POST(req: NextRequest) {
   if (event.type === 'customer.subscription.deleted') {
     const sub = event.data.object as Stripe.Subscription
     const customerId = sub.customer as string
-    
+
     const customer = await stripe.customers.retrieve(
       customerId
     ) as Stripe.Customer
-    
-    if (customer.email) {
-      await admin.from('users').update({
-        subscription_status: 'inactive',
-        subscription_plan: 'starter',
-        analyses_limit: 4,
-      }).eq('email', customer.email)
+
+    const userId = customer.metadata?.userId
+    const update = {
+      subscription_status: 'inactive',
+      subscription_plan: 'starter',
+      analyses_limit: 4,
+    }
+
+    if (userId) {
+      await admin.from('users').update(update).eq('id', userId)
+    } else if (customer.email) {
+      await admin.from('users').update(update).eq('email', customer.email)
+    } else {
+      console.error(
+        'webhook: impossible d\'identifier l\'utilisateur pour suppression abonnement',
+        customerId
+      )
     }
   }
   

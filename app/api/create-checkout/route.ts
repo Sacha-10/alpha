@@ -59,8 +59,14 @@ export async function GET(req: NextRequest) {
     )
   }
   
+  const customer = await stripe.customers.create({
+    email: user.email ?? undefined,
+    metadata: { userId: user.id },
+  })
+
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
+    customer: customer.id,
     payment_method_types: ['card'],
     currency: 'eur',
     line_items: [{

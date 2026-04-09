@@ -10,6 +10,10 @@ const PLAN_LIMITS: Record<string, number> = {
   elite: 999999,
 }
 
+// Rate limiting en mémoire — 1 requête toutes les 15 secondes par utilisateur
+const rateLimitMap = new Map<string, number>()
+const RATE_LIMIT_MS = 15_000
+
 export async function POST(req: NextRequest) {
   const supabase = createRouteHandlerClient({ 
     cookies 
@@ -24,6 +28,15 @@ export async function POST(req: NextRequest) {
     )
   }
   
+  const lastCall = rateLimitMap.get(user.id) ?? 0
+  if (Date.now() - lastCall < RATE_LIMIT_MS) {
+    return NextResponse.json(
+      { error: 'Trop de requêtes. Patientez quelques secondes.' },
+      { status: 429 }
+    )
+  }
+  rateLimitMap.set(user.id, Date.now())
+
   const { data: userData } = await supabase
     .from('users')
     .select('*')

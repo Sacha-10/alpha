@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { demoTrades } from '@/lib/demoTrades'
+import { PLANS } from '@/lib/plans'
 import TradeReport from '@/components/TradeReport'
 import { motion } from 'framer-motion'
 
@@ -123,7 +124,7 @@ export default function DemoPage() {
             trades et obtenir votre rapport personnalisé.
           </p>
           <a href="/dashboard" className="btn-primary">
-            Commencer — 29€/mois
+            Commencer — {PLANS.starter.monthly}€/mois
           </a>
         </div>
       )}
@@ -146,7 +147,7 @@ export default function DemoPage() {
             </p>
             <a href="/dashboard" 
               className="btn-primary text-lg px-8 py-3">
-              Commencer — 29€/mois
+              Commencer — {PLANS.starter.monthly}€/mois
             </a>
           </motion.div>
         </>
