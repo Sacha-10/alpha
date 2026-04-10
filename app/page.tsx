@@ -1,718 +1,463 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { getSupabaseClient } from "@/lib/supabase";
 import {
+  ArrowRight,
+  BarChart3,
+  BellRing,
   Brain,
-  BarChart2,
-  Target,
+  BrainCircuit,
+  CheckCircle2,
+  FileDown,
+  HelpCircle,
+  Info,
+  Menu,
+  ShieldCheck,
   TrendingUp,
-  ChevronRight,
-  Check,
-  Zap,
+  Trophy,
+  Upload,
+  UserCircle,
+  X,
 } from "lucide-react";
-import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5 },
+type RevealProps = {
+  id?: string;
+  className?: string;
+  children: React.ReactNode;
 };
 
-const viewOnce = { once: true } as const;
+function RevealSection({ id, className = "", children }: RevealProps) {
+  const ref = useRef<HTMLElement | null>(null);
+  const [visible, setVisible] = useState(false);
 
-const MARQUEE =
-  "Compatible avec Binance · MT4 · MT5 · TradingView · FTMO · MyForexFunds · The Funded Trader · E8 Funding";
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            observer.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
-/** 31 points = jour 0 → jour 30, courbe equity réaliste (creux / rebonds). */
-const MOCK_EQUITY = [
-  100, 98.2, 95.1, 92.4, 89.8, 87.2, 84.5, 86.1, 88.7, 91.3, 89.6, 87.9, 85.4,
-  88.2, 92.8, 96.4, 94.1, 90.7, 87.3, 84.9, 87.5, 91.2, 95.6, 99.1, 97.4, 101.2,
-  104.8, 102.5, 106.3, 109.1, 112.4,
-];
-
-const MOCK_CHART = (() => {
-  const w = 560;
-  const h = 128;
-  const padX = 8;
-  const padY = 10;
-  const min = Math.min(...MOCK_EQUITY);
-  const max = Math.max(...MOCK_EQUITY);
-  const span = max - min || 1;
-  const n = MOCK_EQUITY.length;
-  const xs = MOCK_EQUITY.map((_, i) => padX + (i / (n - 1)) * (w - 2 * padX));
-  const ys = MOCK_EQUITY.map(
-    (v) => padY + (1 - (v - min) / span) * (h - 2 * padY)
-  );
-  const lineD = xs
-    .map((x, i) => `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${ys[i].toFixed(1)}`)
-    .join(" ");
-  const areaD = `${lineD} L ${xs[n - 1].toFixed(1)} ${h - padY} L ${padX} ${h - padY} Z`;
-  const markerKinds: Record<number, "low" | "high"> = {
-    6: "low",
-    14: "high",
-    19: "low",
-    30: "high",
-  };
-  const markers = [6, 14, 19, 30].map((i) => ({
-    i,
-    x: xs[i],
-    y: ys[i],
-    kind: markerKinds[i]!,
-  }));
-  return { w, h, lineD, areaD, markers };
-})();
-
-function HeroDashboardMockup() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 36 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={viewOnce}
-      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-      className="mx-auto mt-16 max-w-4xl [perspective:1000px]"
+    <section
+      id={id}
+      ref={ref}
+      className={`${className} transition-all duration-700 ease-out ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+      }`}
     >
-      <div
-        className="overflow-hidden rounded-[var(--radius)] border p-5 md:p-6"
-        style={{
-          backgroundColor: "var(--card)",
-          borderColor: "var(--border)",
-          boxShadow:
-            "0 0 60px rgba(var(--blue-rgb), 0.14), 0 24px 48px rgba(var(--background-rgb), 0.35)",
-          transform: "rotateX(5deg)",
-          transformStyle: "preserve-3d",
-        }}
-      >
-        {/* Header chart */}
-        <div className="relative mb-5 flex items-start justify-between gap-4 border-b pb-4" style={{ borderColor: "var(--border)" }}>
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.14em]" style={{ color: "var(--secondary)" }}>
-              Courbe d&apos;equity
-            </p>
-            <p className="mt-1 text-lg font-semibold tracking-tight text-primary">
-              30 jours
-            </p>
-          </div>
-          <motion.div
-            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
-            style={{
-              backgroundColor: "rgba(var(--green-rgb), 0.12)",
-              color: "var(--green)",
-              border: "1px solid rgba(var(--green-rgb), 0.35)",
-            }}
-            animate={{
-              scale: [1, 1.04, 1],
-              boxShadow: [
-                "0 0 0 0 rgba(var(--green-rgb), 0.25)",
-                "0 0 0 8px rgba(var(--green-rgb), 0)",
-                "0 0 0 0 rgba(var(--green-rgb), 0)",
-              ],
-            }}
-            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <span className="relative flex h-2 w-2">
-              <span
-                className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"
-                style={{ backgroundColor: "var(--green)" }}
-              />
-              <span
-                className="relative inline-flex h-2 w-2 rounded-full"
-                style={{ backgroundColor: "var(--green)" }}
-              />
-            </span>
-            IA Active
-          </motion.div>
-        </div>
+      {children}
+    </section>
+  );
+}
 
-        {/* Chart SVG */}
-        <div
-          className="relative overflow-hidden rounded-lg"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(var(--blue-rgb), 0.06) 0%, transparent 45%)",
-            border: "1px solid var(--border)",
-          }}
-        >
-          <svg
-            viewBox={`0 0 ${MOCK_CHART.w} ${MOCK_CHART.h}`}
-            className="h-auto w-full"
-            preserveAspectRatio="xMidYMid meet"
-            aria-hidden
-          >
-            <defs>
-              <linearGradient id="heroEqStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="var(--blue)" />
-                <stop offset="100%" stopColor="var(--cyan)" />
-              </linearGradient>
-              <linearGradient id="heroEqFill" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="var(--blue)" stopOpacity="0.22" />
-                <stop offset="70%" stopColor="var(--cyan)" stopOpacity="0.04" />
-                <stop offset="100%" stopColor="var(--card)" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            {[0, 1, 2, 3].map((i) => (
-              <line
-                key={i}
-                x1={8}
-                y1={20 + i * 28}
-                x2={MOCK_CHART.w - 8}
-                y2={20 + i * 28}
-                stroke="var(--border)"
-                strokeWidth="0.5"
-                strokeDasharray="3 5"
-              />
-            ))}
-            <motion.path
-              d={MOCK_CHART.areaD}
-              fill="url(#heroEqFill)"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            />
-            <motion.path
-              d={MOCK_CHART.lineD}
-              fill="none"
-              stroke="url(#heroEqStroke)"
-              strokeWidth={2.25}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 1 }}
-              transition={{ pathLength: { duration: 1.85, ease: [0.22, 1, 0.36, 1] }, opacity: { duration: 0.3 } }}
-            />
-            {MOCK_CHART.markers.map((m, idx) => (
-              <motion.circle
-                key={m.i}
-                cx={m.x}
-                cy={m.y}
-                r={m.kind === "low" ? 3.5 : 3}
-                fill={m.kind === "low" ? "var(--red)" : "var(--cyan)"}
-                stroke="var(--card)"
-                strokeWidth={1.5}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 1.1 + idx * 0.12, type: "spring", stiffness: 380, damping: 22 }}
-              />
-            ))}
-          </svg>
-        </div>
-
-        {/* Stats */}
-        <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {[
-            { label: "Win Rate", value: "68%", accent: "var(--cyan)" },
-            { label: "Profit Factor", value: "1,84", accent: "var(--blue)" },
-            { label: "Max Drawdown", value: "4,2%", accent: "var(--red)" },
-            { label: "PnL", value: "+2 847 €", accent: "var(--green)" },
-          ].map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={viewOnce}
-              transition={{ delay: 0.15 + i * 0.06, duration: 0.45 }}
-              className="rounded-lg p-3.5 font-mono"
-              style={{
-                backgroundColor: "rgba(var(--background-rgb), 0.9)",
-                border: "1px solid var(--border)",
-                boxShadow: "inset 0 1px 0 rgba(var(--primary-rgb), 0.03)",
-              }}
-            >
-              <p className="text-[10px] font-sans font-medium uppercase tracking-wider" style={{ color: "var(--secondary)" }}>
-                {s.label}
-              </p>
-              <p
-                className="mt-1.5 text-xl font-semibold tabular-nums tracking-tight text-primary"
-                style={{ textShadow: `0 0 24px ${s.accent}33` }}
-              >
-                <span style={{ color: s.accent }}>{s.value}</span>
-              </p>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Biais */}
-        <div className="mt-5 border-t pt-4" style={{ borderColor: "var(--border)" }}>
-          <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.12em]" style={{ color: "var(--secondary)" }}>
-            Biais détectés
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { name: "Revenge Trading", level: "CRITIQUE", fg: "var(--red)", bg: "rgba(var(--red-rgb), 0.12)", border: "rgba(var(--red-rgb), 0.35)" },
-              { name: "FOMO", level: "ÉLEVÉ", fg: "var(--cyan)", bg: "rgba(var(--cyan-rgb), 0.1)", border: "rgba(var(--cyan-rgb), 0.35)" },
-              { name: "Overtrading", level: "MOYEN", fg: "var(--secondary)", bg: "rgba(var(--blue-rgb), 0.1)", border: "rgba(var(--blue-rgb), 0.35)" },
-            ].map((b, i) => (
-              <motion.span
-                key={b.name}
-                initial={{ opacity: 0, y: 8 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={viewOnce}
-                transition={{ delay: 0.35 + i * 0.07 }}
-                className="inline-flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs font-medium"
-                style={{
-                  backgroundColor: b.bg,
-                  border: `1px solid ${b.border}`,
-                  color: b.fg,
-                }}
-              >
-                <span className="font-semibold text-primary">{b.name}</span>
-                <span className="rounded bg-background/25 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide" style={{ color: b.fg }}>
-                  {b.level}
-                </span>
-              </motion.span>
-            ))}
-          </div>
-        </div>
-      </div>
-    </motion.div>
+function ServiceCard({
+  icon,
+  title,
+  body,
+  delayMs,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+  delayMs: number;
+}) {
+  return (
+    <article
+      className="card rounded p-7 transition-all duration-200 hover:border-blue hover:glow-blue"
+      style={{ transitionDelay: `${delayMs}ms` }}
+    >
+      <div className="mb-5">{icon}</div>
+      <h3 className="text-xl font-semibold text-primary">{title}</h3>
+      <p className="mt-3 text-sm leading-relaxed text-secondary">{body}</p>
+    </article>
   );
 }
 
 export default function HomePage() {
+  const router = useRouter();
+  const supabase = useMemo(() => getSupabaseClient(), []);
   const [scrolled, setScrolled] = useState(false);
-  const [annual, setAnnual] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [showTop, setShowTop] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement | null>(null);
+
+  const connectGoogle = async () => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${origin}/api/auth/callback`,
+        queryParams: { access_type: "offline", prompt: "consent" },
+      },
+    });
+  };
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 50);
+      setShowTop(y > 300);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const billing = annual ? "annual" : "monthly";
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onPointerDown = (event: MouseEvent) => {
+      if (!mobileMenuRef.current) return;
+      if (!mobileMenuRef.current.contains(event.target as Node)) {
+        setMobileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [mobileOpen]);
+
+  const closeMobileMenu = () => setMobileOpen(false);
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background text-primary">
-      {/* Fond : grille + radial */}
-      <div
-        className="pointer-events-none fixed inset-0 z-0 opacity-[0.35]"
-        aria-hidden
-      >
+      <div className="pointer-events-none fixed inset-0 z-0 opacity-40" aria-hidden>
         <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern
-              id="landing-grid"
-              width="32"
-              height="32"
-              patternUnits="userSpaceOnUse"
-            >
+            <pattern id="hero-grid" width="36" height="36" patternUnits="userSpaceOnUse">
               <path
-                d="M 32 0 L 0 0 0 32"
+                d="M 36 0 L 0 0 0 36"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="0.5"
+                strokeWidth="0.6"
                 className="text-border"
               />
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#landing-grid)" />
+          <rect width="100%" height="100%" fill="url(#hero-grid)" />
         </svg>
       </div>
-      <div
-        className="pointer-events-none fixed inset-0 z-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(var(--blue-rgb), 0.22), transparent 55%)",
-        }}
-        aria-hidden
-      />
+      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
+        <div className="absolute left-1/2 top-[35%] h-80 w-80 -translate-x-1/2 rounded-full bg-blue/20 blur-3xl" />
+      </div>
 
-      {/* NAVBAR */}
       <header
-        className={`fixed left-0 right-0 top-0 z-50 border-b bg-background/80 backdrop-blur-md transition-colors ${
-          scrolled ? "border-border" : "border-transparent"
+        className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md transition-all duration-300 ${
+          scrolled ? "border-border bg-background" : "border-transparent bg-transparent"
         }`}
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4">
-          <Link href="/" className="flex items-center gap-2">
-            <TrendingUp
-              className="h-7 w-7 shrink-0"
-              style={{ color: "var(--blue)" }}
-              aria-hidden
-            />
-            <span className="text-lg font-bold text-primary">Alpha</span>
-          </Link>
-          <nav className="hidden items-center gap-8 text-sm text-secondary md:flex">
-            <a
-              href="#fonctionnalites"
-              className="transition-colors hover:text-primary"
-            >
-              Fonctionnalités
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-7 w-7 text-blue" aria-hidden />
+            <span className="text-lg font-bold text-primary">TonSaaS</span>
+          </div>
+
+          <nav className="hidden items-center gap-8 text-sm md:flex">
+            <a href="#services" className="text-secondary transition-colors duration-200 hover:text-primary">
+              Services
             </a>
-            <a
-              href="#tarifs"
-              className="transition-colors hover:text-primary"
-            >
-              Tarifs
-            </a>
-            <Link href="/demo" className="transition-colors hover:text-primary">
-              Démo
+            <Link href="/demo" className="text-secondary transition-colors duration-200 hover:text-primary">
+              Analyse Gratuite
             </Link>
+            <Link href="/pricing" className="text-secondary transition-colors duration-200 hover:text-primary">
+              Prix
+            </Link>
+            <button type="button" className="text-secondary transition-colors duration-200 hover:text-primary">
+              About Us
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-secondary transition-colors duration-200 hover:text-primary"
+            >
+              <HelpCircle className="h-4 w-4" aria-hidden />
+              Aide
+            </button>
           </nav>
-          <GoogleAuthButton
-            label="Commencer gratuitement"
-            className="btn-primary inline-flex shrink-0 items-center justify-center gap-2 !border-transparent shadow-blue hover:!opacity-90"
-          />
+
+          <button
+            type="button"
+            onClick={() => void connectGoogle()}
+            className="hidden items-center gap-2 rounded bg-blue px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-blue/90 md:inline-flex"
+          >
+            <UserCircle className="h-4 w-4" aria-hidden />
+            S&apos;inscrire
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMobileOpen((value) => !value)}
+            className="rounded border border-border bg-card p-2 text-secondary md:hidden"
+            aria-label={mobileOpen ? "Fermer menu" : "Ouvrir menu"}
+            aria-expanded={mobileOpen}
+          >
+            {mobileOpen ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
+          </button>
+        </div>
+
+        <div
+          ref={mobileMenuRef}
+          className={`mx-4 overflow-hidden rounded border border-border bg-card transition-all duration-200 ease-out md:hidden ${
+            mobileOpen ? "max-h-[360px] opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="flex flex-col gap-2 p-4">
+            <a
+              href="#services"
+              onClick={closeMobileMenu}
+              className="text-secondary transition-colors duration-200 hover:text-primary"
+            >
+              Services
+            </a>
+            <Link
+              href="/demo"
+              onClick={closeMobileMenu}
+              className="text-secondary transition-colors duration-200 hover:text-primary"
+            >
+              Analyse Gratuite
+            </Link>
+            <Link
+              href="/pricing"
+              onClick={closeMobileMenu}
+              className="text-secondary transition-colors duration-200 hover:text-primary"
+            >
+              Prix
+            </Link>
+            <button
+              type="button"
+              onClick={closeMobileMenu}
+              className="text-left text-secondary transition-colors duration-200 hover:text-primary"
+            >
+              About Us
+            </button>
+            <button
+              type="button"
+              onClick={closeMobileMenu}
+              className="text-left text-secondary transition-colors duration-200 hover:text-primary"
+            >
+              Aide
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                closeMobileMenu();
+                void connectGoogle();
+              }}
+              className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded bg-blue px-4 py-2 font-semibold text-primary transition-all duration-200 hover:bg-blue/90"
+            >
+              <UserCircle className="h-4 w-4" aria-hidden />
+              S&apos;inscrire
+            </button>
+          </div>
         </div>
       </header>
 
-      <main className="relative z-10 pt-24">
-        {/* HERO */}
-        <motion.section
-          initial={fadeInUp.initial}
-          whileInView={fadeInUp.animate}
-          viewport={viewOnce}
-          transition={fadeInUp.transition}
-          className="relative mx-auto max-w-6xl px-6 pb-20 pt-12 md:pb-28 md:pt-16"
-        >
-          <div className="mx-auto max-w-3xl text-center">
-            <motion.div
-              className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue/30 bg-blue/10 px-4 py-2 text-sm font-medium text-blue"
-              animate={{
-                opacity: [0.82, 1, 0.82],
-                scale: [1, 1.035, 1],
-                boxShadow: [
-                  "0 0 0 0 rgba(var(--blue-rgb), 0)",
-                  "0 0 28px 0 rgba(var(--blue-rgb), 0.28)",
-                  "0 0 0 0 rgba(var(--blue-rgb), 0)",
-                ],
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              <Zap className="h-4 w-4 shrink-0" aria-hidden />
-              Journal de Trading propulsé par l&apos;IA
-            </motion.div>
-            <h1 className="text-5xl font-bold leading-tight text-primary">
-              Arrêtez de perdre de l&apos;argent sur les{" "}
-              <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">
-                mêmes erreurs
-              </span>
-              .
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-xl text-secondary">
-              Notre IA analyse vos trades et identifie exactement pourquoi vous
-              sous-performez — avant votre prochaine session.
-            </p>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <Link
-                href="/dashboard"
-                className="btn-primary inline-flex items-center gap-2"
-              >
-                Analyser mes trades
-                <ChevronRight className="h-4 w-4" aria-hidden />
-              </Link>
-              <Link href="/demo" className="btn-outline inline-flex items-center gap-2">
-                Voir la démo
-                <ChevronRight className="h-4 w-4 opacity-70" aria-hidden />
-              </Link>
-            </div>
+      <main className="relative z-10 pt-28">
+        <RevealSection className="mx-auto max-w-6xl px-6 pb-20 pt-10 text-center">
+          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-secondary">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-blue" />
+            AI-Powered Trading Journal
           </div>
 
-          <HeroDashboardMockup />
-        </motion.section>
+          <h1 className="mx-auto mt-8 max-w-4xl text-balance text-4xl font-bold leading-tight text-primary md:text-6xl">
+            Stop losing money on{" "}
+            <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">mistakes</span>
+            <br />
+            you keep repeating.
+          </h1>
 
-        {/* SOCIAL PROOF */}
-        <motion.section
-          initial={fadeInUp.initial}
-          whileInView={fadeInUp.animate}
-          viewport={viewOnce}
-          transition={fadeInUp.transition}
-          aria-label="Plateformes compatibles"
-          className="border-y border-border py-4 text-secondary"
-        >
-          <div className="overflow-hidden">
+          <p className="mx-auto mt-6 max-w-[600px] text-lg text-secondary">
+            Our AI analyzes your trades and identifies exactly why you&apos;re underperforming before your next
+            session.
+          </p>
+
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <button
+              type="button"
+              onClick={() => void connectGoogle()}
+              className="inline-flex items-center gap-2 rounded bg-blue px-6 py-3 font-semibold text-primary transition-all duration-200 hover:bg-blue/90"
+            >
+              <UserCircle className="h-5 w-5" aria-hidden />
+              S&apos;inscrire
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/demo")}
+              className="inline-flex items-center gap-2 rounded border border-border bg-transparent px-6 py-3 font-semibold text-primary transition-all duration-200 hover:border-blue"
+            >
+              Analyse Gratuite
+              <ArrowRight className="h-5 w-5" aria-hidden />
+            </button>
+          </div>
+
+          <div className="mx-auto mt-14 max-w-5xl [perspective:1000px]">
+            <div className="card glow-blue rounded p-6 [transform:rotateX(5deg)]">
+              <div className="mb-5 flex items-center justify-between border-b border-border pb-4">
+                <p className="text-sm text-secondary">Premium Trading Dashboard</p>
+                <span className="inline-flex items-center gap-1 rounded-full border border-green/40 bg-green/10 px-2 py-1 text-xs text-green">
+                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                  IA Active
+                </span>
+              </div>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="rounded border border-border bg-background/50 p-4">
+                  <p className="text-xs text-secondary">Performance</p>
+                  <p className="mt-2 font-mono text-2xl text-primary">+2 847€</p>
+                </div>
+                <div className="rounded border border-border bg-background/50 p-4">
+                  <p className="text-xs text-secondary">Win Rate</p>
+                  <p className="mt-2 font-mono text-2xl text-cyan">68%</p>
+                </div>
+                <div className="rounded border border-border bg-background/50 p-4">
+                  <p className="text-xs text-secondary">Drawdown</p>
+                  <p className="mt-2 font-mono text-2xl text-green">4.2%</p>
+                </div>
+              </div>
+              <div className="mt-5 grid gap-3 text-xs text-secondary md:grid-cols-3">
+                <span className="inline-flex items-center gap-1 rounded border border-border bg-background/40 px-3 py-2">
+                  <Upload className="h-4 w-4 text-blue" aria-hidden />
+                  Upload
+                </span>
+                <span className="inline-flex items-center gap-1 rounded border border-border bg-background/40 px-3 py-2">
+                  <BrainCircuit className="h-4 w-4 text-cyan" aria-hidden />
+                  Analyse IA
+                </span>
+                <span className="inline-flex items-center gap-1 rounded border border-border bg-background/40 px-3 py-2">
+                  <FileDown className="h-4 w-4 text-green" aria-hidden />
+                  Rapport
+                </span>
+              </div>
+            </div>
+          </div>
+        </RevealSection>
+
+        <RevealSection className="border-y border-border bg-card/60 py-4">
+          <div className="overflow-hidden text-secondary">
             <div className="animate-landing-marquee whitespace-nowrap">
-              <span className="inline-block shrink-0 px-10 text-sm">{MARQUEE}</span>
-              <span className="inline-block shrink-0 px-10 text-sm" aria-hidden>
-                {MARQUEE}
-              </span>
+              {[
+                "Trusted by traders on",
+                "Binance",
+                "MT4",
+                "MT5",
+                "TradingView",
+                "FTMO",
+                "MyForexFunds",
+                "Trusted by traders on",
+                "Binance",
+                "MT4",
+                "MT5",
+                "TradingView",
+                "FTMO",
+                "MyForexFunds",
+              ].map((item, index) => (
+                <span key={`${item}-${index}`} className="inline-flex items-center px-6 text-sm">
+                  {index % 2 === 1 ? <span className="mx-3 h-1.5 w-1.5 rounded-full bg-blue" /> : null}
+                  {item}
+                </span>
+              ))}
             </div>
           </div>
-        </motion.section>
+        </RevealSection>
 
-        {/* FONCTIONNALITÉS */}
-        <motion.section
-          id="fonctionnalites"
-          initial={fadeInUp.initial}
-          whileInView={fadeInUp.animate}
-          viewport={viewOnce}
-          transition={fadeInUp.transition}
-          className="mx-auto max-w-6xl scroll-mt-28 px-6 py-20 md:py-28"
-        >
-          <h2 className="mx-auto mb-14 max-w-3xl text-center text-3xl font-bold text-primary md:text-4xl">
-            Tout ce dont vous avez besoin pour progresser
-          </h2>
-          <div className="grid gap-6 md:grid-cols-3">
-            {[
-              {
-                icon: <Brain className="h-8 w-8 text-blue" aria-hidden />,
-                title: "Profil Psychologique",
-                body: "L'IA détecte le Revenge Trading, l'Overtrading et vos biais émotionnels dans votre historique de trades.",
-              },
-              {
-                icon: <BarChart2 className="h-8 w-8 text-cyan" aria-hidden />,
-                title: "Statistiques Avancées",
-                body: "Win Rate, Sharpe Ratio, Drawdown, meilleures sessions — tout analysé automatiquement en secondes.",
-              },
-              {
-                icon: <Target className="h-8 w-8 text-blue" aria-hidden />,
-                title: "Plan d'Action Personnalisé",
-                body: "Recevez 3 actions prioritaires pour corriger vos erreurs et améliorer votre performance immédiatement.",
-              },
-            ].map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial={fadeInUp.initial}
-                whileInView={fadeInUp.animate}
-                viewport={viewOnce}
-                transition={{ ...fadeInUp.transition, delay: i * 0.1 }}
-                className="card hover:glow-blue p-6"
-              >
-                <div className="mb-4">{item.icon}</div>
-                <h3 className="text-lg font-semibold text-primary">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-secondary">
-                  {item.body}
-                </p>
-              </motion.div>
-            ))}
+        <RevealSection id="services" className="mx-auto max-w-6xl px-6 py-20">
+          <h2 className="text-center text-3xl font-bold text-primary md:text-4xl">Everything you need to trade at your best</h2>
+          <p className="mt-3 text-center text-secondary">Stop guessing. Start knowing.</p>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            <ServiceCard
+              icon={<BrainCircuit className="h-8 w-8 text-blue" aria-hidden />}
+              title="Psychological Edge"
+              body="AI detects revenge trading overtrading and emotional patterns across your entire trade history"
+              delayMs={0}
+            />
+            <ServiceCard
+              icon={<BarChart3 className="h-8 w-8 text-cyan" aria-hidden />}
+              title="Deep Statistics"
+              body="Win rate Sharpe ratio drawdown profit factor every metric that actually matters in one clean view"
+              delayMs={100}
+            />
+            <ServiceCard
+              icon={<BellRing className="h-8 w-8 text-green" aria-hidden />}
+              title="Pattern Alerts"
+              body="Get notified when you are about to repeat your most costly mistake before you enter the trade"
+              delayMs={200}
+            />
           </div>
-        </motion.section>
+        </RevealSection>
 
-        {/* TARIFS */}
-        <motion.section
-          id="tarifs"
-          initial={fadeInUp.initial}
-          whileInView={fadeInUp.animate}
-          viewport={viewOnce}
-          transition={fadeInUp.transition}
-          className="mx-auto max-w-6xl scroll-mt-28 px-6 pb-24 md:pb-32"
-        >
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-primary md:text-4xl">
-              Des tarifs simples et transparents
-            </h2>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <span
-                className={`text-sm font-medium ${
-                  !annual ? "text-primary" : "text-secondary"
-                }`}
-              >
-                Mensuel
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={annual}
-                onClick={() => setAnnual((v) => !v)}
-                className={`relative h-9 w-16 rounded-full border transition-colors ${
-                  annual
-                    ? "border-blue bg-blue/20"
-                    : "border-border bg-card"
-                }`}
-              >
-                <span
-                  className={`absolute top-1 h-7 w-7 rounded-full bg-blue transition-transform ${
-                    annual ? "left-8" : "left-1"
-                  }`}
-                />
-              </button>
-              <span
-                className={`text-sm font-medium ${
-                  annual ? "text-primary" : "text-secondary"
-                }`}
-              >
-                Annuel
-              </span>
-              {annual ? (
-                <span className="rounded-full bg-green/15 px-3 py-1 text-xs font-semibold text-green">
-                  Économisez 20%
-                </span>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="mt-14 grid gap-8 lg:grid-cols-3">
-            {/* Starter */}
-            <motion.div
-              initial={fadeInUp.initial}
-              whileInView={fadeInUp.animate}
-              viewport={viewOnce}
-              transition={{ ...fadeInUp.transition, delay: 0 }}
-              className="card flex flex-col p-8"
-            >
-              <h3 className="text-lg font-bold text-primary">Starter</h3>
-              <p className="mt-1 text-sm text-secondary">1 analyse par semaine</p>
-              <p className="mt-6 font-mono text-4xl font-bold text-primary">
-                {annual ? "23" : "29"}€
-                <span className="text-lg font-normal text-secondary">
-                  /mois
-                </span>
-              </p>
-              {annual ? (
-                <p className="mt-1 text-xs text-secondary">facturé à l&apos;année</p>
-              ) : null}
-              <ul className="mt-8 flex flex-col gap-3 text-sm text-secondary">
-                {[
-                  "4 analyses par mois",
-                  "Rapport IA complet",
-                  "Profil psychologique",
-                  "Export PDF",
-                ].map((line) => (
-                  <li key={line} className="flex items-start gap-2">
-                    <Check
-                      className="mt-0.5 h-4 w-4 shrink-0 text-green"
-                      aria-hidden
-                    />
-                    {line}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href={`/api/create-checkout?plan=starter&billing=${billing}`}
-                className="btn-primary mt-8 inline-flex w-full items-center justify-center gap-2 text-center"
-              >
-                Commencer
-                <ChevronRight className="h-4 w-4" aria-hidden />
-              </Link>
-            </motion.div>
-
-            {/* Pro */}
-            <motion.div
-              initial={fadeInUp.initial}
-              whileInView={fadeInUp.animate}
-              viewport={viewOnce}
-              transition={{ ...fadeInUp.transition, delay: 0.1 }}
-              className="card relative flex flex-col border-2 border-blue p-8 glow-blue"
-            >
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue px-3 py-1 text-xs font-semibold text-primary">
-                Le plus populaire
-              </span>
-              <h3 className="text-lg font-bold text-primary">Pro</h3>
-              <p className="mt-1 text-sm text-secondary">
-                1 analyse par jour ouvré
-              </p>
-              <p className="mt-6 font-mono text-4xl font-bold text-primary">
-                {annual ? "63" : "79"}€
-                <span className="text-lg font-normal text-secondary">
-                  /mois
-                </span>
-              </p>
-              {annual ? (
-                <p className="mt-1 text-xs text-secondary">facturé à l&apos;année</p>
-              ) : null}
-              <ul className="mt-8 flex flex-col gap-3 text-sm text-secondary">
-                {[
-                  "24 analyses par mois",
-                  "Tout Starter inclus",
-                  "Historique 6 mois",
-                  "Comparaison semaine/semaine",
-                ].map((line) => (
-                  <li key={line} className="flex items-start gap-2">
-                    <Check
-                      className="mt-0.5 h-4 w-4 shrink-0 text-green"
-                      aria-hidden
-                    />
-                    {line}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href={`/api/create-checkout?plan=pro&billing=${billing}`}
-                className="btn-primary mt-8 inline-flex w-full items-center justify-center gap-2 text-center"
-              >
-                Commencer
-                <ChevronRight className="h-4 w-4" aria-hidden />
-              </Link>
-            </motion.div>
-
-            {/* Elite */}
-            <motion.div
-              initial={fadeInUp.initial}
-              whileInView={fadeInUp.animate}
-              viewport={viewOnce}
-              transition={{ ...fadeInUp.transition, delay: 0.2 }}
-              className="card flex flex-col p-8"
-            >
-              <h3 className="text-lg font-bold text-primary">Elite</h3>
-              <p className="mt-1 text-sm text-secondary">
-                Pour les traders professionnels
-              </p>
-              <p className="mt-6 font-mono text-4xl font-bold text-primary">
-                {annual ? "159" : "199"}€
-                <span className="text-lg font-normal text-secondary">
-                  /mois
-                </span>
-              </p>
-              {annual ? (
-                <p className="mt-1 text-xs text-secondary">facturé à l&apos;année</p>
-              ) : null}
-              <ul className="mt-8 flex flex-col gap-3 text-sm text-secondary">
-                {[
-                  "Analyses illimitées",
-                  "Tout Pro inclus",
-                  "Score Prop Firm Readiness",
-                  "Accès API",
-                  "Support prioritaire",
-                ].map((line) => (
-                  <li key={line} className="flex items-start gap-2">
-                    <Check
-                      className="mt-0.5 h-4 w-4 shrink-0 text-green"
-                      aria-hidden
-                    />
-                    {line}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href={`/api/create-checkout?plan=elite&billing=${billing}`}
-                className="btn-primary mt-8 inline-flex w-full items-center justify-center gap-2 text-center"
-              >
-                Commencer
-                <ChevronRight className="h-4 w-4" aria-hidden />
-              </Link>
-            </motion.div>
-          </div>
-        </motion.section>
-
-        {/* FOOTER */}
-        <motion.footer
-          initial={fadeInUp.initial}
-          whileInView={fadeInUp.animate}
-          viewport={viewOnce}
-          transition={fadeInUp.transition}
-          className="border-t border-border"
-        >
-          <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 py-12 text-sm text-secondary md:flex-row md:justify-between">
-            <div className="flex items-center gap-2">
-              <TrendingUp
-                className="h-6 w-6 shrink-0"
-              style={{ color: "var(--blue)" }}
-                aria-hidden
-              />
-              <span className="font-bold text-primary">Alpha</span>
-            </div>
-            <nav className="flex flex-wrap items-center justify-center gap-6">
-              <Link href="/legal/privacy" className="hover:text-primary">
-                Confidentialité
-              </Link>
-              <Link href="/legal/terms" className="hover:text-primary">
-                CGU
-              </Link>
-              <a href="mailto:contact@alpha.app" className="hover:text-primary">
-                Contact
-              </a>
-            </nav>
-            <p className="text-center md:text-right">
-              © 2026 Alpha. Tous droits réservés.
-            </p>
-          </div>
-        </motion.footer>
+        <RevealSection id="analyse" className="bg-card/30 px-6 py-20 text-center">
+          <h2 className="text-3xl font-bold text-primary md:text-4xl">See what AI finds in 60 seconds</h2>
+          <p className="mt-2 text-secondary">No signup required</p>
+          <button
+            type="button"
+            onClick={() => router.push("/demo")}
+            className="mx-auto mt-8 inline-flex items-center gap-2 rounded bg-blue px-7 py-3 font-semibold text-primary transition-all duration-200 hover:bg-blue/90"
+          >
+            Analyse Gratuite
+            <ArrowRight className="h-5 w-5" aria-hidden />
+          </button>
+          <p className="mx-auto mt-4 max-w-sm text-sm text-secondary">
+            Upload your MT4 MT5 Binance or TradingView export
+          </p>
+        </RevealSection>
       </main>
+
+      <RevealSection className="border-t border-border px-6 py-10">
+        <footer className="mx-auto flex max-w-6xl flex-col gap-8 text-secondary md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-6 w-6 text-blue" aria-hidden />
+              <span className="font-bold text-primary">TonSaaS</span>
+            </div>
+            <p className="mt-2 text-sm">Your AI Trading Edge</p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
+              <Info className="h-4 w-4" aria-hidden />
+              About Us
+            </button>
+            <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
+              <HelpCircle className="h-4 w-4" aria-hidden />
+              Aide
+            </button>
+            <a href="mailto:contact@tondomaine.ai" className="hover:text-primary">
+              contact@tondomaine.ai
+            </a>
+          </div>
+        </footer>
+        <p className="mx-auto mt-8 max-w-6xl text-sm text-secondary">© 2026 TonSaaS. Built for serious traders.</p>
+      </RevealSection>
+
+      <div className="pointer-events-none fixed bottom-6 right-6 z-50">
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className={`pointer-events-auto inline-flex items-center justify-center rounded border border-border bg-card p-2 text-secondary transition-all duration-200 hover:text-primary ${
+            showTop ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+          }`}
+          aria-label="Back to top"
+        >
+          <ArrowRight className="h-5 w-5 -rotate-90" aria-hidden />
+        </button>
+      </div>
+
+      <div className="hidden">
+        <Brain className="h-4 w-4" />
+        <ShieldCheck className="h-4 w-4" />
+        <Trophy className="h-4 w-4" />
+      </div>
     </div>
   );
 }
