@@ -74,37 +74,39 @@ function HeroDashboardMockup() {
       className="mx-auto mt-16 max-w-4xl [perspective:1000px]"
     >
       <div
-        className="overflow-hidden rounded-[var(--radius)] border p-5 shadow-[0_0_60px_rgba(45,111,255,0.14),0_24px_48px_rgba(0,0,0,0.35)] md:p-6"
+        className="overflow-hidden rounded-[var(--radius)] border p-5 md:p-6"
         style={{
-          backgroundColor: "#12121A",
-          borderColor: "#1E2035",
+          backgroundColor: "var(--card)",
+          borderColor: "var(--border)",
+          boxShadow:
+            "0 0 60px rgba(var(--blue-rgb), 0.14), 0 24px 48px rgba(var(--background-rgb), 0.35)",
           transform: "rotateX(5deg)",
           transformStyle: "preserve-3d",
         }}
       >
         {/* Header chart */}
-        <div className="relative mb-5 flex items-start justify-between gap-4 border-b pb-4" style={{ borderColor: "#1E2035" }}>
+        <div className="relative mb-5 flex items-start justify-between gap-4 border-b pb-4" style={{ borderColor: "var(--border)" }}>
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.14em]" style={{ color: "#8892AA" }}>
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em]" style={{ color: "var(--secondary)" }}>
               Courbe d&apos;equity
             </p>
-            <p className="mt-1 text-lg font-semibold tracking-tight text-white">
+            <p className="mt-1 text-lg font-semibold tracking-tight text-primary">
               30 jours
             </p>
           </div>
           <motion.div
             className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
             style={{
-              backgroundColor: "rgba(0, 229, 176, 0.12)",
-              color: "#00E5B0",
-              border: "1px solid rgba(0, 229, 176, 0.35)",
+              backgroundColor: "rgba(var(--green-rgb), 0.12)",
+              color: "var(--green)",
+              border: "1px solid rgba(var(--green-rgb), 0.35)",
             }}
             animate={{
               scale: [1, 1.04, 1],
               boxShadow: [
-                "0 0 0 0 rgba(0, 229, 176, 0.25)",
-                "0 0 0 8px rgba(0, 229, 176, 0)",
-                "0 0 0 0 rgba(0, 229, 176, 0)",
+                "0 0 0 0 rgba(var(--green-rgb), 0.25)",
+                "0 0 0 8px rgba(var(--green-rgb), 0)",
+                "0 0 0 0 rgba(var(--green-rgb), 0)",
               ],
             }}
             transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
@@ -112,11 +114,11 @@ function HeroDashboardMockup() {
             <span className="relative flex h-2 w-2">
               <span
                 className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"
-                style={{ backgroundColor: "#00E5B0" }}
+                style={{ backgroundColor: "var(--green)" }}
               />
               <span
                 className="relative inline-flex h-2 w-2 rounded-full"
-                style={{ backgroundColor: "#00E5B0" }}
+                style={{ backgroundColor: "var(--green)" }}
               />
             </span>
             IA Active
@@ -127,8 +129,9 @@ function HeroDashboardMockup() {
         <div
           className="relative overflow-hidden rounded-lg"
           style={{
-            background: "linear-gradient(180deg, rgba(45,111,255,0.06) 0%, transparent 45%)",
-            border: "1px solid #1E2035",
+            background:
+              "linear-gradient(180deg, rgba(var(--blue-rgb), 0.06) 0%, transparent 45%)",
+            border: "1px solid var(--border)",
           }}
         >
           <svg
@@ -139,13 +142,13 @@ function HeroDashboardMockup() {
           >
             <defs>
               <linearGradient id="heroEqStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#2D6FFF" />
-                <stop offset="100%" stopColor="#00E5FF" />
+                <stop offset="0%" stopColor="var(--blue)" />
+                <stop offset="100%" stopColor="var(--cyan)" />
               </linearGradient>
               <linearGradient id="heroEqFill" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#2D6FFF" stopOpacity="0.22" />
-                <stop offset="70%" stopColor="#00E5FF" stopOpacity="0.04" />
-                <stop offset="100%" stopColor="#12121A" stopOpacity="0" />
+                <stop offset="0%" stopColor="var(--blue)" stopOpacity="0.22" />
+                <stop offset="70%" stopColor="var(--cyan)" stopOpacity="0.04" />
+                <stop offset="100%" stopColor="var(--card)" stopOpacity="0" />
               </linearGradient>
             </defs>
             {[0, 1, 2, 3].map((i) => (
@@ -155,7 +158,7 @@ function HeroDashboardMockup() {
                 y1={20 + i * 28}
                 x2={MOCK_CHART.w - 8}
                 y2={20 + i * 28}
-                stroke="#1E2035"
+                stroke="var(--border)"
                 strokeWidth="0.5"
                 strokeDasharray="3 5"
               />
@@ -184,8 +187,8 @@ function HeroDashboardMockup() {
                 cx={m.x}
                 cy={m.y}
                 r={m.kind === "low" ? 3.5 : 3}
-                fill={m.kind === "low" ? "#FF3D57" : "#00E5FF"}
-                stroke="#12121A"
+                fill={m.kind === "low" ? "var(--red)" : "var(--cyan)"}
+                stroke="var(--card)"
                 strokeWidth={1.5}
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -198,10 +201,10 @@ function HeroDashboardMockup() {
         {/* Stats */}
         <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
           {[
-            { label: "Win Rate", value: "68%", accent: "#00E5FF" },
-            { label: "Profit Factor", value: "1,84", accent: "#2D6FFF" },
-            { label: "Max Drawdown", value: "4,2%", accent: "#FF3D57" },
-            { label: "PnL", value: "+2 847 €", accent: "#00E5B0" },
+            { label: "Win Rate", value: "68%", accent: "var(--cyan)" },
+            { label: "Profit Factor", value: "1,84", accent: "var(--blue)" },
+            { label: "Max Drawdown", value: "4,2%", accent: "var(--red)" },
+            { label: "PnL", value: "+2 847 €", accent: "var(--green)" },
           ].map((s, i) => (
             <motion.div
               key={s.label}
@@ -211,16 +214,16 @@ function HeroDashboardMockup() {
               transition={{ delay: 0.15 + i * 0.06, duration: 0.45 }}
               className="rounded-lg p-3.5 font-mono"
               style={{
-                backgroundColor: "rgba(18, 18, 26, 0.9)",
-                border: "1px solid #1E2035",
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+                backgroundColor: "rgba(var(--background-rgb), 0.9)",
+                border: "1px solid var(--border)",
+                boxShadow: "inset 0 1px 0 rgba(var(--primary-rgb), 0.03)",
               }}
             >
-              <p className="text-[10px] font-sans font-medium uppercase tracking-wider" style={{ color: "#8892AA" }}>
+              <p className="text-[10px] font-sans font-medium uppercase tracking-wider" style={{ color: "var(--secondary)" }}>
                 {s.label}
               </p>
               <p
-                className="mt-1.5 text-xl font-semibold tabular-nums tracking-tight text-white"
+                className="mt-1.5 text-xl font-semibold tabular-nums tracking-tight text-primary"
                 style={{ textShadow: `0 0 24px ${s.accent}33` }}
               >
                 <span style={{ color: s.accent }}>{s.value}</span>
@@ -230,15 +233,15 @@ function HeroDashboardMockup() {
         </div>
 
         {/* Biais */}
-        <div className="mt-5 border-t pt-4" style={{ borderColor: "#1E2035" }}>
-          <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.12em]" style={{ color: "#8892AA" }}>
+        <div className="mt-5 border-t pt-4" style={{ borderColor: "var(--border)" }}>
+          <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.12em]" style={{ color: "var(--secondary)" }}>
             Biais détectés
           </p>
           <div className="flex flex-wrap gap-2">
             {[
-              { name: "Revenge Trading", level: "CRITIQUE", fg: "#FFB4B4", bg: "rgba(255, 61, 87, 0.12)", border: "rgba(255, 61, 87, 0.35)" },
-              { name: "FOMO", level: "ÉLEVÉ", fg: "#FFD89A", bg: "rgba(255, 180, 80, 0.1)", border: "rgba(255, 180, 80, 0.35)" },
-              { name: "Overtrading", level: "MOYEN", fg: "#C8D4E8", bg: "rgba(45, 111, 255, 0.1)", border: "rgba(45, 111, 255, 0.35)" },
+              { name: "Revenge Trading", level: "CRITIQUE", fg: "var(--red)", bg: "rgba(var(--red-rgb), 0.12)", border: "rgba(var(--red-rgb), 0.35)" },
+              { name: "FOMO", level: "ÉLEVÉ", fg: "var(--cyan)", bg: "rgba(var(--cyan-rgb), 0.1)", border: "rgba(var(--cyan-rgb), 0.35)" },
+              { name: "Overtrading", level: "MOYEN", fg: "var(--secondary)", bg: "rgba(var(--blue-rgb), 0.1)", border: "rgba(var(--blue-rgb), 0.35)" },
             ].map((b, i) => (
               <motion.span
                 key={b.name}
@@ -253,8 +256,8 @@ function HeroDashboardMockup() {
                   color: b.fg,
                 }}
               >
-                <span className="font-semibold text-white/95">{b.name}</span>
-                <span className="rounded bg-black/25 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide" style={{ color: b.fg }}>
+                <span className="font-semibold text-primary">{b.name}</span>
+                <span className="rounded bg-background/25 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide" style={{ color: b.fg }}>
                   {b.level}
                 </span>
               </motion.span>
@@ -310,7 +313,7 @@ export default function HomePage() {
         className="pointer-events-none fixed inset-0 z-0"
         style={{
           background:
-            "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(45, 111, 255, 0.22), transparent 55%)",
+            "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(var(--blue-rgb), 0.22), transparent 55%)",
         }}
         aria-hidden
       />
@@ -325,10 +328,10 @@ export default function HomePage() {
           <Link href="/" className="flex items-center gap-2">
             <TrendingUp
               className="h-7 w-7 shrink-0"
-              style={{ color: "#2D6FFF" }}
+              style={{ color: "var(--blue)" }}
               aria-hidden
             />
-            <span className="text-lg font-bold text-white">Alpha</span>
+            <span className="text-lg font-bold text-primary">Alpha</span>
           </Link>
           <nav className="hidden items-center gap-8 text-sm text-secondary md:flex">
             <a
@@ -370,9 +373,9 @@ export default function HomePage() {
                 opacity: [0.82, 1, 0.82],
                 scale: [1, 1.035, 1],
                 boxShadow: [
-                  "0 0 0 0 rgba(45, 111, 255, 0)",
-                  "0 0 28px 0 rgba(45, 111, 255, 0.28)",
-                  "0 0 0 0 rgba(45, 111, 255, 0)",
+                  "0 0 0 0 rgba(var(--blue-rgb), 0)",
+                  "0 0 28px 0 rgba(var(--blue-rgb), 0.28)",
+                  "0 0 0 0 rgba(var(--blue-rgb), 0)",
                 ],
               }}
               transition={{
@@ -586,7 +589,7 @@ export default function HomePage() {
               transition={{ ...fadeInUp.transition, delay: 0.1 }}
               className="card relative flex flex-col border-2 border-blue p-8 glow-blue"
             >
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue px-3 py-1 text-xs font-semibold text-white">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue px-3 py-1 text-xs font-semibold text-primary">
                 Le plus populaire
               </span>
               <h3 className="text-lg font-bold text-primary">Pro</h3>
@@ -688,10 +691,10 @@ export default function HomePage() {
             <div className="flex items-center gap-2">
               <TrendingUp
                 className="h-6 w-6 shrink-0"
-                style={{ color: "#2D6FFF" }}
+              style={{ color: "var(--blue)" }}
                 aria-hidden
               />
-              <span className="font-bold text-white">Alpha</span>
+              <span className="font-bold text-primary">Alpha</span>
             </div>
             <nav className="flex flex-wrap items-center justify-center gap-6">
               <Link href="/legal/privacy" className="hover:text-primary">

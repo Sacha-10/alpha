@@ -99,7 +99,7 @@ export default function DashboardClient() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/50 backdrop-blur">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-4">
-          <Link href="/" className="font-semibold text-slate-100">
+          <Link href="/" className="font-semibold text-primary">
             Alpha — Tableau de bord
           </Link>
           <div className="flex flex-wrap items-center gap-3">
@@ -107,14 +107,14 @@ export default function DashboardClient() {
               type="button"
               onClick={() => subscribe()}
               disabled={checkoutLoading}
-              className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-500 disabled:opacity-50"
+              className="rounded-lg bg-blue px-4 py-2 text-sm font-medium text-primary hover:bg-blue/85 disabled:opacity-50"
             >
               {checkoutLoading ? "Redirection…" : "S’abonner (EUR)"}
             </button>
             <button
               type="button"
               onClick={() => void signOut()}
-              className="rounded-lg border border-border px-4 py-2 text-sm text-slate-300 hover:bg-background"
+              className="rounded-lg border border-border px-4 py-2 text-sm text-secondary hover:bg-background"
             >
               Déconnexion
             </button>
@@ -124,29 +124,29 @@ export default function DashboardClient() {
 
       <main className="mx-auto max-w-5xl space-y-10 px-6 py-10">
         {checkout === "success" || paymentSuccess ? (
-          <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+          <p className="rounded-lg border border-green/35 bg-green/10 px-4 py-3 text-sm text-green">
             Paiement confirmé. Merci ! Vos prochaines analyses seront
             disponibles selon votre offre.
           </p>
         ) : null}
         {checkout === "cancel" ? (
-          <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          <p className="rounded-lg border border-red/35 bg-red/10 px-4 py-3 text-sm text-red">
             Paiement annulé. Vous pouvez réessayer quand vous voulez.
           </p>
         ) : null}
 
         <section className="space-y-4">
-          <h1 className="text-2xl font-bold text-white">Analyser mes trades</h1>
-          <p className="text-sm text-slate-400">
+          <h1 className="text-2xl font-bold text-primary">Analyser mes trades</h1>
+          <p className="text-sm text-secondary">
             Envoyez un CSV : nous détectons MT4, Binance ou TradingView, puis
             appelons le modèle{" "}
-            <span className="font-mono text-slate-300">gpt-5.4</span>.
+            <span className="font-mono text-primary">gpt-5.4</span>.
           </p>
           <UploadZone loading={loading} onAnalyze={onAnalyzeFile} />
         </section>
 
         {error ? (
-          <p className="text-sm text-rose-400" role="alert">
+          <p className="text-sm text-red" role="alert">
             {error}
           </p>
         ) : null}

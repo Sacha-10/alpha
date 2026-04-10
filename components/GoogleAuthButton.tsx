@@ -32,7 +32,7 @@ export function GoogleAuthButton({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => void signIn()}
-      className={`inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-slate-100 shadow-sm transition-colors hover:border-cyan-500/40 hover:bg-background ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-primary shadow-sm transition-colors hover:border-cyan/40 hover:bg-background ${className}`}
     >
       <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden>
         <path

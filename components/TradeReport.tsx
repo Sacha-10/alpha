@@ -13,7 +13,7 @@ function ScoreCircle({ score, label }: { score: number; label: string }) {
   const normalized = score > 0 && score <= 1 ? score * 100 : score;
   const capped = Math.min(100, Math.max(0, normalized));
   const color =
-    capped > 60 ? "#00E5B0" : capped >= 40 ? "#FFB800" : "#FF3D57";
+    capped > 60 ? "var(--green)" : capped >= 40 ? "var(--cyan)" : "var(--red)";
   return (
     <div className="flex flex-col items-center">
       <div className="relative h-24 w-24">
@@ -26,7 +26,7 @@ function ScoreCircle({ score, label }: { score: number; label: string }) {
             cy="50"
             r="45"
             fill="none"
-            stroke="#1E2035"
+            stroke="var(--border)"
             strokeWidth="8"
           />
           <circle
@@ -56,7 +56,7 @@ function SeverityBadge({ severity }: { severity: BiasSeverity | string }) {
   const styles: Record<string, string> = {
     CRITIQUE: "bg-red/20 text-red border-red/30",
     ÉLEVÉ: "bg-red/20 text-red border-red/30",
-    MOYEN: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    MOYEN: "bg-cyan/20 text-cyan border-cyan/30",
     FAIBLE: "bg-green/20 text-green border-green/30",
   };
   return (
@@ -89,9 +89,9 @@ export default function TradeReport({
     v <= 1 ? (v * 100).toFixed(1) : v.toFixed(1);
 
   function sessionPctColorClasses(pct: number): { bar: string; text: string } {
-    if (pct < 40) return { bar: "#FF3D57", text: "text-red" };
-    if (pct <= 60) return { bar: "#FFB800", text: "text-orange-400" };
-    return { bar: "#00E5B0", text: "text-green" };
+    if (pct < 40) return { bar: "var(--red)", text: "text-red" };
+    if (pct <= 60) return { bar: "var(--cyan)", text: "text-cyan" };
+    return { bar: "var(--green)", text: "text-green" };
   }
 
   const winRateNum = s.winRate <= 1 ? s.winRate * 100 : s.winRate;
@@ -398,7 +398,7 @@ export default function TradeReport({
           {report.actionPlan.map((item, i) => {
             const catColors: Record<string, string> = {
               Psychologie: "bg-red/20 text-red",
-              Risque: "bg-orange-500/20 text-orange-400",
+              Risque: "bg-cyan/20 text-cyan",
               Stratégie: "bg-blue/20 text-blue",
               Timing: "bg-cyan/20 text-cyan",
             };

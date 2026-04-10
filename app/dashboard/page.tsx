@@ -5,7 +5,7 @@ export default function DashboardPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-background px-6 py-10 text-slate-400">
+        <div className="min-h-screen bg-background px-6 py-10 text-secondary">
           Chargement du tableau de bord…
         </div>
       }

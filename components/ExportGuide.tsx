@@ -57,7 +57,7 @@ export default function ExportGuide({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <motion.div
@@ -88,7 +88,7 @@ export default function ExportGuide({
               onClick={() => setActive(i)}
               className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                 active === i
-                  ? "bg-blue text-white"
+                  ? "bg-blue text-primary"
                   : "bg-hover text-secondary hover:text-primary"
               }`}
             >

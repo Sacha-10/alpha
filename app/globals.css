@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,6 +18,14 @@
   --radius: 12px;
   --transition: 200ms ease;
   --shadow: 0 0 40px rgba(45, 111, 255, 0.08);
+  --background-rgb: 10, 10, 15;
+  --blue-rgb: 45, 111, 255;
+  --cyan-rgb: 0, 229, 255;
+  --red-rgb: 255, 61, 87;
+  --green-rgb: 0, 229, 176;
+  --primary-rgb: 240, 244, 255;
+  --secondary-rgb: 136, 146, 170;
+  --border-rgb: 30, 32, 53;
 }
 
 *,
@@ -38,11 +48,11 @@
 body {
   background-color: var(--background);
   color: var(--primary);
-  font-family: var(--font-inter), sans-serif;
+  font-family: "Inter", var(--font-inter), sans-serif;
 }
 
 .font-mono {
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: "JetBrains Mono", var(--font-jetbrains-mono), monospace;
 }
 
 .card {
@@ -87,6 +97,30 @@ body {
 
 .glow-blue {
   box-shadow: 0 0 40px rgba(45, 111, 255, 0.15);
+}
+
+::selection {
+  background: var(--blue);
+  color: var(--primary);
+}
+
+html {
+  scrollbar-color: var(--blue) var(--background);
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--blue);
+  border-radius: var(--radius);
 }
 
 @layer utilities {

@@ -1,38 +1,50 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from "tailwindcss";
+import { theme } from "./styles/theme";
 
 const config: Config = {
   content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
       colors: {
-        background: '#0A0A0F',
-        card: '#12121A',
-        hover: '#1A1A28',
-        blue: '#2D6FFF',
-        cyan: '#00E5FF',
-        red: '#FF3D57',
-        green: '#00E5B0',
-        primary: '#F0F4FF',
-        secondary: '#8892AA',
-        border: '#1E2035',
+        background: theme.colors.background,
+        backgroundCard: theme.colors.backgroundCard,
+        backgroundHover: theme.colors.backgroundHover,
+        accentBlue: theme.colors.accentBlue,
+        accentCyan: theme.colors.accentCyan,
+        accentRed: theme.colors.accentRed,
+        accentGreen: theme.colors.accentGreen,
+        textPrimary: theme.colors.textPrimary,
+        textSecondary: theme.colors.textSecondary,
+        border: theme.colors.border,
+        borderHover: theme.colors.borderHover,
+        // Aliases used by existing classes
+        card: theme.colors.backgroundCard,
+        hover: theme.colors.backgroundHover,
+        blue: theme.colors.accentBlue,
+        cyan: theme.colors.accentCyan,
+        red: theme.colors.accentRed,
+        green: theme.colors.accentGreen,
+        primary: theme.colors.textPrimary,
+        secondary: theme.colors.textSecondary,
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'sans-serif'],
-        mono: ['var(--font-jetbrains-mono)', 'monospace'],
+        sans: ["var(--font-inter)", "sans-serif"],
+        mono: ["var(--font-jetbrains-mono)", "monospace"],
       },
       borderRadius: {
-        DEFAULT: '12px',
+        DEFAULT: theme.borderRadius,
       },
       boxShadow: {
-        card: '0 0 40px rgba(45, 111, 255, 0.08)',
-        blue: '0 0 20px rgba(45, 111, 255, 0.3)',
+        card: theme.shadow,
+        blue: "0 0 20px rgba(45, 111, 255, 0.3)",
       },
     },
   },
   plugins: [],
-}
-export default config
+};
+
+export default config;
