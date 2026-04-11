@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
@@ -132,8 +131,8 @@ export default function HomePage() {
   const closeMobileMenu = () => setMobileOpen(false);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-background text-primary">
-      <div className="pointer-events-none fixed inset-0 z-0 opacity-40" aria-hidden>
+    <div className="relative min-h-screen bg-background text-primary">
+      <div className="pointer-events-none absolute inset-0 z-0 min-h-full opacity-40" aria-hidden>
         <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="hero-grid" width="36" height="36" patternUnits="userSpaceOnUse">
@@ -149,7 +148,7 @@ export default function HomePage() {
           <rect width="100%" height="100%" fill="url(#hero-grid)" />
         </svg>
       </div>
-      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
+      <div className="pointer-events-none absolute inset-0 z-0 min-h-full" aria-hidden>
         <div className="absolute left-1/2 top-[35%] h-80 w-80 -translate-x-1/2 rounded-full bg-blue/20 blur-3xl" />
       </div>
 
@@ -168,12 +167,20 @@ export default function HomePage() {
             <a href="#services" className="text-secondary transition-colors duration-200 hover:text-primary">
               Services
             </a>
-            <Link href="/demo" className="text-secondary transition-colors duration-200 hover:text-primary">
+            <button
+              type="button"
+              onClick={() => router.push("/demo")}
+              className="text-secondary transition-colors duration-200 hover:text-primary"
+            >
               Analyse Gratuite
-            </Link>
-            <Link href="/pricing" className="text-secondary transition-colors duration-200 hover:text-primary">
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/pricing")}
+              className="text-secondary transition-colors duration-200 hover:text-primary"
+            >
               Prix
-            </Link>
+            </button>
             <button type="button" className="text-secondary transition-colors duration-200 hover:text-primary">
               About Us
             </button>
@@ -220,20 +227,26 @@ export default function HomePage() {
             >
               Services
             </a>
-            <Link
-              href="/demo"
-              onClick={closeMobileMenu}
-              className="text-secondary transition-colors duration-200 hover:text-primary"
+            <button
+              type="button"
+              onClick={() => {
+                closeMobileMenu();
+                router.push("/demo");
+              }}
+              className="text-left text-secondary transition-colors duration-200 hover:text-primary"
             >
               Analyse Gratuite
-            </Link>
-            <Link
-              href="/pricing"
-              onClick={closeMobileMenu}
-              className="text-secondary transition-colors duration-200 hover:text-primary"
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                closeMobileMenu();
+                router.push("/pricing");
+              }}
+              className="text-left text-secondary transition-colors duration-200 hover:text-primary"
             >
               Prix
-            </Link>
+            </button>
             <button
               type="button"
               onClick={closeMobileMenu}

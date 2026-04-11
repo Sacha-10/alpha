@@ -2,7 +2,6 @@
 
 import { getSupabaseClient } from "@/lib/supabase";
 import { detectAndParse } from "@/lib/parseCSV";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import TradeReport from "@/components/TradeReport";
@@ -99,9 +98,13 @@ export default function DashboardClient() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/50 backdrop-blur">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-4">
-          <Link href="/" className="font-semibold text-primary">
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="text-left font-semibold text-primary"
+          >
             Alpha — Tableau de bord
-          </Link>
+          </button>
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"

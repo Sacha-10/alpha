@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { demoTrades } from '@/lib/demoTrades'
 import { PLANS } from '@/lib/plans'
@@ -7,6 +8,7 @@ import TradeReport from '@/components/TradeReport'
 import { motion } from 'framer-motion'
 
 export default function DemoPage() {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [report, setReport] = useState<any>(null)
   const [error, setError] = useState<string>('')
@@ -123,9 +125,13 @@ export default function DemoPage() {
             Créez un compte pour analyser vos propres 
             trades et obtenir votre rapport personnalisé.
           </p>
-          <a href="/dashboard" className="btn-primary">
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard')}
+            className="btn-primary"
+          >
             Commencer — {PLANS.starter.monthly}€/mois
-          </a>
+          </button>
         </div>
       )}
 
@@ -145,10 +151,13 @@ export default function DemoPage() {
               Importez maintenant vos propres trades 
               pour obtenir votre analyse personnalisée.
             </p>
-            <a href="/dashboard" 
-              className="btn-primary text-lg px-8 py-3">
+            <button
+              type="button"
+              onClick={() => router.push('/dashboard')}
+              className="btn-primary text-lg px-8 py-3"
+            >
               Commencer — {PLANS.starter.monthly}€/mois
-            </a>
+            </button>
           </motion.div>
         </>
       )}
