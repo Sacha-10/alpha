@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
 import {
@@ -88,6 +88,7 @@ function ServiceCard({
 
 export default function HomePage() {
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -130,6 +131,17 @@ export default function HomePage() {
 
   const closeMobileMenu = () => setMobileOpen(false);
 
+  const scrollTopSmooth = () =>
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+
+  const handleBrandClick = () => {
+    if (pathname === "/") {
+      scrollTopSmooth();
+    } else {
+      router.push("/");
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-background text-primary">
       <div className="pointer-events-none absolute inset-0 z-0 min-h-full opacity-40" aria-hidden>
@@ -158,15 +170,24 @@ export default function HomePage() {
         }`}
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-7 w-7 text-blue" aria-hidden />
+          <button
+            type="button"
+            onClick={handleBrandClick}
+            className="flex items-center gap-2 rounded text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue"
+            aria-label="TonSaaS — retour en haut"
+          >
+            <TrendingUp className="h-7 w-7 shrink-0 text-blue" aria-hidden />
             <span className="text-lg font-bold text-primary">TonSaaS</span>
-          </div>
+          </button>
 
           <nav className="hidden items-center gap-8 text-sm md:flex">
-            <a href="#services" className="text-secondary transition-colors duration-200 hover:text-primary">
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, left: 0, behavior: "smooth" })}
+              className="text-secondary transition-colors duration-200 hover:text-primary"
+            >
               Services
-            </a>
+            </button>
             <button
               type="button"
               onClick={() => router.push("/demo")}
@@ -220,13 +241,16 @@ export default function HomePage() {
           }`}
         >
           <div className="flex flex-col gap-2 p-4">
-            <a
-              href="#services"
-              onClick={closeMobileMenu}
-              className="text-secondary transition-colors duration-200 hover:text-primary"
+            <button
+              type="button"
+              onClick={() => {
+                closeMobileMenu();
+                window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+              }}
+              className="text-left text-secondary transition-colors duration-200 hover:text-primary"
             >
               Services
-            </a>
+            </button>
             <button
               type="button"
               onClick={() => {

@@ -1,18 +1,18 @@
-"use client";
+'use client'
 
-import { useLayoutEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 
-export function ScrollReset() {
-  const pathname = usePathname();
+export default function ScrollReset() {
+  const pathname = usePathname()
 
-  useLayoutEffect(() => {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "instant" as ScrollBehavior,
-    });
-  }, [pathname]);
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [pathname])
 
-  return null;
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [])
+
+  return null
 }
