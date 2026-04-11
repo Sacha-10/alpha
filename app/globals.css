@@ -50,11 +50,17 @@
   }
 }
 
+/*
+ * Un seul « scrollport » vertical : html.
+ * html ET body en overflow-y: auto créaient deux zones défilantes (scroll bloqué,
+ * thumb pleine hauteur, restauration de scroll sur le mauvais élément).
+ * overflow-x sur body casse souvent le scroll sur iOS → clip horizontal sur html seulement.
+ */
 html {
   height: auto;
   min-height: 100%;
-  overflow-y: auto;
   overflow-x: hidden;
+  overflow-y: auto;
   position: static;
   scrollbar-gutter: stable;
   scroll-behavior: smooth;
@@ -65,8 +71,8 @@ html {
 body {
   height: auto;
   min-height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible;
+  overflow-y: visible;
   position: static;
   scroll-behavior: smooth;
   background-color: var(--background);
