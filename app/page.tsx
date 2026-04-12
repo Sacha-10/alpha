@@ -161,7 +161,7 @@ export default function HomePage() {
         </svg>
       </div>
       <div className="pointer-events-none absolute inset-0 z-0 min-h-full" aria-hidden>
-        <div className="absolute left-1/2 top-[35%] h-80 w-80 -translate-x-1/2 rounded-full bg-blue/20 blur-3xl" />
+        <div className="fixed left-1/2 top-[35%] h-80 w-80 -translate-x-1/2 rounded-full bg-blue/20 blur-3xl" />
       </div>
 
       <header
