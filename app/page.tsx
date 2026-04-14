@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
@@ -169,15 +170,24 @@ export default function HomePage() {
           scrolled ? "border-border bg-background" : "border-transparent bg-transparent"
         }`}
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <div className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <button
             type="button"
             onClick={handleBrandClick}
-            className="flex items-center gap-2 rounded text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue"
+            className="z-10 flex items-center gap-2 rounded text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue"
             aria-label="TonSaaS — retour en haut"
           >
             <TrendingUp className="h-7 w-7 shrink-0 text-blue" aria-hidden />
-            <span className="text-lg font-bold text-primary">TonSaaS</span>
+            <span className="hidden text-lg font-bold text-primary md:inline">TonSaaS</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleBrandClick}
+            className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-lg font-bold text-primary md:hidden"
+            aria-label="TonSaaS — retour en haut"
+          >
+            TonSaaS
           </button>
 
           <nav className="hidden items-center gap-8 text-sm md:flex">
@@ -203,7 +213,7 @@ export default function HomePage() {
               Prix
             </button>
             <button type="button" className="text-secondary transition-colors duration-200 hover:text-primary">
-              À propos
+              À propos de nous
             </button>
             <button
               type="button"
@@ -217,7 +227,7 @@ export default function HomePage() {
           <button
             type="button"
             onClick={() => void connectGoogle()}
-            className="hidden items-center gap-2 rounded bg-blue px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-blue/90 md:inline-flex"
+            className="z-10 hidden items-center gap-2 rounded bg-blue px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-blue/90 md:inline-flex"
           >
             <UserCircle className="h-4 w-4" aria-hidden />
             S&apos;inscrire
@@ -226,7 +236,7 @@ export default function HomePage() {
           <button
             type="button"
             onClick={() => setMobileOpen((value) => !value)}
-            className="rounded border border-border bg-card p-2 text-secondary md:hidden"
+            className="z-10 rounded border border-border bg-card p-2 text-secondary md:hidden"
             aria-label={mobileOpen ? "Fermer menu" : "Ouvrir menu"}
             aria-expanded={mobileOpen}
           >
@@ -276,7 +286,7 @@ export default function HomePage() {
               onClick={closeMobileMenu}
               className="text-left text-secondary transition-colors duration-200 hover:text-primary"
             >
-              À propos
+              À propos de nous
             </button>
             <button
               type="button"
@@ -408,9 +418,8 @@ export default function HomePage() {
 
         <RevealSection id="services" className="mx-auto max-w-6xl px-6 py-20 md:py-[120px]">
           <h2 className="text-center text-3xl font-bold text-primary md:text-4xl">
-            Tout ce dont vous avez{" "}
-            <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">besoin</span> pour
-            trader à votre meilleur niveau.
+            Tout ce qu&apos;il faut pour trader au plus haut{" "}
+            <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">niveau</span>.
           </h2>
           <p className="mt-3 text-center text-secondary">Passez de l&apos;instinct à la stratégie.</p>
 
@@ -650,7 +659,30 @@ export default function HomePage() {
             </a>
           </div>
         </footer>
-        <p className="mx-auto mt-8 max-w-6xl text-sm text-secondary">© 2026 TonSaaS. Élaboré pour les traders sérieux.</p>
+        <nav
+          aria-label="Mentions légales"
+          className="mx-auto mt-8 flex max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-secondary"
+        >
+          <Link href="#" className="hover:text-primary">
+            Mentions légales
+          </Link>
+          <Link href="/legal/terms" className="hover:text-primary">
+            CGU
+          </Link>
+          <Link href="/legal/privacy" className="hover:text-primary">
+            Politique de confidentialité
+          </Link>
+          <Link href="#" className="hover:text-primary">
+            Politique de cookies
+          </Link>
+          <Link href="#" className="hover:text-primary">
+            CGV
+          </Link>
+          <Link href="#" className="hover:text-primary">
+            Mentions de risque
+          </Link>
+        </nav>
+        <p className="mx-auto mt-6 max-w-6xl text-sm text-secondary">© 2026 TonSaaS. Élaboré pour les traders sérieux.</p>
       </RevealSection>
 
       <div className="pointer-events-none fixed bottom-6 right-6 z-50">
