@@ -310,7 +310,7 @@ export default function HomePage() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-[600px] text-lg text-secondary">
-            Notre IA analyse chaque trade chaque décision chaque pattern pour que vous ne répétiez plus jamais les
+            Notre IA analyse chaque trade, chaque décision, chaque pattern pour que vous ne répétiez plus jamais les
             mêmes erreurs.
           </p>
 
@@ -403,7 +403,11 @@ export default function HomePage() {
         </RevealSection>
 
         <RevealSection id="services" className="mx-auto max-w-6xl px-6 py-20 md:py-[120px]">
-          <h2 className="text-center text-3xl font-bold text-primary md:text-4xl">Tout ce dont vous avez besoin pour trader à votre meilleur niveau</h2>
+          <h2 className="text-center text-3xl font-bold text-primary md:text-4xl">
+            Tout ce dont vous avez{" "}
+            <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">besoin</span> pour
+            trader à votre meilleur niveau.
+          </h2>
           <p className="mt-3 text-center text-secondary">Passez de l&apos;instinct à la stratégie.</p>
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -429,9 +433,6 @@ export default function HomePage() {
         </RevealSection>
 
         <RevealSection className="relative overflow-hidden bg-background px-6 py-20 md:py-[120px]">
-          <div className="pointer-events-none absolute inset-0" aria-hidden>
-            <div className="absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue/10 blur-3xl" />
-          </div>
           <div className="relative mx-auto max-w-6xl">
             <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-secondary">
               <span className="h-2 w-2 animate-pulse rounded-full bg-blue" />
@@ -578,8 +579,12 @@ export default function HomePage() {
         </RevealSection>
 
         <RevealSection id="analyse" className="bg-card/30 px-6 py-20 text-center md:py-[120px]">
-          <h2 className="text-3xl font-bold text-primary md:text-4xl">Découvrez ce que l&apos;IA révèle en 60 secondes</h2>
-          <p className="mt-2 text-secondary">Aucune inscription requise</p>
+          <h2 className="text-3xl font-bold text-primary md:text-4xl">
+            Découvrez ce que l&apos;IA{" "}
+            <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">révèle</span> en 60
+            secondes.
+          </h2>
+          <p className="mt-2 text-secondary">Aucune inscription requise.</p>
           <button
             type="button"
             onClick={() => router.push("/demo")}
@@ -589,7 +594,7 @@ export default function HomePage() {
             <ArrowRight className="h-5 w-5" aria-hidden />
           </button>
           <p className="mx-auto mt-4 max-w-sm text-sm text-secondary">
-            Importez votre export MT4, MT5, Binance ou TradingView
+            Sans carte bancaire. Démonstration immédiate.
           </p>
         </RevealSection>
 
@@ -610,20 +615,12 @@ export default function HomePage() {
               <UserCircle className="h-5 w-5" aria-hidden />
               S&apos;inscrire
             </button>
-            <button
-              type="button"
-              onClick={() => router.push("/demo")}
-              className="inline-flex items-center gap-2 rounded border border-border bg-transparent px-6 py-3 font-semibold text-primary transition-all duration-200 hover:border-blue"
-            >
-              Analyse Gratuite
-              <ArrowRight className="h-5 w-5" aria-hidden />
-            </button>
           </div>
-          <p className="mt-4 text-sm text-secondary">Sans carte bancaire. Démonstration immédiate.</p>
+          <p className="mt-4 text-sm text-secondary">Importez vos trades depuis MT4, MT5, Binance, TradingView.</p>
         </RevealSection>
       </main>
 
-      <RevealSection className="border-t border-border px-6 py-10">
+      <RevealSection className="border-t border-border bg-background px-6 py-10">
         <footer className="mx-auto flex max-w-6xl flex-col gap-8 text-secondary md:flex-row md:items-start md:justify-between">
           <div>
             <div className="flex items-center gap-2">
@@ -636,7 +633,7 @@ export default function HomePage() {
           <div className="flex flex-wrap items-center gap-4 text-sm">
             <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
               <Info className="h-4 w-4" aria-hidden />
-              À propos
+              À propos de nous
             </button>
             <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
               <HelpCircle className="h-4 w-4" aria-hidden />
