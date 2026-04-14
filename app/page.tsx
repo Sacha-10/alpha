@@ -203,7 +203,7 @@ export default function HomePage() {
               Prix
             </button>
             <button type="button" className="text-secondary transition-colors duration-200 hover:text-primary">
-              About Us
+              À propos
             </button>
             <button
               type="button"
@@ -276,7 +276,7 @@ export default function HomePage() {
               onClick={closeMobileMenu}
               className="text-left text-secondary transition-colors duration-200 hover:text-primary"
             >
-              About Us
+              À propos
             </button>
             <button
               type="button"
@@ -304,18 +304,18 @@ export default function HomePage() {
         <RevealSection className="mx-auto max-w-6xl px-6 pb-20 pt-10 text-center">
           <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-secondary">
             <span className="h-2 w-2 animate-pulse rounded-full bg-blue" />
-            AI-Powered Trading Journal
+            Journal de trading propulsé par l&apos;IA
           </div>
 
           <h1 className="mx-auto mt-8 max-w-4xl text-balance text-4xl font-bold leading-tight text-primary md:text-6xl">
-            Stop losing money on{" "}
-            <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">mistakes</span>
+            Arrêtez de perdre de l&apos;argent sur des{" "}
+            <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">erreurs</span>
             <br />
-            you keep repeating.
+            que vous répétez encore.
           </h1>
 
           <p className="mx-auto mt-6 max-w-[600px] text-lg text-secondary">
-            Our AI analyzes your trades and identifies exactly why you&apos;re underperforming before your next
+            Notre IA analyse vos trades et identifie exactement pourquoi vous sous-performez avant votre prochaine
             session.
           </p>
 
@@ -341,7 +341,7 @@ export default function HomePage() {
           <div className="mx-auto mt-14 max-w-5xl [perspective:1000px]">
             <div className="card glow-blue rounded p-6 [transform:rotateX(5deg)]">
               <div className="mb-5 flex items-center justify-between border-b border-border pb-4">
-                <p className="text-sm text-secondary">Premium Trading Dashboard</p>
+                <p className="text-sm text-secondary">Tableau de bord trading premium</p>
                 <span className="inline-flex items-center gap-1 rounded-full border border-green/40 bg-green/10 px-2 py-1 text-xs text-green">
                   <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
                   IA Active
@@ -349,7 +349,7 @@ export default function HomePage() {
               </div>
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="rounded border border-border bg-background/50 p-4">
-                  <p className="text-xs text-secondary">Performance</p>
+                  <p className="text-xs text-secondary">Rendement</p>
                   <p className="mt-2 font-mono text-2xl text-primary">+2 847€</p>
                 </div>
                 <div className="rounded border border-border bg-background/50 p-4">
@@ -364,7 +364,7 @@ export default function HomePage() {
               <div className="mt-5 grid gap-3 text-xs text-secondary md:grid-cols-3">
                 <span className="inline-flex items-center gap-1 rounded border border-border bg-background/40 px-3 py-2">
                   <Upload className="h-4 w-4 text-blue" aria-hidden />
-                  Upload
+                  Importer
                 </span>
                 <span className="inline-flex items-center gap-1 rounded border border-border bg-background/40 px-3 py-2">
                   <BrainCircuit className="h-4 w-4 text-cyan" aria-hidden />
@@ -383,14 +383,14 @@ export default function HomePage() {
           <div className="overflow-hidden text-secondary">
             <div className="animate-landing-marquee whitespace-nowrap">
               {[
-                "Trusted by traders on",
+                "Plébiscité par des traders sur",
                 "Binance",
                 "MT4",
                 "MT5",
                 "TradingView",
                 "FTMO",
                 "MyForexFunds",
-                "Trusted by traders on",
+                "Plébiscité par des traders sur",
                 "Binance",
                 "MT4",
                 "MT5",
@@ -408,34 +408,34 @@ export default function HomePage() {
         </RevealSection>
 
         <RevealSection id="services" className="mx-auto max-w-6xl px-6 py-20">
-          <h2 className="text-center text-3xl font-bold text-primary md:text-4xl">Everything you need to trade at your best</h2>
-          <p className="mt-3 text-center text-secondary">Stop guessing. Start knowing.</p>
+          <h2 className="text-center text-3xl font-bold text-primary md:text-4xl">Tout ce dont vous avez besoin pour trader à votre meilleur niveau</h2>
+          <p className="mt-3 text-center text-secondary">Finie l&apos;approximation. Place à la clarté.</p>
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             <ServiceCard
               icon={<BrainCircuit className="h-8 w-8 text-blue" aria-hidden />}
-              title="Psychological Edge"
-              body="AI detects revenge trading overtrading and emotional patterns across your entire trade history"
+              title="Avantage psychologique"
+              body="L&apos;IA détecte le Revenge trading, l&apos;overtrading et vos schémas émotionnels sur tout votre historique"
               delayMs={0}
             />
             <ServiceCard
               icon={<BarChart3 className="h-8 w-8 text-cyan" aria-hidden />}
-              title="Deep Statistics"
-              body="Win rate Sharpe ratio drawdown profit factor every metric that actually matters in one clean view"
+              title="Statistiques approfondies"
+              body="Win rate, Sharpe ratio, Drawdown, Profit factor : chaque métrique qui compte vraiment, dans une vue claire"
               delayMs={100}
             />
             <ServiceCard
               icon={<BellRing className="h-8 w-8 text-green" aria-hidden />}
-              title="Pattern Alerts"
-              body="Get notified when you are about to repeat your most costly mistake before you enter the trade"
+              title="Alertes sur les schémas"
+              body="Soyez averti lorsque vous êtes sur le point de répéter votre erreur la plus coûteuse, avant d&apos;entrer en position"
               delayMs={200}
             />
           </div>
         </RevealSection>
 
         <RevealSection id="analyse" className="bg-card/30 px-6 py-20 text-center">
-          <h2 className="text-3xl font-bold text-primary md:text-4xl">See what AI finds in 60 seconds</h2>
-          <p className="mt-2 text-secondary">No signup required</p>
+          <h2 className="text-3xl font-bold text-primary md:text-4xl">Découvrez ce que l&apos;IA révèle en 60 secondes</h2>
+          <p className="mt-2 text-secondary">Aucune inscription requise</p>
           <button
             type="button"
             onClick={() => router.push("/demo")}
@@ -445,7 +445,7 @@ export default function HomePage() {
             <ArrowRight className="h-5 w-5" aria-hidden />
           </button>
           <p className="mx-auto mt-4 max-w-sm text-sm text-secondary">
-            Upload your MT4 MT5 Binance or TradingView export
+            Importez votre export MT4, MT5, Binance ou TradingView
           </p>
         </RevealSection>
       </main>
@@ -457,13 +457,13 @@ export default function HomePage() {
               <TrendingUp className="h-6 w-6 text-blue" aria-hidden />
               <span className="font-bold text-primary">TonSaaS</span>
             </div>
-            <p className="mt-2 text-sm">Your AI Trading Edge</p>
+            <p className="mt-2 text-sm">Votre avantage IA sur les marchés</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-sm">
             <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
               <Info className="h-4 w-4" aria-hidden />
-              About Us
+              À propos
             </button>
             <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
               <HelpCircle className="h-4 w-4" aria-hidden />
@@ -474,7 +474,7 @@ export default function HomePage() {
             </a>
           </div>
         </footer>
-        <p className="mx-auto mt-8 max-w-6xl text-sm text-secondary">© 2026 TonSaaS. Built for serious traders.</p>
+        <p className="mx-auto mt-8 max-w-6xl text-sm text-secondary">© 2026 TonSaaS. Conçu pour les traders exigeants.</p>
       </RevealSection>
 
       <div className="pointer-events-none fixed bottom-6 right-6 z-50">
@@ -484,7 +484,7 @@ export default function HomePage() {
           className={`pointer-events-auto inline-flex items-center justify-center rounded border border-border bg-card p-2 text-secondary transition-all duration-200 hover:text-primary ${
             showTop ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
           }`}
-          aria-label="Back to top"
+          aria-label="Retour en haut"
         >
           <ArrowRight className="h-5 w-5 -rotate-90" aria-hidden />
         </button>
