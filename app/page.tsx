@@ -217,9 +217,8 @@ export default function HomePage() {
             </button>
             <button
               type="button"
-              className="inline-flex items-center gap-1 text-secondary transition-colors duration-200 hover:text-primary"
+              className="inline-flex items-center text-secondary transition-colors duration-200 hover:text-primary"
             >
-              <HelpCircle className="h-4 w-4" aria-hidden />
               Aide
             </button>
           </nav>
@@ -516,7 +515,7 @@ export default function HomePage() {
                 <BarChart3 className="h-8 w-8 text-cyan" aria-hidden />
                 <h3 className="mt-5 text-xl font-semibold text-primary">Des données réelles. Des décisions précises</h3>
                 <p className="mt-3 text-sm leading-relaxed text-secondary">
-                  Votre analyse repose sur vos propres trades, pas sur d&apos;autres données génériques. Chaque analyse
+                  Votre analyse repose sur vos propres trades, pas sur des données génériques. Chaque analyse
                   est personnalisée afin de révéler ce qui fonctionne vraiment et ce qui vous freine.
                 </p>
               </article>
