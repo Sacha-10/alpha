@@ -435,7 +435,7 @@ export default function HomePage() {
         <RevealSection className="relative overflow-hidden bg-background px-6 py-20 md:py-[120px]">
           <div className="relative mx-auto max-w-6xl">
             <div className="flex justify-center">
-              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-secondary">
+              <div className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-secondary">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-blue" />
                 Technologie Exclusive
               </div>

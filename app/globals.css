@@ -48,6 +48,11 @@
   body {
     scroll-behavior: auto;
   }
+
+  .animate-pulse {
+    animation: none !important;
+    opacity: 1 !important;
+  }
 }
 
 /*
@@ -165,7 +170,7 @@ body {
 .animate-landing-marquee {
   display: flex;
   width: max-content;
-  animation: landing-marquee 50s linear infinite;
+  animation: landing-marquee 80s linear infinite;
   will-change: transform;
   backface-visibility: hidden;
 }
