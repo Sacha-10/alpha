@@ -587,7 +587,7 @@ export default function HomePage() {
                   key={item.name}
                   className="relative rounded border border-border bg-card p-7 transition-all duration-200 hover:border-blue"
                 >
-                  <span className="absolute left-4 top-3 text-5xl font-bold text-blue/20">&ldquo;</span>
+                  <span className="absolute right-4 top-3 text-5xl font-bold text-blue/20">&ldquo;</span>
                   <p className="mb-3 text-sm tracking-widest text-blue">★★★★★</p>
                   <p className="text-sm leading-relaxed text-secondary">{item.quote}</p>
                   <p className="mt-5 text-sm font-semibold text-primary">{item.name}</p>
