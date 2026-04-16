@@ -144,22 +144,6 @@ export default function HomePage() {
 
   return (
     <div className="relative min-h-screen bg-background text-primary">
-      <div className="pointer-events-none fixed inset-0 z-[1] opacity-40" aria-hidden>
-        <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="hero-grid" width="36" height="36" patternUnits="userSpaceOnUse">
-              <path
-                d="M 36 0 L 0 0 0 36"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="0.6"
-                className="text-border"
-              />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#hero-grid)" />
-        </svg>
-      </div>
       <div className="pointer-events-none fixed inset-0 z-[1]" aria-hidden>
         <div className="fixed left-1/2 top-[35%] h-80 w-80 -translate-x-1/2 rounded-full bg-blue/20 blur-3xl" />
       </div>
@@ -303,7 +287,7 @@ export default function HomePage() {
       </header>
 
       <main className="relative z-[2] pt-20">
-        <RevealSection className="-mt-20 bg-[#0A0A0F] pt-20">
+        <RevealSection className="-mt-20 bg-gradient-to-b from-[#0D0D14] to-[#0A0A0F] pt-20">
           <div className="mx-auto max-w-6xl px-6 pb-20 pt-4 text-center">
           <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-secondary">
             <span className="h-2 w-2 animate-pulse rounded-full bg-blue" />
@@ -384,7 +368,7 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection className="border-y border-border bg-[#0D0D14] py-4">
+        <RevealSection className="border-y border-border bg-[#0A0A0F] py-4">
           <div className="overflow-hidden text-secondary">
             <div className="animate-landing-marquee whitespace-nowrap">
               {[
@@ -412,7 +396,7 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection id="services" className="bg-[#0A0A0F]">
+        <RevealSection id="services" className="bg-[#0D0D14]">
           <div className="mx-auto max-w-6xl px-6 py-20">
           <h2 className="text-center text-3xl font-bold text-primary md:text-4xl">
             Tout ce qu&apos;il faut pour trader au plus haut{" "}
@@ -488,7 +472,7 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection className="bg-card px-6 py-20">
+        <RevealSection className="bg-[#0D0D14] px-6 py-20">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-center text-3xl font-bold text-primary md:text-5xl">
               Le système que les traders{" "}
@@ -617,7 +601,7 @@ export default function HomePage() {
         </RevealSection>
       </main>
 
-      <RevealSection className="bg-gradient-to-b from-background to-card px-6 py-20 text-center">
+      <RevealSection className="bg-gradient-to-b from-[#0A0A0F] to-[#0D0D14] px-6 py-20 text-center">
         <div className="mx-auto max-w-4xl">
           <h2 className="text-3xl font-bold text-primary md:text-5xl">
             Rejoignez l&apos;
