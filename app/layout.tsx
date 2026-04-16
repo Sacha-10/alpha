@@ -39,6 +39,21 @@ export default function RootLayout({
   return (
     <html lang="fr" data-scroll-behavior="smooth" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body>
+        <div
+          aria-hidden
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "600px",
+            height: "600px",
+            background: "radial-gradient(circle, rgba(45, 111, 255, 0.20) 0%, transparent 70%)",
+            borderRadius: "50%",
+            pointerEvents: "none",
+            zIndex: 1,
+          }}
+        />
         <ScrollReset />
         <Providers>{children}</Providers>
       </body>

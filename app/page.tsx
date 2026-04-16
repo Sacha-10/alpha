@@ -54,11 +54,11 @@ function RevealSection({ id, className = "", children }: RevealProps) {
     <section
       id={id}
       ref={ref}
-      className={`relative z-[2] ${className} transition-all duration-700 ease-out ${
+      className={`relative ${className} transition-all duration-700 ease-out ${
         visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
       }`}
     >
-      <div className="relative z-[3]">{children}</div>
+      <div>{children}</div>
     </section>
   );
 }
@@ -143,11 +143,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-background text-primary">
-      <div className="pointer-events-none fixed inset-0 z-[1]" aria-hidden>
-        <div className="fixed left-1/2 top-[35%] h-80 w-80 -translate-x-1/2 rounded-full bg-blue/20 blur-3xl" />
-      </div>
-
+    <div className="relative min-h-screen bg-background text-primary" style={{ zIndex: 0 }}>
       <header
         className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md transition-all duration-300 ${
           scrolled ? "border-border bg-background" : "border-transparent bg-transparent"
@@ -286,7 +282,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main className="relative z-[2]">
+      <main className="relative">
         <RevealSection className="pt-20 bg-gradient-to-b from-[#0A0A0F] to-[#12121A]">
           <div className="mx-auto max-w-6xl px-6 pb-20 pt-4 text-center">
           <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-secondary">
