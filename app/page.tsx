@@ -343,7 +343,7 @@ export default function HomePage() {
         </RevealSection>
 
         <RevealSection className="bg-[#0D0D14]">
-          <div className="mx-auto max-w-5xl px-6 pb-20 [perspective:1000px]">
+          <div className="mx-auto max-w-5xl px-6 pb-20 pt-20 [perspective:1000px]">
             <div className="card glow-blue rounded p-6 [transform:rotateX(5deg)]">
               <div className="mb-5 flex items-center justify-between border-b border-border pb-4">
                 <p className="text-sm text-secondary">Tableau de bord trading premium</p>
@@ -443,7 +443,7 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection className="bg-background px-6 py-20 md:py-[120px]">
+        <RevealSection className="bg-background px-6 py-20">
           <div className="mx-auto max-w-6xl text-center">
             <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-secondary">
               <span className="h-2 w-2 animate-pulse rounded-full bg-blue" />
@@ -488,7 +488,7 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection className="bg-card px-6 py-20 md:py-[120px]">
+        <RevealSection className="bg-card px-6 py-20">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-center text-3xl font-bold text-primary md:text-5xl">
               Le système que les traders{" "}
@@ -545,7 +545,7 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection className="bg-background px-6 py-20 md:py-[120px]">
+        <RevealSection className="bg-background px-6 py-20">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-center text-3xl font-bold text-primary md:text-5xl">
               Ce que les traders{" "}
@@ -617,7 +617,7 @@ export default function HomePage() {
         </RevealSection>
       </main>
 
-      <RevealSection className="bg-gradient-to-b from-background to-card px-6 py-20 md:py-[120px] text-center">
+      <RevealSection className="bg-gradient-to-b from-background to-card px-6 py-20 text-center">
         <div className="mx-auto max-w-4xl">
           <h2 className="text-3xl font-bold text-primary md:text-5xl">
             Rejoignez l&apos;
