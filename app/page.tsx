@@ -303,7 +303,7 @@ export default function HomePage() {
       </header>
 
       <main className="relative z-[2] pt-20">
-        <RevealSection className="bg-[#0A0A0F]">
+        <RevealSection className="-mt-20 bg-[#0A0A0F] pt-20">
           <div className="mx-auto max-w-6xl px-6 pb-20 pt-4 text-center">
           <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-secondary">
             <span className="h-2 w-2 animate-pulse rounded-full bg-blue" />
