@@ -286,8 +286,8 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main className="relative z-[2] pt-20">
-        <RevealSection className="-mt-20 bg-gradient-to-b from-[#0D0D14] to-[#0A0A0F] pt-20">
+      <main className="relative z-[2]">
+        <RevealSection className="pt-20 bg-gradient-to-b from-[#0A0A0F] to-[#12121A]">
           <div className="mx-auto max-w-6xl px-6 pb-20 pt-4 text-center">
           <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-secondary">
             <span className="h-2 w-2 animate-pulse rounded-full bg-blue" />
@@ -326,7 +326,7 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection className="bg-[#0D0D14]">
+        <RevealSection className="bg-[#12121A]">
           <div className="mx-auto max-w-5xl px-6 pb-20 pt-20 [perspective:1000px]">
             <div className="card glow-blue rounded p-6 [transform:rotateX(5deg)]">
               <div className="mb-5 flex items-center justify-between border-b border-border pb-4">
@@ -396,7 +396,7 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection id="services" className="bg-[#0D0D14]">
+        <RevealSection id="services" className="bg-[#12121A]">
           <div className="mx-auto max-w-6xl px-6 py-20">
           <h2 className="text-center text-3xl font-bold text-primary md:text-4xl">
             Tout ce qu&apos;il faut pour trader au plus haut{" "}
@@ -472,7 +472,7 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection className="bg-[#0D0D14] px-6 py-20">
+        <RevealSection className="bg-[#12121A] px-6 py-20">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-center text-3xl font-bold text-primary md:text-5xl">
               Le système que les traders{" "}
@@ -582,7 +582,7 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection id="analyse" className="bg-[#0D0D14] px-6 py-20 text-center">
+        <RevealSection id="analyse" className="bg-[#12121A] px-6 py-20 text-center">
           <h2 className="text-3xl font-bold text-primary md:text-4xl">
             Ce que l&apos;IA{" "}
             <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">révèle</span> en 60
@@ -601,7 +601,7 @@ export default function HomePage() {
         </RevealSection>
       </main>
 
-      <RevealSection className="bg-gradient-to-b from-[#0A0A0F] to-[#0D0D14] px-6 py-20 text-center">
+      <RevealSection className="bg-gradient-to-b from-[#12121A] to-[#0A0A0F] px-6 py-20 text-center">
         <div className="mx-auto max-w-4xl">
           <h2 className="text-3xl font-bold text-primary md:text-5xl">
             Rejoignez l&apos;
