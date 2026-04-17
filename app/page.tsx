@@ -156,7 +156,7 @@ export default function HomePage() {
             className="flex items-center gap-2 rounded text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue"
             aria-label="AlphaTradeX — retour en haut"
           >
-            <img src="/logo.svg" alt="AlphaTradeX" width={32} height={32} style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'var(--card)' }} />
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 600 600" style={{ borderRadius: '8px', flexShrink: 0 }}><rect width="600" height="600" rx="125" ry="125" fill="#0A0A0F"/><svg x="75" y="75" width="450" height="450" viewBox="0 0 24 24" fill="#0A0A0F" stroke="#2D6FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></svg>
             <span className="hidden text-lg font-bold text-primary md:inline">AlphaTradeX</span>
           </button>
           <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 text-lg font-bold text-primary md:hidden">
@@ -625,7 +625,7 @@ export default function HomePage() {
         <footer className="mx-auto flex max-w-6xl flex-col gap-8 text-secondary md:flex-row md:items-start md:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <img src="/logo.svg" alt="AlphaTradeX" width={32} height={32} style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'var(--card)' }} />
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 600 600" style={{ borderRadius: '8px', flexShrink: 0 }}><rect width="600" height="600" rx="125" ry="125" fill="#0A0A0F"/><svg x="75" y="75" width="450" height="450" viewBox="0 0 24 24" fill="#0A0A0F" stroke="#2D6FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></svg>
               <span className="font-bold text-primary">AlphaTradeX</span>
             </div>
             <p className="mt-2 text-sm">Votre analyste IA personnel sur les marchés</p>
