@@ -5,7 +5,12 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(npm run:*)",
-      "Bash(xxd /c/Users/sacha/dev/SaasAi/Alpha/alpha/public/logo.png)"
+      "Bash(xxd /c/Users/sacha/dev/SaasAi/Alpha/alpha/public/logo.png)",
+      "Bash(npx next *)",
+      "Bash(curl -s http://localhost:3001/)",
+      "Bash(curl -s http://localhost:3001/logo.svg)",
+      "Bash(curl -sI http://localhost:3001/logo.svg)",
+      "Bash(curl -sI http://localhost:3001/)"
     ]
   }
 }
