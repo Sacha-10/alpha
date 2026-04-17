@@ -156,7 +156,7 @@ export default function HomePage() {
             className="flex items-center gap-2 rounded text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue"
             aria-label="AlphaTradeX — retour en haut"
           >
-            <img src="/logo.svg" alt="AlphaTradeX" style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'var(--card)' }} />
+            <img src="/logo.svg" alt="AlphaTradeX" width={32} height={32} style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'var(--card)' }} />
             <span className="hidden text-lg font-bold text-primary md:inline">AlphaTradeX</span>
           </button>
           <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 text-lg font-bold text-primary md:hidden">
@@ -625,7 +625,7 @@ export default function HomePage() {
         <footer className="mx-auto flex max-w-6xl flex-col gap-8 text-secondary md:flex-row md:items-start md:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <img src="/logo.svg" alt="AlphaTradeX" style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'var(--card)' }} />
+              <img src="/logo.svg" alt="AlphaTradeX" width={32} height={32} style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'var(--card)' }} />
               <span className="font-bold text-primary">AlphaTradeX</span>
             </div>
             <p className="mt-2 text-sm">Votre analyste IA personnel sur les marchés</p>
