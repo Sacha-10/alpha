@@ -21,19 +21,19 @@ export const metadata: Metadata = {
   description:
     "Analyze your trades with AI. Find out exactly why you're losing money and fix it before your next session.",
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-    shortcut: "/logo.png",
+    icon: "/logo.svg",
+    apple: "/logo.svg",
+    shortcut: "/logo.svg",
   },
   openGraph: {
     title: "TonSaaS — AI Trading Journal",
     description:
       "Analyze your trades with AI. Find out exactly why you're losing money and fix it before your next session.",
     type: "website",
-    images: ["/logo.png"],
+    images: ["/logo.svg"],
   },
   twitter: {
-    images: ["/logo.png"],
+    images: ["/logo.svg"],
   },
 };
 
