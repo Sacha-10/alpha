@@ -21,13 +21,19 @@ export const metadata: Metadata = {
   description:
     "Analyze your trades with AI. Find out exactly why you're losing money and fix it before your next session.",
   icons: {
-    icon: "/icon.svg",
+    icon: "/logo.png",
+    apple: "/logo.png",
+    shortcut: "/logo.png",
   },
   openGraph: {
     title: "TonSaaS — AI Trading Journal",
     description:
       "Analyze your trades with AI. Find out exactly why you're losing money and fix it before your next session.",
     type: "website",
+    images: ["/logo.png"],
+  },
+  twitter: {
+    images: ["/logo.png"],
   },
 };
 
@@ -38,6 +44,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" data-scroll-behavior="smooth" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+      </head>
       <body>
         <div
           aria-hidden
