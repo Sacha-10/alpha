@@ -17,6 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://alphatradex.ai'),
   title: "TonSaaS — AI Trading Journal",
   description:
     "Analyze your trades with AI. Find out exactly why you're losing money and fix it before your next session.",
