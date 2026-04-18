@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import CookieBanner from "@/components/CookieBanner";
 import { Providers } from "@/components/Providers";
 import ScrollReset from "@/components/ScrollReset";
 import "./globals.css";
@@ -66,6 +67,7 @@ export default function RootLayout({
         />
         <ScrollReset />
         <Providers>{children}</Providers>
+        <CookieBanner />
       </body>
     </html>
   );
