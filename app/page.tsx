@@ -648,25 +648,29 @@ export default function HomePage() {
             </div>
           </div>
         </footer>
-        <div className="mx-auto mt-6 flex max-w-6xl flex-wrap gap-x-4 gap-y-2 text-xs text-secondary">
-          <Link href="/legal/mentions-legales" className="hover:text-primary">
-            Mentions légales
-          </Link>
-          <Link href="/legal/cgu" className="hover:text-primary">
-            CGU
-          </Link>
-          <Link href="/legal/confidentialite" className="hover:text-primary">
-            Politique de confidentialité
-          </Link>
-          <Link href="/legal/cookies" className="hover:text-primary">
-            Politique de cookies
-          </Link>
-          <Link href="/legal/cgv" className="hover:text-primary">
-            CGV
-          </Link>
-          <Link href="/legal/risques" className="hover:text-primary">
-            Mentions de risque
-          </Link>
+        <div className="mx-auto mt-6 flex max-w-6xl flex-col gap-2 text-xs text-secondary">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Link href="/legal/mentions-legales" className="hover:text-primary">
+              Mentions légales
+            </Link>
+            <Link href="/legal/cgu" className="hover:text-primary">
+              CGU
+            </Link>
+            <Link href="/legal/confidentialite" className="hover:text-primary">
+              Politique de confidentialité
+            </Link>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Link href="/legal/cookies" className="hover:text-primary">
+              Politique de cookies
+            </Link>
+            <Link href="/legal/cgv" className="hover:text-primary">
+              CGV
+            </Link>
+            <Link href="/legal/risques" className="hover:text-primary">
+              Mentions de risque
+            </Link>
+          </div>
         </div>
         <p className="mx-auto mt-8 max-w-6xl text-sm text-secondary">© 2026 AlphaTradeX. Élaboré pour les traders sérieux.</p>
       </RevealSection>
