@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
@@ -622,7 +623,7 @@ export default function HomePage() {
       </RevealSection>
 
       <RevealSection className="border-t border-border bg-background/80 px-6 py-10 backdrop-blur-md">
-        <footer className="mx-auto flex max-w-6xl flex-col gap-8 text-secondary md:flex-row md:items-start md:justify-between">
+        <footer className="mx-auto flex max-w-6xl flex-col gap-8 text-secondary">
           <div>
             <div className="flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 600 600" style={{ borderRadius: '8px', flexShrink: 0 }}><rect width="600" height="600" rx="125" ry="125" fill="#0A0A0F"/><svg x="75" y="75" width="450" height="450" viewBox="0 0 24 24" fill="#0A0A0F" stroke="#2D6FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></svg>
@@ -632,6 +633,9 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-sm">
+            <a href="mailto:contact@alphatradex.ai" className="hover:text-primary">
+              contact@alphatradex.ai
+            </a>
             <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
               <Info className="h-4 w-4" aria-hidden />
               À propos de nous
@@ -640,18 +644,27 @@ export default function HomePage() {
               <HelpCircle className="h-4 w-4" aria-hidden />
               Aide
             </button>
-            <a href="mailto:contact@tondomaine.ai" className="hover:text-primary">
-              contact@tondomaine.ai
-            </a>
           </div>
         </footer>
         <div className="mx-auto mt-6 flex max-w-6xl flex-wrap gap-x-4 gap-y-2 text-xs text-secondary">
-          <span>Mentions légales</span>
-          <span>CGU</span>
-          <span>Politique de confidentialité</span>
-          <span>Politique de cookies</span>
-          <span>CGV</span>
-          <span>Mentions de risque</span>
+          <Link href="/legal/mentions-legales" className="hover:text-primary">
+            Mentions légales
+          </Link>
+          <Link href="/legal/cgu" className="hover:text-primary">
+            CGU
+          </Link>
+          <Link href="/legal/confidentialite" className="hover:text-primary">
+            Politique de confidentialité
+          </Link>
+          <Link href="/legal/cookies" className="hover:text-primary">
+            Politique de cookies
+          </Link>
+          <Link href="/legal/cgv" className="hover:text-primary">
+            CGV
+          </Link>
+          <Link href="/legal/risques" className="hover:text-primary">
+            Mentions de risque
+          </Link>
         </div>
         <p className="mx-auto mt-8 max-w-6xl text-sm text-secondary">© 2026 AlphaTradeX. Élaboré pour les traders sérieux.</p>
       </RevealSection>
