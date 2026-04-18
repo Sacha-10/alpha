@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 const STORAGE_KEY = "alphatradex-cookie-consent";
@@ -16,9 +16,6 @@ export default function CookieBanner() {
   const [exiting, setExiting] = useState(false);
   const [acceptHover, setAcceptHover] = useState(false);
   const [rejectHover, setRejectHover] = useState(false);
-  const [topPos, setTopPos] = useState<string>("auto");
-  const [bottomPos, setBottomPos] = useState<string>("16px");
-  const bannerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -30,27 +27,6 @@ export default function CookieBanner() {
       setShow(true);
     }
   }, []);
-
-  useEffect(() => {
-    if (!show) return;
-
-    const calcPosition = () => {
-      const el = document.getElementById("hero-cta-analyse");
-      if (!el || !bannerRef.current) {
-        setTopPos("auto");
-        setBottomPos("16px");
-        return;
-      }
-      const rect = el.getBoundingClientRect();
-      const bannerHeight = bannerRef.current.getBoundingClientRect().height;
-      setTopPos(`${rect.bottom - bannerHeight}px`);
-      setBottomPos("auto");
-    };
-
-    calcPosition();
-    window.addEventListener("resize", calcPosition);
-    return () => window.removeEventListener("resize", calcPosition);
-  }, [show]);
 
   const persistChoice = (value: "accepted" | "rejected") => {
     _sessionDismissed = true;
@@ -72,13 +48,11 @@ export default function CookieBanner() {
 
   return createPortal(
     <div
-      ref={bannerRef}
       role="dialog"
       aria-label="Cookies"
       style={{
         position: "fixed",
-        top: topPos,
-        bottom: bottomPos,
+        bottom: "20px",
         left: "50%",
         transform: "translateX(-50%)",
         width: "min(420px, calc(100% - 2rem))",
