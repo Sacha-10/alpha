@@ -52,7 +52,7 @@ export default function CookieBanner() {
       aria-label="Cookies"
       style={{
         position: "fixed",
-        bottom: "20px",
+        bottom: "12px",
         left: "50%",
         transform: "translateX(-50%)",
         width: "min(420px, calc(100% - 2rem))",
