@@ -632,18 +632,20 @@ export default function HomePage() {
             <p className="mt-2 text-sm">Votre analyste IA personnel sur les marchés</p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-sm">
+          <div className="flex flex-col gap-4 text-sm">
             <a href="mailto:contact@alphatradex.ai" className="hover:text-primary">
               contact@alphatradex.ai
             </a>
-            <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
-              <Info className="h-4 w-4" aria-hidden />
-              À propos de nous
-            </button>
-            <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
-              <HelpCircle className="h-4 w-4" aria-hidden />
-              Aide
-            </button>
+            <div className="flex flex-wrap items-center gap-4">
+              <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
+                <Info className="h-4 w-4" aria-hidden />
+                À propos de nous
+              </button>
+              <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
+                <HelpCircle className="h-4 w-4" aria-hidden />
+                Aide
+              </button>
+            </div>
           </div>
         </footer>
         <div className="mx-auto mt-6 flex max-w-6xl flex-wrap gap-x-4 gap-y-2 text-xs text-secondary">
