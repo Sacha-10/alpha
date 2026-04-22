@@ -85,6 +85,14 @@ export default function Navbar() {
     }
   };
 
+  const handleServicesClick = () => {
+    if (pathname === "/") {
+      window.scrollTo(0, 0);
+    } else {
+      router.push("/");
+    }
+  };
+
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md transition-all duration-300 ${
@@ -108,7 +116,7 @@ export default function Navbar() {
         <nav className="hidden items-center gap-8 text-sm md:flex">
           <button
             type="button"
-            onClick={() => window.scrollTo({ top: 0, left: 0, behavior: "smooth" })}
+            onClick={handleServicesClick}
             className="text-secondary transition-colors duration-200 hover:text-primary"
           >
             Services
@@ -164,10 +172,7 @@ export default function Navbar() {
         <div className="flex flex-col gap-2 p-4">
           <button
             type="button"
-            onClick={() => {
-              closeMobileMenu();
-              window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-            }}
+            onClick={() => { closeMobileMenu(); handleServicesClick(); }}
             className="text-left text-secondary transition-colors duration-200 hover:text-primary"
           >
             Services
