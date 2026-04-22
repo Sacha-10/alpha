@@ -191,7 +191,7 @@ export default function PricingPage() {
                       <p className="text-xs uppercase tracking-wide text-[#8892AA]">Accès anticipé (à vie)</p>
                       <p className="mt-2 text-3xl font-bold text-[#F0F4FF]">{currentPrices.opening}</p>
                       {"openingDetail" in currentPrices ? (
-                        <p className="mt-1 text-sm text-[#8892AA]">{currentPrices.openingDetail}</p>
+                        <p className="mt-1 text-sm text-[#8892AA]">{currentPrices.openingDetail as string}</p>
                       ) : null}
                       <p className="mt-1 text-sm text-[#8892AA]">
                         au lieu de <span className="line-through">{currentPrices.openingStriked}</span>
