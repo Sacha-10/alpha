@@ -12,12 +12,12 @@ type Plan = {
   name: string;
   hook: string;
   subhook: string;
-  popular?: boolean;
+  yearlySavings: string;
   highlighted?: boolean;
   ctaBg: string;
   prices: {
     monthly: { opening: string; openingStriked: string; normal: string };
-    yearly: { opening: string; openingDetail: string; openingStriked: string; normal: string };
+    yearly: { opening: string; openingStriked: string; normal: string };
   };
   features: Array<{ label: string; included: boolean }>;
 };
@@ -27,10 +27,11 @@ const plans: Plan[] = [
     name: "PRO",
     hook: "Structurer ses décisions.",
     subhook: "Analyser ses trades avec méthode.",
+    yearlySavings: "Économisez 60€",
     ctaBg: "bg-[#1E2035]",
     prices: {
-      monthly: { opening: "24.5€", openingStriked: "49.5€", normal: "49.5€" },
-      yearly: { opening: "19.5€/mois", openingDetail: "facturé 234€/an", openingStriked: "474€", normal: "39.5€/mois" },
+      monthly: { opening: "24.5€/mois", openingStriked: "49.5€/mois", normal: "49.5€/mois" },
+      yearly: { opening: "19.5€/mois", openingStriked: "474€/an", normal: "39.5€/mois" },
     },
     features: [
       { label: "4 analyses par mois", included: true },
@@ -50,12 +51,12 @@ const plans: Plan[] = [
     name: "PREMIUM",
     hook: "Optimiser sa régularité.",
     subhook: "Améliorer ses performances avec régularité.",
-    popular: true,
+    yearlySavings: "Économisez 120€",
     highlighted: true,
     ctaBg: "bg-[#2D6FFF]",
     prices: {
-      monthly: { opening: "49.5€", openingStriked: "99.5€", normal: "99.5€" },
-      yearly: { opening: "39.5€/mois", openingDetail: "facturé 474€/an", openingStriked: "954€", normal: "79.5€/mois" },
+      monthly: { opening: "49.5€/mois", openingStriked: "99.5€/mois", normal: "99.5€/mois" },
+      yearly: { opening: "39.5€/mois", openingStriked: "954€/an", normal: "79.5€/mois" },
     },
     features: [
       { label: "24 analyses par mois", included: true },
@@ -72,13 +73,14 @@ const plans: Plan[] = [
     ],
   },
   {
-    name: "ELITE",
+    name: "ÉLITE",
     hook: "Maîtriser son exécution.",
     subhook: "Exécuter ses décisions avec précision.",
+    yearlySavings: "Économisez 240€",
     ctaBg: "bg-[#1E2035]",
     prices: {
-      monthly: { opening: "99.5€", openingStriked: "199.5€", normal: "199.5€" },
-      yearly: { opening: "79.5€/mois", openingDetail: "facturé 954€/an", openingStriked: "1914€", normal: "159.5€/mois" },
+      monthly: { opening: "99.5€/mois", openingStriked: "199.5€/mois", normal: "199.5€/mois" },
+      yearly: { opening: "79.5€/mois", openingStriked: "1914€/an", normal: "159.5€/mois" },
     },
     features: [
       { label: "Analyses illimitées", included: true },
@@ -166,62 +168,98 @@ export default function PricingPage() {
           </p>
 
           <section className="w-full py-20">
-            <div className="grid gap-6 md:grid-cols-3">
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-end', gap: '24px', width: '100%' }}>
               {plans.map((plan) => {
                 const currentPrices = billingMode === "monthly" ? plan.prices.monthly : plan.prices.yearly;
                 return (
-                  <article
-                    key={plan.name}
-                    className={`rounded-xl border bg-[#12121A] p-6 ${
-                      plan.highlighted ? "border-[#2D6FFF]" : "border-[#1E2035]"
-                    }`}
-                  >
-                    <div className="min-h-[64px]">
-                      {plan.popular ? (
-                        <span className="inline-flex rounded-full border border-[#2D6FFF] bg-[#2D6FFF]/10 px-3 py-1 text-xs font-semibold text-[#2D6FFF]">
-                          Le plus populaire
-                        </span>
-                      ) : null}
-                    </div>
-                    <h2 className="text-2xl font-bold">{plan.name}</h2>
-                    <p className="mt-2 text-[#F0F4FF]">{plan.hook}</p>
-                    <p className="text-sm text-[#8892AA]">{plan.subhook}</p>
+                  <div key={plan.name} style={{ flex: 1 }}>
+                    {plan.highlighted ? (
+                      <article className="relative overflow-hidden rounded-xl border border-[#1E2035] bg-[#12121A] p-6">
+                        {billingMode === "yearly" && (
+                          <span
+                            className="absolute rounded-full bg-[#2D6FFF] px-3 py-1 text-xs font-semibold text-white"
+                            style={{ top: 16, right: 16 }}
+                          >
+                            {plan.yearlySavings}
+                          </span>
+                        )}
+                        <h2 className="text-2xl font-bold">{plan.name}</h2>
+                        <p className="mt-2 text-[#F0F4FF]">{plan.hook}</p>
+                        <p className="text-sm text-[#8892AA]">{plan.subhook}</p>
+                        <div className="mt-6 rounded-lg border border-[#1E2035] bg-[#0A0A0F] p-4">
+                          <p className="text-xs uppercase tracking-wide text-[#8892AA]">Accès anticipé (à vie)</p>
+                          <p className="mt-2 text-3xl font-bold text-[#F0F4FF]">{currentPrices.opening}</p>
+                          <p className="mt-1 text-sm text-[#8892AA] line-through">{currentPrices.openingStriked}</p>
+                          <p className="mt-4 text-sm text-[#8892AA]">
+                            Prix public (à venir) :{" "}
+                            <span className="font-semibold text-[#F0F4FF]">{currentPrices.normal}</span>
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          className={`mt-6 w-full rounded-lg px-4 py-3 font-semibold text-[#F0F4FF] transition-opacity hover:opacity-90 ${plan.ctaBg}`}
+                        >
+                          Commencer
+                        </button>
+                        <ul className="mt-6 space-y-3">
+                          {plan.features.map((feature) => (
+                            <li key={feature.label} className="flex items-start gap-2 text-sm">
+                              {feature.included ? (
+                                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#2D6FFF]" aria-hidden />
+                              ) : (
+                                <X className="mt-0.5 h-4 w-4 shrink-0 text-[#8892AA]" aria-hidden />
+                              )}
+                              <span className={feature.included ? "text-[#F0F4FF]" : "text-[#8892AA]"}>{feature.label}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </article>
+                    ) : (
+                      <article className="relative overflow-hidden rounded-xl border border-[#1E2035] bg-[#12121A] p-6">
+                        {billingMode === "yearly" && (
+                          <span
+                            className="absolute rounded-full bg-[#2D6FFF] px-3 py-1 text-xs font-semibold text-white"
+                            style={{ top: 16, right: 16 }}
+                          >
+                            {plan.yearlySavings}
+                          </span>
+                        )}
+                        <h2 className="text-2xl font-bold">{plan.name}</h2>
+                        <p className="mt-2 text-[#F0F4FF]">{plan.hook}</p>
+                        <p className="text-sm text-[#8892AA]">{plan.subhook}</p>
 
-                    <div className="mt-6 rounded-lg border border-[#1E2035] bg-[#0A0A0F] p-4">
-                      <p className="text-xs uppercase tracking-wide text-[#8892AA]">Accès anticipé (à vie)</p>
-                      <p className="mt-2 text-3xl font-bold text-[#F0F4FF]">{currentPrices.opening}</p>
-                      {"openingDetail" in currentPrices ? (
-                        <p className="mt-1 text-sm text-[#8892AA]">{currentPrices.openingDetail as string}</p>
-                      ) : null}
-                      <p className="mt-1 text-sm text-[#8892AA]">
-                        au lieu de <span className="line-through">{currentPrices.openingStriked}</span>
-                      </p>
-                      <p className="mt-4 text-sm text-[#8892AA]">
-                        Prix public (à venir) :{" "}
-                        <span className="font-semibold text-[#F0F4FF]">{currentPrices.normal}</span>
-                      </p>
-                    </div>
+                        <div className="mt-6 rounded-lg border border-[#1E2035] bg-[#0A0A0F] p-4">
+                          <p className="text-xs uppercase tracking-wide text-[#8892AA]">Accès anticipé (à vie)</p>
+                          <p className="mt-2 text-3xl font-bold text-[#F0F4FF]">{currentPrices.opening}</p>
+                          <p className="mt-1 text-sm text-[#8892AA] line-through">{currentPrices.openingStriked}</p>
+                          <p className="mt-4 text-sm text-[#8892AA]">
+                            Prix public (à venir) :{" "}
+                            <span className="font-semibold text-[#F0F4FF]">{currentPrices.normal}</span>
+                          </p>
+                        </div>
 
-                    <button
-                      type="button"
-                      className={`mt-6 w-full rounded-lg px-4 py-3 font-semibold text-[#F0F4FF] transition-opacity hover:opacity-90 ${plan.ctaBg}`}
-                    >
-                      Commencer
-                    </button>
+                        <button
+                          type="button"
+                          className={`mt-6 w-full rounded-lg px-4 py-3 font-semibold text-[#F0F4FF] transition-opacity hover:opacity-90 ${plan.ctaBg}`}
+                        >
+                          Commencer
+                        </button>
 
-                    <ul className="mt-6 space-y-3">
-                      {plan.features.map((feature) => (
-                        <li key={feature.label} className="flex items-start gap-2 text-sm text-[#8892AA]">
-                          {feature.included ? (
-                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#2D6FFF]" aria-hidden />
-                          ) : (
-                            <X className="mt-0.5 h-4 w-4 shrink-0 text-[#8892AA]" aria-hidden />
-                          )}
-                          <span className={feature.included ? "text-[#F0F4FF]" : "text-[#8892AA]"}>{feature.label}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </article>
+                        <ul className="mt-6 space-y-3">
+                          {plan.features.map((feature) => (
+                            <li key={feature.label} className="flex items-start gap-2 text-sm">
+                              {feature.included ? (
+                                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#2D6FFF]" aria-hidden />
+                              ) : (
+                                <X className="mt-0.5 h-4 w-4 shrink-0 text-[#8892AA]" aria-hidden />
+                              )}
+                              <span className={feature.included ? "text-[#F0F4FF]" : "text-[#8892AA]"}>{feature.label}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </article>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -259,3 +297,4 @@ export default function PricingPage() {
     </div>
   );
 }
+
