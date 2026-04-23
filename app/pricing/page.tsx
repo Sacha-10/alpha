@@ -174,46 +174,51 @@ export default function PricingPage() {
                 return (
                   <div key={plan.name} style={{ flex: 1 }}>
                     {plan.highlighted ? (
-                      <article className="relative overflow-hidden rounded-xl border border-[#1E2035] bg-[#12121A] p-6">
-                        {billingMode === "yearly" && (
-                          <span
-                            className="absolute rounded-full bg-[#2D6FFF] px-3 py-1 text-xs font-semibold text-white"
-                            style={{ top: 16, right: 16 }}
-                          >
-                            {plan.yearlySavings}
-                          </span>
-                        )}
-                        <h2 className="text-2xl font-bold">{plan.name}</h2>
-                        <p className="mt-2 text-[#F0F4FF]">{plan.hook}</p>
-                        <p className="text-sm text-[#8892AA]">{plan.subhook}</p>
-                        <div className="mt-6 rounded-lg border border-[#1E2035] bg-[#0A0A0F] p-4">
-                          <p className="text-xs uppercase tracking-wide text-[#8892AA]">Accès anticipé (à vie)</p>
-                          <p className="mt-2 text-3xl font-bold text-[#F0F4FF]">{currentPrices.opening}</p>
-                          <p className="mt-1 text-sm text-[#8892AA] line-through">{currentPrices.openingStriked}</p>
-                          <p className="mt-4 text-sm text-[#8892AA]">
-                            Prix public (à venir) :{" "}
-                            <span className="font-semibold text-[#F0F4FF]">{currentPrices.normal}</span>
-                          </p>
+                      <div style={{ position: 'relative', background: 'linear-gradient(180deg, #2D6FFF 0%, #00E5FF 100%)', borderRadius: '24px', padding: '48px 4px 4px 4px' }}>
+                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span className="font-semibold text-white">Le plus populaire</span>
                         </div>
-                        <button
-                          type="button"
-                          className={`mt-6 w-full rounded-lg px-4 py-3 font-semibold text-[#F0F4FF] transition-opacity hover:opacity-90 ${plan.ctaBg}`}
-                        >
-                          Commencer
-                        </button>
-                        <ul className="mt-6 space-y-3">
-                          {plan.features.map((feature) => (
-                            <li key={feature.label} className="flex items-start gap-2 text-sm">
-                              {feature.included ? (
-                                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#2D6FFF]" aria-hidden />
-                              ) : (
-                                <X className="mt-0.5 h-4 w-4 shrink-0 text-[#8892AA]" aria-hidden />
-                              )}
-                              <span className={feature.included ? "text-[#F0F4FF]" : "text-[#8892AA]"}>{feature.label}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </article>
+                        <article className="relative overflow-hidden border border-[#1E2035] bg-[#12121A] p-6" style={{ borderRadius: '20px' }}>
+                          {billingMode === "yearly" && (
+                            <span
+                              className="absolute rounded-full bg-[#2D6FFF] px-3 py-1 text-xs font-semibold text-white"
+                              style={{ top: 16, right: 16 }}
+                            >
+                              {plan.yearlySavings}
+                            </span>
+                          )}
+                          <h2 className="text-2xl font-bold">{plan.name}</h2>
+                          <p className="mt-2 text-[#F0F4FF]">{plan.hook}</p>
+                          <p className="text-sm text-[#8892AA]">{plan.subhook}</p>
+                          <div className="mt-6 rounded-lg border border-[#1E2035] bg-[#0A0A0F] p-4">
+                            <p className="text-xs uppercase tracking-wide text-[#8892AA]">Accès anticipé (à vie)</p>
+                            <p className="mt-2 text-3xl font-bold text-[#F0F4FF]">{currentPrices.opening}</p>
+                            <p className="mt-1 text-sm text-[#8892AA] line-through">{currentPrices.openingStriked}</p>
+                            <p className="mt-4 text-sm text-[#8892AA]">
+                              Prix public (à venir) :{" "}
+                              <span className="font-semibold text-[#F0F4FF]">{currentPrices.normal}</span>
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            className={`mt-6 w-full rounded-lg px-4 py-3 font-semibold text-[#F0F4FF] transition-opacity hover:opacity-90 ${plan.ctaBg}`}
+                          >
+                            Commencer
+                          </button>
+                          <ul className="mt-6 space-y-3">
+                            {plan.features.map((feature) => (
+                              <li key={feature.label} className="flex items-start gap-2 text-sm">
+                                {feature.included ? (
+                                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#2D6FFF]" aria-hidden />
+                                ) : (
+                                  <X className="mt-0.5 h-4 w-4 shrink-0 text-[#8892AA]" aria-hidden />
+                                )}
+                                <span className={feature.included ? "text-[#F0F4FF]" : "text-[#8892AA]"}>{feature.label}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </article>
+                      </div>
                     ) : (
                       <article className="relative overflow-hidden rounded-xl border border-[#1E2035] bg-[#12121A] p-6">
                         {billingMode === "yearly" && (
