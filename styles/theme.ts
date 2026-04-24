@@ -18,5 +18,5 @@ export const theme = {
   },
   borderRadius: "12px",
   transition: "200ms ease",
-  shadow: "0 0 40px rgba(45, 111, 255, 0.08)",
+  shadow: "0 0 40px rgba(45, 111, 255, 0.07)",
 } as const;

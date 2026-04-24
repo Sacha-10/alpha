@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     shortcut: "/logo.svg",
   },
   openGraph: {
-    title: "TonSaaS — AI Trading Journal",
+    title: "AlphaTradeX — Votre analyste IA personnel sur les marchés",
     description:
       "Analyze your trades with AI. Find out exactly why you're losing money and fix it before your next session.",
     type: "website",
