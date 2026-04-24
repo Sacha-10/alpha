@@ -282,9 +282,9 @@ export default function PricingPage() {
             </div>
           </section>
 
-          <section className="w-full rounded-2xl bg-gradient-to-b from-[#0A0A0F] to-[#12121A] px-6 py-16 text-center md:py-20">
+          <section className="w-full rounded-2xl bg-[#0A0A0F] px-6 py-16 text-center md:py-20">
             <h2 className="text-2xl font-bold text-[#F0F4FF] md:text-3xl">Votre première analyse IA offerte.</h2>
-            <p className="mx-auto mt-6 max-w-lg text-sm text-[#8892AA]">Aucune inscription requise.</p>
+            <p className="mx-auto mt-6 max-w-lg text-[#8892AA]">Aucune inscription requise.</p>
             <Link
               href="/demo"
               className="mt-4 inline-flex items-center justify-center rounded-lg bg-[#2D6FFF] px-8 py-3 text-lg font-semibold text-[#F0F4FF] transition-opacity hover:opacity-90"
