@@ -168,17 +168,17 @@ export default function PricingPage() {
           </p>
 
           <section className="w-full py-20">
-            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-end', gap: '24px', width: '100%' }}>
+            <div className="flex w-full flex-col gap-6 md:flex-row md:items-end">
               {plans.map((plan) => {
                 const currentPrices = billingMode === "monthly" ? plan.prices.monthly : plan.prices.yearly;
                 return (
-                  <div key={plan.name} style={{ flex: 1 }}>
+                  <div key={plan.name} className="w-full md:flex-1" style={plan.highlighted ? { marginBottom: '-4px' } : undefined}>
                     {plan.highlighted ? (
-                      <div style={{ position: 'relative', background: 'linear-gradient(180deg, #2D6FFF 0%, #00E5FF 100%)', borderRadius: '24px', padding: '48px 4px 4px 4px' }}>
+                      <div className="rounded-xl" style={{ position: 'relative', background: 'linear-gradient(180deg, #2D6FFF 0%, #00E5FF 100%)', padding: '48px 4px 4px 4px' }}>
                         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <span className="font-semibold text-white">Le plus populaire</span>
                         </div>
-                        <article className="relative overflow-hidden border border-[#1E2035] bg-[#12121A] p-6" style={{ borderRadius: '20px' }}>
+                        <article className="relative overflow-hidden rounded-xl border border-[#1E2035] bg-[#12121A] p-6">
                           {billingMode === "yearly" && (
                             <span
                               className="absolute rounded-full bg-[#2D6FFF] px-3 py-1 text-xs font-semibold text-white"
