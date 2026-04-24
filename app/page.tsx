@@ -327,8 +327,9 @@ export default function HomePage() {
                 <BarChart3 className="h-8 w-8 text-cyan" aria-hidden />
                 <h3 className="mt-5 text-xl font-semibold text-primary">Des données réelles. Des décisions précises</h3>
                 <p className="mt-3 text-sm leading-relaxed text-secondary">
-                  Votre analyse repose sur vos propres trades, pas sur d&apos;autres données génériques. Chaque
-                  analyse est personnalisée afin de révéler ce qui fonctionne vraiment et ce qui vous freine.
+                  Votre analyse repose sur vos propres trades, pas sur des données génériques.
+                  Chaque analyse est personnalisée afin de révéler ce qui fonctionne vraiment
+                  et ce qui vous freine.
                 </p>
               </article>
               <article className="card rounded p-7">
