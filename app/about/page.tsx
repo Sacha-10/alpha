@@ -71,7 +71,7 @@ const truthCards = [
   },
   {
     title: "Votre exposition vous dépasse.",
-    body: "Sans mesure précise votre risque géré coûte plus que vos pires drawdowns.",
+    body: "Sans mesure précise votre risque géré coûte plus que vos pires pertes.",
   },
   {
     title: "Votre journal vous condamne.",
@@ -87,6 +87,7 @@ const stats = [
   { value: "< 60s", label: "Pour analyser votre historique" },
   { value: "4", label: "Plateformes compatibles" },
   { value: "200", label: "Traders en accès anticipé" },
+  { value: "2", label: "Prop Firms compatibles" },
 ];
 
 const principles = [
@@ -163,18 +164,18 @@ export default function AboutPage() {
         </section>
 
         <section className="px-6 py-24">
-          <div className="mx-auto max-w-[1200px]">
+          <div className="mx-auto max-w-[1200px] text-center">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Le problème</p>
-              <h2 className="mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
                 Les bons traders ont une stratégie.
               </h2>
-              <p className="mt-6 max-w-[480px] text-base leading-relaxed text-secondary">
+              <p className="mx-auto mt-6 max-w-[480px] text-base leading-relaxed text-secondary">
                 Aucun n&apos;a de mirror. AlphaTradeX est ce mirror.
               </p>
             </RevealSection>
 
-            <div className="mt-14 grid max-w-[900px] gap-5 md:grid-cols-2">
+            <div className="mt-14 grid gap-5 md:grid-cols-2">
               {truthCards.map((item, index) => (
                 <RevealSection key={item.title} delay={index * 80}>
                   <article className="card rounded p-7 transition-colors duration-200 hover:border-blue">
@@ -198,12 +199,15 @@ export default function AboutPage() {
               </h2>
             </RevealSection>
 
-            <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3">
+            <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-4">
               {stats.map((item, index) => (
                 <RevealSection key={item.label} delay={index * 70}>
                   <article className="card rounded p-8 text-center transition-colors duration-200 hover:border-blue">
                     <p className="font-mono text-4xl font-bold text-primary">{item.value}</p>
-                    <p className="mt-2 text-sm text-secondary">{item.label}</p>
+                    <p
+                      className="mt-2 text-sm text-secondary"
+                      dangerouslySetInnerHTML={{ __html: item.label }}
+                    />
                   </article>
                 </RevealSection>
               ))}
