@@ -199,7 +199,7 @@ export default function AboutPage() {
               </h2>
             </RevealSection>
 
-            <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {stats.map((item, index) => (
                 <RevealSection key={item.label} delay={index * 70}>
                   <article className="card rounded p-8 text-center transition-colors duration-200 hover:border-blue">
