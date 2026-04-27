@@ -205,10 +205,10 @@ export default function AboutPage() {
                   <article className="card rounded p-8 text-center transition-colors duration-200 hover:border-blue">
                     <p className="block w-full text-center font-mono text-4xl font-bold text-primary whitespace-nowrap sm:whitespace-normal">{item.value}</p>
                     {item.value === "<60s" ? (
-                      <p className="mt-2 w-full text-sm text-secondary">
-                        <span className="hidden sm:inline">Pour analyser votre historique</span>
-                        <span className="sm:hidden block w-fit mx-auto whitespace-nowrap">Pour analyser<br />votre historique</span>
-                      </p>
+                      <>
+                        <p className="mt-2 w-full text-sm text-secondary hidden sm:block">Pour analyser votre historique</p>
+                        <p className="text-sm text-secondary mt-2 text-center w-full sm:hidden">Pour analyser<br />votre historique</p>
+                      </>
                     ) : (
                       <p className="mt-2 w-full text-sm text-secondary">{item.label}</p>
                     )}
