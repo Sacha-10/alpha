@@ -205,9 +205,9 @@ export default function AboutPage() {
                   <article className="card rounded p-8 text-center transition-colors duration-200 hover:border-blue">
                     <p className="block font-mono text-4xl font-bold text-primary">{item.value}</p>
                     {item.value === "< 60s" ? (
-                      <p className="text-sm text-secondary mt-2">
-                        <span className="block sm:inline">Pour analyser</span>
-                        <span className="block sm:inline"> votre historique</span>
+                      <p className="mt-2 text-sm text-secondary">
+                        <span className="hidden sm:inline">Pour analyser votre historique</span>
+                        <span className="sm:hidden">Pour analyser<br />votre historique</span>
                       </p>
                     ) : (
                       <p className="mt-2 text-sm text-secondary">{item.label}</p>
