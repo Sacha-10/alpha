@@ -207,7 +207,7 @@ export default function AboutPage() {
                     {item.value === "<60s" ? (
                       <p className="mt-2 mx-auto w-full text-center text-sm text-secondary">
                         <span className="hidden sm:inline">Pour analyser votre historique</span>
-                        <span className="sm:hidden block whitespace-nowrap">Pour analyser<br />votre historique</span>
+                        <span className="sm:hidden block whitespace-nowrap w-fit mx-auto">Pour analyser<br />votre historique</span>
                       </p>
                     ) : (
                       <p className="mt-2 w-full text-sm text-secondary">{item.label}</p>
