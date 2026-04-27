@@ -202,7 +202,7 @@ export default function AboutPage() {
             <div className="mt-12 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {stats.map((item, index) => (
                 <RevealSection key={item.label} delay={index * 70}>
-                  <article className="card rounded p-8 text-center transition-colors duration-200 hover:border-blue">
+                  <article className="card rounded p-4 sm:p-8 text-center transition-colors duration-200 hover:border-blue">
                     <p className="block w-full text-center font-mono text-4xl font-bold text-primary whitespace-nowrap sm:whitespace-normal">{item.value}</p>
                     {item.value === "<60s" ? (
                       <>
