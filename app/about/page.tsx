@@ -203,9 +203,9 @@ export default function AboutPage() {
               {stats.map((item, index) => (
                 <RevealSection key={item.label} delay={index * 70}>
                   <article className="card rounded p-8 text-center transition-colors duration-200 hover:border-blue">
-                    <p className={`block w-full text-center font-mono text-4xl font-bold text-primary${item.value !== "<60s" ? " whitespace-nowrap sm:whitespace-normal" : ""}`}>{item.value}</p>
+                    <p className={`block w-full text-center font-mono text-4xl font-bold text-primary${item.value !== "<60s" ? " whitespace-nowrap sm:whitespace-normal" : " mx-auto text-center"}`}>{item.value}</p>
                     {item.value === "<60s" ? (
-                      <p className="mt-2 w-full text-sm text-secondary">
+                      <p className="mt-2 mx-auto w-full text-center text-sm text-secondary">
                         <span className="hidden sm:inline">Pour analyser votre historique</span>
                         <span className="sm:hidden whitespace-nowrap">Pour analyser<br />votre historique</span>
                       </p>
