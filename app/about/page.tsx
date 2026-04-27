@@ -203,7 +203,7 @@ export default function AboutPage() {
               {stats.map((item, index) => (
                 <RevealSection key={item.label} delay={index * 70}>
                   <article className="card rounded p-8 text-center transition-colors duration-200 hover:border-blue">
-                    <p className="block font-mono text-4xl font-bold text-primary">{item.value}</p>
+                    <p className="block whitespace-nowrap font-mono text-4xl font-bold text-primary sm:whitespace-normal">{item.value}</p>
                     {item.value === "< 60s" ? (
                       <p className="mt-2 text-sm text-secondary">
                         <span className="hidden sm:inline">Pour analyser votre historique</span>
