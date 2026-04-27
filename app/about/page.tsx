@@ -203,11 +203,19 @@ export default function AboutPage() {
               {stats.map((item, index) => (
                 <RevealSection key={item.label} delay={index * 70}>
                   <article className="card rounded p-8 text-center transition-colors duration-200 hover:border-blue">
-                    <p className="font-mono text-4xl font-bold text-primary">{item.value}</p>
-                    <p
-                      className="mt-2 text-sm text-secondary"
-                      dangerouslySetInnerHTML={{ __html: item.label }}
-                    />
+                    <p className="block font-mono text-4xl font-bold text-primary">{item.value}</p>
+                    {item.value === "< 60s" ? (
+                      <p className="mt-2 text-sm text-secondary">
+                        <span className="block sm:hidden">
+                          Pour analyser
+                          <br />
+                          votre historique
+                        </span>
+                        <span className="hidden sm:block">Pour analyser votre historique</span>
+                      </p>
+                    ) : (
+                      <p className="mt-2 text-sm text-secondary">{item.label}</p>
+                    )}
                   </article>
                 </RevealSection>
               ))}
