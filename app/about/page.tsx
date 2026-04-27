@@ -199,18 +199,18 @@ export default function AboutPage() {
               </h2>
             </RevealSection>
 
-            <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="mt-12 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {stats.map((item, index) => (
                 <RevealSection key={item.label} delay={index * 70}>
                   <article className="card rounded p-8 text-center transition-colors duration-200 hover:border-blue">
-                    <p className="block whitespace-nowrap font-mono text-4xl font-bold text-primary sm:whitespace-normal">{item.value}</p>
+                    <p className="block w-full whitespace-nowrap font-mono text-4xl font-bold text-primary sm:whitespace-normal">{item.value}</p>
                     {item.value === "< 60s" ? (
-                      <p className="mt-2 text-sm text-secondary">
+                      <p className="mt-2 w-full text-sm text-secondary">
                         <span className="hidden sm:inline">Pour analyser votre historique</span>
                         <span className="sm:hidden">Pour analyser<br />votre historique</span>
                       </p>
                     ) : (
-                      <p className="mt-2 text-sm text-secondary">{item.label}</p>
+                      <p className="mt-2 w-full text-sm text-secondary">{item.label}</p>
                     )}
                   </article>
                 </RevealSection>
