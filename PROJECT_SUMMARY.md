@@ -310,7 +310,7 @@ scrollbar-gutter: stable
 
 **Nav desktop :** `hidden items-center gap-8 text-sm md:flex`
 - Items : `text-secondary transition-colors duration-200 hover:text-primary`
-- Liens : Services · Analyse Gratuite → `/demo` · Prix → `/pricing` · À propos de nous · Aide
+- Liens : Services · Analyse Gratuite → `/demo` · Prix → `/pricing` · À propos · Aide
 
 **Bouton S'inscrire desktop :**
 - `hidden items-center gap-2 rounded bg-blue px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-blue/90 md:inline-flex`
@@ -342,7 +342,7 @@ scrollbar-gutter: stable
   "Votre analyste IA personnel sur les marchés" — mt-2 text-sm
   a[href="mailto:contact@alphatradex.ai"] — hover:text-primary
   flex flex-wrap items-center gap-4 text-sm :
-    <Info h-4 w-4> "À propos de nous"
+    <Info h-4 w-4> "À propos"
     <HelpCircle h-4 w-4> "Aide"
 
 <div class="mx-auto mt-6 flex max-w-6xl flex-col gap-2 text-xs text-secondary">

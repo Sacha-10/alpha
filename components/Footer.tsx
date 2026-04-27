@@ -48,7 +48,7 @@ export default function Footer() {
           <div className="flex flex-wrap items-center gap-4">
             <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
               <Info className="h-4 w-4" aria-hidden />
-              À propos de nous
+              À propos
             </button>
             <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
               <HelpCircle className="h-4 w-4" aria-hidden />

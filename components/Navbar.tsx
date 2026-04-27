@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Menu, UserCircle, X } from "lucide-react";
@@ -135,9 +136,9 @@ export default function Navbar() {
           >
             Prix
           </button>
-          <button type="button" className="text-secondary transition-colors duration-200 hover:text-primary">
-            À propos de nous
-          </button>
+          <Link href="/about" className="text-secondary transition-colors duration-200 hover:text-primary">
+            À propos
+          </Link>
           <button type="button" className="text-secondary transition-colors duration-200 hover:text-primary">
             Aide
           </button>
@@ -197,13 +198,13 @@ export default function Navbar() {
           >
             Prix
           </button>
-          <button
-            type="button"
+          <Link
+            href="/about"
             onClick={closeMobileMenu}
             className="text-left text-secondary transition-colors duration-200 hover:text-primary"
           >
-            À propos de nous
-          </button>
+            À propos
+          </Link>
           <button
             type="button"
             onClick={closeMobileMenu}
