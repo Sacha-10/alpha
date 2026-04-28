@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Menu, UserCircle, X } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase";
@@ -35,7 +35,6 @@ const LogoSvg = () => (
 );
 
 export default function Navbar() {
-  const router = useRouter();
   const pathname = usePathname();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const [scrolled, setScrolled] = useState(false);
@@ -79,19 +78,7 @@ export default function Navbar() {
   const scrollTopSmooth = () => window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
 
   const handleBrandClick = () => {
-    if (pathname === "/") {
-      scrollTopSmooth();
-    } else {
-      router.push("/");
-    }
-  };
-
-  const handleServicesClick = () => {
-    if (pathname === "/") {
-      window.scrollTo(0, 0);
-    } else {
-      router.push("/");
-    }
+    if (pathname === "/") scrollTopSmooth();
   };
 
   return (
@@ -101,47 +88,36 @@ export default function Navbar() {
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <button
-          type="button"
+        <Link
+          href="/"
           onClick={handleBrandClick}
           className="flex items-center gap-2 rounded text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue"
           aria-label="AlphaTradeX — retour en haut"
         >
           <LogoSvg />
           <span className="hidden text-lg font-bold text-primary md:inline">AlphaTradeX</span>
-        </button>
-        <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 text-lg font-bold text-primary md:hidden">
+        </Link>
+        <Link
+          href="/"
+          onClick={handleBrandClick}
+          className="absolute left-1/2 -translate-x-1/2 text-lg font-bold text-primary md:hidden"
+        >
           AlphaTradeX
-        </span>
+        </Link>
 
         <nav className="hidden items-center gap-8 text-sm md:flex">
-          <button
-            type="button"
-            onClick={handleServicesClick}
-            className="text-secondary transition-colors duration-200 hover:text-primary"
-          >
-            Services
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push("/demo")}
-            className="text-secondary transition-colors duration-200 hover:text-primary"
-          >
-            Analyse Gratuite
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push("/pricing")}
-            className="text-secondary transition-colors duration-200 hover:text-primary"
-          >
+          <Link href="/demo" className="text-secondary transition-colors duration-200 hover:text-primary">
+            Analyse
+          </Link>
+          <Link href="/pricing" className="text-secondary transition-colors duration-200 hover:text-primary">
             Prix
-          </button>
+          </Link>
           <Link href="/about" className="text-secondary transition-colors duration-200 hover:text-primary">
             À propos
           </Link>
-          <button type="button" className="text-secondary transition-colors duration-200 hover:text-primary">
+          <Link href="/aide" className="text-secondary transition-colors duration-200 hover:text-primary">
             Aide
-          </button>
+          </Link>
         </nav>
 
         <button
@@ -171,47 +147,18 @@ export default function Navbar() {
         }`}
       >
         <div className="flex flex-col gap-2 p-4">
-          <button
-            type="button"
-            onClick={() => { closeMobileMenu(); handleServicesClick(); }}
-            className="text-left text-secondary transition-colors duration-200 hover:text-primary"
-          >
-            Services
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              closeMobileMenu();
-              router.push("/demo");
-            }}
-            className="text-left text-secondary transition-colors duration-200 hover:text-primary"
-          >
-            Analyse Gratuite
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              closeMobileMenu();
-              router.push("/pricing");
-            }}
-            className="text-left text-secondary transition-colors duration-200 hover:text-primary"
-          >
+          <Link href="/demo" onClick={closeMobileMenu} className="text-left text-secondary transition-colors duration-200 hover:text-primary">
+            Analyse
+          </Link>
+          <Link href="/pricing" onClick={closeMobileMenu} className="text-left text-secondary transition-colors duration-200 hover:text-primary">
             Prix
-          </button>
-          <Link
-            href="/about"
-            onClick={closeMobileMenu}
-            className="text-left text-secondary transition-colors duration-200 hover:text-primary"
-          >
+          </Link>
+          <Link href="/about" onClick={closeMobileMenu} className="text-left text-secondary transition-colors duration-200 hover:text-primary">
             À propos
           </Link>
-          <button
-            type="button"
-            onClick={closeMobileMenu}
-            className="text-left text-secondary transition-colors duration-200 hover:text-primary"
-          >
+          <Link href="/aide" onClick={closeMobileMenu} className="text-left text-secondary transition-colors duration-200 hover:text-primary">
             Aide
-          </button>
+          </Link>
           <button
             type="button"
             onClick={() => {
