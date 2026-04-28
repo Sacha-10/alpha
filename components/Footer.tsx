@@ -46,14 +46,14 @@ export default function Footer() {
             contact@alphatradex.ai
           </a>
           <div className="flex flex-wrap items-center gap-4">
-            <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
+            <Link href="/about" className="inline-flex items-center gap-1 hover:text-primary">
               <Info className="h-4 w-4" aria-hidden />
               À propos
-            </button>
-            <button type="button" className="inline-flex items-center gap-1 hover:text-primary">
+            </Link>
+            <Link href="/aide" className="inline-flex items-center gap-1 hover:text-primary">
               <HelpCircle className="h-4 w-4" aria-hidden />
               Aide
-            </button>
+            </Link>
           </div>
         </div>
       </footer>
