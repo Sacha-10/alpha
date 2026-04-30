@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from 
+import { createRouteHandlerClient } from
   '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { analyzeTrades } from '@/lib/openai'
+import Stripe from 'stripe'
 
 const PLAN_LIMITS: Record<string, number> = {
   starter: 4,
@@ -13,6 +14,8 @@ const PLAN_LIMITS: Record<string, number> = {
 // Rate limiting en mémoire — 1 requête toutes les 15 secondes par utilisateur
 const rateLimitMap = new Map<string, number>()
 const RATE_LIMIT_MS = 15_000
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 export async function POST(req: NextRequest) {
   const supabase = createRouteHandlerClient({ 
@@ -50,19 +53,29 @@ export async function POST(req: NextRequest) {
     )
   }
   
-  // Reset mensuel automatique
-  const today = new Date()
+  // Reset basé sur la période de facturation Stripe (current_period_start)
   const resetDate = new Date(userData.analyses_reset_date)
-  if (today >= resetDate) {
-    const nextReset = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      1
+  let periodStart: Date | null = null
+
+  if (userData.subscription_status === 'active') {
+    const customers = await stripe.customers.search({
+      query: `metadata['userId']:'${user.id}'`,
+      expand: ['data.subscriptions'],
+    })
+    const customer = customers.data[0]
+    const activeSub = customer?.subscriptions?.data.find(
+      (s) => s.status === 'active'
     )
+    if (activeSub) {
+      periodStart = new Date(activeSub.current_period_start * 1000)
+    }
+  }
+
+  if (periodStart !== null && resetDate < periodStart) {
     await supabase.from('users')
-      .update({ 
+      .update({
         analyses_used: 0,
-        analyses_reset_date: nextReset.toISOString()
+        analyses_reset_date: periodStart.toISOString(),
       })
       .eq('id', user.id)
     userData.analyses_used = 0
