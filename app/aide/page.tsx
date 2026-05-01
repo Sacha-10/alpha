@@ -285,11 +285,11 @@ export default function AidePage() {
           </div>
         </section>
 
-        <section className="px-6 py-24 text-center">
+        <section className="px-6 py-24">
           <div className="max-w-[1200px] mx-auto">
             <RevealSection>
-              <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase">Questions fréquentes</p>
-              <h2 className="text-4xl font-bold text-primary mt-4 mx-auto">
+              <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase text-center">Questions fréquentes</p>
+              <h2 className="text-4xl font-bold text-primary mt-4 text-center">
                 Ce que les traders sérieux veulent savoir.
               </h2>
             </RevealSection>
