@@ -105,14 +105,14 @@ const processSteps: ProcessStep[] = [
     color: "#00E5FF",
     number: "02",
     title: "L'IA décrypte vos trades",
-    body: "Vos patterns, vos biais, vos sessions, votre profil psychologique. Résultat en moins de 60 secondes.",
+    body: "Vos patterns, vos biais, vos sessions, votre profil psychologique. Chaque donnée analysée, résultat en moins de 60 secondes.",
   },
   {
     icon: FileText,
     color: "#00E5B0",
     number: "03",
     title: "Votre mirror sans filtre",
-    body: "Vos forces, vos failles, votre plan d'action exportable en PDF. Exécutable en moins de 24h.",
+    body: "Vos forces, vos failles, votre plan d'action\nexportable en PDF. Chaque insight priorisé,\nexécutable en moins de 24h.",
   },
 ];
 
@@ -120,7 +120,7 @@ const platformGuides: PlatformGuide[] = [
   { title: "MT4", description: "Ctrl+T · Account History · Clic droit · Save as Report · CSV" },
   { title: "MT5", description: "Ctrl+T · History · Clic droit · Export · CSV" },
   { title: "Binance", description: "Orders · Trade History · Export Trade History · CSV" },
-  { title: "Bybit", description: "Profile · Account · Data Export · Période · Export Now · Download · CSV" },
+  { title: "Bybit", description: "Profile · Account · Data Export · Export Now · Download · CSV" },
   { title: "TradingView", description: "Panneau broker · Export Data · Balance History · Export · CSV" },
   { title: "FTMO", description: "Client Area · Metrix · Trading Journal · Export · CSV" },
   { title: "FundedNext", description: "Exportez via MT4 ou MT5. Voir étapes ci-dessus." },
@@ -285,14 +285,12 @@ export default function AidePage() {
           </div>
         </section>
 
-        <section className="px-6 py-24">
+        <section className="px-6 py-24 text-center">
           <div className="max-w-[1200px] mx-auto">
             <RevealSection>
               <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase">Questions fréquentes</p>
-              <h2 className="text-4xl font-bold text-primary mt-4">
-                Ce que les traders sérieux
-                <br />
-                veulent savoir.
+              <h2 className="text-4xl font-bold text-primary mt-4 mx-auto">
+                Ce que les traders sérieux veulent savoir.
               </h2>
             </RevealSection>
 
