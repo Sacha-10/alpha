@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Upload, FileText, Brain, MessageCircle, ChevronDown } from "lucide-react";
+import { type LucideIcon, ArrowRight, Upload, FileText, Brain, MessageCircle, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -13,7 +13,7 @@ type RevealSectionProps = {
 };
 
 type ProcessStep = {
-  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties; "aria-hidden"?: boolean }>;
+  icon: LucideIcon;
   color: string;
   number: string;
   title: string;
