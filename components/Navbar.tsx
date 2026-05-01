@@ -115,7 +115,7 @@ export default function Navbar() {
           <Link href="/about" className="text-secondary transition-colors duration-200 hover:text-primary">
             À propos
           </Link>
-          <Link href="/aide" className="text-secondary transition-colors duration-200 hover:text-primary">
+          <Link href="/help" className="text-secondary transition-colors duration-200 hover:text-primary">
             Aide
           </Link>
         </nav>
@@ -156,7 +156,7 @@ export default function Navbar() {
           <Link href="/about" onClick={closeMobileMenu} className="text-left text-secondary transition-colors duration-200 hover:text-primary">
             À propos
           </Link>
-          <Link href="/aide" onClick={closeMobileMenu} className="text-left text-secondary transition-colors duration-200 hover:text-primary">
+          <Link href="/help" onClick={closeMobileMenu} className="text-left text-secondary transition-colors duration-200 hover:text-primary">
             Aide
           </Link>
           <button
