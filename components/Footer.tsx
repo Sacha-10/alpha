@@ -32,7 +32,7 @@ const LogoSvg = () => (
 export default function Footer() {
   return (
     <>
-      <footer className="mx-auto flex max-w-6xl flex-col gap-8 text-secondary">
+      <footer className="mx-auto flex max-w-[1200px] flex-col gap-8 text-secondary">
         <div>
           <div className="flex items-center gap-2">
             <LogoSvg />
@@ -57,7 +57,7 @@ export default function Footer() {
           </div>
         </div>
       </footer>
-      <div className="mx-auto mt-6 flex max-w-6xl flex-col gap-2 text-xs text-secondary">
+      <div className="mx-auto mt-6 flex max-w-[1200px] flex-col gap-2 text-xs text-secondary">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <Link href="/legal/mentions-legales" className="hover:text-primary">
             Mentions légales
@@ -81,7 +81,7 @@ export default function Footer() {
           </Link>
         </div>
       </div>
-      <p className="mx-auto mt-8 max-w-6xl text-sm text-secondary">
+      <p className="mx-auto mt-8 max-w-[1200px] text-sm text-secondary">
         © 2026 AlphaTradeX. Élaboré pour les traders sérieux.
       </p>
     </>

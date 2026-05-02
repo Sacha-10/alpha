@@ -113,7 +113,7 @@ const faqItems = [
   },
   {
     q: "Quels formats de trades sont compatibles ?",
-    r: "Compatible à MT4, MT5, Binance et TradingView. De nouvelles intégrations seront ajoutées de manière progressive.",
+    r: "Compatible à MT4, MT5, Binance, Bybit, TradingView, FTMO et FundedNext.",
   },
   {
     q: "À qui s'adresse la plateforme ?",

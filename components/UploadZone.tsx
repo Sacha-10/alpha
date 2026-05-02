@@ -77,7 +77,7 @@ export default function UploadZone({ onAnalyze, loading }: Props) {
                 Déposez votre historique de trades ici
               </p>
               <p className="text-secondary text-sm">
-                Compatible MT4, MT5, Binance et TradingView
+                Compatible MT4, MT5, Binance, Bybit, TradingView, FTMO et FundedNext
               </p>
             </motion.div>
           ) : (

@@ -200,19 +200,21 @@ export default function HomePage() {
             <div className="animate-landing-marquee whitespace-nowrap">
               {[
                 "Approuvé par les traders sur",
-                "Binance",
                 "MT4",
                 "MT5",
+                "Binance",
+                "Bybit",
                 "TradingView",
                 "FTMO",
-                "MyForexFunds",
+                "FundedNext",
                 "Approuvé par les traders sur",
-                "Binance",
                 "MT4",
                 "MT5",
+                "Binance",
+                "Bybit",
                 "TradingView",
                 "FTMO",
-                "MyForexFunds",
+                "FundedNext",
               ].map((item, index) => (
                 <span key={`${item}-${index}`} className="inline-flex items-center px-6 text-sm">
                   {index % 2 === 1 ? <span className="mx-3 h-1.5 w-1.5 rounded-full bg-blue" /> : null}
@@ -449,7 +451,7 @@ export default function HomePage() {
               S&apos;inscrire
             </button>
           </div>
-          <p className="mt-4 text-sm text-secondary">Importez vos trades depuis MT4, MT5, Binance, TradingView.</p>
+          <p className="mt-4 text-sm text-secondary">Importez vos trades depuis MT4, MT5, Binance, Bybit, TradingView, FTMO et FundedNext.</p>
         </div>
       </RevealSection>
 

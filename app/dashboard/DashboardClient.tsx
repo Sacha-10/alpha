@@ -141,7 +141,7 @@ export default function DashboardClient() {
         <section className="space-y-4">
           <h1 className="text-2xl font-bold text-primary">Analyser mes trades</h1>
           <p className="text-sm text-secondary">
-            Envoyez un CSV : nous détectons MT4, Binance ou TradingView, puis
+            Envoyez un CSV : nous détectons MT4, MT5, Binance, Bybit, TradingView, FTMO et FundedNext, puis
             appelons le modèle{" "}
             <span className="font-mono text-primary">gpt-5.4</span>.
           </p>

@@ -85,7 +85,7 @@ const truthCards = [
 
 const stats = [
   { value: "<60s", label: "Pour analyser votre historique" },
-  { value: "4", label: "Plateformes compatibles" },
+  { value: "5", label: "Plateformes compatibles" },
   { value: "200", label: "Traders en accès anticipé" },
   { value: "2", label: "Prop Firms compatibles" },
 ];
@@ -137,7 +137,7 @@ const timeline: TimelineStep[] = [
   },
 ];
 
-const platforms = ["MT4", "MT5", "Binance", "TradingView", "FTMO", "MyForexFunds"];
+const platforms = ["MT4", "MT5", "Binance", "Bybit", "TradingView", "FTMO", "FundedNext"];
 
 export default function AboutPage() {
   return (
