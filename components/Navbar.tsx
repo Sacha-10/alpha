@@ -83,11 +83,11 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 border-b px-6 backdrop-blur-md transition-all duration-300 ${
         scrolled ? "border-border bg-background" : "border-transparent bg-transparent"
       }`}
     >
-      <div className="mx-auto flex max-w-[1200px] items-center justify-between px-6 py-4">
+      <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between py-4">
         <Link
           href="/"
           onClick={handleBrandClick}
