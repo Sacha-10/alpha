@@ -351,7 +351,7 @@ export default function AidePage() {
                 Votre historique. 60 secondes. La vérité.
               </p>
               <div className="flex flex-wrap gap-4 justify-center mt-10">
-                <Link href="/demo" className="btn-primary inline-flex items-center gap-2">
+                <Link href="/analysis" className="btn-primary inline-flex items-center gap-2">
                   Analyse gratuite
                   <ArrowRight size={16} aria-hidden />
                 </Link>

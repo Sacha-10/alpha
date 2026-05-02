@@ -286,7 +286,7 @@ export default function PricingPage() {
             <h2 className="text-2xl font-bold text-[#F0F4FF] md:text-3xl">Votre première analyse IA offerte.</h2>
             <p className="mx-auto mt-6 max-w-lg text-[#8892AA]">Aucune inscription requise.</p>
             <Link
-              href="/demo"
+              href="/analysis"
               className="mt-4 inline-flex items-center justify-center rounded-lg bg-[#2D6FFF] px-8 py-3 text-lg font-semibold text-[#F0F4FF] transition-opacity hover:opacity-90"
             >
               Essayez l&apos;analyse gratuite

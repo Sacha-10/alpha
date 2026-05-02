@@ -106,7 +106,7 @@ export default function Navbar() {
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm md:flex">
-          <Link href="/demo" className="text-secondary transition-colors duration-200 hover:text-primary">
+          <Link href="/analysis" className="text-secondary transition-colors duration-200 hover:text-primary">
             Analyse
           </Link>
           <Link href="/pricing" className="text-secondary transition-colors duration-200 hover:text-primary">
@@ -147,7 +147,7 @@ export default function Navbar() {
         }`}
       >
         <div className="flex flex-col gap-2 p-4">
-          <Link href="/demo" onClick={closeMobileMenu} className="text-left text-secondary transition-colors duration-200 hover:text-primary">
+          <Link href="/analysis" onClick={closeMobileMenu} className="text-left text-secondary transition-colors duration-200 hover:text-primary">
             Analyse
           </Link>
           <Link href="/pricing" onClick={closeMobileMenu} className="text-left text-secondary transition-colors duration-200 hover:text-primary">

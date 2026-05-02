@@ -143,7 +143,7 @@ export default function HomePage() {
             </button>
             <button
               type="button"
-              onClick={() => router.push("/demo")}
+              onClick={() => router.push("/analysis")}
               className="inline-flex items-center gap-2 rounded border border-border bg-transparent px-6 py-3 font-semibold text-primary transition-all duration-200 hover:border-blue"
             >
               Analyse Gratuite
@@ -419,7 +419,7 @@ export default function HomePage() {
           <p className="mt-2 text-secondary">Aucune inscription requise</p>
           <button
             type="button"
-            onClick={() => router.push("/demo")}
+            onClick={() => router.push("/analysis")}
             className="mx-auto mt-8 inline-flex items-center gap-2 rounded bg-blue px-7 py-3 font-semibold text-primary transition-all duration-200 hover:bg-blue/90"
           >
             Analyse Gratuite

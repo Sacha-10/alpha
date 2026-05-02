@@ -367,7 +367,7 @@ export default function AboutPage() {
                 Votre historique. 60 secondes. La vérité.
               </p>
               <div className="mt-10 flex flex-wrap justify-center gap-4">
-                <Link href="/demo" className="btn-primary inline-flex items-center gap-2">
+                <Link href="/analysis" className="btn-primary inline-flex items-center gap-2">
                   Analyse gratuite
                   <ArrowRight size={16} aria-hidden />
                 </Link>
