@@ -76,7 +76,7 @@ export default function Footer() {
           <Link href="/legal/cgv" className="hover:text-primary">
             CGV
           </Link>
-          <Link href="/legal/risques" className="hover:text-primary">
+          <Link href="/legal/risque" className="hover:text-primary">
             Mentions de risque
           </Link>
         </div>
