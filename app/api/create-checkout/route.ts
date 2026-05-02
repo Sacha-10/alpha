@@ -14,25 +14,29 @@ const PLANS: Record<string, {
   monthly: number,
   annual: number,
   name: string,
-  limit: number
+  limit: number,
+  stripeProductId: string,
 }> = {
   starter: {
     monthly: 2900,
     annual: 2300,
     name: 'Starter — 1 analyse par semaine',
     limit: 4,
+    stripeProductId: 'prod_STARTER_ID',
   },
   pro: {
     monthly: 7900,
     annual: 6300,
     name: 'Pro — 1 analyse par jour ouvré',
     limit: 24,
+    stripeProductId: 'prod_PRO_ID',
   },
   elite: {
     monthly: 19900,
     annual: 15900,
     name: 'Elite — Analyses illimitées',
     limit: 999999,
+    stripeProductId: 'prod_ELITE_ID',
   },
 }
 
@@ -83,13 +87,13 @@ export async function GET(req: NextRequest) {
           id: itemId,
           price_data: {
             currency: 'eur',
-            product_data: { name: plan.name },
+            product: plan.stripeProductId,
             unit_amount: annual ? plan.annual : plan.monthly,
             recurring: {
               interval: annual ? 'year' : 'month',
               interval_count: 1,
             },
-          } as Stripe.SubscriptionCreateParams.Item.PriceData,
+          } as unknown as Stripe.SubscriptionUpdateParams.Item.PriceData,
         }],
         proration_behavior: 'none',
         metadata: {
@@ -123,13 +127,11 @@ export async function GET(req: NextRequest) {
       price_data: {
         currency: 'eur',
         product_data: { name: plan.name },
-        unit_amount: annual
-          ? plan.annual
-          : plan.monthly,
+        unit_amount: annual ? plan.annual : plan.monthly,
         recurring: {
           interval: annual ? 'year' : 'month',
         },
-      },
+      } as unknown as Stripe.SubscriptionUpdateParams.Item.PriceData,
       quantity: 1,
     }],
     metadata: {
