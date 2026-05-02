@@ -87,8 +87,9 @@ export async function GET(req: NextRequest) {
             unit_amount: annual ? plan.annual : plan.monthly,
             recurring: {
               interval: annual ? 'year' : 'month',
+              interval_count: 1,
             },
-          },
+          } as Stripe.SubscriptionCreateParams.Item.PriceData,
         }],
         proration_behavior: 'none',
         metadata: {
