@@ -50,7 +50,7 @@ export default function Footer() {
               <Info className="h-4 w-4" aria-hidden />
               À propos
             </Link>
-            <Link href="/aide" className="inline-flex items-center gap-1 hover:text-primary">
+            <Link href="/help" className="inline-flex items-center gap-1 hover:text-primary">
               <HelpCircle className="h-4 w-4" aria-hidden />
               Aide
             </Link>
