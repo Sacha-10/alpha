@@ -12,7 +12,8 @@
       "Bash(curl -sI http://localhost:3001/logo.svg)",
       "Bash(curl -sI http://localhost:3001/)",
       "Bash(python3 *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(Get-ChildItem *)"
     ]
   }
 }
