@@ -130,7 +130,7 @@ export default function DemoPage() {
             onClick={() => router.push('/dashboard')}
             className="btn-primary"
           >
-            Commencer — {PLANS.starter.monthly}€/mois
+            Commencer — {PLANS.pro.monthly}€/mois
           </button>
         </div>
       )}
@@ -156,7 +156,7 @@ export default function DemoPage() {
               onClick={() => router.push('/dashboard')}
               className="btn-primary text-lg px-8 py-3"
             >
-              Commencer — {PLANS.starter.monthly}€/mois
+              Commencer — {PLANS.pro.monthly}€/mois
             </button>
           </motion.div>
         </>
