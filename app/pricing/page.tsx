@@ -5,6 +5,7 @@ import { useState } from "react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Check, Flame, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type BillingMode = "monthly" | "yearly";
 
@@ -123,6 +124,12 @@ const faqItems = [
 
 export default function PricingPage() {
   const [billingMode, setBillingMode] = useState<BillingMode>("monthly");
+  const router = useRouter();
+  const handleCheckout = (planName: string) => {
+    const planKey = planName === "PRO" ? "pro" : planName === "PREMIUM" ? "premium" : "elite";
+    const billing = billingMode === "yearly" ? "annual" : "monthly";
+    router.push(`/api/create-checkout?plan=${planKey}&billing=${billing}`);
+  };
 
   return (
     <div className="min-h-screen bg-[#0A0A0F] font-sans text-[#F0F4FF]">
@@ -201,6 +208,7 @@ export default function PricingPage() {
                           </div>
                           <button
                             type="button"
+                            onClick={() => handleCheckout(plan.name)}
                             className={`mt-6 w-full rounded-lg px-4 py-3 font-semibold text-[#F0F4FF] transition-opacity hover:opacity-90 ${plan.ctaBg}`}
                           >
                             Commencer
@@ -245,6 +253,7 @@ export default function PricingPage() {
 
                         <button
                           type="button"
+                          onClick={() => handleCheckout(plan.name)}
                           className={`mt-6 w-full rounded-lg px-4 py-3 font-semibold text-[#F0F4FF] transition-opacity hover:opacity-90 ${plan.ctaBg}`}
                         >
                           Commencer

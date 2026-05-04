@@ -1,47 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { createRouteHandlerClient } from
-  '@supabase/auth-helpers-nextjs'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
+import { PLANS } from '@/lib/plans'
 
 export const dynamic = 'force-dynamic'
 
-const stripe = new Stripe(
-  process.env.STRIPE_SECRET_KEY!
-)
-
-const PLANS: Record<string, {
-  monthly: number,
-  annual: number,
-  name: string,
-  limit: number,
-  stripeProductId: string,
-}> = {
-  starter: {
-    monthly: 2900,
-    annual: 2300,
-    name: 'Starter — 1 analyse par semaine',
-    limit: 4,
-    stripeProductId: 'prod_STARTER_ID',
-  },
-  pro: {
-    monthly: 7900,
-    annual: 6300,
-    name: 'Pro — 1 analyse par jour ouvré',
-    limit: 24,
-    stripeProductId: 'prod_PRO_ID',
-  },
-  elite: {
-    monthly: 19900,
-    annual: 15900,
-    name: 'Elite — Analyses illimitées',
-    limit: 999999,
-    stripeProductId: 'prod_ELITE_ID',
-  },
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 export async function GET(req: NextRequest) {
-  const supabase = createRouteHandlerClient({ cookies })
+  const cookieStore = await cookies()
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
@@ -49,16 +18,15 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url)
-  const planKey = searchParams.get('plan') || 'starter'
+  const planKey = searchParams.get('plan') as keyof typeof PLANS
   const annual = searchParams.get('billing') === 'annual'
   const plan = PLANS[planKey]
 
   if (!plan) {
-    return NextResponse.json(
-      { error: 'Plan invalide' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'Plan invalide' }, { status: 400 })
   }
+
+  const priceId = annual ? plan.stripePriceAnnual : plan.stripePriceMonthly
 
   // Vérifier si l'utilisateur a déjà un abonnement actif
   const { data: dbUser } = await supabase
@@ -72,29 +40,14 @@ export async function GET(req: NextRequest) {
     dbUser?.subscription_status === 'active'
 
   if (hasActiveSub) {
-    // Changement de plan (upgrade ou downgrade)
     try {
       const currentSub = await stripe.subscriptions.retrieve(
         dbUser.stripe_subscription_id
       )
       const itemId = currentSub.items.data[0].id
 
-      // proration_behavior: 'none' — pas de facturation immédiate
-      // pour les downgrades ; les upgrades prennent effet immédiatement
-      // via customer.subscription.updated dans le webhook
       await stripe.subscriptions.update(dbUser.stripe_subscription_id, {
-        items: [{
-          id: itemId,
-          price_data: {
-            currency: 'eur',
-            product: plan.stripeProductId,
-            unit_amount: annual ? plan.annual : plan.monthly,
-            recurring: {
-              interval: annual ? 'year' : 'month',
-              interval_count: 1,
-            },
-          } as unknown as Stripe.SubscriptionUpdateParams.Item.PriceData,
-        }],
+        items: [{ id: itemId, price: priceId }],
         proration_behavior: 'none',
         metadata: {
           planName: planKey,
@@ -107,12 +60,10 @@ export async function GET(req: NextRequest) {
       )
     } catch (err) {
       console.error('create-checkout: échec mise à jour abonnement', err)
-      // En cas d'erreur (abonnement introuvable, etc.),
-      // créer une nouvelle session ci-dessous
     }
   }
 
-  // Nouvel abonnement — créer une session Checkout
+  // Nouvel abonnement
   const customer = await stripe.customers.create({
     email: user.email ?? undefined,
     metadata: { userId: user.id },
@@ -122,25 +73,14 @@ export async function GET(req: NextRequest) {
     mode: 'subscription',
     customer: customer.id,
     payment_method_types: ['card'],
-    currency: 'eur',
-    line_items: [{
-      price_data: {
-        currency: 'eur',
-        product_data: { name: plan.name },
-        unit_amount: annual ? plan.annual : plan.monthly,
-        recurring: {
-          interval: annual ? 'year' : 'month',
-        },
-      } as unknown as Stripe.SubscriptionUpdateParams.Item.PriceData,
-      quantity: 1,
-    }],
+    line_items: [{ price: priceId, quantity: 1 }],
     metadata: {
       userId: user.id,
       planName: planKey,
       analysesLimit: plan.limit.toString(),
     },
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/#tarifs`,
+    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
   })
 
   return NextResponse.redirect(session.url!)
