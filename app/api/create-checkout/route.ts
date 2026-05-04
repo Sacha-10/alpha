@@ -9,8 +9,7 @@ export const dynamic = 'force-dynamic'
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 export async function GET(req: NextRequest) {
-  const cookieStore = await cookies()
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+  const supabase = createRouteHandlerClient({ cookies })
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
