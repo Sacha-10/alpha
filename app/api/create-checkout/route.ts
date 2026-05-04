@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { PLANS } from '@/lib/plans'
 
 export const dynamic = 'force-dynamic'
@@ -9,8 +7,15 @@ export const dynamic = 'force-dynamic'
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 export async function GET(req: NextRequest) {
-  const supabase = createRouteHandlerClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
+  const { createClient } = await import('@supabase/supabase-js')
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const authHeader = req.headers.get('authorization') ?? ''
+  const token = authHeader.replace('Bearer ', '')
+  const { data: { user } } = await supabase.auth.getUser(token)
 
   if (!user) {
     return NextResponse.redirect(new URL('/', req.url))
