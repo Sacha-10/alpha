@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Menu, UserCircle, X } from "lucide-react";
-import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseClient } from "@/lib/supabase";
 
 const LogoSvg = () => (
   <svg
@@ -36,10 +36,7 @@ const LogoSvg = () => (
 
 export default function Navbar() {
   const pathname = usePathname();
-  const supabase = useMemo(
-    () => createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!),
-    []
-  );
+  const supabase = useMemo(() => getSupabaseClient(), []);
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);

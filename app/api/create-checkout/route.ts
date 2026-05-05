@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { PLANS } from '@/lib/plans'
+import { getSupabase } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,14 +17,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL('/', req.url))
   }
 
-  const { createClient } = await import('@supabase/supabase-js')
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  const supabase = getSupabase()
 
-  const { data: { user }, error } = await supabase.auth.getUser(token)
-  console.log('checkout user:', user?.email, 'error:', error)
+  const { data: { user } } = await supabase.auth.getUser(token)
 
   if (!user) {
     return NextResponse.redirect(new URL('/', req.url))
