@@ -8,6 +8,11 @@ import { Check, Flame, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from '@supabase/ssr'
 
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
 type BillingMode = "monthly" | "yearly";
 
 type Plan = {
@@ -130,10 +135,6 @@ export default function PricingPage() {
     const planKey = planName === "PRO" ? "pro" : planName === "PREMIUM" ? "premium" : "elite";
     const billing = billingMode === "yearly" ? "annual" : "monthly";
 
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
     const { data: { session } } = await supabase.auth.getSession()
 
     if (!session) {
