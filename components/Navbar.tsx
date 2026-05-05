@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Menu, UserCircle, X } from "lucide-react";
-import { getSupabaseClient } from "@/lib/supabase";
+import { createBrowserClient } from "@supabase/ssr";
 
 const LogoSvg = () => (
   <svg
@@ -36,7 +36,11 @@ const LogoSvg = () => (
 
 export default function Navbar() {
   const pathname = usePathname();
-  const supabase = useMemo(() => getSupabaseClient(), []);
+  const supabase = useMemo(
+    () => createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!),
+    []
+  );
+  const [user, setUser] = useState<{ id: string } | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
@@ -72,6 +76,14 @@ export default function Navbar() {
     document.addEventListener("mousedown", onPointerDown);
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, [mobileOpen]);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, [supabase]);
 
   const closeMobileMenu = () => setMobileOpen(false);
 
@@ -120,14 +132,25 @@ export default function Navbar() {
           </Link>
         </nav>
 
-        <button
-          type="button"
-          onClick={() => void connectGoogle()}
-          className="hidden items-center gap-2 rounded bg-blue px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-blue/90 md:inline-flex"
-        >
-          <UserCircle className="h-4 w-4" aria-hidden />
-          S&apos;inscrire
-        </button>
+        {user ? (
+          <button
+            type="button"
+            onClick={() => void supabase.auth.signOut()}
+            className="hidden items-center gap-2 rounded bg-blue px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-blue/90 md:inline-flex"
+          >
+            <UserCircle className="h-4 w-4" aria-hidden />
+            Déconnexion
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => void connectGoogle()}
+            className="hidden items-center gap-2 rounded bg-blue px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-blue/90 md:inline-flex"
+          >
+            <UserCircle className="h-4 w-4" aria-hidden />
+            S&apos;inscrire
+          </button>
+        )}
 
         <button
           type="button"
@@ -159,17 +182,31 @@ export default function Navbar() {
           <Link href="/help" onClick={closeMobileMenu} className="text-left text-secondary transition-colors duration-200 hover:text-primary">
             Aide
           </Link>
-          <button
-            type="button"
-            onClick={() => {
-              closeMobileMenu();
-              void connectGoogle();
-            }}
-            className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded bg-blue px-4 py-2 font-semibold text-primary transition-all duration-200 hover:bg-blue/90"
-          >
-            <UserCircle className="h-4 w-4" aria-hidden />
-            S&apos;inscrire
-          </button>
+          {user ? (
+            <button
+              type="button"
+              onClick={() => {
+                closeMobileMenu();
+                void supabase.auth.signOut();
+              }}
+              className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded bg-blue px-4 py-2 font-semibold text-primary transition-all duration-200 hover:bg-blue/90"
+            >
+              <UserCircle className="h-4 w-4" aria-hidden />
+              Déconnexion
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                closeMobileMenu();
+                void connectGoogle();
+              }}
+              className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded bg-blue px-4 py-2 font-semibold text-primary transition-all duration-200 hover:bg-blue/90"
+            >
+              <UserCircle className="h-4 w-4" aria-hidden />
+              S&apos;inscrire
+            </button>
+          )}
         </div>
       </div>
     </header>
