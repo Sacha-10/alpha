@@ -8,8 +8,6 @@ import { Check, Flame, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getSupabaseClient } from '@/lib/supabase'
 
-const supabase = getSupabaseClient()
-
 type BillingMode = "monthly" | "yearly";
 
 type Plan = {
@@ -128,6 +126,7 @@ const faqItems = [
 export default function PricingPage() {
   const [billingMode, setBillingMode] = useState<BillingMode>("monthly");
   const router = useRouter();
+  const supabase = getSupabaseClient();
   const handleCheckout = async (planName: string) => {
     const planKey = planName === "PRO" ? "pro" : planName === "PREMIUM" ? "premium" : "elite";
     const billing = billingMode === "yearly" ? "annual" : "monthly";
