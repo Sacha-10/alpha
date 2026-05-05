@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Check, Flame, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { createBrowserClient } from '@supabase/ssr'
 
 type BillingMode = "monthly" | "yearly";
 
@@ -130,6 +130,10 @@ export default function PricingPage() {
     const planKey = planName === "PRO" ? "pro" : planName === "PREMIUM" ? "premium" : "elite";
     const billing = billingMode === "yearly" ? "annual" : "monthly";
 
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
     const { data: { session } } = await supabase.auth.getSession()
 
     if (!session) {
