@@ -27,7 +27,8 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    await supabase.auth.exchangeCodeForSession(code)
+    const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code)
+    console.log('callback session:', session?.user?.email, 'error:', error)
   }
 
   return NextResponse.redirect(origin)

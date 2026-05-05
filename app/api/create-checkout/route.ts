@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
+  console.log('checkout user:', user?.email, 'cookies:', cookieStore.getAll().map(c => c.name))
 
   if (!user) {
     return NextResponse.redirect(new URL('/', req.url))
