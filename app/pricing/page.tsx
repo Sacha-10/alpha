@@ -125,10 +125,23 @@ const faqItems = [
 export default function PricingPage() {
   const [billingMode, setBillingMode] = useState<BillingMode>("monthly");
   const router = useRouter();
-  const handleCheckout = (planName: string) => {
+  const handleCheckout = async (planName: string) => {
     const planKey = planName === "PRO" ? "pro" : planName === "PREMIUM" ? "premium" : "elite";
     const billing = billingMode === "yearly" ? "annual" : "monthly";
-    router.push(`/api/create-checkout?plan=${planKey}&billing=${billing}`);
+
+    const { createBrowserClient } = await import('@supabase/ssr')
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+    )
+    const { data: { session } } = await supabase.auth.getSession()
+
+    if (!session) {
+      router.push('/')
+      return
+    }
+
+    router.push(`/api/create-checkout?plan=${planKey}&billing=${billing}&token=${session.access_token}`)
   };
 
   return (

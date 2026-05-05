@@ -1,5 +1,3 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { PLANS } from '@/lib/plans'
@@ -9,36 +7,27 @@ export const dynamic = 'force-dynamic'
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 export async function GET(req: NextRequest) {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
+  const { searchParams } = new URL(req.url)
+  const planKey = searchParams.get('plan') as keyof typeof PLANS
+  const annual = searchParams.get('billing') === 'annual'
+  const token = searchParams.get('token')
+
+  if (!token) {
+    return NextResponse.redirect(new URL('/', req.url))
+  }
+
+  const { createClient } = await import('@supabase/supabase-js')
+  const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {}
-        },
-      },
-    }
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
-  console.log('checkout user:', user?.email, 'cookies:', cookieStore.getAll().map(c => c.name))
+  const { data: { user }, error } = await supabase.auth.getUser(token)
+  console.log('checkout user:', user?.email, 'error:', error)
 
   if (!user) {
     return NextResponse.redirect(new URL('/', req.url))
   }
-
-  const { searchParams } = new URL(req.url)
-  const planKey = searchParams.get('plan') as keyof typeof PLANS
-  const annual = searchParams.get('billing') === 'annual'
   const plan = PLANS[planKey]
 
   if (!plan) {
