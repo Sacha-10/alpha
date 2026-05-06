@@ -129,7 +129,6 @@ export default function DashboardClient() {
               <div className="flex flex-col items-end gap-0.5 text-sm">
                 <div className="flex items-center gap-2">
                   <span className="font-medium capitalize text-primary">{subscriptionPlan}</span>
-                  <span className="rounded-full bg-green/15 px-2 py-0.5 text-xs font-medium text-green">Actif</span>
                 </div>
                 <span className="text-secondary">
                   {analysesUsed ?? "–"} / {dbAnalysesLimit ?? "–"} analyses utilisées
@@ -139,7 +138,7 @@ export default function DashboardClient() {
                 )}
                 <a
                   href="/api/customer-portal"
-                  className="text-xs text-secondary/60 hover:text-secondary"
+                  className="text-xs text-secondary hover:text-primary"
                 >
                   Modifier · Annuler · Factures
                 </a>
