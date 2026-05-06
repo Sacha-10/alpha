@@ -3,7 +3,7 @@
 import { getSupabaseClient } from "@/lib/supabase";
 import { detectAndParse } from "@/lib/parseCSV";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import TradeReport from "@/components/TradeReport";
 import UploadZone from "@/components/UploadZone";
 import type { AiAnalysisResult } from "@/lib/tradingAnalysisTypes";
@@ -25,7 +25,30 @@ export default function DashboardClient() {
   const [analysesLimit, setAnalysesLimit] = useState<number | undefined>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
+  const [analysesUsed, setAnalysesUsed] = useState<number | null>(null);
+  const [dbAnalysesLimit, setDbAnalysesLimit] = useState<number | null>(null);
+  const [analysesResetDate, setAnalysesResetDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchUserData() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("users")
+        .select("subscription_plan, analyses_used, analyses_limit, analyses_reset_date")
+        .eq("id", user.id)
+        .single();
+      if (data) {
+        setSubscriptionPlan(data.subscription_plan ?? null);
+        setAnalysesUsed(data.analyses_used ?? null);
+        setDbAnalysesLimit(data.analyses_limit ?? null);
+        setAnalysesResetDate(data.analyses_reset_date ?? null);
+      }
+    }
+    void fetchUserData();
+  }, [supabase]);
 
   const runAnalyze = useCallback(async (file: File) => {
     setLoading(true);
@@ -79,13 +102,9 @@ export default function DashboardClient() {
     [runAnalyze]
   );
 
-  function subscribe() {
-    setCheckoutLoading(true);
-    setError(null);
-    window.location.href = new URL(
-      "/api/create-checkout?plan=starter",
-      window.location.origin
-    ).href;
+  function formatResetDate(dateStr: string): string {
+    const d = new Date(dateStr);
+    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
   }
 
   async function signOut() {
@@ -106,14 +125,34 @@ export default function DashboardClient() {
             Alpha — Tableau de bord
           </button>
           <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={() => subscribe()}
-              disabled={checkoutLoading}
-              className="rounded-lg bg-blue px-4 py-2 text-sm font-medium text-primary hover:bg-blue/85 disabled:opacity-50"
-            >
-              {checkoutLoading ? "Redirection…" : "S’abonner (EUR)"}
-            </button>
+            {subscriptionPlan ? (
+              <div className="flex flex-col items-end gap-0.5 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium capitalize text-primary">{subscriptionPlan}</span>
+                  <span className="rounded-full bg-green/15 px-2 py-0.5 text-xs font-medium text-green">Actif</span>
+                </div>
+                <span className="text-secondary">
+                  {analysesUsed ?? "–"} / {dbAnalysesLimit ?? "–"} analyses utilisées
+                </span>
+                {analysesResetDate && (
+                  <span className="text-secondary">Prochain cycle le {formatResetDate(analysesResetDate)}</span>
+                )}
+                <a
+                  href="/api/customer-portal"
+                  className="text-xs text-secondary/60 hover:text-secondary"
+                >
+                  Modifier · Annuler · Factures
+                </a>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => router.push("/pricing")}
+                className="rounded-lg bg-blue px-4 py-2 text-sm font-medium text-primary hover:bg-blue/85"
+              >
+                Voir les plans
+              </button>
+            )}
             <button
               type="button"
               onClick={() => void signOut()}
