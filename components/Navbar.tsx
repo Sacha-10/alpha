@@ -89,9 +89,9 @@ export default function Navbar() {
           .eq('id', session.user.id)
           .single()
         if (data?.subscription_status === 'active') {
-          router.push('/dashboard')
+          window.location.href = '/dashboard'
         } else {
-          router.push('/pricing')
+          window.location.href = '/pricing'
         }
       }
     })
