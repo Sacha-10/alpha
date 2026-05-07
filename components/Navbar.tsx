@@ -46,6 +46,7 @@ export default function Navbar() {
 
   const connectGoogle = async () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
+    sessionStorage.setItem("oauth_login_pending", "1");
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -77,12 +78,12 @@ export default function Navbar() {
   }, [mobileOpen]);
 
   useEffect(() => {
-    const isOAuthCallback = new URLSearchParams(window.location.search).has('code')
+    const isPendingOAuth = sessionStorage.getItem("oauth_login_pending") === "1"
+    if (isPendingOAuth) sessionStorage.removeItem("oauth_login_pending")
 
     const handlePostLogin = async (userId: string) => {
       if (redirectingRef.current) return
       redirectingRef.current = true
-      window.history.replaceState({}, '', window.location.pathname)
       const { data } = await supabase
         .from('users')
         .select('subscription_status')
@@ -94,7 +95,7 @@ export default function Navbar() {
     // Register FIRST — before any async call — so we never miss SIGNED_IN
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null)
-      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && isOAuthCallback) {
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && isPendingOAuth) {
         await handlePostLogin(session.user.id)
       }
     })
@@ -102,7 +103,7 @@ export default function Navbar() {
     // Fallback: exchange may have completed before the listener above was registered
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
-      if (session && isOAuthCallback) void handlePostLogin(session.user.id)
+      if (session && isPendingOAuth) void handlePostLogin(session.user.id)
     })
 
     return () => subscription.unsubscribe()
