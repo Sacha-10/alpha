@@ -14,7 +14,8 @@
       "Bash(python3 *)",
       "Bash(node *)",
       "Bash(Get-ChildItem *)",
-      "Bash(Rename-Item C:\\\\Users\\\\sacha\\\\dev\\\\SaasAi\\\\Alpha\\\\alpha\\\\app\\\\demo *)"
+      "Bash(Rename-Item C:\\\\Users\\\\sacha\\\\dev\\\\SaasAi\\\\Alpha\\\\alpha\\\\app\\\\demo *)",
+      "Bash(npx tsc *)"
     ]
   }
 }

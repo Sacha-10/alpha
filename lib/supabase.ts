@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import { createBrowserClient } from '@supabase/ssr'
 
+// Server-side only — explicit JWT token validation (e.g. getUser(token)). Not PKCE/session-based.
+// Use createServerClient from @supabase/ssr for session-based auth in route handlers.
 export function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
