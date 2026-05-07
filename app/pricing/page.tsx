@@ -168,7 +168,7 @@ export default function PricingPage() {
   const renderCTA = (p: Plan) => {
     const key = toPlanKey(p.name);
     const ctaClass = `mt-6 w-full rounded-lg px-4 py-3 font-semibold text-[#F0F4FF] transition-opacity hover:opacity-90 ${p.ctaBg}`;
-    if (!currentPlan) {
+    if (subscriptionStatus !== 'active' || !currentPlan) {
       return (
         <button type="button" onClick={() => handleCheckout(p.name)} className={ctaClass}>
           Commencer
@@ -178,7 +178,7 @@ export default function PricingPage() {
     if (currentPlan === key && subscriptionStatus === 'active') {
       return (
         <div className="mt-6 rounded-full bg-blue/10 text-blue border border-blue/30 px-4 py-2 text-sm font-medium w-full text-center">
-          Votre plan actuel
+          Plan actuel
         </div>
       );
     }
