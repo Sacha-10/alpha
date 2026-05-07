@@ -103,19 +103,6 @@ export default function UploadZone({ onAnalyze, loading }: Props) {
         <p className="text-red text-sm mt-2 text-center">{error}</p>
       ) : null}
 
-      <div className="text-center mt-3">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowGuide(true);
-          }}
-          className="text-secondary text-sm hover:text-blue underline"
-        >
-          Comment exporter mes trades →
-        </button>
-      </div>
-
       <button
         type="button"
         onClick={() => file && onAnalyze(file)}

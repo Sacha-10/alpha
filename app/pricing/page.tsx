@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Check, Flame, X } from "lucide-react";
@@ -127,6 +127,26 @@ export default function PricingPage() {
   const [billingMode, setBillingMode] = useState<BillingMode>("monthly");
   const router = useRouter();
   const supabase = getSupabaseClient();
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchPlan() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data } = await supabase
+        .from('users')
+        .select('subscription_plan, subscription_status')
+        .eq('id', session.user.id)
+        .single();
+      if (data) {
+        setCurrentPlan(data.subscription_plan ?? null);
+        setSubscriptionStatus(data.subscription_status ?? null);
+      }
+    }
+    void fetchPlan();
+  }, [supabase]);
+
   const handleCheckout = async (planName: string) => {
     const planKey = planName === "PRO" ? "pro" : planName === "PREMIUM" ? "premium" : "elite";
     const billing = billingMode === "yearly" ? "annual" : "monthly";
@@ -139,6 +159,45 @@ export default function PricingPage() {
     }
 
     router.push(`/api/create-checkout?plan=${planKey}&billing=${billing}&token=${session.access_token}`)
+  };
+
+  const planRank: Record<string, number> = { pro: 0, premium: 1, elite: 2 };
+  const toPlanKey = (name: string) =>
+    name === "PRO" ? "pro" : name === "PREMIUM" ? "premium" : "elite";
+
+  const renderCTA = (p: Plan) => {
+    const key = toPlanKey(p.name);
+    const ctaClass = `mt-6 w-full rounded-lg px-4 py-3 font-semibold text-[#F0F4FF] transition-opacity hover:opacity-90 ${p.ctaBg}`;
+    if (!currentPlan) {
+      return (
+        <button type="button" onClick={() => handleCheckout(p.name)} className={ctaClass}>
+          Commencer
+        </button>
+      );
+    }
+    if (currentPlan === key && subscriptionStatus === 'active') {
+      return (
+        <div className="mt-6 rounded-full bg-blue/10 text-blue border border-blue/30 px-4 py-2 text-sm font-medium w-full text-center">
+          Votre plan actuel
+        </div>
+      );
+    }
+    if (planRank[key] > (planRank[currentPlan] ?? -1)) {
+      return (
+        <button type="button" onClick={() => handleCheckout(p.name)} className={ctaClass}>
+          Upgrader
+        </button>
+      );
+    }
+    return (
+      <button
+        type="button"
+        onClick={() => handleCheckout(p.name)}
+        className="mt-6 bg-[#1E2035] text-[#8892AA] hover:text-[#F0F4FF] rounded-lg px-4 py-2 text-sm font-medium w-full text-center"
+      >
+        Downgrader
+      </button>
+    );
   };
 
   return (
@@ -216,13 +275,7 @@ export default function PricingPage() {
                               <span className="font-semibold text-[#F0F4FF]">{currentPrices.normal}</span>
                             </p>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => handleCheckout(plan.name)}
-                            className={`mt-6 w-full rounded-lg px-4 py-3 font-semibold text-[#F0F4FF] transition-opacity hover:opacity-90 ${plan.ctaBg}`}
-                          >
-                            Commencer
-                          </button>
+                          {renderCTA(plan)}
                           <ul className="mt-6 space-y-3">
                             {plan.features.map((feature) => (
                               <li key={feature.label} className="flex items-start gap-2 text-sm">
@@ -261,13 +314,7 @@ export default function PricingPage() {
                           </p>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={() => handleCheckout(plan.name)}
-                          className={`mt-6 w-full rounded-lg px-4 py-3 font-semibold text-[#F0F4FF] transition-opacity hover:opacity-90 ${plan.ctaBg}`}
-                        >
-                          Commencer
-                        </button>
+                        {renderCTA(plan)}
 
                         <ul className="mt-6 space-y-3">
                           {plan.features.map((feature) => (

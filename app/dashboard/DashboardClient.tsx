@@ -136,12 +136,22 @@ export default function DashboardClient() {
                 {analysesResetDate && (
                   <span className="text-secondary">Prochain cycle le {formatResetDate(analysesResetDate)}</span>
                 )}
-                <a
-                  href="/api/customer-portal"
-                  className="text-xs text-secondary hover:text-primary"
-                >
-                  Modifier · Annuler · Factures
-                </a>
+                <div className="flex items-center gap-1 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => router.push('/pricing')}
+                    className="text-secondary hover:text-primary"
+                  >
+                    Offres
+                  </button>
+                  <span className="text-secondary">·</span>
+                  <a
+                    href="/api/customer-portal"
+                    className="text-secondary hover:text-primary"
+                  >
+                    Factures
+                  </a>
+                </div>
               </div>
             ) : (
               <button
