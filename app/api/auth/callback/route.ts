@@ -46,8 +46,15 @@ export async function GET(request: NextRequest) {
       if (upsertError) {
         console.log('[auth/callback] upsert error.message:', upsertError.message, 'error.code:', upsertError.code)
       }
+
+      const { data: userData } = await supabase.from('users').select('subscription_status').eq('id', user.id).single()
+      if (userData?.subscription_status === 'active') {
+        return NextResponse.redirect(process.env.NEXT_PUBLIC_APP_URL + '/dashboard')
+      } else {
+        return NextResponse.redirect(process.env.NEXT_PUBLIC_APP_URL + '/pricing')
+      }
     }
   }
 
-  return NextResponse.redirect(origin)
+  return NextResponse.redirect(process.env.NEXT_PUBLIC_APP_URL!)
 }
