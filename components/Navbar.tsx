@@ -42,6 +42,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
+  const redirectingRef = useRef(false);
 
   const connectGoogle = async () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -76,24 +77,32 @@ export default function Navbar() {
   }, [mobileOpen]);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const isOAuthCallback = new URLSearchParams(window.location.search).has('code')
+
+    const handlePostLogin = async (userId: string) => {
+      if (redirectingRef.current) return
+      redirectingRef.current = true
+      window.history.replaceState({}, '', window.location.pathname)
+      const { data } = await supabase
+        .from('users')
+        .select('subscription_status')
+        .eq('id', userId)
+        .single()
+      window.location.href = data?.subscription_status === 'active' ? '/dashboard' : '/pricing'
+    }
+
+    // Register FIRST — before any async call — so we never miss SIGNED_IN
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null)
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && isOAuthCallback) {
+        await handlePostLogin(session.user.id)
+      }
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    // Fallback: exchange may have completed before the listener above was registered
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
-      if (_event === 'SIGNED_IN' && session) {
-        const { data } = await supabase
-          .from('users')
-          .select('subscription_status')
-          .eq('id', session.user.id)
-          .single()
-        if (data?.subscription_status === 'active') {
-          window.location.href = '/dashboard'
-        } else {
-          window.location.href = '/pricing'
-        }
-      }
+      if (session && isOAuthCallback) void handlePostLogin(session.user.id)
     })
 
     return () => subscription.unsubscribe()
