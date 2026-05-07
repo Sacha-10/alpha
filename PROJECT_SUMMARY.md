@@ -1,4 +1,4 @@
-# RÉSUMÉ COMPLET — AlphaTradeX (à jour au 24 avril 2026)
+# RÉSUMÉ COMPLET — AlphaTradeX (à jour au 6 mai 2026)
 
 ---
 
@@ -11,6 +11,7 @@
 | `react` | ^18.3.1 |
 | `react-dom` | ^18.3.1 |
 | `@supabase/supabase-js` | ^2.47.10 |
+| `@supabase/ssr` | ^0.10.2 |
 | `@supabase/auth-helpers-nextjs` | ^0.10.0 |
 | `@stripe/stripe-js` | ^5.5.0 |
 | `stripe` | ^17.5.0 |
@@ -50,30 +51,36 @@ alpha/
 │   ├── favicon.ico
 │   ├── icon.svg
 │   ├── globals.css
-│   ├── layout.tsx                  ← Root layout global
-│   ├── page.tsx                    ← Page d'accueil /
+│   ├── layout.tsx                      ← Root layout global
+│   ├── page.tsx                        ← Page d'accueil /
 │   ├── api/
-│   │   ├── analyze/route.ts        ← POST (auth requise, rate-limit 15s)
-│   │   ├── analyze-demo/route.ts   ← POST (rate-limit par IP)
-│   │   ├── auth/callback/route.ts  ← OAuth callback Supabase
-│   │   ├── create-checkout/route.ts← Stripe checkout
-│   │   └── webhook/route.ts        ← Webhook Stripe
+│   │   ├── analyze/route.ts            ← POST (auth requise, rate-limit 15s)
+│   │   ├── analyze-demo/route.ts       ← POST (rate-limit par IP)
+│   │   ├── auth/callback/route.ts      ← OAuth callback Supabase (@supabase/ssr)
+│   │   ├── create-checkout/route.ts    ← Stripe checkout (GET, param token)
+│   │   ├── customer-portal/route.ts    ← Portail client Stripe (GET)
+│   │   └── webhook/route.ts            ← Webhook Stripe (3 événements)
+│   ├── about/
+│   │   └── page.tsx                    ← /about (Page À propos)
+│   ├── analysis/
+│   │   └── page.tsx                    ← /analysis (démo libre, 1/IP)
 │   ├── dashboard/
-│   │   ├── page.tsx                ← Wrapper Suspense
-│   │   └── DashboardClient.tsx     ← /dashboard (protégé middleware)
-│   ├── demo/
-│   │   └── page.tsx                ← /demo
+│   │   ├── page.tsx                    ← Wrapper Suspense
+│   │   └── DashboardClient.tsx         ← /dashboard (protégé middleware)
+│   ├── help/
+│   │   └── page.tsx                    ← /help (Page Aide)
 │   ├── pricing/
-│   │   └── page.tsx                ← /pricing
+│   │   └── page.tsx                    ← /pricing
 │   └── legal/
-│       ├── layout.tsx              ← Navbar + Footer partagés
+│       ├── layout.tsx                  ← Navbar + Footer partagés
 │       ├── cgu/page.tsx
 │       ├── cgv/page.tsx
 │       ├── confidentialite/page.tsx
 │       ├── cookies/page.tsx
 │       ├── mentions-legales/page.tsx
 │       ├── privacy/page.tsx
-│       └── risques/page.tsx
+│       ├── risque/page.tsx
+│       └── terms/page.tsx
 ├── components/
 │   ├── Navbar.tsx
 │   ├── Footer.tsx
@@ -95,9 +102,11 @@ alpha/
 │       ├── types.ts
 │       ├── parseMT4.ts
 │       ├── parseTradingView.ts
-│       └── parseBinance.ts
+│       ├── parseBinance.ts
+│       ├── parseBybit.ts
+│       └── parseFTMO.ts
 ├── styles/
-│   └── theme.ts                    ← Source of truth couleurs/tokens
+│   └── theme.ts                        ← Source of truth couleurs/tokens
 ├── middleware.ts
 ├── tailwind.config.ts
 ├── next.config.mjs
@@ -105,7 +114,8 @@ alpha/
 ├── .eslintrc.json
 ├── CLAUDE.md / AGENTS.md
 └── public/
-    └── file.svg, globe.svg, next.svg, vercel.svg, window.svg
+    ├── manifest.json                   ← PWA manifest
+    └── file.svg, globe.svg, logo.svg, next.svg, vercel.svg, window.svg
 ```
 
 ---
@@ -225,14 +235,15 @@ blue: "0 0 20px rgba(45, 111, 255, 0.3)"
 
 **Framer Motion** :
 - `TradeReport.tsx` : `initial={{ opacity:0, y:20 }}` → `animate={{ opacity:1, y:0 }}` delays 0 / 0.1 / 0.2 / 0.3 / 0.35 / 0.4 / 0.45 / 0.5s
-- `demo/page.tsx` : même pattern + barre `width:['0%','90%']` duration 8s
+- `analysis/page.tsx` : même pattern + barre `width:['0%','90%']` duration 8s
 - `UploadZone.tsx` : `whileHover={{ scale:1.01 }}` + AnimatePresence + barre `width:['0%','85%']` duration 10s
 
 **RevealSection** (IntersectionObserver threshold 0.15) :
 ```
-invisible : translate-y-6 opacity-0
-visible   : translate-y-0 opacity-100
-transition: duration-700 ease-out
+invisible : translateY(28px) opacity-0   ← about/page.tsx, help/page.tsx
+invisible : translate-y-6 opacity-0       ← page.tsx (homepage)
+visible   : translateY(0) opacity-100
+transition: 700ms ease-out
 ```
 One-shot : `observer.unobserve()` après premier déclenchement.
 
@@ -302,54 +313,59 @@ scrollbar-gutter: stable
 - Scrollé (> 50px) : `border-border bg-background`
 - Non scrollé : `border-transparent bg-transparent`
 
-**Container inner :** `mx-auto flex max-w-6xl items-center justify-between px-6 py-4`
+**Container inner :** `mx-auto flex w-full max-w-[1200px] items-center justify-between py-4`
 
-**Logo bouton :** `flex items-center gap-2 rounded text-left focus-visible:ring-2 focus-visible:ring-blue`
+**Logo (Link `href="/"`) :** `flex items-center gap-2 rounded text-left focus-visible:ring-2 focus-visible:ring-blue`
 - Texte desktop : `hidden text-lg font-bold text-primary md:inline`
-- Texte mobile centré : `pointer-events-none absolute left-1/2 -translate-x-1/2 text-lg font-bold text-primary md:hidden`
+- Texte mobile centré (Link séparé) : `absolute left-1/2 -translate-x-1/2 text-lg font-bold text-primary md:hidden`
 
 **Nav desktop :** `hidden items-center gap-8 text-sm md:flex`
 - Items : `text-secondary transition-colors duration-200 hover:text-primary`
-- Liens : Services · Analyse Gratuite → `/demo` · Prix → `/pricing` · À propos · Aide
+- Liens : Analyse → `/analysis` · Prix → `/pricing` · À propos → `/about` · Aide → `/help`
 
-**Bouton S'inscrire desktop :**
+**Bouton auth desktop (conditionnel sur `user`) :**
 - `hidden items-center gap-2 rounded bg-blue px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-blue/90 md:inline-flex`
 - Icône : `<UserCircle h-4 w-4>`
-- Action : `supabase.auth.signInWithOAuth({ provider:"google", redirectTo:"/api/auth/callback" })`
+- Si `user` : texte "Déconnexion" → `supabase.auth.signOut()`
+- Si non connecté : texte "S'inscrire" → `supabase.auth.signInWithOAuth({ provider:"google", redirectTo:"/api/auth/callback", queryParams:{ access_type:"offline", prompt:"consent" } })`
+
+**Auth state :** géré via `supabase.auth.getSession()` + `onAuthStateChange` dans `useEffect`
+- `getSupabaseClient()` → `createBrowserClient` de `@supabase/ssr`
 
 **Burger mobile :** `rounded border border-border bg-card p-2 text-secondary md:hidden`
+- Icône : `<Menu>` fermé / `<X>` ouvert
 
 **Menu mobile :**
 - `mx-4 overflow-hidden rounded border border-border bg-card transition-all duration-200 ease-out md:hidden`
 - Ouvert : `max-h-[360px] opacity-100`
 - Fermé : `max-h-0 opacity-0`
 - Inner : `flex flex-col gap-2 p-4`
-- Bouton S'inscrire mobile : `mt-2 inline-flex w-full items-center justify-center gap-2 rounded bg-blue px-4 py-2 font-semibold text-primary hover:bg-blue/90`
+- Liens mobiles : Analyse · Prix · À propos · Aide
+- Bouton auth mobile : conditionnel (Déconnexion / S'inscrire), même logique que desktop
 - Fermeture au clic extérieur via `mousedown` listener sur `document`
 
 **États / logique :**
 - `scrolled` : `window.scrollY > 50`
-- `handleBrandClick` : scroll top si sur `/`, sinon `router.push("/")`
-- `handleServicesClick` : `window.scrollTo(0,0)` si sur `/`, sinon `router.push("/")`
+- `handleBrandClick` : `window.scrollTo({ top:0, behavior:"smooth" })` si sur `/`
 
 ---
 
 ### `Footer.tsx` — Server Component
 
 ```
-<footer class="mx-auto flex max-w-6xl flex-col gap-8 text-secondary">
+<footer class="mx-auto flex max-w-[1200px] flex-col gap-8 text-secondary">
   Logo SVG 32x32 + "AlphaTradeX" font-bold text-primary
   "Votre analyste IA personnel sur les marchés" — mt-2 text-sm
   a[href="mailto:contact@alphatradex.ai"] — hover:text-primary
   flex flex-wrap items-center gap-4 text-sm :
-    <Info h-4 w-4> "À propos"
-    <HelpCircle h-4 w-4> "Aide"
+    <Info h-4 w-4> Link "/about" → "À propos"
+    <HelpCircle h-4 w-4> Link "/help" → "Aide"
 
-<div class="mx-auto mt-6 flex max-w-6xl flex-col gap-2 text-xs text-secondary">
+<div class="mx-auto mt-6 flex max-w-[1200px] flex-col gap-2 text-xs text-secondary">
   Row 1 : /legal/mentions-legales · /legal/cgu · /legal/confidentialite
-  Row 2 : /legal/cookies · /legal/cgv · /legal/risques
+  Row 2 : /legal/cookies · /legal/cgv · /legal/risque
 
-<p class="mx-auto mt-8 max-w-6xl text-sm text-secondary">
+<p class="mx-auto mt-8 max-w-[1200px] text-sm text-secondary">
   © 2026 AlphaTradeX. Élaboré pour les traders sérieux.
 ```
 
@@ -518,7 +534,7 @@ Wrapper : `div.relative.min-h-screen.bg-background.text-primary` `z-index:0`
 - `bg-[#12121A] px-6 py-20 text-center`
 - H2 : `text-3xl font-bold md:text-4xl` — "révèle" en gradient
 - CTA : `mx-auto mt-8 inline-flex items-center gap-2 rounded bg-blue px-7 py-3 font-semibold text-primary hover:bg-blue/90`
-- Note : `mx-auto mt-4 max-w-sm text-sm text-secondary` — "Sans carte bancaire. Démonstration immédiate."
+- Note : `mx-auto mt-4 max-w-sm text-sm text-secondary`
 
 #### Section 9 — CTA Elite
 - `bg-gradient-to-b from-[#12121A] to-[#0A0A0F] px-6 py-20 text-center`
@@ -544,12 +560,24 @@ Container : `mx-auto flex w-full max-w-[1200px] flex-col items-center`
 #### Badge accès anticipé
 `inline-flex items-center gap-2 rounded-full border border-[#2D6FFF] bg-[#2D6FFF]/10 px-4 py-2 text-sm font-medium text-[#2D6FFF]`
 `<Flame h-4 w-4>` + "Accès anticipé - Places limitées"
+Sous-texte : `text-sm text-[#8892AA]` — "Réservé aux 200 premiers membres."
 
 #### Toggle mensuel/annuel
 - Wrapper : `mt-8 inline-flex items-center rounded-full border border-[#1E2035] bg-[#12121A] p-1 text-sm`
 - Actif : `rounded-full px-4 py-2 bg-[#1E2035] text-[#F0F4FF]`
 - Inactif : `text-[#8892AA]`
-- Badge économie : `rounded-full bg-[#2D6FFF] px-2 py-0.5 text-xs font-semibold text-[#F0F4FF]`
+- Badge économie : `rounded-full bg-[#2D6FFF] px-2 py-0.5 text-xs font-semibold text-[#F0F4FF]` — "Économisez 20%"
+
+#### Checkout — `handleCheckout(planName)` (fonctionnel)
+```ts
+async function handleCheckout(planName: string) {
+  const planKey = planName === "PRO" ? "pro" : planName === "PREMIUM" ? "premium" : "elite"
+  const billing = billingMode === "yearly" ? "annual" : "monthly"
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) { router.push('/'); return }
+  router.push(`/api/create-checkout?plan=${planKey}&billing=${billing}&token=${session.access_token}`)
+}
+```
 
 #### Tableau des plans
 
@@ -572,15 +600,17 @@ Container : `mx-auto flex w-full max-w-[1200px] flex-col items-center`
 
 #### Bloc prix interne
 `mt-6 rounded-lg border border-[#1E2035] bg-[#0A0A0F] p-4`
-- Label : `text-xs uppercase tracking-wide text-[#8892AA]`
+- Label : `text-xs uppercase tracking-wide text-[#8892AA]` — "Accès anticipé (à vie)"
 - Prix principal : `mt-2 text-3xl font-bold text-[#F0F4FF]`
 - Prix barré : `mt-1 text-sm text-[#8892AA] line-through`
+- Prix public : `mt-4 text-sm text-[#8892AA]` — "Prix public (à venir) : {normal}"
 
 #### Features par plan
 ```
-PRO (4/11 incluses)     : 4 analyses/mois, Analyse IA GPT-5.4, Export PDF, Historique✗,
-                           Évolution hebdo✗, Résumé hebdo✗, Support prio✗,
-                           Score Prop Firm✗, Détection prédictive✗, Alertes Telegram✗, API✗
+PRO (3/11 incluses)     : 4 analyses/mois, Analyse IA GPT-5.4, Export PDF,
+                           Historique✗, Évolution hebdo✗, Résumé hebdo✗,
+                           Support prio✗, Score Prop Firm✗, Détection prédictive✗,
+                           Alertes Telegram✗, API✗
 PREMIUM (6/11 incluses) : 24 analyses/mois, Analyse IA GPT-5.4, Export PDF,
                            Historique 6 mois✓, Évolution hebdo✓, Résumé hebdo✓,
                            Support prio✗, Score Prop Firm✗, Détection prédictive✗,
@@ -593,16 +623,18 @@ PREMIUM (6/11 incluses) : 24 analyses/mois, Analyse IA GPT-5.4, Export PDF,
 1. Sécurité des données
 2. Changement/résiliation de plan
 3. Fonctionnement accès anticipé
-4. Formats compatibles (MT4, MT5, Binance, TradingView)
+4. Formats compatibles (MT4, MT5, Binance, Bybit, TradingView, FTMO, FundedNext)
 5. Cible utilisateurs
 
 #### CTA démo
 `w-full rounded-2xl bg-[#0A0A0F] px-6 py-16 text-center md:py-20`
-Link → `/demo` : `rounded-lg bg-[#2D6FFF] px-8 py-3 text-lg font-semibold hover:opacity-90`
+Link → `/analysis` : `rounded-lg bg-[#2D6FFF] px-8 py-3 text-lg font-semibold hover:opacity-90`
 
 ---
 
-### `/demo` — `app/demo/page.tsx` — `"use client"`
+### `/analysis` — `app/analysis/page.tsx` — `"use client"`
+
+Anciennement `/demo` (`app/demo/page.tsx` n'existe plus — route renommée).
 
 Main : `min-h-screen bg-background text-primary p-8 max-w-6xl mx-auto`
 
@@ -611,22 +643,106 @@ Main : `min-h-screen bg-background text-primary p-8 max-w-6xl mx-auto`
 - Barre loading : `w-full bg-card rounded-full h-2 max-w-md mx-auto` + framer `['0%','90%']` 8s
 - État "déjà utilisé" : `card p-8 text-center max-w-lg mx-auto`
 - CTA post-rapport : `card p-8 text-center mt-12 border-blue glow-blue`
-- Prix affiché : `PLANS.starter.monthly` = 29€/mois
+- Prix affiché dans CTA : `PLANS.pro.monthly` = 24.5€/mois
 
 ---
 
 ### `/dashboard` — `DashboardClient.tsx` — `"use client"`
 
-Protégé par `middleware.ts`.
+Protégé par `middleware.ts` (`@supabase/ssr`).
 
 Header : `border-b border-border bg-card/50 backdrop-blur`
 Container : `mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-4`
 Main : `mx-auto max-w-5xl space-y-10 px-6 py-10`
 
-- Succès paiement : `rounded-lg border border-green/35 bg-green/10 px-4 py-3 text-sm text-green`
-- Annulation : `rounded-lg border border-red/35 bg-red/10 px-4 py-3 text-sm text-red`
-- Bouton abonnement : `rounded-lg bg-blue px-4 py-2 text-sm font-medium hover:bg-blue/85`
-- Checkout → `/api/create-checkout?plan=starter`
+**State chargé au montage :**
+- `subscriptionPlan` — nom du plan (ex. "pro", "premium", "elite")
+- `analysesUsed` — nombre d'analyses utilisées ce cycle
+- `dbAnalysesLimit` — quota du plan
+- `analysesResetDate` — date de prochain reset (formatée `dd/mm`)
+
+**Header — zone plan (si `subscriptionPlan` existe) :**
+```
+<nom du plan> (capitalisé, texte seul — sans badge)
+{analysesUsed} / {dbAnalysesLimit} analyses utilisées
+Prochain cycle le {dd/mm}
+<a href="/api/customer-portal" class="text-xs text-secondary hover:text-primary">
+  Modifier · Annuler · Factures
+</a>
+```
+
+**Header — zone plan (si pas d'abonnement) :**
+- Bouton "Voir les plans" → `router.push('/pricing')`
+
+**Header — bouton Déconnexion :**
+- `supabase.auth.signOut()` puis `router.push("/")` + `router.refresh()`
+- Style : `rounded-lg border border-border px-4 py-2 text-sm text-secondary hover:bg-background`
+
+**Bandeaux feedback :**
+- Succès paiement (`?success=true` ou `?checkout=success`) : `rounded-lg border border-green/35 bg-green/10 px-4 py-3 text-sm text-green`
+- Annulation (`?checkout=cancel`) : `rounded-lg border border-red/35 bg-red/10 px-4 py-3 text-sm text-red`
+
+**Section analyse :**
+- Description : "MT4, MT5, Binance, Bybit, TradingView, FTMO et FundedNext"
+- `<UploadZone>` → `detectAndParse(file)` → `POST /api/analyze`
+- Résultat : `<TradeReport report={analysis} analysesLeft={left} analysesLimit={limit} />`
+
+---
+
+### `/about` — `app/about/page.tsx` — `"use client"`
+
+Layout : `min-h-screen bg-background text-primary` · Navbar + Footer inclus.
+Toutes les sections utilisent `RevealSection` (IntersectionObserver, translateY 28px, 700ms).
+
+| Section | Contenu |
+|---|---|
+| **Hero** | `px-6 pb-28 pt-40 text-center` · H1 : "Vous aviez les données. Personne n'avait encore décrypté vos biais." |
+| **Le problème** | `px-6 py-24` · 4 "truth cards" en `md:grid-cols-2` : edge / exposition / journal / exécution |
+| **En chiffres** | `px-6 py-24` · 4 stats : `<60s` / `5` plateformes / `200` traders / `2` Prop Firms |
+| **Nos convictions** | `px-6 py-24` · 3 cards `md:grid-cols-3` : Brain(blue) La donnée / Shield(cyan) La discipline / Target(green) L'exécution |
+| **Genèse** | `px-6 py-24` · 2 cols : texte intro + timeline 2022/2023/2025/2026 |
+| **Le fondateur** | `px-6 py-24` · Avatar "S" gradient blue→cyan + citation · `border-l: 3px solid #2D6FFF` |
+| **Compatibilité** | `px-6 py-24` · 7 pill-cards : MT4 · MT5 · Binance · Bybit · TradingView · FTMO · FundedNext |
+| **CTA final** | `px-6 py-28` · Links : "Analyse gratuite" → `/analysis` + "Voir les plans" → `/pricing` |
+
+---
+
+### `/help` — `app/help/page.tsx` — `"use client"`
+
+Layout : `min-h-screen bg-background text-primary` · Navbar + Footer inclus.
+Toutes les sections utilisent `RevealSection`.
+
+| Section | Contenu |
+|---|---|
+| **Hero** | `px-6 pt-40 pb-28 text-center` · H1 : "Une question. Une réponse directe." |
+| **Comment on fonctionne** | 3 steps `md:grid-cols-3` : Upload(blue) · Brain(cyan) · FileText(green) |
+| **Compatibilité** | Grille 4+3 cards avec instructions d'export par plateforme |
+| **FAQ** | 10 questions `<details>/<summary>` avec `AccordionItem` — ChevronDown rotate(180) à l'ouverture |
+| **Support** | Card : MessageCircle(blue) + `mailto:contact@alphatradex.ai` + "Du lundi au vendredi" |
+| **CTA final** | Links : "Analyse gratuite" → `/analysis` + "Voir les plans" → `/pricing` |
+
+**Guides d'export par plateforme :**
+| Plateforme | Instructions |
+|---|---|
+| MT4 | Ctrl+T · Account History · Clic droit · Save as Report · CSV |
+| MT5 | Ctrl+T · History · Clic droit · Export · CSV |
+| Binance | Orders · Trade History · Export Trade History · CSV |
+| Bybit | Profile · Account · Data Export · Export Now · Download · CSV |
+| TradingView | Panneau broker · Export Data · Balance History · Export · CSV |
+| FTMO | Client Area · Metrix · Trading Journal · Export · CSV |
+| FundedNext | Via MT4 ou MT5 |
+
+**FAQ (10 questions) :**
+1. Sécurité des données
+2. Formats acceptés
+3. Test avant abonnement
+4. Réinitialisation du compteur
+5. Changement / résiliation de plan
+6. Score Prop Firm Readiness (Élite uniquement)
+7. Types d'actifs compatibles
+8. Cible utilisateurs
+9. Volume minimum (50 trades)
+10. Alertes Telegram (Élite uniquement)
 
 ---
 
@@ -642,7 +758,7 @@ Structure commune :
 - H2 : `mb-2 text-xl font-semibold text-primary`
 - Texte : `mt-4 text-sm leading-relaxed text-secondary`
 
-Routes : `/legal/mentions-legales` · `/legal/cgu` · `/legal/cgv` · `/legal/confidentialite` · `/legal/privacy` · `/legal/cookies` · `/legal/risques`
+Routes : `/legal/mentions-legales` · `/legal/cgu` · `/legal/cgv` · `/legal/confidentialite` · `/legal/privacy` · `/legal/cookies` · `/legal/risque` · `/legal/terms`
 
 ---
 
@@ -682,10 +798,24 @@ NEXT_PUBLIC_SUPABASE_URL → placeholder si env absent
 NEXT_PUBLIC_SUPABASE_ANON_KEY → JWT placeholder si env absent
 ```
 
-### Plans `lib/plans.ts` vs `/pricing`
-- `lib/plans.ts` : starter=29€, pro=79€, elite=199€ → utilisé uniquement par `/demo`
-- `/pricing` affiche : 24.5€, 49.5€, 99.5€ (accès anticipé)
-- Les deux systèmes coexistent sans lien
+### `lib/plans.ts` — Prix et IDs Stripe live
+
+Plans identiques à ceux affichés sur `/pricing` (aucune incohérence) :
+
+| Clé | Nom | Limit | Mensuel | Annuel |
+|---|---|---|---|---|
+| `pro` | Pro | 4 | 24.5€ | 234€ |
+| `premium` | Premium | 24 | 49.5€ | 474€ |
+| `elite` | Élite | 999999 | 99.5€ | 954€ |
+
+**Price IDs et Product IDs Stripe live :**
+| Plan | stripePriceMonthly | stripePriceAnnual | stripeProductId |
+|---|---|---|---|
+| pro | `price_1TTQM6CfiBqZlYaUIHzEg8mE` | `price_1TTQMUCfiBqZlYaUBGMvBO8M` | `prod_USL2OMHSRxPwPE` |
+| premium | `price_1TTQNkCfiBqZlYaUz2FyNlFi` | `price_1TTQOBCfiBqZlYaUu2bZWfBQ` | `prod_USL3p21C1Kc8Rc` |
+| elite | `price_1TTQPXCfiBqZlYaU11kT9Yoc` | `price_1TTQQ2CfiBqZlYaUvCndD4Xz` | `prod_USL53dmtaWpiDq` |
+
+Référencé dans `/analysis` via `PLANS.pro.monthly` pour le CTA post-rapport (24.5€/mois).
 
 ### Rate limiting API `/api/analyze`
 - `Map<userId, timestamp>` en mémoire — 1 requête / 15s par user
@@ -696,9 +826,53 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY → JWT placeholder si env absent
 - `maxDuration = 60` (Vercel Edge timeout)
 - Paramètres randomisés guidés par cibles calculées
 
+### @supabase/ssr — Migration terminée
+
+Tous les fichiers utilisent `@supabase/ssr`. `@supabase/auth-helpers-nextjs` reste dans `package.json` mais n'est plus utilisé dans le code applicatif.
+
+| Fichier | Fonction exportée | Client utilisé |
+|---|---|---|
+| `lib/supabase.ts` | `getSupabaseClient()` | `createBrowserClient` (@supabase/ssr) |
+| `lib/supabase.ts` | `getSupabase()` | `createClient` (@supabase/supabase-js) — utilisé dans create-checkout |
+| `lib/supabase.ts` | `getSupabaseAdmin()` | `createClient` avec `SUPABASE_SERVICE_ROLE_KEY` — utilisé dans webhook |
+| `middleware.ts` | — | `createServerClient` (@supabase/ssr) |
+| `app/api/auth/callback/route.ts` | — | `createServerClient` (@supabase/ssr) |
+| `app/api/customer-portal/route.ts` | — | `createServerClient` (@supabase/ssr) |
+| `components/Navbar.tsx` | — | `getSupabaseClient()` |
+| `app/dashboard/DashboardClient.tsx` | — | `getSupabaseClient()` |
+
+### `parseCSV/index.ts` — Détection automatique de format
+
+```
+firstLine contient "position" + "fee"  → parseFTMO  (FTMO Metrix — extra colonne Fee décale Swap/Profit)
+firstLine contient "ticket" ou "position" → parseMT4  (MT4 / MT5 standard)
+firstLine contient "pair", "realized profit" ou "date(utc)" → parseBinance
+firstLine contient "realized p&l"          → parseBybit
+firstLine contient "trade #", "signal" ou "cum. profit" → parseTradingView
+Sinon → Error "Format non reconnu"
+```
+
+**Plateformes supportées :** MT4, MT5, Binance, Bybit, TradingView, FTMO, FundedNext (7 plateformes)
+
+**`parseFTMO` :** colonnes spécifiques — `Commission[10] + Fee[11]` combinés, `Swap[12]`, `Profit[13]` (décalage vs MT5 standard).
+
+**`parseBybit` :** format "Trade History" — Date, Symbol, Side, Price, Quantity, Fee, Realized P&L, Order ID. Session calculée par heure UTC.
+
 ---
 
 ## 7. CONFIGURATION
+
+### Variables d'environnement référencées dans le code
+
+| Variable | Utilisée dans |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | `lib/supabase.ts`, `middleware.ts`, `api/auth/callback`, `api/customer-portal`, `next.config.mjs` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Idem |
+| `SUPABASE_SERVICE_ROLE_KEY` | `lib/supabase.ts` → `getSupabaseAdmin()` → `api/webhook` |
+| `STRIPE_SECRET_KEY` | `api/create-checkout`, `api/customer-portal`, `api/webhook` |
+| `STRIPE_WEBHOOK_SECRET` | `api/webhook` (validation signature) |
+| `NEXT_PUBLIC_APP_URL` | `api/create-checkout` (success/cancel URL), `api/customer-portal` (return_url) |
+| `OPENAI_API_KEY` | `lib/openai.ts` |
 
 ### `next.config.mjs`
 ```js
@@ -738,33 +912,88 @@ openGraph.title: "TonSaaS — AI Trading Journal"  ← BUG à corriger
 </html>
 ```
 
-### `middleware.ts`
+### `middleware.ts` — `@supabase/ssr`
 ```ts
+import { createServerClient } from '@supabase/ssr'
 // Protège /dashboard/:path*
-// createMiddlewareClient(@supabase/auth-helpers-nextjs)
-// Redirect → "/" si pas de session
+// createServerClient avec cookies.getAll / setAll
+// Redirect → "/" si pas de session (supabase.auth.getUser())
 export const config = { matcher: ['/dashboard/:path*'] }
+```
+
+### `app/api/auth/callback/route.ts` — `@supabase/ssr`
+```ts
+// GET handler — reçoit ?code=...
+// createServerClient avec cookieStore
+// supabase.auth.exchangeCodeForSession(code)
+// Redirect → origin
+```
+
+### Stripe — `app/api/create-checkout/route.ts`
+```
+GET /api/create-checkout?plan=pro|premium|elite&billing=monthly|annual&token={access_token}
+
+1. Récupère l'user via supabase.auth.getUser(token)
+2. Si abonnement actif → stripe.subscriptions.update() (upgrade/downgrade, proration_behavior:'none')
+   puis redirect /dashboard?updated=true
+3. Sinon → stripe.customers.create({ email, metadata:{ userId } })
+         + stripe.checkout.sessions.create({ mode:'subscription', ... })
+   puis redirect vers session.url (Stripe Checkout)
+
+Metadata Stripe checkout : { userId, planName, analysesLimit }
+success_url : NEXT_PUBLIC_APP_URL/dashboard?success=true
+cancel_url  : NEXT_PUBLIC_APP_URL/pricing
+```
+
+### Stripe — `app/api/webhook/route.ts`
+
+**Événements traités :**
+
+| Événement | Action |
+|---|---|
+| `checkout.session.completed` | Met à jour `users` : `subscription_status=active`, `subscription_plan`, `analyses_limit`, `analyses_used=0`, `analyses_reset_date` (1er du mois suivant), `stripe_customer_id`, `stripe_subscription_id`. Met aussi à jour `sub.metadata` pour les handlers suivants. |
+| `customer.subscription.updated` | Upgrade (`newLimit > dbLimit`) : met à jour plan et limit immédiatement. Downgrade : différé au renouvellement de période. `cancel_at_period_end → true` : garde `status=active`, attend `.deleted`. |
+| `customer.subscription.deleted` | `status=canceled`, `plan=starter`, `analyses_limit=4`. Résolution user via `customer.metadata.userId` ou `customer.email`. |
+
+### Stripe — `app/api/customer-portal/route.ts`
+```
+GET /api/customer-portal
+
+1. Récupère l'user (@supabase/ssr, cookies)
+2. Récupère stripe_customer_id depuis table users
+3. Si pas de stripe_customer_id → redirect /pricing
+4. stripe.billingPortal.sessions.create({ customer, return_url: APP_URL/dashboard })
+5. redirect → session.url (Portail Stripe natif)
+```
+
+### `public/manifest.json`
+```json
+{
+  "name": "AlphaTradeX",
+  "short_name": "AlphaTradeX",
+  "icons": [{ "src": "/logo.svg", "sizes": "any", "type": "image/svg+xml" }],
+  "theme_color": "#0A0A0F",
+  "background_color": "#0A0A0F",
+  "display": "standalone"
+}
 ```
 
 ---
 
 ## 8. CE QUI RESTE À FAIRE
 
-### Priorité 1 — Fonctionnel critique manquant
-- **Bouton "Commencer" sur `/pricing`** : aucun `onClick`, ne déclenche pas Stripe
-- **Boutons "À propos" et "Aide"** : ne font rien dans Navbar et Footer (pas de page)
-- **Incohérence prix** : `lib/plans.ts` (29€/79€/199€) ≠ `/pricing` (24.5€/49.5€/99.5€)
-
-### Priorité 2 — UX et complétude
+### Priorité 1 — UX et complétude
 - **Export PDF réel** : `window.print()` est un hack → remplacer par `@react-pdf/renderer`
 - **Historique des analyses** : table `analyses` créée en DB mais aucune page de consultation
 - **`GoogleAuthButton.tsx`** : composant existant mais non utilisé
 - **Page 404 personnalisée** : absente
-- **`/manifest.json`** : référencé dans `<head>` mais absent de `public/`
 
-### Priorité 3 — Polish et infrastructure
-- **Bug OpenGraph** : `openGraph.title` = "TonSaaS — AI Trading Journal" → corriger en "AlphaTradeX"
-- **Alertes Telegram** : feature ÉLITE listée, backend absent
-- **Détection prédictive de setups** : feature ÉLITE, non implémentée
-- **`app/icon.svg`** vs `/logo.svg` : vérifier cohérence favicon
-- **`ExportGuide.tsx`** : importé par UploadZone, contenu non audité
+### Priorité 3 — Features Élite manquantes (backend absent)
+- **Alertes Telegram** : feature ÉLITE listée sur `/pricing` et `/help`, backend non implémenté
+- **Détection prédictive de setups** : feature ÉLITE listée, non implémentée
+- **Historique / Évolution hebdomadaire** : features PREMIUM/ÉLITE listées, non implémentées
+
+### Notes
+- `app/icon.svg` (dans `app/`) vs `public/logo.svg` : deux assets distincts — vérifier cohérence favicon
+- `ExportGuide.tsx` : importé par UploadZone, contenu non audité
+- `@supabase/auth-helpers-nextjs` reste dans `package.json` mais inutilisé — peut être retiré

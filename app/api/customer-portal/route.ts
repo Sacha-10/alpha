@@ -64,14 +64,24 @@ export async function GET(req: NextRequest) {
 
   }
 
-  const session = await stripe.billingPortal.sessions.create({
+  try {
 
-    customer: dbUser.stripe_customer_id,
+    const session = await stripe.billingPortal.sessions.create({
 
-    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+      customer: dbUser.stripe_customer_id,
 
-  })
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
 
-  return NextResponse.redirect(session.url)
+    })
+
+    return NextResponse.redirect(session.url)
+
+  } catch (err) {
+
+    const message = err instanceof Error ? err.message : String(err)
+
+    return NextResponse.json({ error: message }, { status: 500 })
+
+  }
 
 }
