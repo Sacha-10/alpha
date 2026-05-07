@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Menu, UserCircle, X } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase";
@@ -36,6 +36,7 @@ const LogoSvg = () => (
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -79,8 +80,20 @@ export default function Navbar() {
       setUser(session?.user ?? null)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null)
+      if (_event === 'SIGNED_IN' && session) {
+        const { data } = await supabase
+          .from('users')
+          .select('subscription_status')
+          .eq('id', session.user.id)
+          .single()
+        if (data?.subscription_status === 'active') {
+          router.push('/dashboard')
+        } else {
+          router.push('/pricing')
+        }
+      }
     })
 
     return () => subscription.unsubscribe()
