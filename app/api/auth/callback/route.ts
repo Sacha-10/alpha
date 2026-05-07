@@ -30,8 +30,10 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code)
 
     const { data: { user } } = await supabase.auth.getUser()
+    console.log('[auth/callback] exchangeCodeForSession → user.id:', user?.id, 'user.email:', user?.email)
+
     if (user) {
-      await supabase.from('users').upsert(
+      const { data: upsertData, error: upsertError } = await supabase.from('users').upsert(
         {
           id: user.id,
           email: user.email,
@@ -40,6 +42,10 @@ export async function GET(request: NextRequest) {
         },
         { onConflict: 'id', ignoreDuplicates: false }
       )
+      console.log('[auth/callback] upsert data:', upsertData, 'error:', upsertError)
+      if (upsertError) {
+        console.log('[auth/callback] upsert error.message:', upsertError.message, 'error.code:', upsertError.code)
+      }
     }
   }
 
