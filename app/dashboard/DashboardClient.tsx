@@ -31,6 +31,22 @@ export default function DashboardClient() {
   const [dbAnalysesLimit, setDbAnalysesLimit] = useState<number | null>(null);
   const [analysesResetDate, setAnalysesResetDate] = useState<string | null>(null);
 
+  const [showSuccessBanner, setShowSuccessBanner] = useState(paymentSuccess || checkout === "success");
+  const [bannerVisible, setBannerVisible] = useState(true);
+
+  useEffect(() => {
+    if (!showSuccessBanner) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("success");
+    url.searchParams.delete("checkout");
+    window.history.replaceState({}, "", url.toString());
+    const autoHide = setTimeout(() => {
+      setBannerVisible(false);
+      setTimeout(() => setShowSuccessBanner(false), 500);
+    }, 10000);
+    return () => clearTimeout(autoHide);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     async function fetchUserData() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -174,11 +190,25 @@ export default function DashboardClient() {
       </header>
 
       <main className="mx-auto max-w-5xl space-y-10 px-6 py-10">
-        {checkout === "success" || paymentSuccess ? (
-          <p className="rounded-lg border border-green/35 bg-green/10 px-4 py-3 text-sm text-green">
-            Paiement confirmé. Merci ! Vos prochaines analyses seront
-            disponibles selon votre offre.
-          </p>
+        {showSuccessBanner ? (
+          <div className={`flex items-center justify-between rounded-lg border border-green/35 bg-green/10 px-4 py-3 text-sm text-green transition-opacity duration-500 ${bannerVisible ? "opacity-100" : "opacity-0"}`}>
+            <span>
+              {subscriptionPlan
+                ? `Plan ${subscriptionPlan.charAt(0).toUpperCase() + subscriptionPlan.slice(1)} activé.`
+                : "Plan activé."}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setBannerVisible(false);
+                setTimeout(() => setShowSuccessBanner(false), 500);
+              }}
+              className="ml-4 text-green hover:opacity-70"
+              aria-label="Fermer"
+            >
+              ×
+            </button>
+          </div>
         ) : null}
         {checkout === "cancel" ? (
           <p className="rounded-lg border border-red/35 bg-red/10 px-4 py-3 text-sm text-red">

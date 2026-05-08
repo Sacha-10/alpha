@@ -177,9 +177,9 @@ export default function PricingPage() {
     }
     if (currentPlan === key && subscriptionStatus === 'active') {
       return (
-        <div className="mt-6 rounded-full bg-blue/10 text-blue border border-blue/30 px-4 py-2 text-sm font-medium w-full text-center">
+        <button type="button" className={`mt-6 w-full rounded-lg px-4 py-3 font-semibold text-[#F0F4FF] cursor-default ${p.ctaBg}`}>
           Plan actuel
-        </div>
+        </button>
       );
     }
     if (planRank[key] > (planRank[currentPlan] ?? -1)) {
