@@ -237,7 +237,7 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
         <View style={st.header}>
           <Text style={st.logoText}>AlphaTradeX</Text>
           <View style={st.headerRight}>
-            <Text style={st.headerTitle}>Rapport d&apos;analyse</Text>
+            <Text style={st.headerTitle}>{"Rapport d'analyse"}</Text>
             <Text style={st.headerDate}>{date}</Text>
           </View>
         </View>
@@ -300,7 +300,7 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
                   </View>
                 </View>
                 <Text style={st.biasDesc}>{bias.description}</Text>
-                <Text style={st.biasEvidence}>&quot;{bias.evidence}&quot;</Text>
+                <Text style={st.biasEvidence}>{'"'}{bias.evidence}{'"'}</Text>
               </View>
             );
           })}
@@ -368,7 +368,7 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
 
         {/* 7. PLAN D'ACTION */}
         <View style={st.card}>
-          <Text style={st.cardTitle}>Plan d&apos;action personnalise</Text>
+          <Text style={st.cardTitle}>{"Plan d'action personnalise"}</Text>
           {report.actionPlan.map((item, i) => {
             const cc = categoryColors(item.category);
             return (
@@ -391,8 +391,8 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
 
         {/* 8. COACH IA */}
         <View style={st.coachCard}>
-          <Text style={st.coachTitle}>L&apos;avis de votre coach IA</Text>
-          <Text style={st.coachQuote}>&quot;{report.personalizedInsight}&quot;</Text>
+          <Text style={st.coachTitle}>{"L'avis de votre coach IA"}</Text>
+          <Text style={st.coachQuote}>{'"'}{report.personalizedInsight}{'"'}</Text>
           <Text style={st.coachSig}>-- Votre coach IA trading</Text>
         </View>
 
@@ -408,11 +408,15 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('[generate-pdf] Parsing request body...');
     const body = (await req.json()) as { report: AiAnalysisResult };
+    console.log('[generate-pdf] Body parsed, report keys:', Object.keys(body.report ?? {}));
     const date = new Date().toLocaleDateString('fr-FR');
-    const nodeBuffer = await renderToBuffer(
-      <TradingReportPDF report={body.report} date={date} />,
-    );
+    console.log('[generate-pdf] Building PDF component...');
+    const element = <TradingReportPDF report={body.report} date={date} />;
+    console.log('[generate-pdf] Calling renderToBuffer...');
+    const nodeBuffer = await renderToBuffer(element);
+    console.log('[generate-pdf] renderToBuffer done, size:', nodeBuffer.length);
     const buffer = new Uint8Array(nodeBuffer);
     const filename = `alphatradex-rapport-${date.replace(/\//g, '-')}.pdf`;
     return new Response(buffer, {
@@ -422,8 +426,12 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    console.error('[generate-pdf]', err);
-    return new Response(JSON.stringify({ error: 'PDF generation failed' }), {
+    console.error('[generate-pdf] CRASH:', err);
+    if (err instanceof Error) {
+      console.error('[generate-pdf] message:', err.message);
+      console.error('[generate-pdf] stack:', err.stack);
+    }
+    return new Response(JSON.stringify({ error: 'PDF generation failed', detail: err instanceof Error ? err.message : String(err) }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });

@@ -219,14 +219,6 @@ export default function TradeReport({
             <span className="font-mono text-primary">
               {analysesLeft}/{analysesLimit ?? limit}
             </span>
-            {analysesLeft <= 1 && (
-              <a
-                href="/api/create-checkout?plan=pro"
-                className="btn-primary px-3 py-1 text-sm"
-              >
-                Passer au Pro
-              </a>
-            )}
           </div>
         </div>
       )}

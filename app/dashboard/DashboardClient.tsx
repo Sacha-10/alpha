@@ -8,8 +8,12 @@ import TradeReport from "@/components/TradeReport";
 import UploadZone from "@/components/UploadZone";
 import type { AiAnalysisResult } from "@/lib/tradingAnalysisTypes";
 
+const SESSION_KEY_REPORT = "atx_last_report";
+const SESSION_KEY_LEFT = "atx_analyses_left";
+const SESSION_KEY_LIMIT = "atx_analyses_limit";
+
 function normalizeApiError(message: unknown): string {
-  if (typeof message !== "string") return "Erreur d’analyse.";
+  if (typeof message !== "string") return "Erreur d'analyse.";
   return message.replace(/\s+/g, " ").trim();
 }
 
@@ -27,12 +31,26 @@ export default function DashboardClient() {
   const [error, setError] = useState<string | null>(null);
 
   const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
-  const [analysesUsed, setAnalysesUsed] = useState<number | null>(null);
-  const [dbAnalysesLimit, setDbAnalysesLimit] = useState<number | null>(null);
   const [analysesResetDate, setAnalysesResetDate] = useState<string | null>(null);
 
   const [showSuccessBanner, setShowSuccessBanner] = useState(paymentSuccess || checkout === "success");
   const [bannerVisible, setBannerVisible] = useState(true);
+
+  // BUG 2 — Restore last report from sessionStorage on mount
+  useEffect(() => {
+    try {
+      const savedReport = sessionStorage.getItem(SESSION_KEY_REPORT);
+      const savedLeft = sessionStorage.getItem(SESSION_KEY_LEFT);
+      const savedLimit = sessionStorage.getItem(SESSION_KEY_LIMIT);
+      if (savedReport) {
+        setAnalysis(JSON.parse(savedReport) as AiAnalysisResult);
+        if (savedLeft !== null) setAnalysesLeft(Number(savedLeft));
+        if (savedLimit !== null) setAnalysesLimit(Number(savedLimit));
+      }
+    } catch {
+      // ignore corrupted sessionStorage
+    }
+  }, []);
 
   useEffect(() => {
     if (!showSuccessBanner) return;
@@ -47,24 +65,33 @@ export default function DashboardClient() {
     return () => clearTimeout(autoHide);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    async function fetchUserData() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
-        .from("users")
-        .select("subscription_plan, analyses_used, analyses_limit, analyses_reset_date")
-        .eq("id", user.id)
-        .single();
-      if (data) {
-        setSubscriptionPlan(data.subscription_plan ?? null);
-        setAnalysesUsed(data.analyses_used ?? null);
-        setDbAnalysesLimit(data.analyses_limit ?? null);
-        setAnalysesResetDate(data.analyses_reset_date ?? null);
+  // BUG 3 & 4 — fetchUserData as standalone function, called on mount and after analysis
+  const fetchUserData = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase
+      .from("users")
+      .select("subscription_plan, analyses_used, analyses_limit, analyses_reset_date")
+      .eq("id", user.id)
+      .single();
+    if (data) {
+      setSubscriptionPlan(data.subscription_plan ?? null);
+      setAnalysesResetDate(data.analyses_reset_date ?? null);
+      // BUG 4 — analysesLeft always derived from Supabase, never local calc
+      if (data.analyses_limit != null && data.analyses_used != null) {
+        const left = Math.max(0, data.analyses_limit - data.analyses_used);
+        setAnalysesLeft(left);
+        setAnalysesLimit(data.analyses_limit);
+        // Sync sessionStorage so refresh shows correct count
+        sessionStorage.setItem(SESSION_KEY_LEFT, String(left));
+        sessionStorage.setItem(SESSION_KEY_LIMIT, String(data.analyses_limit));
       }
     }
-    void fetchUserData();
   }, [supabase]);
+
+  useEffect(() => {
+    void fetchUserData();
+  }, [fetchUserData]);
 
   const runAnalyze = useCallback(async (file: File) => {
     setLoading(true);
@@ -72,6 +99,10 @@ export default function DashboardClient() {
     setAnalysis(null);
     setAnalysesLeft(undefined);
     setAnalysesLimit(undefined);
+    // BUG 2 — Clear sessionStorage when user uploads a new file
+    sessionStorage.removeItem(SESSION_KEY_REPORT);
+    sessionStorage.removeItem(SESSION_KEY_LEFT);
+    sessionStorage.removeItem(SESSION_KEY_LIMIT);
     try {
       const trades = await detectAndParse(file);
       if (!trades.length) {
@@ -91,8 +122,8 @@ export default function DashboardClient() {
       }
 
       const {
-        analysesLeft: left,
-        analysesLimit: limit,
+        analysesLeft: _left,
+        analysesLimit: _limit,
         ...report
       } = data as {
         analysesLeft: number;
@@ -100,8 +131,11 @@ export default function DashboardClient() {
       } & AiAnalysisResult;
 
       setAnalysis(report);
-      setAnalysesLeft(left);
-      setAnalysesLimit(limit);
+      // BUG 2 — Save report to sessionStorage
+      sessionStorage.setItem(SESSION_KEY_REPORT, JSON.stringify(report));
+
+      // BUG 3 & 4 — Refetch from Supabase to get authoritative counts
+      await fetchUserData();
     } catch (e) {
       setError(
         e instanceof Error ? e.message : "Réseau indisponible."
@@ -109,7 +143,7 @@ export default function DashboardClient() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchUserData]);
 
   const onAnalyzeFile = useCallback(
     (file: File) => {
@@ -142,13 +176,9 @@ export default function DashboardClient() {
           </button>
           <div className="flex flex-wrap items-center gap-3">
             {subscriptionPlan ? (
+              // BUG 5 — Header shows plan name + Offres/Factures only, no counter
               <div className="flex flex-col items-end gap-0.5 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium capitalize text-primary">{subscriptionPlan}</span>
-                </div>
-                <span className="text-secondary">
-                  {analysesUsed ?? "–"} / {dbAnalysesLimit ?? "–"} analyses utilisées
-                </span>
+                <span className="font-medium capitalize text-primary">{subscriptionPlan}</span>
                 {analysesResetDate && (
                   <span className="text-secondary">Prochain cycle le {formatResetDate(analysesResetDate)}</span>
                 )}
