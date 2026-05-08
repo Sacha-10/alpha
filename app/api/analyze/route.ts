@@ -6,7 +6,8 @@ import Stripe from 'stripe'
 
 const PLAN_LIMITS: Record<string, number> = {
   starter: 4,
-  pro: 24,
+  pro: 4,
+  premium: 24,
   elite: 999999,
 }
 

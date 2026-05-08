@@ -82,17 +82,27 @@ export default function TradeReport({
   const session = report.sessionAnalysis;
 
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   async function handleDownloadPdf() {
     setPdfLoading(true);
+    setPdfError(null);
+    console.log("[PDF] Début téléchargement");
     try {
+      console.log("[PDF] POST /api/generate-pdf");
       const res = await fetch("/api/generate-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ report }),
       });
-      if (!res.ok) throw new Error("PDF generation failed");
+      console.log("[PDF] status:", res.status, res.statusText);
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("[PDF] erreur serveur:", text);
+        throw new Error("Erreur lors de la génération du PDF");
+      }
       const blob = await res.blob();
+      console.log("[PDF] blob reçu — taille:", blob.size, "type:", blob.type);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       const date = new Date().toISOString().split("T")[0];
@@ -101,7 +111,11 @@ export default function TradeReport({
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      console.log("[PDF] téléchargement déclenché");
+    } catch (err) {
+      console.error("[PDF] échec:", err);
+      setPdfError(err instanceof Error ? err.message : "Téléchargement PDF impossible");
     } finally {
       setPdfLoading(false);
     }
@@ -470,6 +484,9 @@ export default function TradeReport({
       </motion.div>
 
       <div className="pb-8 text-center">
+        {pdfError && (
+          <p className="mb-3 text-sm text-red">{pdfError}</p>
+        )}
         <button
           type="button"
           onClick={handleDownloadPdf}
