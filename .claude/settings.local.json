@@ -15,7 +15,10 @@
       "Bash(node *)",
       "Bash(Get-ChildItem *)",
       "Bash(Rename-Item C:\\\\Users\\\\sacha\\\\dev\\\\SaasAi\\\\Alpha\\\\alpha\\\\app\\\\demo *)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(npm install *)",
+      "Bash(New-Item -ItemType Directory -Path \"C:\\\\Users\\\\sacha\\\\dev\\\\SaasAi\\\\Alpha\\\\alpha\\\\app\\\\api\\\\generate-pdf\" -Force)",
+      "Bash(Out-Null)"
     ]
   }
 }

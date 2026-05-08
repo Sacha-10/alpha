@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import type { AiAnalysisResult, BiasSeverity } from "@/lib/tradingAnalysisTypes";
 
@@ -79,6 +80,32 @@ export default function TradeReport({
   const prop = report.propFirmReadiness;
   const patterns = report.performancePatterns;
   const session = report.sessionAnalysis;
+
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  async function handleDownloadPdf() {
+    setPdfLoading(true);
+    try {
+      const res = await fetch("/api/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ report }),
+      });
+      if (!res.ok) throw new Error("PDF generation failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const date = new Date().toISOString().split("T")[0];
+      a.href = url;
+      a.download = `alphatradex-rapport-${date}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } finally {
+      setPdfLoading(false);
+    }
+  }
 
   const limit = Math.max(analysesLimit ?? 4, 1);
   const remainingPct = Math.min(
@@ -445,10 +472,18 @@ export default function TradeReport({
       <div className="pb-8 text-center">
         <button
           type="button"
-          onClick={() => window.print()}
+          onClick={handleDownloadPdf}
+          disabled={pdfLoading}
           className="btn-outline"
         >
-          Télécharger mon rapport PDF
+          {pdfLoading ? (
+            <>
+              <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              Génération en cours...
+            </>
+          ) : (
+            "Télécharger mon rapport PDF"
+          )}
         </button>
       </div>
     </div>
