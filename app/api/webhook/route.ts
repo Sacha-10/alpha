@@ -75,11 +75,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ received: true })
       }
 
-      const nextReset = new Date(
-        new Date().getFullYear(),
-        new Date().getMonth() + 1,
-        1
-      )
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+      const nextReset = new Date(subscription.current_period_end * 1000)
 
       const payload = {
         subscription_status: 'active',
