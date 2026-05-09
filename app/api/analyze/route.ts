@@ -4,6 +4,8 @@ import { cookies } from 'next/headers'
 import { analyzeTradesMember } from '@/lib/openai'
 import Stripe from 'stripe'
 
+export const maxDuration = 60
+
 const PLAN_LIMITS: Record<string, number> = {
   starter: 4,
   pro: 4,
