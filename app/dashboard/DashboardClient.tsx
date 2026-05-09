@@ -40,12 +40,8 @@ export default function DashboardClient() {
   useEffect(() => {
     try {
       const savedReport = sessionStorage.getItem(SESSION_KEY_REPORT);
-      const savedLeft = sessionStorage.getItem(SESSION_KEY_LEFT);
-      const savedLimit = sessionStorage.getItem(SESSION_KEY_LIMIT);
       if (savedReport) {
         setAnalysis(JSON.parse(savedReport) as AiAnalysisResult);
-        if (savedLeft !== null) setAnalysesLeft(Number(savedLeft));
-        if (savedLimit !== null) setAnalysesLimit(Number(savedLimit));
       }
     } catch {
       // ignore corrupted sessionStorage
