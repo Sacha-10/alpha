@@ -17,10 +17,9 @@ const PLAN_LIMITS: Record<string, number> = {
 const rateLimitMap = new Map<string, number>()
 const RATE_LIMIT_MS = 15_000
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-
 export async function POST(req: NextRequest) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
     const cookieStore = await cookies()
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
