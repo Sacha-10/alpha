@@ -509,11 +509,8 @@ export async function analyzeTradesMember(
   }))
 
   async function callAPI(attempt: number): Promise<any> {
-    console.error(`[MEMBER attempt=${attempt}] Début callAPI`)
-
     let response: any
     try {
-      console.error(`[MEMBER attempt=${attempt}] Appel OpenAI → model=gpt-5.4 trades=${trades.length}`)
       response = await client.chat.completions.create({
         model: 'gpt-5.4',
         max_completion_tokens: 4000,
@@ -528,7 +525,6 @@ export async function analyzeTradesMember(
           },
         ],
       })
-      console.error(`[MEMBER attempt=${attempt}] Réponse OpenAI reçue → finish_reason=${response.choices[0]?.finish_reason} usage=${JSON.stringify(response.usage)}`)
     } catch (apiError: any) {
       let errJson = ''
       try { errJson = JSON.stringify(apiError) } catch { errJson = String(apiError) }
@@ -564,8 +560,6 @@ export async function analyzeTradesMember(
       )
     }
 
-    console.error(`[MEMBER attempt=${attempt}] Contenu brut (500 chars) → ${content.slice(0, 500)}`)
-
     const clean = content
       .replace(/```json/g, '')
       .replace(/```/g, '')
@@ -573,7 +567,6 @@ export async function analyzeTradesMember(
 
     try {
       const parsed = JSON.parse(clean)
-      console.error(`[MEMBER attempt=${attempt}] JSON.parse OK → clés=${Object.keys(parsed).join(',')}`)
       return parsed
     } catch (parseError: any) {
       console.error(`[MEMBER attempt=${attempt}] ERREUR JSON.PARSE`, {

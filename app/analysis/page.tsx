@@ -15,7 +15,6 @@ export default function DemoPage() {
   const [used, setUsed] = useState(false)
 
   async function handleDemo() {
-    console.log('[demo] handleDemo() entrée')
     setLoading(true)
     setError('')
     try {
@@ -23,27 +22,12 @@ export default function DemoPage() {
       const payload = { trades: demoTrades }
       const body = JSON.stringify(payload)
 
-      console.log('[demo] Avant fetch', {
-        url,
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        tradesCount: demoTrades.length,
-        bodyLengthChars: body.length,
-      })
-
       const res = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body,
-      })
-
-      console.log('[demo] Après fetch', {
-        status: res.status,
-        ok: res.ok,
-        statusText: res.statusText,
-        contentType: res.headers.get('content-type'),
       })
 
       const data = await res.json()

@@ -87,22 +87,16 @@ export default function TradeReport({
   async function handleDownloadPdf() {
     setPdfLoading(true);
     setPdfError(null);
-    console.log("[PDF] Début téléchargement");
     try {
-      console.log("[PDF] POST /api/generate-pdf");
       const res = await fetch("/api/generate-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ report }),
       });
-      console.log("[PDF] status:", res.status, res.statusText);
       if (!res.ok) {
-        const text = await res.text();
-        console.error("[PDF] erreur serveur:", text);
         throw new Error("Erreur lors de la génération du PDF");
       }
       const blob = await res.blob();
-      console.log("[PDF] blob reçu — taille:", blob.size, "type:", blob.type);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       const date = new Date().toISOString().split("T")[0];
@@ -112,7 +106,6 @@ export default function TradeReport({
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      console.log("[PDF] téléchargement déclenché");
     } catch (err) {
       console.error("[PDF] échec:", err);
       setPdfError(err instanceof Error ? err.message : "Téléchargement PDF impossible");

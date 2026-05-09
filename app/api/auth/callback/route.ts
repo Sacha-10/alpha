@@ -33,7 +33,6 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code)
 
     const { data: { user } } = await supabase.auth.getUser()
-    console.log('[auth/callback] exchangeCodeForSession → user.id:', user?.id, 'user.email:', user?.email)
 
     let redirectUrl = process.env.NEXT_PUBLIC_APP_URL!
 
@@ -47,11 +46,6 @@ export async function GET(request: NextRequest) {
         },
         { onConflict: 'id', ignoreDuplicates: false }
       )
-      console.log('[auth/callback] upsert data:', upsertData, 'error:', upsertError)
-      if (upsertError) {
-        console.log('[auth/callback] upsert error.message:', upsertError.message, 'error.code:', upsertError.code)
-      }
-
       const { data: userData } = await supabase.from('users').select('subscription_status').eq('id', user.id).single()
       redirectUrl = userData?.subscription_status === 'active'
         ? `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`

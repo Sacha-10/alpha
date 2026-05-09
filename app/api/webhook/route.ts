@@ -15,12 +15,6 @@ export async function POST(req: NextRequest) {
   const body = await req.text()
   const sig = req.headers.get('stripe-signature')
 
-  console.log('[webhook] Requête reçue')
-  console.log('[webhook] stripe-signature présente:', !!sig)
-  console.log('[webhook] STRIPE_WEBHOOK_SECRET défini:', !!process.env.STRIPE_WEBHOOK_SECRET)
-  console.log('[webhook] SUPABASE_SERVICE_ROLE_KEY défini:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
-  console.log('[webhook] NEXT_PUBLIC_SUPABASE_URL défini:', !!process.env.NEXT_PUBLIC_SUPABASE_URL)
-
   if (!sig) {
     console.error('[webhook] stripe-signature manquante')
     return NextResponse.json({ error: 'Signature manquante' }, { status: 400 })
@@ -45,21 +39,12 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  console.log('[webhook] Événement validé:', event.type, '| id:', event.id)
-
   const admin = getSupabaseAdmin()
 
   try {
     // ── checkout.session.completed ────────────────────────────────────
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session
-
-      console.log('[webhook] checkout.session.completed')
-      console.log('[webhook] session.id:', session.id)
-      console.log('[webhook] session.customer:', session.customer)
-      console.log('[webhook] session.subscription:', session.subscription)
-      console.log('[webhook] session.metadata:', JSON.stringify(session.metadata))
-      console.log('[webhook] session.payment_status:', session.payment_status)
 
       const { userId, planName, analysesLimit } = session.metadata ?? {}
 
@@ -87,9 +72,6 @@ export async function POST(req: NextRequest) {
         stripe_customer_id: session.customer as string,
         stripe_subscription_id: subscriptionId,
       }
-      console.log('[webhook] Tentative update Supabase users pour userId:', userId)
-      console.log('[webhook] Payload:', JSON.stringify(payload))
-
       const { data: updateData, error: updateError } = await admin
         .from('users')
         .update(payload)
@@ -98,8 +80,6 @@ export async function POST(req: NextRequest) {
 
       if (updateError) {
         console.error('[webhook] ERREUR Supabase update:', JSON.stringify(updateError))
-      } else {
-        console.log('[webhook] Supabase update OK — lignes affectées:', JSON.stringify(updateData))
       }
 
       // Persist plan info in subscription metadata so the
@@ -108,7 +88,6 @@ export async function POST(req: NextRequest) {
         await stripe.subscriptions.update(subscriptionId, {
           metadata: { planName, analysesLimit },
         })
-        console.log('[webhook] Metadata Stripe subscription mise à jour:', subscriptionId)
       } catch (err) {
         console.error('[webhook] Erreur mise à jour metadata subscription Stripe:', err)
       }
@@ -119,8 +98,6 @@ export async function POST(req: NextRequest) {
       const sub = event.data.object as Stripe.Subscription
       const prev = event.data.previous_attributes as any
       const userId = await getUserId(sub)
-
-      console.log('[webhook] customer.subscription.updated — userId:', userId)
 
       if (!userId) return NextResponse.json({ received: true })
 
@@ -181,8 +158,6 @@ export async function POST(req: NextRequest) {
       const sub = event.data.object as Stripe.Subscription
       const customerId = sub.customer as string
 
-      console.log('[webhook] customer.subscription.deleted — customerId:', customerId)
-
       const customer = await stripe.customers.retrieve(
         customerId
       ) as Stripe.Customer
@@ -196,10 +171,8 @@ export async function POST(req: NextRequest) {
 
       if (userId) {
         await admin.from('users').update(update).eq('id', userId)
-        console.log('[webhook] Abonnement annulé pour userId:', userId)
       } else if (customer.email) {
         await admin.from('users').update(update).eq('email', customer.email)
-        console.log('[webhook] Abonnement annulé pour email:', customer.email)
       } else {
         console.error(
           '[webhook] Impossible d\'identifier l\'utilisateur pour suppression abonnement — customerId:',

@@ -20,8 +20,6 @@ function randFloat(
 }
 
 export async function POST(req: NextRequest) {
-  console.log('[analyze-demo] Route appelée')
-
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -62,9 +60,6 @@ export async function POST(req: NextRequest) {
   try {
     const raw = (body as { trades?: unknown })?.trades
     if (!Array.isArray(raw)) {
-      console.error('[analyze-demo] Échec étape: validation trades (type)', {
-        type: typeof raw,
-      })
       return NextResponse.json(
         { error: 'Données trades invalides.' },
         { status: 400 }
