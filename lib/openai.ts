@@ -361,6 +361,11 @@ RÈGLE BIAIS ET SÉVÉRITÉ :
 CRITIQUE est autorisé si le biais est profondément ancré
 et représente un danger sérieux et répété pour le capital.
 
+RÈGLE LISTE BIAIS :
+Ne liste jamais un biais avec 0 occurrences détectées.
+Un biais doit apparaître dans la liste uniquement
+s'il a été détecté au moins 1 fois dans les trades.
+
 RÈGLE HEURES :
 Les plages horaires sont toujours sur des tranches de 2h.
 Calcule depuis les données réelles sans restriction de plage.
