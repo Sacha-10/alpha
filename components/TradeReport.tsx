@@ -204,16 +204,15 @@ export default function TradeReport({
   return (
     <div className="space-y-6">
       {analysesLeft !== undefined && limit < 999999 && (
-        <div className="card flex items-center justify-between p-4">
-          <span className="text-secondary">
-            <span className="font-mono text-primary">{used}/{limit}</span>{" "}analyses utilisées
-          </span>
-          <div className="h-2 w-32 rounded-full bg-hover">
+        <div className="card flex items-center gap-3 p-4">
+          <span className="text-secondary">analyses utilisées</span>
+          <div className="h-2 flex-1 rounded-full bg-hover">
             <div
               className={`h-full rounded-full ${isAtLimit ? "bg-red" : "bg-blue"}`}
               style={{ width: `${usedPct}%` }}
             />
           </div>
+          <span className="font-mono text-primary">{used}/{limit}</span>
         </div>
       )}
 

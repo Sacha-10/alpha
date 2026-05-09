@@ -255,20 +255,6 @@ export default function DashboardClient() {
           </p>
         ) : null}
 
-        {analysesUsed !== undefined && analysesLimit !== undefined && analysesLimit < 999999 && (
-          <div className="card flex items-center justify-between p-4">
-            <span className="text-secondary">
-              <span className="font-mono text-primary">{analysesUsed}/{analysesLimit}</span>{" "}analyses utilisées
-            </span>
-            <div className="h-2 w-32 rounded-full bg-hover">
-              <div
-                className={`h-full rounded-full ${analysesAtLimit ? "bg-red" : "bg-blue"}`}
-                style={{ width: `${analysesUsedPct}%` }}
-              />
-            </div>
-          </div>
-        )}
-
         <section className="space-y-4">
           <h1 className="text-2xl font-bold text-primary">Analyser mes trades</h1>
           <p className="text-sm text-secondary">
