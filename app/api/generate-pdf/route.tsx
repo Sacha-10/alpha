@@ -222,12 +222,12 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
   ];
 
   const patternItems = [
-    { label: 'Meilleur jour', value: patterns.bestDayOfWeek ?? '', color: C.green },
-    { label: 'Pire jour', value: patterns.worstDayOfWeek ?? '', color: C.red },
-    { label: 'Meilleure heure', value: patterns.bestTimeOfDay ?? '', color: C.green },
-    { label: 'Pire heure', value: patterns.worstTimeOfDay ?? '', color: C.red },
-    { label: 'Meilleur symbole', value: `${patterns.bestSymbol?.symbol ?? ''} (${displayRate(patterns.bestSymbol?.winRate ?? 0)}%)`, color: C.green },
-    { label: 'Pire symbole', value: `${patterns.worstSymbol?.symbol ?? ''} (${displayRate(patterns.worstSymbol?.winRate ?? 0)}%)`, color: C.red },
+    { label: 'Meilleur jour', value: String(patterns.bestDayOfWeek ?? ''), color: C.green },
+    { label: 'Pire jour', value: String(patterns.worstDayOfWeek ?? ''), color: C.red },
+    { label: 'Meilleure heure', value: String(patterns.bestTimeOfDay ?? ''), color: C.green },
+    { label: 'Pire heure', value: String(patterns.worstTimeOfDay ?? ''), color: C.red },
+    { label: 'Meilleur symbole', value: `${String(patterns.bestSymbol?.symbol ?? '')} (${displayRate(patterns.bestSymbol?.winRate ?? 0)}%)`, color: C.green },
+    { label: 'Pire symbole', value: `${String(patterns.worstSymbol?.symbol ?? '')} (${displayRate(patterns.worstSymbol?.winRate ?? 0)}%)`, color: C.red },
   ];
 
   return (
@@ -291,14 +291,14 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
               <View key={i} style={st.biasItem} wrap={false}>
                 <View style={st.biasRow}>
                   <View style={st.biasLeft}>
-                    <Text style={st.biasName}>{bias.name ?? ''}</Text>
-                    <Text style={st.biasFreq}>{String(bias.frequency)}x detecte</Text>
+                    <Text style={st.biasName}>{String(bias.name ?? '')}</Text>
+                    <Text style={st.biasFreq}>{`${String(bias.frequency)}x detecte`}</Text>
                   </View>
                   <View style={[st.biasBadge, { backgroundColor: sc.bg }]}>
-                    <Text style={[st.biasBadgeText, { color: sc.color }]}>{bias.severity}</Text>
+                    <Text style={[st.biasBadgeText, { color: sc.color }]}>{String(bias.severity ?? '')}</Text>
                   </View>
                 </View>
-                <Text style={st.biasDesc}>{bias.description ?? ''}</Text>
+                <Text style={st.biasDesc}>{String(bias.description ?? '')}</Text>
                 <Text style={st.biasEvidence}>{`"${bias.evidence ?? ''}"`}</Text>
               </View>
             );
@@ -321,12 +321,12 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
                       style={[st.barFill, { width: `${Math.min(100, rv)}%`, backgroundColor: color }]}
                     />
                   </View>
-                  <Text style={[st.sessValue, { color }]}>{displayRate(s.rate)}%</Text>
+                  <Text style={[st.sessValue, { color }]}>{`${displayRate(s.rate)}%`}</Text>
                 </View>
               );
             })}
           </View>
-          <Text style={st.sessionInsight}>{session.insight ?? ''}</Text>
+          <Text style={st.sessionInsight}>{String(session.insight ?? '')}</Text>
         </View>
 
         {/* 5. PATTERNS DE PERFORMANCE */}
@@ -360,7 +360,7 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
           {prop.mainObstacles.map((obs, i) => (
             <View key={i} style={st.obsRow}>
               <Text style={st.obsBullet}>x</Text>
-              <Text style={st.obsText}>{obs ?? ''}</Text>
+              <Text style={st.obsText}>{String(obs ?? '')}</Text>
             </View>
           ))}
         </View>
@@ -376,11 +376,11 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
                 <View style={st.actionBody}>
                   <View style={st.actionMeta}>
                     <View style={[st.actionBadge, { backgroundColor: cc.bg }]}>
-                      <Text style={[st.actionBadgeText, { color: cc.color }]}>{item.category ?? ''}</Text>
+                      <Text style={[st.actionBadgeText, { color: cc.color }]}>{String(item.category ?? '')}</Text>
                     </View>
-                    <Text style={st.actionTimeframe}>{item.timeframe ?? ''}</Text>
+                    <Text style={st.actionTimeframe}>{String(item.timeframe ?? '')}</Text>
                   </View>
-                  <Text style={st.actionTitle}>{item.action ?? ''}</Text>
+                  <Text style={st.actionTitle}>{String(item.action ?? '')}</Text>
                   <Text style={st.actionImpact}>{`Impact : ${item.expectedImpact ?? ''}`}</Text>
                 </View>
               </View>

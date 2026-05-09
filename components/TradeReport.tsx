@@ -204,7 +204,7 @@ export default function TradeReport({
   return (
     <div className="space-y-6">
       {analysesLeft !== undefined && limit < 999999 && (
-        <div className="card flex items-center justify-between p-4">
+        <div className="card flex items-center justify-between p-6">
           <span className="text-secondary">Analyses utilisées</span>
           <div className="flex items-center gap-3">
             <div className="h-2 w-32 rounded-full bg-hover">
