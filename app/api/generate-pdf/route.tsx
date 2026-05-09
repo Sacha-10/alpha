@@ -412,7 +412,13 @@ export async function POST(req: NextRequest) {
     console.log('[generate-pdf] Body parsed, report keys:', Object.keys(body.report ?? {}));
     const date = new Date().toLocaleDateString('fr-FR');
     console.log('[generate-pdf] Building PDF component...');
-    const element = <TradingReportPDF report={body.report} date={date} />;
+    const element = (
+      <Document>
+        <Page>
+          <Text>Test AlphaTradeX</Text>
+        </Page>
+      </Document>
+    );
     console.log('[generate-pdf] Calling renderToBuffer...');
     const nodeBuffer = await renderToBuffer(element);
     console.log('[generate-pdf] renderToBuffer done, size:', nodeBuffer.length);
