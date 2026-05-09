@@ -24,10 +24,6 @@ type AnalysisTargets = {
   targetWorstHour: string
 }
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-
 // ─── DÉMO ────────────────────────────────────────────────
 
 const DEMO_SYSTEM_PROMPT = `Tu es un analyste de performance
@@ -212,6 +208,7 @@ export async function analyzeTradesDemo(
   trades: Trade[],
   targets?: AnalysisTargets
 ): Promise<any> {
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   const tradesData = trades.map(t => ({
     symbol: t.symbol,
     direction: t.direction,
@@ -495,6 +492,7 @@ Structure JSON exacte :
 export async function analyzeTradesMember(
   trades: Trade[]
 ): Promise<any> {
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   const tradesData = trades.map(t => ({
     symbol: t.symbol,
     direction: t.direction,
