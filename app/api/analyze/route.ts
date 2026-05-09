@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       )
     }
+    console.log('[analyze] user.id:', user.id)
 
     const lastCall = rateLimitMap.get(user.id) ?? 0
     if (Date.now() - lastCall < RATE_LIMIT_MS) {
@@ -109,8 +110,11 @@ export async function POST(req: NextRequest) {
         { status: 403 }
       )
     }
+    console.log('[analyze] analysesUsed:', userData.analyses_used)
 
     const { trades } = await req.json()
+    console.log('[analyze] trades reçus:', trades.length)
+    console.log('[analyze] Appel analyzeTradesMember')
     const report = await analyzeTradesMember(trades)
 
     await supabase.from('users')
