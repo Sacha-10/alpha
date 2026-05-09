@@ -287,12 +287,17 @@ export async function POST(req: NextRequest) {
     }
 
     const page = await browser.newPage();
+    await page.setViewport({ width: 1200, height: 800, deviceScaleFactor: 2 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
+    const contentHeight = await page.evaluate(() =>
+      document.documentElement.scrollHeight);
+
     const pdfBuffer = await page.pdf({
-      format: 'A4',
+      width: '1200px',
+      height: `${contentHeight}px`,
       printBackground: true,
-      margin: { top: '0', right: '0', bottom: '0', left: '0' },
+      pageRanges: '1',
     });
 
     await browser.close();
