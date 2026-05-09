@@ -121,11 +121,10 @@ export default function TradeReport({
     }
   }
 
-  const limit = Math.max(analysesLimit ?? 4, 1);
-  const remainingPct = Math.min(
-    100,
-    Math.max(0, ((analysesLeft ?? 0) / limit) * 100)
-  );
+  const limit = analysesLimit ?? 0;
+  const used = limit > 0 ? Math.max(0, limit - (analysesLeft ?? 0)) : 0;
+  const usedPct = limit > 0 ? Math.min(100, (used / limit) * 100) : 0;
+  const isAtLimit = limit > 0 && used >= limit;
   const displayRate = (v: number) =>
     v <= 1 ? (v * 100).toFixed(1) : v.toFixed(1);
 
@@ -204,21 +203,16 @@ export default function TradeReport({
 
   return (
     <div className="space-y-6">
-      {analysesLeft !== undefined && (
+      {analysesLeft !== undefined && limit < 999999 && (
         <div className="card flex items-center justify-between p-4">
           <span className="text-secondary">
-            Analyses restantes ce mois-ci
+            <span className="font-mono text-primary">{used}/{limit}</span>{" "}analyses utilisées
           </span>
-          <div className="flex items-center gap-3">
-            <div className="h-2 w-32 rounded-full bg-hover">
-              <div
-                className="h-full rounded-full bg-blue"
-                style={{ width: `${remainingPct}%` }}
-              />
-            </div>
-            <span className="font-mono text-primary">
-              {analysesLeft}/{analysesLimit ?? limit}
-            </span>
+          <div className="h-2 w-32 rounded-full bg-hover">
+            <div
+              className={`h-full rounded-full ${isAtLimit ? "bg-red" : "bg-blue"}`}
+              style={{ width: `${usedPct}%` }}
+            />
           </div>
         </div>
       )}

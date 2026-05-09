@@ -153,6 +153,19 @@ export default function DashboardClient() {
     return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
   }
 
+  const analysesUsed =
+    analysesLimit !== undefined && analysesLeft !== undefined
+      ? Math.max(0, analysesLimit - analysesLeft)
+      : undefined;
+  const analysesUsedPct =
+    analysesUsed !== undefined && analysesLimit
+      ? Math.min(100, (analysesUsed / analysesLimit) * 100)
+      : 0;
+  const analysesAtLimit =
+    analysesUsed !== undefined &&
+    analysesLimit !== undefined &&
+    analysesUsed >= analysesLimit;
+
   async function signOut() {
     await supabase.auth.signOut();
     router.push("/");
@@ -241,6 +254,20 @@ export default function DashboardClient() {
             Paiement annulé. Vous pouvez réessayer quand vous voulez.
           </p>
         ) : null}
+
+        {analysesUsed !== undefined && analysesLimit !== undefined && analysesLimit < 999999 && (
+          <div className="card flex items-center justify-between p-4">
+            <span className="text-secondary">
+              <span className="font-mono text-primary">{analysesUsed}/{analysesLimit}</span>{" "}analyses utilisées
+            </span>
+            <div className="h-2 w-32 rounded-full bg-hover">
+              <div
+                className={`h-full rounded-full ${analysesAtLimit ? "bg-red" : "bg-blue"}`}
+                style={{ width: `${analysesUsedPct}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         <section className="space-y-4">
           <h1 className="text-2xl font-bold text-primary">Analyser mes trades</h1>

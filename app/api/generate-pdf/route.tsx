@@ -212,7 +212,7 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
     { label: 'Trades Total', value: String(gs.totalTrades), color: C.text },
     { label: 'Sharpe Ratio', value: gs.sharpeRatio.toFixed(2), color: gs.sharpeRatio >= 1 ? C.green : C.red },
     { label: 'Risk/Reward', value: gs.avgRiskReward.toFixed(2), color: gs.avgRiskReward >= 1 ? C.green : C.red },
-    { label: 'Duree moyenne', value: gs.avgTradeDuration, color: C.text },
+    { label: 'Duree moyenne', value: String(gs.avgTradeDuration ?? ''), color: C.text },
   ];
 
   const sessions = [
@@ -222,12 +222,12 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
   ];
 
   const patternItems = [
-    { label: 'Meilleur jour', value: patterns.bestDayOfWeek, color: C.green },
-    { label: 'Pire jour', value: patterns.worstDayOfWeek, color: C.red },
-    { label: 'Meilleure heure', value: patterns.bestTimeOfDay, color: C.green },
-    { label: 'Pire heure', value: patterns.worstTimeOfDay, color: C.red },
-    { label: 'Meilleur symbole', value: `${patterns.bestSymbol.symbol} (${displayRate(patterns.bestSymbol.winRate)}%)`, color: C.green },
-    { label: 'Pire symbole', value: `${patterns.worstSymbol.symbol} (${displayRate(patterns.worstSymbol.winRate)}%)`, color: C.red },
+    { label: 'Meilleur jour', value: patterns.bestDayOfWeek ?? '', color: C.green },
+    { label: 'Pire jour', value: patterns.worstDayOfWeek ?? '', color: C.red },
+    { label: 'Meilleure heure', value: patterns.bestTimeOfDay ?? '', color: C.green },
+    { label: 'Pire heure', value: patterns.worstTimeOfDay ?? '', color: C.red },
+    { label: 'Meilleur symbole', value: `${patterns.bestSymbol?.symbol ?? ''} (${displayRate(patterns.bestSymbol?.winRate ?? 0)}%)`, color: C.green },
+    { label: 'Pire symbole', value: `${patterns.worstSymbol?.symbol ?? ''} (${displayRate(patterns.worstSymbol?.winRate ?? 0)}%)`, color: C.red },
   ];
 
   return (
@@ -255,7 +255,7 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
               const color = scoreColor(item.score);
               return (
                 <View key={i} style={st.scoreBox}>
-                  <Text style={[st.scoreNum, { color }]}>{Math.round(n)}</Text>
+                  <Text style={[st.scoreNum, { color }]}>{String(Math.round(n))}</Text>
                   <Text style={st.scoreMax}>/100</Text>
                   <Text style={st.scoreLabel}>{item.label}</Text>
                 </View>
@@ -283,8 +283,7 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
         <View style={st.card}>
           <Text style={st.cardTitle}>Profil psychologique</Text>
           <Text style={st.domBias}>
-            Biais dominant :{' '}
-            <Text style={{ color: C.red, fontFamily: 'Helvetica-Bold' }}>{psych.dominantBias}</Text>
+            {`Biais dominant : ${psych.dominantBias ?? 'N/A'}`}
           </Text>
           {psych.biases.map((bias, i) => {
             const sc = severityColors(bias.severity);
@@ -292,15 +291,15 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
               <View key={i} style={st.biasItem} wrap={false}>
                 <View style={st.biasRow}>
                   <View style={st.biasLeft}>
-                    <Text style={st.biasName}>{bias.name}</Text>
-                    <Text style={st.biasFreq}>{bias.frequency}x detecte</Text>
+                    <Text style={st.biasName}>{bias.name ?? ''}</Text>
+                    <Text style={st.biasFreq}>{String(bias.frequency)}x detecte</Text>
                   </View>
                   <View style={[st.biasBadge, { backgroundColor: sc.bg }]}>
                     <Text style={[st.biasBadgeText, { color: sc.color }]}>{bias.severity}</Text>
                   </View>
                 </View>
-                <Text style={st.biasDesc}>{bias.description}</Text>
-                <Text style={st.biasEvidence}>{'"'}{bias.evidence}{'"'}</Text>
+                <Text style={st.biasDesc}>{bias.description ?? ''}</Text>
+                <Text style={st.biasEvidence}>{`"${bias.evidence ?? ''}"`}</Text>
               </View>
             );
           })}
@@ -327,7 +326,7 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
               );
             })}
           </View>
-          <Text style={st.sessionInsight}>{session.insight}</Text>
+          <Text style={st.sessionInsight}>{session.insight ?? ''}</Text>
         </View>
 
         {/* 5. PATTERNS DE PERFORMANCE */}
@@ -356,12 +355,12 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
             </Text>
           </View>
           <Text style={st.propMeta}>
-            Score : {Math.round(normalizeScore(prop.score))}/100  •  Temps estime : {prop.estimatedTimeToReady}
+            {`Score : ${String(Math.round(normalizeScore(prop.score)))}/100  •  Temps estime : ${prop.estimatedTimeToReady ?? ''}`}
           </Text>
           {prop.mainObstacles.map((obs, i) => (
             <View key={i} style={st.obsRow}>
               <Text style={st.obsBullet}>x</Text>
-              <Text style={st.obsText}>{obs}</Text>
+              <Text style={st.obsText}>{obs ?? ''}</Text>
             </View>
           ))}
         </View>
@@ -373,16 +372,16 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
             const cc = categoryColors(item.category);
             return (
               <View key={i} style={st.actionItem} wrap={false}>
-                <Text style={st.actionNum}>{item.priority}</Text>
+                <Text style={st.actionNum}>{String(item.priority)}</Text>
                 <View style={st.actionBody}>
                   <View style={st.actionMeta}>
                     <View style={[st.actionBadge, { backgroundColor: cc.bg }]}>
-                      <Text style={[st.actionBadgeText, { color: cc.color }]}>{item.category}</Text>
+                      <Text style={[st.actionBadgeText, { color: cc.color }]}>{item.category ?? ''}</Text>
                     </View>
-                    <Text style={st.actionTimeframe}>{item.timeframe}</Text>
+                    <Text style={st.actionTimeframe}>{item.timeframe ?? ''}</Text>
                   </View>
-                  <Text style={st.actionTitle}>{item.action}</Text>
-                  <Text style={st.actionImpact}>Impact : {item.expectedImpact}</Text>
+                  <Text style={st.actionTitle}>{item.action ?? ''}</Text>
+                  <Text style={st.actionImpact}>{`Impact : ${item.expectedImpact ?? ''}`}</Text>
                 </View>
               </View>
             );
@@ -392,7 +391,7 @@ function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: st
         {/* 8. COACH IA */}
         <View style={st.coachCard}>
           <Text style={st.coachTitle}>{"L'avis de votre coach IA"}</Text>
-          <Text style={st.coachQuote}>{'"'}{report.personalizedInsight}{'"'}</Text>
+          <Text style={st.coachQuote}>{`"${report.personalizedInsight ?? ''}"`}</Text>
           <Text style={st.coachSig}>-- Votre coach IA trading</Text>
         </View>
 
