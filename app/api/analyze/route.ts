@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { analyzeTrades } from '@/lib/openai'
+import { analyzeTradesMember } from '@/lib/openai'
 import Stripe from 'stripe'
 
 const PLAN_LIMITS: Record<string, number> = {
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
   }
   
   const { trades } = await req.json()
-  const report = await analyzeTrades(trades)
+  const report = await analyzeTradesMember(trades)
   
   await supabase.from('users')
     .update({ 

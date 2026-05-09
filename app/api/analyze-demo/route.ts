@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { analyzeTrades } from '@/lib/openai'
+import { analyzeTradesDemo } from '@/lib/openai'
 import type { Trade } from '@/lib/parseCSV'
 
 export const maxDuration = 60
@@ -240,7 +240,7 @@ export async function POST(req: NextRequest) {
     const shuffled = [...trades]
       .sort(() => Math.random() - 0.5)
       .slice(0, 120)
-    report = await analyzeTrades(shuffled, targets)
+    report = await analyzeTradesDemo(shuffled, targets)
   } catch (err) {
     console.error('[analyze-demo] Échec étape: OpenAI analyzeTrades', err)
     const message =
