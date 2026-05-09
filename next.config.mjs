@@ -7,6 +7,9 @@ const placeholderAnon =
 
 const nextConfig = {
   serverExternalPackages: ['puppeteer-core', '@sparticuz/chromium'],
+  outputFileTracingIncludes: {
+    '/api/generate-pdf': ['./node_modules/@sparticuz/chromium/**/*'],
+  },
   env: {
     NEXT_PUBLIC_SUPABASE_URL:
       (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim() || placeholderUrl,

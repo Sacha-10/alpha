@@ -1,3 +1,6 @@
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+
 import { NextRequest } from 'next/server';
 import type { AiAnalysisResult } from '@/lib/tradingAnalysisTypes';
 
