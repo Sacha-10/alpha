@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@sparticuz/chromium": "^148.0.0",
     "@stripe/stripe-js": "^5.5.0",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.10.2",
@@ -20,7 +21,7 @@
     "nextjs-toploader": "^3.9.17",
     "openai": "^4.77.3",
     "papaparse": "^5.4.1",
-    "pdf-lib": "^1.17.1",
+    "puppeteer-core": "^24.43.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "stripe": "^17.5.0"
