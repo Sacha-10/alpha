@@ -511,8 +511,12 @@ export async function analyzeTradesMember(
   }))
 
   async function callAPI(attempt: number): Promise<any> {
+    console.error(`[MEMBER attempt=${attempt}] Début callAPI`)
+
+    let response: any
     try {
-      const response = await client.chat.completions.create({
+      console.error(`[MEMBER attempt=${attempt}] Appel OpenAI → model=gpt-5.4 trades=${trades.length}`)
+      response = await client.chat.completions.create({
         model: 'gpt-5.4',
         max_completion_tokens: 4000,
         temperature: 0.7,
@@ -526,30 +530,58 @@ export async function analyzeTradesMember(
           },
         ],
       })
-
-      const content = response.choices[0]?.message?.content
-      if (!content) throw new Error('Réponse vide')
-
-      const clean = content
-        .replace(/```json/g, '')
-        .replace(/```/g, '')
-        .trim()
-
-      return JSON.parse(clean)
-    } catch (error: any) {
-      let errorJson = ''
-      try {
-        errorJson = JSON.stringify(error)
-      } catch (jsonErr: any) {
-        errorJson = `JSON.stringify failed: ${jsonErr?.message || String(jsonErr)}`
+      console.error(`[MEMBER attempt=${attempt}] Réponse OpenAI reçue → finish_reason=${response.choices[0]?.finish_reason} usage=${JSON.stringify(response.usage)}`)
+    } catch (apiError: any) {
+      let errJson = ''
+      try { errJson = JSON.stringify(apiError) } catch { errJson = String(apiError) }
+      console.error(`[MEMBER attempt=${attempt}] ERREUR APPEL OPENAI`, {
+        message: apiError?.message,
+        status: apiError?.status,
+        code: apiError?.code,
+        type: apiError?.type,
+        json: errJson,
+      })
+      if (attempt < 2) {
+        await new Promise(r => setTimeout(r, 1000))
+        return callAPI(attempt + 1)
       }
+      throw new Error(
+        "Erreur lors de l'analyse. " +
+          'Veuillez réessayer dans quelques instants.'
+      )
+    }
 
-      console.error('[OpenAI Error - Detailed]', {
-        message: error?.message,
-        status: error?.status,
-        code: error?.code,
-        type: error?.type,
-        json: errorJson,
+    const content = response.choices[0]?.message?.content
+    if (!content) {
+      console.error(`[MEMBER attempt=${attempt}] ERREUR CONTENU VIDE`, {
+        choices: response.choices,
+      })
+      if (attempt < 2) {
+        await new Promise(r => setTimeout(r, 1000))
+        return callAPI(attempt + 1)
+      }
+      throw new Error(
+        "Erreur lors de l'analyse. " +
+          'Veuillez réessayer dans quelques instants.'
+      )
+    }
+
+    console.error(`[MEMBER attempt=${attempt}] Contenu brut (500 chars) → ${content.slice(0, 500)}`)
+
+    const clean = content
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .trim()
+
+    try {
+      const parsed = JSON.parse(clean)
+      console.error(`[MEMBER attempt=${attempt}] JSON.parse OK → clés=${Object.keys(parsed).join(',')}`)
+      return parsed
+    } catch (parseError: any) {
+      console.error(`[MEMBER attempt=${attempt}] ERREUR JSON.PARSE`, {
+        message: parseError?.message,
+        contentStart: clean.slice(0, 300),
+        contentEnd: clean.slice(-200),
       })
       if (attempt < 2) {
         await new Promise(r => setTimeout(r, 1000))
