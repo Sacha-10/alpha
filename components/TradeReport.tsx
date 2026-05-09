@@ -206,7 +206,7 @@ export default function TradeReport({
       {analysesLeft !== undefined && limit < 999999 && (
         <div className="card flex items-center gap-3 p-4">
           <span className="text-secondary">analyses utilisées</span>
-          <div className="h-2 flex-1 rounded-full bg-hover">
+          <div className="h-2 w-32 rounded-full bg-hover">
             <div
               className={`h-full rounded-full ${isAtLimit ? "bg-red" : "bg-blue"}`}
               style={{ width: `${usedPct}%` }}
