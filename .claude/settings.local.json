@@ -19,7 +19,8 @@
       "Bash(npm install *)",
       "Bash(New-Item -ItemType Directory -Path \"C:\\\\Users\\\\sacha\\\\dev\\\\SaasAi\\\\Alpha\\\\alpha\\\\app\\\\api\\\\generate-pdf\" -Force)",
       "Bash(Out-Null)",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "Bash(npm uninstall *)"
     ]
   }
 }

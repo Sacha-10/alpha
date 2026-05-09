@@ -1,430 +1,353 @@
 import { NextRequest } from 'next/server';
-import React from 'react';
-import {
-  Document,
-  Page,
-  View,
-  Text,
-  StyleSheet,
-  renderToBuffer,
-} from '@react-pdf/renderer';
+import { PDFDocument, PDFPage, PDFFont, StandardFonts, rgb } from 'pdf-lib';
 import type { AiAnalysisResult } from '@/lib/tradingAnalysisTypes';
 
+const PW = 595.28;
+const PH = 841.89;
+const ML = 40;
+const CW = PW - ML * 2;
+
+type RGB = ReturnType<typeof rgb>;
+
+const hx = (h: string): RGB =>
+  rgb(parseInt(h.slice(1,3),16)/255, parseInt(h.slice(3,5),16)/255, parseInt(h.slice(5,7),16)/255);
+
 const C = {
-  bg: '#0A0A0F',
-  card: '#0F1117',
-  hover: '#12141E',
-  border: '#1E2035',
-  text: '#F0F4FF',
-  muted: '#8892AA',
-  blue: '#2D6FFF',
-  green: '#00E5B0',
-  red: '#FF3D57',
-  cyan: '#00B8D9',
-} as const;
+  bg:     hx('#0A0A0F'),
+  card:   hx('#0F1117'),
+  hover:  hx('#12141E'),
+  border: hx('#1E2035'),
+  text:   hx('#F0F4FF'),
+  muted:  hx('#8892AA'),
+  blue:   hx('#2D6FFF'),
+  green:  hx('#00E5B0'),
+  red:    hx('#FF3D57'),
+  cyan:   hx('#00B8D9'),
+  darkBlue: hx('#0D1529'),
+};
 
-const st = StyleSheet.create({
-  page: {
-    backgroundColor: C.bg,
-    paddingHorizontal: 40,
-    paddingVertical: 36,
-    fontFamily: 'Helvetica',
-    fontSize: 10,
-    color: C.text,
-  },
-  // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: C.border,
-    borderBottomStyle: 'solid',
-  },
-  logoText: { fontSize: 18, fontFamily: 'Helvetica-Bold', color: C.blue },
-  headerRight: { alignItems: 'flex-end' },
-  headerTitle: { fontSize: 11, color: C.text, marginBottom: 2 },
-  headerDate: { fontSize: 9, color: C.muted },
-  // Card
-  card: {
-    backgroundColor: C.card,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderStyle: 'solid',
-    borderRadius: 8,
-    padding: 14,
-    marginBottom: 12,
-  },
-  cardTitle: { fontSize: 12, fontFamily: 'Helvetica-Bold', marginBottom: 10 },
-  // Scores
-  scoreRow: { flexDirection: 'row', justifyContent: 'space-around' },
-  scoreBox: { alignItems: 'center', flex: 1, paddingVertical: 4 },
-  scoreNum: { fontSize: 28, fontFamily: 'Helvetica-Bold', marginBottom: 1 },
-  scoreMax: { fontSize: 10, color: C.muted, marginBottom: 3 },
-  scoreLabel: { fontSize: 8, color: C.muted, textAlign: 'center' },
-  // Stats grid
-  statsWrap: { flexDirection: 'row', flexWrap: 'wrap' },
-  statCell: { width: '25%', paddingRight: 6, paddingBottom: 6 },
-  statInner: { backgroundColor: C.hover, borderRadius: 5, padding: 8 },
-  statLabel: { fontSize: 7, color: C.muted, marginBottom: 3 },
-  statValue: { fontSize: 12, fontFamily: 'Helvetica-Bold' },
-  // Bias
-  biasItem: { backgroundColor: C.hover, borderRadius: 5, padding: 8, marginBottom: 5 },
-  biasRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 3,
-  },
-  biasLeft: { flexDirection: 'row', alignItems: 'center' },
-  biasName: { fontSize: 9, fontFamily: 'Helvetica-Bold', marginRight: 6 },
-  biasFreq: { fontSize: 7, color: C.muted },
-  biasBadge: { borderRadius: 8, paddingHorizontal: 5, paddingVertical: 2 },
-  biasBadgeText: { fontSize: 7, fontFamily: 'Helvetica-Bold' },
-  biasDesc: { fontSize: 8, color: C.muted, marginBottom: 2 },
-  biasEvidence: { fontSize: 7, color: C.muted, fontFamily: 'Helvetica-Oblique' },
-  domBias: { fontSize: 9, color: C.muted, marginBottom: 8 },
-  // Session
-  sessionWrap: { flexDirection: 'row', marginBottom: 8 },
-  sessBox: { flex: 1, backgroundColor: C.hover, borderRadius: 5, padding: 8, alignItems: 'center', marginRight: 6 },
-  sessBoxLast: { flex: 1, backgroundColor: C.hover, borderRadius: 5, padding: 8, alignItems: 'center' },
-  sessName: { fontSize: 8, color: C.muted, marginBottom: 5 },
-  barTrack: { width: '100%', height: 4, backgroundColor: C.bg, borderRadius: 2, marginBottom: 5 },
-  barFill: { height: 4, borderRadius: 2 },
-  sessValue: { fontSize: 11, fontFamily: 'Helvetica-Bold' },
-  sessionInsight: { fontSize: 8, color: C.muted, fontFamily: 'Helvetica-Oblique' },
-  // Patterns
-  patternWrap: { flexDirection: 'row', flexWrap: 'wrap' },
-  patternCell: { width: '50%', paddingRight: 6, paddingBottom: 6 },
-  patternInner: { backgroundColor: C.hover, borderRadius: 5, padding: 8 },
-  patternLabel: { fontSize: 7, color: C.muted, marginBottom: 3 },
-  patternValue: { fontSize: 10, fontFamily: 'Helvetica-Bold' },
-  // Prop firm
-  propBadge: { borderRadius: 16, paddingHorizontal: 10, paddingVertical: 5, alignSelf: 'flex-start', marginBottom: 8 },
-  propBadgeText: { fontSize: 9, fontFamily: 'Helvetica-Bold' },
-  propMeta: { fontSize: 8, color: C.muted, marginBottom: 8 },
-  obsRow: { flexDirection: 'row', marginBottom: 3 },
-  obsBullet: { fontSize: 8, color: C.red, marginRight: 5, width: 8 },
-  obsText: { fontSize: 8, color: C.muted, flex: 1 },
-  // Action plan
-  actionItem: {
-    flexDirection: 'row',
-    backgroundColor: C.hover,
-    borderRadius: 5,
-    padding: 8,
-    marginBottom: 5,
-  },
-  actionNum: { fontSize: 20, fontFamily: 'Helvetica-Bold', color: '#2D6FFF44', width: 24, marginRight: 8 },
-  actionBody: { flex: 1 },
-  actionMeta: { flexDirection: 'row', alignItems: 'center', marginBottom: 3 },
-  actionBadge: { borderRadius: 6, paddingHorizontal: 5, paddingVertical: 2, marginRight: 6 },
-  actionBadgeText: { fontSize: 7 },
-  actionTimeframe: { fontSize: 7, color: C.muted },
-  actionTitle: { fontSize: 9, color: C.text, marginBottom: 2 },
-  actionImpact: { fontSize: 7, color: C.muted },
-  // Coach IA
-  coachCard: {
-    backgroundColor: '#0D1529',
-    borderWidth: 1,
-    borderColor: '#2D6FFF4D',
-    borderStyle: 'solid',
-    borderRadius: 8,
-    padding: 14,
-    marginBottom: 12,
-  },
-  coachTitle: { fontSize: 12, fontFamily: 'Helvetica-Bold', marginBottom: 8 },
-  coachQuote: { fontSize: 9, color: C.muted, fontFamily: 'Helvetica-Oblique', lineHeight: 1.6, marginBottom: 8 },
-  coachSig: { fontSize: 9, color: C.blue, fontFamily: 'Helvetica-Bold' },
-  // Footer
-  footer: {
-    marginTop: 12,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: C.border,
-    borderTopStyle: 'solid',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  footerText: { fontSize: 7, color: C.muted },
-});
+const norm = (s: number) => Math.min(100, Math.max(0, s > 0 && s <= 1 ? s * 100 : s));
+const sCol = (s: number): RGB => { const n = norm(s); return n > 60 ? C.green : n >= 40 ? C.cyan : C.red; };
+const pRate = (v: number) => (v <= 1 ? v * 100 : v).toFixed(1);
 
-function normalizeScore(score: number): number {
-  const n = score > 0 && score <= 1 ? score * 100 : score;
-  return Math.min(100, Math.max(0, n));
+function wrap(text: string, maxW: number, sz: number, font: PDFFont): string[] {
+  const lines: string[] = [];
+  let line = '';
+  for (const word of text.split(' ')) {
+    const t = line ? `${line} ${word}` : word;
+    if (font.widthOfTextAtSize(t, sz) > maxW && line) { lines.push(line); line = word; }
+    else line = t;
+  }
+  if (line) lines.push(line);
+  return lines;
 }
 
-function scoreColor(score: number): string {
-  const n = normalizeScore(score);
-  return n > 60 ? C.green : n >= 40 ? C.cyan : C.red;
+// Coordinate helpers: yTop = distance from page top
+const textY = (yTop: number, sz: number) => PH - yTop - sz;
+const rectY = (yTop: number, h: number) => PH - yTop - h;
+
+function drawT(pg: PDFPage, text: string, x: number, yTop: number, sz: number, font: PDFFont, color = C.text, opacity = 1) {
+  pg.drawText(text, { x, y: textY(yTop, sz), size: sz, font, color, opacity });
 }
 
-function displayRate(v: number): string {
-  return v <= 1 ? (v * 100).toFixed(1) : v.toFixed(1);
+function drawR(pg: PDFPage, x: number, yTop: number, w: number, h: number, color: RGB, border?: RGB, opacity = 1) {
+  pg.drawRectangle({ x, y: rectY(yTop, h), width: w, height: h, color, borderColor: border, borderWidth: border ? 1 : undefined, opacity });
 }
 
-function severityColors(severity: string): { bg: string; color: string } {
-  if (severity === 'CRITIQUE' || severity === 'ÉLEVÉ') return { bg: '#FF3D5733', color: C.red };
-  if (severity === 'MOYEN') return { bg: '#00B8D933', color: C.cyan };
-  return { bg: '#00E5B033', color: C.green };
+function drawL(pg: PDFPage, x1: number, y1: number, x2: number, y2: number, color: RGB) {
+  pg.drawLine({ start: { x: x1, y: PH - y1 }, end: { x: x2, y: PH - y2 }, color, thickness: 0.5 });
 }
 
-function categoryColors(category: string): { bg: string; color: string } {
-  if (category === 'Psychologie') return { bg: '#FF3D5733', color: C.red };
-  if (category === 'Risque' || category === 'Timing') return { bg: '#00B8D933', color: C.cyan };
-  if (category === 'Stratégie') return { bg: '#2D6FFF33', color: C.blue };
-  return { bg: '#8892AA33', color: C.muted };
+interface Ctx { doc: PDFDocument; pg: PDFPage; y: number; R: PDFFont; B: PDFFont; O: PDFFont }
+
+function addPage(ctx: Ctx) {
+  ctx.pg = ctx.doc.addPage([PW, PH]);
+  ctx.pg.drawRectangle({ x: 0, y: 0, width: PW, height: PH, color: C.bg });
+  ctx.y = 36;
 }
 
-function sessionBarColor(rate: number): string {
-  if (rate < 40) return C.red;
-  if (rate <= 60) return C.cyan;
-  return C.green;
+function need(ctx: Ctx, h: number) { if (ctx.y + h > PH - 40) addPage(ctx); }
+
+// ─── Sections ─────────────────────────────────────────────────────────────────
+
+function drawHeader(ctx: Ctx, date: string) {
+  const { pg, B, R } = ctx;
+  const y = ctx.y;
+  drawT(pg, 'AlphaTradeX', ML, y, 18, B, C.blue);
+  drawT(pg, "Rapport d'analyse", ML + 330, y, 11, R);
+  drawT(pg, date, ML + 330, y + 15, 9, R, C.muted);
+  ctx.y += 32;
+  drawL(pg, ML, ctx.y, ML + CW, ctx.y, C.border);
+  ctx.y += 20;
 }
 
-function TradingReportPDF({ report, date }: { report: AiAnalysisResult; date: string }) {
-  const gs = report.globalStats;
-  const psych = report.psychologicalProfile;
-  const risk = report.riskManagement;
-  const prop = report.propFirmReadiness;
-  const patterns = report.performancePatterns;
-  const session = report.sessionAnalysis;
+function drawScores(ctx: Ctx, psychScore: number, riskScore: number, propScore: number) {
+  const H = 85;
+  need(ctx, H + 12);
+  const y = ctx.y;
+  drawR(ctx.pg, ML, y, CW, H, C.card, C.border);
+  drawT(ctx.pg, 'Performance globale', ML + 14, y + 14, 12, ctx.B);
 
-  const sess = session as Record<string, unknown>;
-  const tokyoRate =
-    typeof sess.tokyoWinRate === 'number' ? sess.tokyoWinRate
-    : typeof sess.asianWinRate === 'number' ? sess.asianWinRate
-    : 30;
-
-  const winRateNum = gs.winRate <= 1 ? gs.winRate * 100 : gs.winRate;
-  const ddNum = gs.maxDrawdownPercent <= 1 ? gs.maxDrawdownPercent * 100 : gs.maxDrawdownPercent;
-
-  const keyStats = [
-    { label: 'Win Rate', value: `${displayRate(gs.winRate)}%`, color: winRateNum >= 50 ? C.green : C.red },
-    { label: 'Profit Factor', value: gs.profitFactor.toFixed(2), color: gs.profitFactor >= 1 ? C.green : C.red },
-    { label: 'Max Drawdown', value: `${displayRate(gs.maxDrawdownPercent)}%`, color: ddNum > 20 ? C.red : C.muted },
-    {
-      label: 'PnL Total',
-      value: gs.totalPnL < 0 ? `-${Math.abs(gs.totalPnL).toFixed(0)} EUR` : `+${gs.totalPnL.toFixed(0)} EUR`,
-      color: gs.totalPnL >= 0 ? C.green : C.red,
-    },
-    { label: 'Trades Total', value: String(gs.totalTrades), color: C.text },
-    { label: 'Sharpe Ratio', value: gs.sharpeRatio.toFixed(2), color: gs.sharpeRatio >= 1 ? C.green : C.red },
-    { label: 'Risk/Reward', value: gs.avgRiskReward.toFixed(2), color: gs.avgRiskReward >= 1 ? C.green : C.red },
-    { label: 'Duree moyenne', value: String(gs.avgTradeDuration ?? ''), color: C.text },
+  const items = [
+    { s: psychScore, label: 'Score psychologique' },
+    { s: riskScore,  label: 'Gestion du risque' },
+    { s: propScore,  label: 'Prop Firm Readiness' },
   ];
+  const colW = CW / 3;
+  for (let i = 0; i < 3; i++) {
+    const { s, label } = items[i];
+    const n = norm(s);
+    const col = sCol(s);
+    const cx = ML + i * colW;
+    const scoreStr = String(Math.round(n));
+    const sw = ctx.B.widthOfTextAtSize(scoreStr, 26);
+    drawT(ctx.pg, scoreStr, cx + (colW - sw) / 2, y + 30, 26, ctx.B, col);
+    const mxW = ctx.R.widthOfTextAtSize('/100', 9);
+    drawT(ctx.pg, '/100', cx + (colW - mxW) / 2, y + 56, 9, ctx.R, C.muted);
+    const lw = ctx.R.widthOfTextAtSize(label, 8);
+    drawT(ctx.pg, label, cx + (colW - lw) / 2, y + 68, 8, ctx.R, C.muted);
+  }
+  ctx.y += H + 12;
+}
+
+function drawStats(ctx: Ctx, gs: AiAnalysisResult['globalStats']) {
+  const winN = gs.winRate <= 1 ? gs.winRate * 100 : gs.winRate;
+  const ddN  = gs.maxDrawdownPercent <= 1 ? gs.maxDrawdownPercent * 100 : gs.maxDrawdownPercent;
+  const stats = [
+    { label: 'Win Rate',      val: `${pRate(gs.winRate)}%`,                                                          col: winN >= 50 ? C.green : C.red },
+    { label: 'Profit Factor', val: gs.profitFactor.toFixed(2),                                                       col: gs.profitFactor >= 1 ? C.green : C.red },
+    { label: 'Max Drawdown',  val: `${pRate(gs.maxDrawdownPercent)}%`,                                               col: ddN > 20 ? C.red : C.muted },
+    { label: 'PnL Total',     val: gs.totalPnL < 0 ? `-${Math.abs(gs.totalPnL).toFixed(0)}€` : `+${gs.totalPnL.toFixed(0)}€`, col: gs.totalPnL >= 0 ? C.green : C.red },
+    { label: 'Trades Total',  val: String(gs.totalTrades),                                                           col: C.text },
+    { label: 'Sharpe Ratio',  val: gs.sharpeRatio.toFixed(2),                                                        col: gs.sharpeRatio >= 1 ? C.green : C.red },
+    { label: 'Risk/Reward',   val: gs.avgRiskReward.toFixed(2),                                                      col: gs.avgRiskReward >= 1 ? C.green : C.red },
+    { label: 'Duree moy.',    val: String(gs.avgTradeDuration ?? '-'),                                               col: C.text },
+  ];
+  const H = 106;
+  need(ctx, H + 12);
+  const y = ctx.y;
+  drawR(ctx.pg, ML, y, CW, H, C.card, C.border);
+  drawT(ctx.pg, 'Statistiques cles', ML + 14, y + 14, 12, ctx.B);
+
+  const cellW = CW / 4;
+  for (let i = 0; i < 8; i++) {
+    const row = Math.floor(i / 4);
+    const col = i % 4;
+    const cx = ML + col * cellW + 6;
+    const cy = y + 34 + row * 33;
+    drawR(ctx.pg, cx, cy, cellW - 12, 28, C.hover);
+    drawT(ctx.pg, stats[i].label, cx + 6, cy + 5,  7,  ctx.R, C.muted);
+    drawT(ctx.pg, stats[i].val,   cx + 6, cy + 14, 11, ctx.B, stats[i].col);
+  }
+  ctx.y += H + 12;
+}
+
+function drawSession(ctx: Ctx, session: AiAnalysisResult['sessionAnalysis']) {
+  const insightLines = wrap(String(session.insight ?? ''), CW - 28, 8, ctx.O);
+  const H = 72 + Math.min(insightLines.length, 2) * 10;
+  need(ctx, H + 12);
+  const y = ctx.y;
+  drawR(ctx.pg, ML, y, CW, H, C.card, C.border);
+  drawT(ctx.pg, 'Performance par session', ML + 14, y + 14, 12, ctx.B);
 
   const sessions = [
-    { name: 'London', rate: session.londonWinRate },
+    { name: 'London',   rate: session.londonWinRate },
     { name: 'New York', rate: session.newYorkWinRate },
-    { name: 'Tokyo', rate: tokyoRate },
+    { name: 'Tokyo',    rate: typeof session.tokyoWinRate === 'number' ? session.tokyoWinRate : 30 },
   ];
-
-  const patternItems = [
-    { label: 'Meilleur jour', value: String(patterns.bestDayOfWeek ?? ''), color: C.green },
-    { label: 'Pire jour', value: String(patterns.worstDayOfWeek ?? ''), color: C.red },
-    { label: 'Meilleure heure', value: String(patterns.bestTimeOfDay ?? ''), color: C.green },
-    { label: 'Pire heure', value: String(patterns.worstTimeOfDay ?? ''), color: C.red },
-    { label: 'Meilleur symbole', value: `${String(patterns.bestSymbol?.symbol ?? '')} (${displayRate(patterns.bestSymbol?.winRate ?? 0)}%)`, color: C.green },
-    { label: 'Pire symbole', value: `${String(patterns.worstSymbol?.symbol ?? '')} (${displayRate(patterns.worstSymbol?.winRate ?? 0)}%)`, color: C.red },
-  ];
-
-  return (
-    <Document>
-      <Page size="A4" style={st.page}>
-        {/* HEADER */}
-        <View style={st.header}>
-          <Text style={st.logoText}>AlphaTradeX</Text>
-          <View style={st.headerRight}>
-            <Text style={st.headerTitle}>{"Rapport d'analyse"}</Text>
-            <Text style={st.headerDate}>{date}</Text>
-          </View>
-        </View>
-
-        {/* 1. PERFORMANCE GLOBALE */}
-        <View style={st.card}>
-          <Text style={st.cardTitle}>Performance globale</Text>
-          <View style={st.scoreRow}>
-            {[
-              { score: psych.overallScore, label: 'Score psychologique' },
-              { score: risk.score, label: 'Gestion du risque' },
-              { score: prop.score, label: 'Prop Firm Readiness' },
-            ].map((item, i) => {
-              const n = normalizeScore(item.score);
-              const color = scoreColor(item.score);
-              return (
-                <View key={i} style={st.scoreBox}>
-                  <Text style={[st.scoreNum, { color }]}>{String(Math.round(n))}</Text>
-                  <Text style={st.scoreMax}>/100</Text>
-                  <Text style={st.scoreLabel}>{item.label}</Text>
-                </View>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* 2. STATISTIQUES CLES */}
-        <View style={st.card}>
-          <Text style={st.cardTitle}>Statistiques cles</Text>
-          <View style={st.statsWrap}>
-            {keyStats.map((stat, i) => (
-              <View key={i} style={st.statCell}>
-                <View style={st.statInner}>
-                  <Text style={st.statLabel}>{stat.label}</Text>
-                  <Text style={[st.statValue, { color: stat.color }]}>{stat.value}</Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* 3. PROFIL PSYCHOLOGIQUE */}
-        <View style={st.card}>
-          <Text style={st.cardTitle}>Profil psychologique</Text>
-          <Text style={st.domBias}>
-            {`Biais dominant : ${psych.dominantBias ?? 'N/A'}`}
-          </Text>
-          {psych.biases.map((bias, i) => {
-            const sc = severityColors(bias.severity);
-            return (
-              <View key={i} style={st.biasItem} wrap={false}>
-                <View style={st.biasRow}>
-                  <View style={st.biasLeft}>
-                    <Text style={st.biasName}>{String(bias.name ?? '')}</Text>
-                    <Text style={st.biasFreq}>{`${String(bias.frequency)}x detecte`}</Text>
-                  </View>
-                  <View style={[st.biasBadge, { backgroundColor: sc.bg }]}>
-                    <Text style={[st.biasBadgeText, { color: sc.color }]}>{String(bias.severity ?? '')}</Text>
-                  </View>
-                </View>
-                <Text style={st.biasDesc}>{String(bias.description ?? '')}</Text>
-                <Text style={st.biasEvidence}>{`"${bias.evidence ?? ''}"`}</Text>
-              </View>
-            );
-          })}
-        </View>
-
-        {/* 4. PERFORMANCE PAR SESSION */}
-        <View style={st.card}>
-          <Text style={st.cardTitle}>Performance par session</Text>
-          <View style={st.sessionWrap}>
-            {sessions.map((s, i) => {
-              const rv = Number(displayRate(s.rate));
-              const color = sessionBarColor(rv);
-              const isLast = i === sessions.length - 1;
-              return (
-                <View key={i} style={isLast ? st.sessBoxLast : st.sessBox}>
-                  <Text style={st.sessName}>{s.name}</Text>
-                  <View style={st.barTrack}>
-                    <View
-                      style={[st.barFill, { width: `${Math.min(100, rv)}%`, backgroundColor: color }]}
-                    />
-                  </View>
-                  <Text style={[st.sessValue, { color }]}>{`${displayRate(s.rate)}%`}</Text>
-                </View>
-              );
-            })}
-          </View>
-          <Text style={st.sessionInsight}>{String(session.insight ?? '')}</Text>
-        </View>
-
-        {/* 5. PATTERNS DE PERFORMANCE */}
-        <View style={st.card}>
-          <Text style={st.cardTitle}>Patterns de performance</Text>
-          <View style={st.patternWrap}>
-            {patternItems.map((p, i) => (
-              <View key={i} style={st.patternCell}>
-                <View style={st.patternInner}>
-                  <Text style={st.patternLabel}>{p.label}</Text>
-                  <Text style={[st.patternValue, { color: p.color }]}>{p.value}</Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* 6. PROP FIRM READINESS */}
-        <View style={st.card}>
-          <Text style={st.cardTitle}>Prop Firm Readiness</Text>
-          <View style={[st.propBadge, { backgroundColor: prop.wouldPassFTMO ? '#00E5B033' : '#FF3D5733' }]}>
-            <Text style={[st.propBadgeText, { color: prop.wouldPassFTMO ? C.green : C.red }]}>
-              {prop.wouldPassFTMO
-                ? 'Passerait le challenge FTMO'
-                : 'Ne passerait pas encore le challenge FTMO'}
-            </Text>
-          </View>
-          <Text style={st.propMeta}>
-            {`Score : ${String(Math.round(normalizeScore(prop.score)))}/100  •  Temps estime : ${prop.estimatedTimeToReady ?? ''}`}
-          </Text>
-          {prop.mainObstacles.map((obs, i) => (
-            <View key={i} style={st.obsRow}>
-              <Text style={st.obsBullet}>x</Text>
-              <Text style={st.obsText}>{String(obs ?? '')}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* 7. PLAN D'ACTION */}
-        <View style={st.card}>
-          <Text style={st.cardTitle}>{"Plan d'action personnalise"}</Text>
-          {report.actionPlan.map((item, i) => {
-            const cc = categoryColors(item.category);
-            return (
-              <View key={i} style={st.actionItem} wrap={false}>
-                <Text style={st.actionNum}>{String(item.priority)}</Text>
-                <View style={st.actionBody}>
-                  <View style={st.actionMeta}>
-                    <View style={[st.actionBadge, { backgroundColor: cc.bg }]}>
-                      <Text style={[st.actionBadgeText, { color: cc.color }]}>{String(item.category ?? '')}</Text>
-                    </View>
-                    <Text style={st.actionTimeframe}>{String(item.timeframe ?? '')}</Text>
-                  </View>
-                  <Text style={st.actionTitle}>{String(item.action ?? '')}</Text>
-                  <Text style={st.actionImpact}>{`Impact : ${item.expectedImpact ?? ''}`}</Text>
-                </View>
-              </View>
-            );
-          })}
-        </View>
-
-        {/* 8. COACH IA */}
-        <View style={st.coachCard}>
-          <Text style={st.coachTitle}>{"L'avis de votre coach IA"}</Text>
-          <Text style={st.coachQuote}>{`"${report.personalizedInsight ?? ''}"`}</Text>
-          <Text style={st.coachSig}>-- Votre coach IA trading</Text>
-        </View>
-
-        {/* FOOTER */}
-        <View style={st.footer}>
-          <Text style={st.footerText}>Genere par AlphaTradeX  •  alphatradex.ai</Text>
-          <Text style={st.footerText}>{date}</Text>
-        </View>
-      </Page>
-    </Document>
-  );
+  const colW = CW / 3;
+  for (let i = 0; i < 3; i++) {
+    const { name, rate } = sessions[i];
+    const rv = parseFloat(pRate(rate));
+    const col = rv < 40 ? C.red : rv <= 60 ? C.cyan : C.green;
+    const cx = ML + i * colW;
+    const nw = ctx.R.widthOfTextAtSize(name, 9);
+    drawT(ctx.pg, name, cx + (colW - nw) / 2, y + 34, 9, ctx.R, C.muted);
+    const bx = cx + 12; const bw = colW - 24;
+    drawR(ctx.pg, bx, y + 48, bw, 4, C.bg);
+    drawR(ctx.pg, bx, y + 48, bw * Math.min(100, rv) / 100, 4, col);
+    const valStr = `${pRate(rate)}%`;
+    const vw = ctx.B.widthOfTextAtSize(valStr, 11);
+    drawT(ctx.pg, valStr, cx + (colW - vw) / 2, y + 56, 11, ctx.B, col);
+  }
+  for (let i = 0; i < Math.min(insightLines.length, 2); i++) {
+    drawT(ctx.pg, insightLines[i], ML + 14, y + 72 + i * 10, 8, ctx.O, C.muted);
+  }
+  ctx.y += H + 12;
 }
+
+function drawPatterns(ctx: Ctx, patterns: AiAnalysisResult['performancePatterns']) {
+  const items = [
+    { label: 'Meilleur jour',    val: String(patterns.bestDayOfWeek ?? ''),  col: C.green },
+    { label: 'Pire jour',        val: String(patterns.worstDayOfWeek ?? ''), col: C.red },
+    { label: 'Meilleure heure',  val: String(patterns.bestTimeOfDay ?? ''),  col: C.green },
+    { label: 'Pire heure',       val: String(patterns.worstTimeOfDay ?? ''), col: C.red },
+    { label: 'Meilleur symbole', val: `${patterns.bestSymbol?.symbol ?? ''} (${pRate(patterns.bestSymbol?.winRate ?? 0)}%)`, col: C.green },
+    { label: 'Pire symbole',     val: `${patterns.worstSymbol?.symbol ?? ''} (${pRate(patterns.worstSymbol?.winRate ?? 0)}%)`, col: C.red },
+  ];
+  const H = 96;
+  need(ctx, H + 12);
+  const y = ctx.y;
+  drawR(ctx.pg, ML, y, CW, H, C.card, C.border);
+  drawT(ctx.pg, 'Patterns de performance', ML + 14, y + 14, 12, ctx.B);
+
+  const cellW = CW / 3;
+  for (let i = 0; i < 6; i++) {
+    const row = Math.floor(i / 3);
+    const col = i % 3;
+    const cx = ML + col * cellW + 6;
+    const cy = y + 34 + row * 32;
+    drawR(ctx.pg, cx, cy, cellW - 12, 27, C.hover);
+    drawT(ctx.pg, items[i].label, cx + 6, cy + 5,  7,  ctx.R, C.muted);
+    drawT(ctx.pg, items[i].val,   cx + 6, cy + 14, 10, ctx.B, items[i].col);
+  }
+  ctx.y += H + 12;
+}
+
+function drawPsych(ctx: Ctx, psych: AiAnalysisResult['psychologicalProfile']) {
+  const biasH = 62;
+  const H = 46 + psych.biases.length * biasH + 8;
+  need(ctx, Math.min(H + 12, PH - 80));
+  const y = ctx.y;
+  drawR(ctx.pg, ML, y, CW, H, C.card, C.border);
+  drawT(ctx.pg, 'Profil psychologique', ML + 14, y + 14, 12, ctx.B);
+  drawT(ctx.pg, `Biais dominant : ${psych.dominantBias ?? 'N/A'}`, ML + 14, y + 30, 9, ctx.R, C.muted);
+
+  for (let i = 0; i < psych.biases.length; i++) {
+    const bias = psych.biases[i];
+    const by = y + 46 + i * biasH;
+    if (by + biasH > y + H) break;
+    const sev = bias.severity;
+    const isHigh = sev === 'CRITIQUE' || sev === 'ÉLEVÉ';
+    const sevBgCol = isHigh ? C.red : sev === 'MOYEN' ? C.cyan : C.green;
+    const sevTxtCol = isHigh ? C.red : sev === 'MOYEN' ? C.cyan : C.green;
+
+    drawR(ctx.pg, ML + 14, by, CW - 28, biasH - 4, C.hover);
+    drawT(ctx.pg, String(bias.name ?? ''), ML + 20, by + 6, 9, ctx.B);
+    drawT(ctx.pg, `${String(bias.frequency)}x detecte`, ML + 20 + ctx.B.widthOfTextAtSize(String(bias.name ?? ''), 9) + 6, by + 7, 7, ctx.R, C.muted);
+
+    const badgeText = String(sev ?? '');
+    const bw = ctx.B.widthOfTextAtSize(badgeText, 7) + 10;
+    drawR(ctx.pg, ML + CW - 28 - bw - 14, by + 5, bw, 13, sevBgCol, undefined, 0.2);
+    drawT(ctx.pg, badgeText, ML + CW - 28 - bw - 14 + 5, by + 8, 7, ctx.B, sevTxtCol);
+
+    const descLines = wrap(String(bias.description ?? ''), CW - 50, 8, ctx.R);
+    drawT(ctx.pg, descLines[0] ?? '', ML + 20, by + 22, 8, ctx.R, C.muted);
+    const evLines = wrap(`"${bias.evidence ?? ''}"`, CW - 50, 7, ctx.O);
+    drawT(ctx.pg, evLines[0] ?? '', ML + 20, by + 34, 7, ctx.O, C.muted);
+  }
+  ctx.y += H + 12;
+}
+
+function drawProp(ctx: Ctx, prop: AiAnalysisResult['propFirmReadiness']) {
+  const H = 72 + prop.mainObstacles.length * 18 + 10;
+  need(ctx, H + 12);
+  const y = ctx.y;
+  drawR(ctx.pg, ML, y, CW, H, C.card, C.border);
+  drawT(ctx.pg, 'Prop Firm Readiness', ML + 14, y + 14, 12, ctx.B);
+
+  const passText = prop.wouldPassFTMO ? 'Passerait le challenge FTMO' : 'Ne passerait pas encore le challenge FTMO';
+  const passCol  = prop.wouldPassFTMO ? C.green : C.red;
+  const bw = ctx.B.widthOfTextAtSize(passText, 9) + 20;
+  drawR(ctx.pg, ML + 14, y + 30, bw, 18, passCol, undefined, 0.2);
+  drawT(ctx.pg, passText, ML + 24, y + 33, 9, ctx.B, passCol);
+
+  drawT(ctx.pg, `Score : ${Math.round(norm(prop.score))}/100  •  Temps estime : ${prop.estimatedTimeToReady ?? ''}`, ML + 14, y + 54, 8, ctx.R, C.muted);
+
+  for (let i = 0; i < prop.mainObstacles.length; i++) {
+    const oy = y + 68 + i * 18;
+    drawT(ctx.pg, 'x', ML + 14, oy, 8, ctx.B, C.red);
+    drawT(ctx.pg, String(prop.mainObstacles[i] ?? ''), ML + 26, oy, 8, ctx.R, C.muted);
+  }
+  ctx.y += H + 12;
+}
+
+function drawActions(ctx: Ctx, actions: AiAnalysisResult['actionPlan']) {
+  const itemH = 56;
+  const H = 28 + actions.length * itemH + 8;
+  need(ctx, Math.min(H + 12, PH - 80));
+  const y = ctx.y;
+  drawR(ctx.pg, ML, y, CW, H, C.card, C.border);
+  drawT(ctx.pg, "Plan d'action personnalise", ML + 14, y + 14, 12, ctx.B);
+
+  for (let i = 0; i < actions.length; i++) {
+    const action = actions[i];
+    const ay = y + 28 + i * itemH;
+    if (ay + itemH > y + H) break;
+    drawR(ctx.pg, ML + 14, ay, CW - 28, itemH - 4, C.hover);
+    drawT(ctx.pg, String(action.priority), ML + 20, ay + 6, 20, ctx.B, C.blue, 0.27);
+
+    const catCol = action.category === 'Psychologie'
+      ? { bg: C.red, txt: C.red }
+      : action.category === 'Risque' || action.category === 'Timing'
+        ? { bg: C.cyan, txt: C.cyan }
+        : action.category === 'Stratégie'
+          ? { bg: C.blue, txt: C.blue }
+          : { bg: C.muted, txt: C.muted };
+    const catW = ctx.B.widthOfTextAtSize(String(action.category ?? ''), 7) + 10;
+    drawR(ctx.pg, ML + 42, ay + 7, catW, 13, catCol.bg, undefined, 0.2);
+    drawT(ctx.pg, String(action.category ?? ''), ML + 47, ay + 10, 7, ctx.B, catCol.txt);
+    drawT(ctx.pg, String(action.timeframe ?? ''), ML + 42 + catW + 6, ay + 9, 7, ctx.R, C.muted);
+    drawT(ctx.pg, String(action.action ?? ''), ML + 42, ay + 24, 9, ctx.R);
+    drawT(ctx.pg, `Impact : ${action.expectedImpact ?? ''}`, ML + 42, ay + 37, 7, ctx.R, C.muted);
+  }
+  ctx.y += H + 12;
+}
+
+function drawCoach(ctx: Ctx, insight: string) {
+  const insightLines = wrap(`"${insight}"`, CW - 28, 9, ctx.O);
+  const H = 32 + insightLines.length * 13 + 22;
+  need(ctx, H + 12);
+  const y = ctx.y;
+  drawR(ctx.pg, ML, y, CW, H, C.darkBlue, C.blue, 0.3);
+  drawT(ctx.pg, "L'avis de votre coach IA", ML + 14, y + 14, 12, ctx.B);
+  for (let i = 0; i < insightLines.length; i++) {
+    drawT(ctx.pg, insightLines[i], ML + 14, y + 28 + i * 13, 9, ctx.O, C.muted);
+  }
+  drawT(ctx.pg, '-- Votre coach IA trading', ML + 14, y + 28 + insightLines.length * 13 + 6, 9, ctx.B, C.blue);
+  ctx.y += H + 12;
+}
+
+function drawFooter(ctx: Ctx, date: string) {
+  need(ctx, 30);
+  const y = ctx.y + 10;
+  drawL(ctx.pg, ML, y, ML + CW, y, C.border);
+  drawT(ctx.pg, 'Genere par AlphaTradeX  •  alphatradex.ai', ML, y + 13, 7, ctx.R, C.muted);
+  const dw = ctx.R.widthOfTextAtSize(date, 7);
+  drawT(ctx.pg, date, ML + CW - dw, y + 13, 7, ctx.R, C.muted);
+}
+
+// ─── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('[generate-pdf] Parsing request body...');
-    const body = (await req.json()) as { report: AiAnalysisResult };
-    console.log('[generate-pdf] Body parsed, report keys:', Object.keys(body.report ?? {}));
+    const body = await req.json() as { report: AiAnalysisResult };
+    const report = body.report;
     const date = new Date().toLocaleDateString('fr-FR');
-    console.log('[generate-pdf] Building PDF component...');
-    const element = (
-      <Document>
-        <Page>
-          <Text>Test AlphaTradeX</Text>
-        </Page>
-      </Document>
-    );
-    console.log('[generate-pdf] Calling renderToBuffer...');
-    const nodeBuffer = await renderToBuffer(element);
-    console.log('[generate-pdf] renderToBuffer done, size:', nodeBuffer.length);
-    const buffer = new Uint8Array(nodeBuffer);
+
+    const doc = await PDFDocument.create();
+    const R = await doc.embedFont(StandardFonts.Helvetica);
+    const B = await doc.embedFont(StandardFonts.HelveticaBold);
+    const O = await doc.embedFont(StandardFonts.HelveticaOblique);
+
+    const ctx: Ctx = { doc, pg: null as unknown as PDFPage, y: 36, R, B, O };
+    addPage(ctx);
+
+    drawHeader(ctx, date);
+    drawScores(ctx, report.psychologicalProfile.overallScore, report.riskManagement.score, report.propFirmReadiness.score);
+    drawStats(ctx, report.globalStats);
+    drawSession(ctx, report.sessionAnalysis);
+    drawPatterns(ctx, report.performancePatterns);
+    drawPsych(ctx, report.psychologicalProfile);
+    drawProp(ctx, report.propFirmReadiness);
+    drawActions(ctx, report.actionPlan);
+    drawCoach(ctx, report.personalizedInsight ?? '');
+    drawFooter(ctx, date);
+
+    const pdfBytes = await doc.save();
     const filename = `alphatradex-rapport-${date.replace(/\//g, '-')}.pdf`;
-    return new Response(buffer, {
+
+    return new Response(Buffer.from(pdfBytes), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${filename}"`,
@@ -432,13 +355,9 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error('[generate-pdf] CRASH:', err);
-    if (err instanceof Error) {
-      console.error('[generate-pdf] message:', err.message);
-      console.error('[generate-pdf] stack:', err.stack);
-    }
-    return new Response(JSON.stringify({ error: 'PDF generation failed', detail: err instanceof Error ? err.message : String(err) }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ error: 'PDF generation failed', detail: err instanceof Error ? err.message : String(err) }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } },
+    );
   }
 }

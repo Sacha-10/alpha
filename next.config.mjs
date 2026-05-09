@@ -6,8 +6,6 @@ const placeholderAnon =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiJ9.build-placeholder-signature";
 
 const nextConfig = {
-  serverExternalPackages: ['@react-pdf/renderer'],
-
   env: {
     NEXT_PUBLIC_SUPABASE_URL:
       (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim() || placeholderUrl,
