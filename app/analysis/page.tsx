@@ -1,11 +1,13 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { demoTrades } from '@/lib/demoTrades'
 import { PLANS } from '@/lib/plans'
 import TradeReport from '@/components/TradeReport'
 import { motion } from 'framer-motion'
+
+const SESSION_KEY = 'atx_demo_report'
 
 export default function DemoPage() {
   const router = useRouter()
@@ -14,9 +16,19 @@ export default function DemoPage() {
   const [error, setError] = useState<string>('')
   const [used, setUsed] = useState(false)
 
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(SESSION_KEY)
+      if (saved) setReport(JSON.parse(saved))
+    } catch {
+      // ignore corrupted sessionStorage
+    }
+  }, [])
+
   async function handleDemo() {
     setLoading(true)
     setError('')
+    sessionStorage.removeItem(SESSION_KEY)
     try {
       const url = `${window.location.origin}/api/analyze-demo`
       const payload = { trades: demoTrades }
@@ -36,6 +48,7 @@ export default function DemoPage() {
         if (res.status === 429) setUsed(true)
       } else {
         setReport(data)
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(data))
       }
     } catch (err) {
       console.error('[demo] Erreur réseau ou lecture réponse', err)
@@ -137,7 +150,7 @@ export default function DemoPage() {
             </p>
             <button
               type="button"
-              onClick={() => router.push('/dashboard')}
+              onClick={() => router.push('/pricing')}
               className="btn-primary text-lg px-8 py-3"
             >
               Commencer — {PLANS.pro.monthly}€/mois
