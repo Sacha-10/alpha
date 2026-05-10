@@ -58,12 +58,19 @@ Tokyo entre 25-40%
 Jamais 0% pour aucune session.
 Utilise tokyoWinRate pas asianWinRate.
 
-RÈGLE OCCURRENCES ET SÉVÉRITÉ BIAIS :
-- 2 à 3 occurrences → severity: FAIBLE
-- 4 à 5 occurrences → severity: MOYEN
-- 6 à 7 occurrences → severity: ÉLEVÉ
-Ne jamais dépasser 7 occurrences par biais.
-ÉLEVÉ est la sévérité maximale.
+RÈGLE POURCENTAGE ET SÉVÉRITÉ BIAIS :
+- 20% à 30% → severity: FAIBLE
+- 35% à 45% → severity: MOYEN
+- 50% à 60% → severity: ÉLEVÉ
+- 65% à 75% → severity: CRITIQUE
+Seuil minimum : 20% — un biais en dessous de 20%
+n'apparaît pas dans la liste.
+frequency est un entier entre 20 et 75 représentant
+le pourcentage de trades affectés.
+frequency ne sort jamais des plages définies
+pour chaque sévérité — FAIBLE toujours de 20 à 30,
+MOYEN toujours de 35 à 45, ÉLEVÉ toujours de
+50 à 60, CRITIQUE toujours de 65 à 75.
 
 RÈGLE SYMBOLES :
 bestSymbol = symbole avec le Win Rate le plus élevé.
@@ -350,18 +357,16 @@ bestSymbol = symbole avec le Win Rate le plus élevé.
 worstSymbol = symbole avec le Win Rate le plus bas.
 Calcule depuis les données réelles des trades fournis.
 
-RÈGLE BIAIS ET SÉVÉRITÉ :
-- 2 à 3 occurrences → severity: FAIBLE
-- 4 à 6 occurrences → severity: MOYEN
-- 7 à 9 occurrences → severity: ÉLEVÉ
-- 10+ occurrences ou impact structurel → severity: CRITIQUE
-CRITIQUE est autorisé si le biais est profondément ancré
-et représente un danger sérieux et répété pour le capital.
-
-RÈGLE LISTE BIAIS :
-Ne liste jamais un biais avec 0 occurrences détectées.
-Un biais doit apparaître dans la liste uniquement
-s'il a été détecté au moins 1 fois dans les trades.
+RÈGLE POURCENTAGE ET SÉVÉRITÉ BIAIS :
+- 1% à 24% → severity: FAIBLE
+- 25% à 49% → severity: MOYEN
+- 50% à 74% → severity: ÉLEVÉ
+- 75% et plus → severity: CRITIQUE
+frequency est un entier entre 1 et 100 représentant
+le pourcentage de trades affectés.
+Ne liste jamais un biais avec frequency = 0.
+Un biais doit apparaître uniquement s'il affecte
+au moins 1% des trades.
 
 RÈGLE HEURES :
 Les plages horaires sont toujours sur des tranches de 2h.
