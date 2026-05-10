@@ -272,7 +272,7 @@ export default function TradeReport({
                 <span className="font-bold">{bias.name}</span>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-secondary">
-                    {bias.frequency}% de vos trades
+                    {bias.frequency}%
                   </span>
                   <SeverityBadge severity={bias.severity} />
                 </div>
