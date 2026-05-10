@@ -365,6 +365,10 @@ RÈGLE POURCENTAGE ET SÉVÉRITÉ BIAIS :
 frequency est un entier entre 1 et 100 représentant
 le pourcentage de trades affectés.
 Ne liste jamais un biais avec frequency = 0.
+frequency ne sort jamais des plages définies
+pour chaque sévérité — FAIBLE toujours de 1 à 24,
+MOYEN toujours de 25 à 49, ÉLEVÉ toujours de 50 à 74,
+CRITIQUE toujours de 75 à 100.
 Un biais doit apparaître uniquement s'il affecte
 au moins 1% des trades.
 
