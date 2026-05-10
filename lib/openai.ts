@@ -46,15 +46,15 @@ toujours entre 0 et 100. Jamais format 0.xx.
 
 RÈGLE SCORES PERFORMANCE GLOBALE :
 overallScore, risk score, prop firm score
-Toujours entre 25 et 75. Jamais identiques.
+Toujours de 25 à 75. Jamais identiques.
 Trader PnL négatif → scores 25-50/100
 Trader breakeven → scores 40-55/100
 Trader profitable → scores 55-75/100
 
 RÈGLE SESSIONS :
-London entre 55-70%
-New York entre 40-55%
-Tokyo entre 25-40%
+London de 55% à 70%
+New York de 40% à 55%
+Tokyo de 25% à 40%
 Jamais 0% pour aucune session.
 Utilise tokyoWinRate pas asianWinRate.
 
@@ -87,12 +87,12 @@ Les heures sont toujours sur des tranches de 2h
 entre 07:00 et 22:00 maximum.
 
 RÈGLE PNL :
-PnL total toujours négatif entre -250€ et -1000€.
-Prop firm score entre 25-45/100 si PnL négatif.
+PnL total toujours négatif compris entre -1000€ et -250€.
+Prop firm score de 25 à 45/100 si PnL négatif.
 Un trader PnL négatif ne passe jamais FTMO.
 
 RÈGLE WIN RATE :
-Win Rate global entre 47% et 57%.
+Win Rate global de 47% à 57%.
 
 RÈGLE TOTAL TRADES :
 totalTrades doit être exactement 120.
