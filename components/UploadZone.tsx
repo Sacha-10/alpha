@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { CheckCircle2, Upload } from "lucide-react";
 import { useRef, useState, type DragEvent } from "react";
 import ExportGuide from "./ExportGuide";
 
@@ -37,7 +38,7 @@ export default function UploadZone({ onAnalyze, loading }: Props) {
   return (
     <div className="w-full max-w-2xl mx-auto">
       <motion.div
-        className={`relative border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 ${
+        className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${
           dragging
             ? "border-blue bg-blue/5 shadow-blue"
             : file
@@ -72,12 +73,9 @@ export default function UploadZone({ onAnalyze, loading }: Props) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <div className="text-5xl mb-4">📂</div>
-              <p className="text-primary text-xl font-semibold mb-2">
-                Déposez votre historique de trades ici
-              </p>
-              <p className="text-secondary text-sm">
-                Compatible MT4, MT5, Binance, Bybit, TradingView, FTMO et FundedNext
+              <Upload className="h-10 w-10 text-secondary mx-auto mb-4" />
+              <p className="text-primary text-lg font-semibold mb-2">
+                Importez votre CSV
               </p>
             </motion.div>
           ) : (
@@ -87,7 +85,7 @@ export default function UploadZone({ onAnalyze, loading }: Props) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <div className="text-5xl mb-4">✅</div>
+              <CheckCircle2 className="h-10 w-10 text-green mx-auto mb-4" />
               <p className="text-green text-xl font-semibold mb-1">
                 {file.name}
               </p>
@@ -107,7 +105,7 @@ export default function UploadZone({ onAnalyze, loading }: Props) {
         type="button"
         onClick={() => file && onAnalyze(file)}
         disabled={!file || loading}
-        className="btn-primary w-full mt-4 text-lg py-4 disabled:opacity-40 disabled:cursor-not-allowed"
+        className="btn-primary mx-auto mt-4 block py-2.5 px-6 disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {loading ? (
           <span className="flex items-center justify-center gap-3">

@@ -3,16 +3,27 @@
 import { getSupabaseClient } from "@/lib/supabase";
 import { detectAndParse } from "@/lib/parseCSV";
 import { useRouter, useSearchParams } from "next/navigation";
-import { type ComponentType, useCallback, useEffect, useState } from "react";
+import {
+  type ComponentType,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import TradeReport from "@/components/TradeReport";
 import UploadZone from "@/components/UploadZone";
 import type { AiAnalysisResult } from "@/lib/tradingAnalysisTypes";
 import {
+  Bell,
   BrainCircuit,
+  CalendarCheck,
+  Code2,
   CreditCard,
   FileText,
   History,
   Lock,
+  Radar,
+  Receipt,
   Target,
   TrendingUp,
 } from "lucide-react";
@@ -20,8 +31,6 @@ import {
 const SESSION_KEY_REPORT = "atx_last_report";
 const SESSION_KEY_LEFT = "atx_analyses_left";
 const SESSION_KEY_LIMIT = "atx_analyses_limit";
-
-const TOP_NAV_ITEMS = ["Analyse", "Historique", "Progression"];
 
 const LogoSvg = () => (
   <svg
@@ -51,9 +60,35 @@ const LogoSvg = () => (
   </svg>
 );
 
+type DashboardView =
+  | "nouvelle-analyse"
+  | "mon-analyse"
+  | "historique"
+  | "evolution"
+  | "resume-hebdomadaire"
+  | "prop-firm-score"
+  | "detection-predictive"
+  | "alertes-telegram"
+  | "acces-api";
+
 function normalizeApiError(message: unknown): string {
   if (typeof message !== "string") return "Erreur d'analyse.";
   return message.replace(/\s+/g, " ").trim();
+}
+
+function EmptyFeaturePage({
+  icon: Icon,
+  title,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  title: string;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center text-center">
+      <Icon className="h-12 w-12 text-secondary opacity-30" aria-hidden />
+      <h2 className="mt-6 text-xl font-bold text-primary">{title}</h2>
+    </div>
+  );
 }
 
 export default function DashboardClient() {
@@ -75,12 +110,17 @@ export default function DashboardClient() {
   const [showSuccessBanner, setShowSuccessBanner] = useState(paymentSuccess || checkout === "success");
   const [bannerVisible, setBannerVisible] = useState(true);
 
+  const [mainView, setMainView] = useState<DashboardView>("nouvelle-analyse");
+
+  const [hasSessionReport, setHasSessionReport] = useState(false);
+
   // BUG 2 — Restore last report from sessionStorage on mount
   useEffect(() => {
     try {
       const savedReport = sessionStorage.getItem(SESSION_KEY_REPORT);
       if (savedReport) {
         setAnalysis(JSON.parse(savedReport) as AiAnalysisResult);
+        setHasSessionReport(true);
       }
     } catch {
       // ignore corrupted sessionStorage
@@ -134,6 +174,8 @@ export default function DashboardClient() {
     setAnalysis(null);
     setAnalysesLeft(undefined);
     setAnalysesLimit(undefined);
+    setHasSessionReport(false);
+    setMainView((prev) => (prev === "mon-analyse" ? "nouvelle-analyse" : prev));
     // BUG 2 — Clear sessionStorage when user uploads a new file
     sessionStorage.removeItem(SESSION_KEY_REPORT);
     sessionStorage.removeItem(SESSION_KEY_LEFT);
@@ -166,6 +208,7 @@ export default function DashboardClient() {
       } & AiAnalysisResult;
 
       setAnalysis(report);
+      setHasSessionReport(true);
       // BUG 2 — Save report to sessionStorage
       sessionStorage.setItem(SESSION_KEY_REPORT, JSON.stringify(report));
 
@@ -196,10 +239,6 @@ export default function DashboardClient() {
     analysesLimit !== undefined && analysesLeft !== undefined
       ? Math.max(0, analysesLimit - analysesLeft)
       : undefined;
-  const analysesAtLimit =
-    analysesUsed !== undefined &&
-    analysesLimit !== undefined &&
-    analysesUsed >= analysesLimit;
   const normalizedPlan = (subscriptionPlan ?? "").toLowerCase();
   const isPro = normalizedPlan === "pro";
   const isElite = normalizedPlan === "elite";
@@ -207,19 +246,34 @@ export default function DashboardClient() {
     ? subscriptionPlan.charAt(0).toUpperCase() + subscriptionPlan.slice(1)
     : "Pro";
   const cycleLabel = analysesResetDate
-    ? `Cycle \u00B7 ${formatResetDate(analysesResetDate)}`
-    : "Cycle \u00B7 --/--";
+    ? `Cycle · ${formatResetDate(analysesResetDate)}`
+    : "Cycle · --/--";
   const progressWidth =
     analysesUsed !== undefined && analysesLimit && analysesLimit > 0
       ? Math.min(100, (analysesUsed / analysesLimit) * 100)
       : 0;
-  const lastPsychScore = analysis
-    ? Math.round(
-        analysis.psychologicalProfile.overallScore <= 1
-          ? analysis.psychologicalProfile.overallScore * 100
-          : analysis.psychologicalProfile.overallScore
-      )
+
+  const showQuotaCard =
+    analysesUsed !== undefined &&
+    analysesLimit !== undefined &&
+    analysesLimit < 999999;
+
+  const psychScoreRaw = analysis
+    ? analysis.psychologicalProfile.overallScore <= 1
+      ? analysis.psychologicalProfile.overallScore * 100
+      : analysis.psychologicalProfile.overallScore
     : null;
+  const lastPsychScore =
+    psychScoreRaw !== null ? Math.round(psychScoreRaw) : null;
+  const psychScoreColor =
+    lastPsychScore === null
+      ? "text-secondary"
+      : lastPsychScore > 60
+        ? "text-green"
+        : lastPsychScore >= 40
+          ? "text-cyan"
+          : "text-red";
+
   const lastWinRate = analysis
     ? analysis.globalStats.winRate <= 1
       ? analysis.globalStats.winRate * 100
@@ -233,79 +287,168 @@ export default function DashboardClient() {
     router.refresh();
   }
 
-  function SidebarItem({
+  function SectionLabel({ children }: { children: ReactNode }) {
+    return (
+      <p className="px-2 pb-1.5 pt-3 font-mono text-[10px] uppercase tracking-[0.15em] text-secondary">
+        {children}
+      </p>
+    );
+  }
+
+  function SidebarNavRow({
     icon: Icon,
     label,
     active = false,
     locked = false,
     lockPlanLabel,
-    href,
+    onSelect,
   }: {
     icon: ComponentType<{ className?: string }>;
     label: string;
     active?: boolean;
     locked?: boolean;
     lockPlanLabel?: string;
-    href?: string;
+    onSelect?: () => void;
   }) {
-    const onClick = () => {
-      if (locked) {
-        router.push("/pricing");
-        return;
-      }
-      if (href) router.push(href);
-    };
-
     return (
       <button
         type="button"
-        onClick={onClick}
-        className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-sm transition ${
-          active
-            ? "border-[#2D6FFF40] bg-[#2D6FFF15] text-primary"
-            : "border-transparent bg-transparent text-secondary hover:bg-hover hover:text-primary"
-        } ${locked ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+        onClick={() => {
+          if (locked) {
+            router.push("/pricing");
+            return;
+          }
+          onSelect?.();
+        }}
+        className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-all duration-150 ${
+          locked
+            ? "cursor-not-allowed opacity-40"
+            : active
+              ? "border border-[#2D6FFF25] bg-[#2D6FFF15] text-primary"
+              : "cursor-pointer text-secondary hover:bg-hover hover:text-primary"
+        }`}
         title={locked && lockPlanLabel ? `Disponible sur plan ${lockPlanLabel}` : undefined}
       >
-        <span className="flex items-center gap-2.5">
-          <Icon className="h-4 w-4" />
+        <span className="flex items-center gap-3">
+          <Icon className="h-4 w-4 shrink-0" />
           {label}
         </span>
-        {locked ? <Lock className="h-3.5 w-3.5" /> : null}
+        {locked ? <Lock className="h-4 w-4 shrink-0 text-secondary" /> : null}
       </button>
+    );
+  }
+
+  const historiqueLocked = isPro;
+  const evolutionLocked = isPro;
+  const resumeLocked = isPro;
+  const propFirmLocked = !isElite;
+  const signauxLocked = !isElite;
+
+  function renderMainContent() {
+    if (mainView === "mon-analyse") {
+      if (!analysis) {
+        return (
+          <div className="flex flex-col items-center justify-center py-16 text-center text-secondary">
+            <p className="text-sm">Aucun rapport à afficher.</p>
+          </div>
+        );
+      }
+      return (
+        <TradeReport
+          report={analysis}
+          analysesLeft={analysesLeft}
+          analysesLimit={analysesLimit}
+        />
+      );
+    }
+
+    if (mainView === "historique") {
+      return <EmptyFeaturePage icon={History} title="Historique" />;
+    }
+    if (mainView === "evolution") {
+      return <EmptyFeaturePage icon={TrendingUp} title="Évolution" />;
+    }
+    if (mainView === "resume-hebdomadaire") {
+      return <EmptyFeaturePage icon={CalendarCheck} title="Résumé hebdomadaire" />;
+    }
+    if (mainView === "prop-firm-score") {
+      return <EmptyFeaturePage icon={Target} title="Prop Firm Score" />;
+    }
+    if (mainView === "detection-predictive") {
+      return <EmptyFeaturePage icon={Radar} title="Détection prédictive" />;
+    }
+    if (mainView === "alertes-telegram") {
+      return <EmptyFeaturePage icon={Bell} title="Alertes Telegram" />;
+    }
+    if (mainView === "acces-api") {
+      return <EmptyFeaturePage icon={Code2} title="Accès API" />;
+    }
+
+    // nouvelle-analyse
+    return (
+      <>
+        <div>
+          <h1 className="text-2xl font-bold text-primary">Nouvelle analyse</h1>
+          <p className="mt-1 text-sm text-secondary">Importez votre historique CSV</p>
+        </div>
+
+        <div className="mx-auto mt-8 w-full max-w-xl">
+          <UploadZone loading={loading} onAnalyze={onAnalyzeFile} />
+        </div>
+
+        {error ? (
+          <p className="mt-4 text-sm text-red" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        {hasSessionReport && analysis ? (
+          <section className="mt-12">
+            <h2 className="mb-4 text-sm font-semibold text-primary">Dernière analyse</h2>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="rounded-xl border border-border bg-card p-5">
+                <p className="text-xs text-secondary">Score psychologique</p>
+                <p className={`mt-2 font-mono text-2xl font-bold ${psychScoreColor}`}>
+                  {lastPsychScore ?? "--"}/100
+                </p>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-5">
+                <p className="text-xs text-secondary">Win rate</p>
+                <p className="mt-2 font-mono text-2xl font-bold text-cyan">
+                  {lastWinRate !== null ? `${lastWinRate.toFixed(1)}%` : "--"}
+                </p>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-5">
+                <p className="text-xs text-secondary">PnL total</p>
+                <p
+                  className={`mt-2 font-mono text-2xl font-bold ${
+                    lastPnl !== null && lastPnl < 0 ? "text-red" : "text-green"
+                  }`}
+                >
+                  {lastPnl !== null
+                    ? `${lastPnl < 0 ? "-" : "+"}${Math.abs(lastPnl).toFixed(0)}€`
+                    : "--"}
+                </p>
+              </div>
+            </div>
+          </section>
+        ) : null}
+      </>
     );
   }
 
   return (
     <div className="h-screen overflow-hidden bg-background text-primary">
-      <header className="h-14 border-b border-border bg-card">
+      <header className="h-14 shrink-0 border-b border-border bg-card">
         <div className="flex h-full items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => router.push("/")}
-              className="flex items-center gap-2 text-left"
-            >
-              <LogoSvg />
-              <span className="font-semibold text-primary">AlphaTradeX</span>
-            </button>
-            <span className="h-5 w-px bg-border" aria-hidden />
-            <nav className="flex items-center gap-1">
-              {TOP_NAV_ITEMS.map((item) => {
-                const active = item === "Analyse";
-                return (
-                  <span
-                    key={item}
-                    className={`rounded-md px-2.5 py-1.5 text-xs ${
-                      active ? "bg-hover text-primary" : "text-secondary"
-                    }`}
-                  >
-                    {item}
-                  </span>
-                );
-              })}
-            </nav>
-          </div>
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="flex items-center gap-2 text-left"
+          >
+            <LogoSvg />
+            <span className="font-semibold text-primary">AlphaTradeX</span>
+          </button>
           <div className="flex items-center gap-2">
             <span className="rounded-md border border-[#2D6FFF40] bg-[#2D6FFF15] px-3 py-1 text-xs font-semibold text-blue">
               {planLabel}
@@ -322,74 +465,121 @@ export default function DashboardClient() {
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-56px)]">
-        <aside className="flex h-full w-[280px] flex-col border-r border-border bg-[#0D0D14] px-4 py-5">
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <p className="px-1 text-xs font-semibold uppercase tracking-wide text-secondary">
-                Analyse
-              </p>
-              <SidebarItem icon={BrainCircuit} label="Nouvelle analyse" active />
-              <SidebarItem
-                icon={History}
-                label="Historique"
-                locked={isPro}
-                lockPlanLabel="Premium"
+      <div className="flex h-[calc(100vh-56px)] min-h-0">
+        <aside className="flex h-full w-[280px] shrink-0 flex-col border-r border-border bg-card px-4 py-5">
+          <div className="min-h-0 flex-1 space-y-1 overflow-y-auto">
+            <SectionLabel>Analyse</SectionLabel>
+            <SidebarNavRow
+              icon={BrainCircuit}
+              label="Nouvelle analyse"
+              active={mainView === "nouvelle-analyse"}
+              onSelect={() => setMainView("nouvelle-analyse")}
+            />
+            {hasSessionReport ? (
+              <SidebarNavRow
+                icon={FileText}
+                label="Mon analyse"
+                active={mainView === "mon-analyse"}
+                onSelect={() => setMainView("mon-analyse")}
               />
-            </div>
+            ) : null}
+            <SidebarNavRow
+              icon={History}
+              label="Historique"
+              locked={historiqueLocked}
+              lockPlanLabel="Premium"
+              active={mainView === "historique"}
+              onSelect={() => setMainView("historique")}
+            />
 
-            <div className="space-y-2">
-              <p className="px-1 text-xs font-semibold uppercase tracking-wide text-secondary">
-                Performance
-              </p>
-              <SidebarItem
-                icon={TrendingUp}
-                label="Progression"
-                locked={isPro}
-                lockPlanLabel="Premium"
-              />
-              <SidebarItem
-                icon={Target}
-                label="Prop Firm Score"
-                locked={!isElite}
-                lockPlanLabel="Elite"
-              />
-            </div>
+            <SectionLabel>Performance</SectionLabel>
+            <SidebarNavRow
+              icon={TrendingUp}
+              label="Évolution"
+              locked={evolutionLocked}
+              lockPlanLabel="Premium"
+              active={mainView === "evolution"}
+              onSelect={() => setMainView("evolution")}
+            />
+            <SidebarNavRow
+              icon={CalendarCheck}
+              label="Résumé hebdomadaire"
+              locked={resumeLocked}
+              lockPlanLabel="Premium"
+              active={mainView === "resume-hebdomadaire"}
+              onSelect={() => setMainView("resume-hebdomadaire")}
+            />
+            <SidebarNavRow
+              icon={Target}
+              label="Prop Firm Score"
+              locked={propFirmLocked}
+              lockPlanLabel="Elite"
+              active={mainView === "prop-firm-score"}
+              onSelect={() => setMainView("prop-firm-score")}
+            />
 
-            <div className="space-y-2">
-              <p className="px-1 text-xs font-semibold uppercase tracking-wide text-secondary">
-                Compte
-              </p>
-              <SidebarItem icon={CreditCard} label="Offres" href="/pricing" />
-              <a
-                href="/api/customer-portal"
-                className="flex w-full items-center gap-2.5 rounded-xl border border-transparent px-3 py-2.5 text-sm text-secondary transition hover:bg-hover hover:text-primary"
-              >
-                <FileText className="h-4 w-4" />
-                Factures
-              </a>
-            </div>
+            <SectionLabel>Signaux</SectionLabel>
+            <SidebarNavRow
+              icon={Radar}
+              label="Détection prédictive"
+              locked={signauxLocked}
+              lockPlanLabel="Elite"
+              active={mainView === "detection-predictive"}
+              onSelect={() => setMainView("detection-predictive")}
+            />
+            <SidebarNavRow
+              icon={Bell}
+              label="Alertes Telegram"
+              locked={signauxLocked}
+              lockPlanLabel="Elite"
+              active={mainView === "alertes-telegram"}
+              onSelect={() => setMainView("alertes-telegram")}
+            />
+            <SidebarNavRow
+              icon={Code2}
+              label="Accès API"
+              locked={signauxLocked}
+              lockPlanLabel="Elite"
+              active={mainView === "acces-api"}
+              onSelect={() => setMainView("acces-api")}
+            />
+
+            <SectionLabel>Compte</SectionLabel>
+            <SidebarNavRow
+              icon={CreditCard}
+              label="Offres"
+              onSelect={() => router.push("/pricing")}
+            />
+            <a
+              href="/api/customer-portal"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
+            >
+              <Receipt className="h-4 w-4 shrink-0" />
+              Factures
+            </a>
           </div>
 
-          {!isElite && analysesUsed !== undefined && analysesLimit !== undefined ? (
-            <div className="mt-auto rounded-xl border border-border bg-card p-3">
-              <p className="text-xs text-secondary">Analyses utilisées</p>
-              <div className="mt-2 h-1.5 w-full rounded-full bg-border">
+          {showQuotaCard ? (
+            <div className="mt-auto shrink-0 rounded-xl border border-border bg-background p-4 pt-6">
+              <p className="mb-2 text-xs text-secondary">Analyses utilisées</p>
+              <div className="h-1 w-full rounded-full bg-border">
                 <div
-                  className={`h-full rounded-full ${analysesAtLimit ? "bg-red" : "bg-blue"}`}
+                  className="h-full rounded-full bg-[#2D6FFF]"
                   style={{ width: `${progressWidth}%` }}
                 />
               </div>
-              <p className="mt-2 font-mono text-xs text-primary">
-                {analysesUsed}/{analysesLimit}
-              </p>
-              <p className="mt-1 text-xs text-secondary">{cycleLabel}</p>
+              <div className="mt-2 flex justify-between gap-2">
+                <span className="font-mono text-xs text-primary">
+                  {analysesUsed}/{analysesLimit}
+                </span>
+                <span className="text-xs text-secondary">{cycleLabel}</span>
+              </div>
             </div>
           ) : null}
         </aside>
 
-        <main className="flex-1 overflow-y-auto bg-background p-6">
-          <div className="space-y-6">
+        <main className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-[#0A0A0F] p-8">
+          <div className="flex shrink-0 flex-col gap-4">
             {showSuccessBanner ? (
               <div
                 className={`flex items-center justify-between rounded-lg border border-green/35 bg-green/10 px-4 py-3 text-sm text-green transition-opacity duration-500 ${bannerVisible ? "opacity-100" : "opacity-0"}`}
@@ -418,70 +608,18 @@ export default function DashboardClient() {
                 Paiement annulé. Vous pouvez réessayer quand vous voulez.
               </p>
             ) : null}
+          </div>
 
-            <section className="space-y-4">
-              <div>
-                <h1 className="text-xl font-bold text-primary">Nouvelle analyse</h1>
-                <p className="mt-1 text-xs text-secondary">
-                  MT4 · MT5 · Binance · Bybit · TradingView · FTMO · FundedNext
-                </p>
+          <div
+            className={`flex min-h-0 flex-1 flex-col ${mainView === "nouvelle-analyse" ? "space-y-6" : ""}`}
+          >
+            {mainView !== "nouvelle-analyse" && mainView !== "mon-analyse" ? (
+              <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+                {renderMainContent()}
               </div>
-              <UploadZone loading={loading} onAnalyze={onAnalyzeFile} />
-            </section>
-
-            {error ? (
-              <p className="text-sm text-red" role="alert">
-                {error}
-              </p>
-            ) : null}
-
-            {analysis ? (
-              <section className="space-y-4">
-                <h2 className="text-sm font-semibold text-primary">Dernières stats</h2>
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                  <div className="rounded-xl border border-border bg-card p-4">
-                    <p className="text-xs text-secondary">Score psychologique</p>
-                    <p className="mt-2 font-mono text-2xl font-semibold text-cyan">
-                      {lastPsychScore ?? "--"}/100
-                    </p>
-                  </div>
-                  <div className="rounded-xl border border-border bg-card p-4">
-                    <p className="text-xs text-secondary">Win rate</p>
-                    <p className="mt-2 font-mono text-2xl font-semibold text-green">
-                      {lastWinRate !== null ? `${lastWinRate.toFixed(1)}%` : "--"}
-                    </p>
-                  </div>
-                  <div className="rounded-xl border border-border bg-card p-4">
-                    <p className="text-xs text-secondary">PnL total</p>
-                    <p
-                      className={`mt-2 font-mono text-2xl font-semibold ${
-                        lastPnl !== null && lastPnl < 0 ? "text-red" : "text-green"
-                      }`}
-                    >
-                      {lastPnl !== null
-                        ? `${lastPnl < 0 ? "-" : "+"}${Math.abs(lastPnl).toFixed(0)}€`
-                        : "--"}
-                    </p>
-                  </div>
-                </div>
-              </section>
-            ) : null}
-
-            <section className="rounded-xl border border-border bg-card p-4">
-              <h2 className="text-sm font-semibold text-primary">Analyses récentes</h2>
-              <p className="mt-2 text-sm text-secondary">
-                Aucune analyse récente pour le moment. Vos 2 dernières analyses
-                apparaîtront ici automatiquement.
-              </p>
-            </section>
-
-            {analysis ? (
-              <TradeReport
-                report={analysis}
-                analysesLeft={analysesLeft}
-                analysesLimit={analysesLimit}
-              />
-            ) : null}
+            ) : (
+              renderMainContent()
+            )}
           </div>
         </main>
       </div>

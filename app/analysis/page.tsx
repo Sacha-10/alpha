@@ -151,7 +151,7 @@ export default function DemoPage() {
             <button
               type="button"
               onClick={() => router.push('/pricing')}
-              className="btn-primary text-lg px-8 py-3"
+              className="btn-primary text-lg px-6 py-2.5"
             >
               Commencer — {PLANS.pro.monthly}€/mois
             </button>
