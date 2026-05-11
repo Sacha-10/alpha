@@ -2,6 +2,7 @@
 
 import { getSupabaseClient } from "@/lib/supabase";
 import { detectAndParse } from "@/lib/parseCSV";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   type ComponentType,
@@ -371,7 +372,7 @@ export default function DashboardClient() {
   function renderQuotaCard() {
     if (!showQuotaCard) return null;
     return (
-      <div className="sticky bottom-0 z-10 shrink-0 border-t border-border bg-card p-4">
+      <div className="sticky bottom-0 z-10 w-full shrink-0 border-t border-border bg-card p-4">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-xs text-secondary">Analyses restantes</span>
           <span className="font-mono text-xs text-primary">
@@ -681,9 +682,12 @@ export default function DashboardClient() {
           >
             <LogoSvg />
           </button>
-          <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-semibold text-primary">
+          <Link
+            href="/"
+            className="absolute left-1/2 max-w-[55%] -translate-x-1/2 truncate font-semibold text-primary"
+          >
             AlphaTradeX
-          </span>
+          </Link>
           <button
             type="button"
             onClick={() => setMobileMenuOpen((open) => !open)}
@@ -717,7 +721,7 @@ export default function DashboardClient() {
           <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3 pt-1">
             {renderSidebarAccordion(closeMobileMenu)}
           </div>
-          <div className="shrink-0">
+          <div className="shrink-0 bg-card">
             <div className="h-px bg-border mx-4" aria-hidden />
             <button
               type="button"
@@ -725,7 +729,7 @@ export default function DashboardClient() {
                 closeMobileMenu();
                 void signOut();
               }}
-              className="w-full px-3 py-2.5 text-left text-sm text-red"
+              className="w-full px-4 py-3 text-left text-sm text-secondary hover:text-primary"
             >
               Déconnexion
             </button>
