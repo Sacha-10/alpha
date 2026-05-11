@@ -22,6 +22,7 @@ import {
   Headphones,
   History,
   Lock,
+  LogOut,
   Menu,
   Radar,
   Receipt,
@@ -299,7 +300,7 @@ export default function DashboardClient() {
         onClick={() =>
           setOpenSections((prev) => ({ ...prev, [sectionKey]: !prev[sectionKey] }))
         }
-        className="flex w-full items-center justify-between px-2 pb-1.5 pt-3 font-mono text-[10px] uppercase tracking-[0.15em] text-secondary"
+        className="flex w-full items-center justify-between px-2 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-secondary"
       >
         <span>{children}</span>
         <ChevronDown
@@ -372,7 +373,7 @@ export default function DashboardClient() {
   function renderQuotaCard() {
     if (!showQuotaCard) return null;
     return (
-      <div className="w-full shrink-0 border-t border-border p-4" style={{ backgroundColor: '#12121A' }}>
+      <div className="w-full shrink-0 border-t border-border px-4 pb-4 pt-3" style={{ backgroundColor: '#12121A' }}>
         <div className="mb-2 flex items-center justify-between">
           <span className="text-xs text-secondary">Analyses restantes</span>
           <span className="font-mono text-xs text-primary">
@@ -702,7 +703,7 @@ export default function DashboardClient() {
 
       {mobileMenuOpen ? (
         <div className="flex max-h-[calc(100vh-3.5rem)] shrink-0 flex-col overflow-hidden border-b border-border bg-card md:hidden" style={{ backgroundColor: '#12121A' }}>
-          <div className="shrink-0 space-y-3 px-4 py-3">
+          <div className="shrink-0 px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <span
@@ -711,27 +712,30 @@ export default function DashboardClient() {
                 />
                 <span className="text-xs text-secondary">IA active</span>
               </div>
+              <span className="text-xs text-secondary">{cycleLabel}</span>
               <span className="rounded-md border border-[#2D6FFF40] bg-[#2D6FFF15] px-3 py-1 text-xs font-semibold text-blue">
                 {planLabel}
               </span>
             </div>
-            <p className="text-center text-xs text-secondary">{cycleLabel}</p>
-            <div className="h-px w-full bg-border" aria-hidden />
+            <div className="mt-3 h-px w-full bg-border" aria-hidden />
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3 pt-1">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4">
             {renderSidebarAccordion(closeMobileMenu)}
           </div>
-          <div className="shrink-0 px-4 pb-2" style={{ backgroundColor: '#12121A' }}>
-            <div className="mb-1 h-px bg-border" aria-hidden />
+          <div className="shrink-0 px-4" style={{ backgroundColor: '#12121A' }}>
+            <div className="h-px bg-border" aria-hidden />
             <button
               type="button"
               onClick={() => {
                 closeMobileMenu();
                 void signOut();
               }}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
+              className="flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 text-sm text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
             >
-              Déconnexion
+              <span className="flex items-center gap-3">
+                <LogOut className="h-4 w-4 shrink-0" />
+                Déconnexion
+              </span>
             </button>
           </div>
           {renderQuotaCard()}
