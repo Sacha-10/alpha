@@ -372,7 +372,7 @@ export default function DashboardClient() {
   function renderQuotaCard() {
     if (!showQuotaCard) return null;
     return (
-      <div className="sticky bottom-0 z-10 w-full shrink-0 border-t border-border bg-card p-4">
+      <div className="sticky bottom-0 z-10 w-full shrink-0 border-t border-border bg-card p-4" style={{ backgroundColor: '#12121A' }}>
         <div className="mb-2 flex items-center justify-between">
           <span className="text-xs text-secondary">Analyses restantes</span>
           <span className="font-mono text-xs text-primary">
@@ -729,7 +729,7 @@ export default function DashboardClient() {
                 closeMobileMenu();
                 void signOut();
               }}
-              className="w-full px-4 py-3 text-left text-sm text-secondary hover:text-primary"
+              className="w-full px-4 py-3 text-left text-sm font-normal text-secondary hover:text-primary"
             >
               Déconnexion
             </button>
