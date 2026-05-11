@@ -15,19 +15,19 @@ import UploadZone from "@/components/UploadZone";
 import type { AiAnalysisResult } from "@/lib/tradingAnalysisTypes";
 import {
   Bell,
-  BookOpen,
-  BrainCircuit,
   CalendarCheck,
-  Code2,
+  ChevronDown,
   CreditCard,
-  FileText,
+  Headphones,
   History,
-  LifeBuoy,
   Lock,
   Radar,
   Receipt,
+  ScanLine,
+  ScrollText,
   Target,
   TrendingUp,
+  Webhook,
 } from "lucide-react";
 
 const SESSION_KEY_REPORT = "atx_last_report";
@@ -74,6 +74,7 @@ type DashboardView =
   | "alertes-telegram"
   | "acces-api"
   | "support";
+type SectionKey = "analyse" | "performance" | "signaux" | "aide" | "compte";
 
 function normalizeApiError(message: unknown): string {
   if (typeof message !== "string") return "Erreur d'analyse.";
@@ -119,6 +120,13 @@ export default function DashboardClient() {
   const [hasSessionReport, setHasSessionReport] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [uploadZoneKey, setUploadZoneKey] = useState(0);
+  const [openSections, setOpenSections] = useState<Record<SectionKey, boolean>>({
+    analyse: false,
+    performance: false,
+    signaux: false,
+    aide: false,
+    compte: false,
+  });
 
   // BUG 2 — Restore last report from sessionStorage on mount
   useEffect(() => {
@@ -259,40 +267,36 @@ export default function DashboardClient() {
     analysesLimit !== undefined &&
     analysesLimit < 999999;
 
-  const psychScoreRaw = analysis
-    ? analysis.psychologicalProfile.overallScore <= 1
-      ? analysis.psychologicalProfile.overallScore * 100
-      : analysis.psychologicalProfile.overallScore
-    : null;
-  const lastPsychScore =
-    psychScoreRaw !== null ? Math.round(psychScoreRaw) : null;
-  const psychScoreColor =
-    lastPsychScore === null
-      ? "text-secondary"
-      : lastPsychScore > 60
-        ? "text-green"
-        : lastPsychScore >= 40
-          ? "text-cyan"
-          : "text-red";
-
-  const lastWinRate = analysis
-    ? analysis.globalStats.winRate <= 1
-      ? analysis.globalStats.winRate * 100
-      : analysis.globalStats.winRate
-    : null;
-  const lastPnl = analysis?.globalStats.totalPnL ?? null;
-
   async function signOut() {
     await supabase.auth.signOut();
     router.push("/");
     router.refresh();
   }
 
-  function SectionLabel({ children }: { children: ReactNode }) {
+  function SectionLabel({
+    children,
+    sectionKey,
+  }: {
+    children: ReactNode;
+    sectionKey: SectionKey;
+  }) {
+    const isOpen = openSections[sectionKey];
     return (
-      <p className="px-2 pb-1.5 pt-3 font-mono text-[10px] uppercase tracking-[0.15em] text-secondary">
-        {children}
-      </p>
+      <button
+        type="button"
+        onClick={() =>
+          setOpenSections((prev) => ({ ...prev, [sectionKey]: !prev[sectionKey] }))
+        }
+        className="flex w-full items-center justify-between px-2 pb-1.5 pt-3 font-mono text-[10px] uppercase tracking-[0.15em] text-secondary"
+      >
+        <span>{children}</span>
+        <ChevronDown
+          className={`h-3.5 w-3.5 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+          aria-hidden
+        />
+      </button>
     );
   }
 
@@ -302,6 +306,7 @@ export default function DashboardClient() {
     active = false,
     locked = false,
     lockPlanLabel,
+    lockedPath = "/pricing",
     onSelect,
   }: {
     icon: ComponentType<{ className?: string }>;
@@ -309,6 +314,7 @@ export default function DashboardClient() {
     active?: boolean;
     locked?: boolean;
     lockPlanLabel?: string;
+    lockedPath?: string;
     onSelect?: () => void;
   }) {
     return (
@@ -316,7 +322,7 @@ export default function DashboardClient() {
         type="button"
         onClick={() => {
           if (locked) {
-            router.push("/pricing");
+            router.push(lockedPath);
             return;
           }
           onSelect?.();
@@ -367,7 +373,7 @@ export default function DashboardClient() {
       return <EmptyFeaturePage icon={History} title="Historique" />;
     }
     if (mainView === "journal-analyses") {
-      return <EmptyFeaturePage icon={BookOpen} title="Journal analyses" />;
+      return <EmptyFeaturePage icon={ScrollText} title="Journal analyses" />;
     }
     if (mainView === "evolution") {
       return <EmptyFeaturePage icon={TrendingUp} title="Évolution semaine" />;
@@ -385,29 +391,27 @@ export default function DashboardClient() {
       return <EmptyFeaturePage icon={Bell} title="Alertes Telegram" />;
     }
     if (mainView === "acces-api") {
-      return <EmptyFeaturePage icon={Code2} title="Accès API" />;
+      return <EmptyFeaturePage icon={Webhook} title="Accès API" />;
     }
     if (mainView === "support") {
-      return <EmptyFeaturePage icon={LifeBuoy} title="Support" />;
+      return <EmptyFeaturePage icon={Headphones} title="Support prioritaire" />;
     }
 
     // nouvelle-analyse
     return (
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="shrink-0">
+      <div className="flex h-full w-full flex-col items-center justify-center">
+        <div className="w-full max-w-md text-center">
           <h1 className="text-2xl font-bold text-primary">Nouvelle analyse</h1>
           <p className="mt-1 text-sm text-secondary">Importez votre historique CSV</p>
         </div>
-
-        <div className="mx-auto mt-4 w-full max-w-xl shrink-0">
+        <div className="mt-4 w-full max-w-md">
           <UploadZone
             key={uploadZoneKey}
             loading={loading}
             onFileChange={setPendingFile}
           />
         </div>
-
-        <div className="mt-4 flex shrink-0 flex-wrap justify-center gap-3">
+        <div className="mt-4 flex flex-wrap justify-center gap-3">
           <button
             type="button"
             className="btn-primary py-2.5 px-6 disabled:cursor-not-allowed disabled:opacity-40"
@@ -452,41 +456,9 @@ export default function DashboardClient() {
         </div>
 
         {error ? (
-          <p className="mt-3 shrink-0 text-sm text-red" role="alert">
+          <p className="mt-3 text-sm text-red" role="alert">
             {error}
           </p>
-        ) : null}
-
-        {hasSessionReport && analysis ? (
-          <section className="mt-6 min-h-0 shrink-0">
-            <h2 className="mb-3 text-sm font-semibold text-primary">Dernière analyse</h2>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-              <div className="rounded-xl border border-border bg-card p-4">
-                <p className="text-xs text-secondary">Score psychologique</p>
-                <p className={`mt-2 font-mono text-2xl font-bold ${psychScoreColor}`}>
-                  {lastPsychScore ?? "--"}/100
-                </p>
-              </div>
-              <div className="rounded-xl border border-border bg-card p-4">
-                <p className="text-xs text-secondary">Win rate</p>
-                <p className="mt-2 font-mono text-2xl font-bold text-cyan">
-                  {lastWinRate !== null ? `${lastWinRate.toFixed(1)}%` : "--"}
-                </p>
-              </div>
-              <div className="rounded-xl border border-border bg-card p-4">
-                <p className="text-xs text-secondary">PnL total</p>
-                <p
-                  className={`mt-2 font-mono text-2xl font-bold ${
-                    lastPnl !== null && lastPnl < 0 ? "text-red" : "text-green"
-                  }`}
-                >
-                  {lastPnl !== null
-                    ? `${lastPnl < 0 ? "-" : "+"}${Math.abs(lastPnl).toFixed(0)}€`
-                    : "--"}
-                </p>
-              </div>
-            </div>
-          </section>
         ) : null}
       </div>
     );
@@ -527,121 +499,128 @@ export default function DashboardClient() {
       </header>
 
       <div className="flex h-[calc(100vh-56px)] min-h-0">
-        <aside className="flex h-full w-[280px] shrink-0 flex-col border-r border-border bg-card px-4 py-5">
-          <div className="min-h-0 flex-1 space-y-1 overflow-y-auto">
-            <SectionLabel>Analyse</SectionLabel>
-            <SidebarNavRow
-              icon={BrainCircuit}
-              label="Nouvelle analyse"
-              active={mainView === "nouvelle-analyse"}
-              onSelect={() => setMainView("nouvelle-analyse")}
-            />
-            {hasSessionReport ? (
+        <aside className="h-full w-[280px] shrink-0 overflow-y-auto border-r border-border bg-card px-4 py-5">
+          <div className="space-y-1">
+            <SectionLabel sectionKey="analyse">Analyse</SectionLabel>
+            {openSections.analyse ? (
+              <>
+                <SidebarNavRow
+                  icon={ScanLine}
+                  label="Nouvelle analyse"
+                  active={mainView === "nouvelle-analyse"}
+                  onSelect={() => setMainView("nouvelle-analyse")}
+                />
+                <SidebarNavRow
+                  icon={ScrollText}
+                  label="Journal analyses"
+                  active={mainView === "journal-analyses"}
+                  onSelect={() => setMainView("journal-analyses")}
+                />
+                <SidebarNavRow
+                  icon={History}
+                  label="Historique"
+                  locked={historiqueLocked}
+                  lockPlanLabel="Premium"
+                  active={mainView === "historique"}
+                  onSelect={() => setMainView("historique")}
+                />
+              </>
+            ) : null}
+
+            <SectionLabel sectionKey="performance">Performance</SectionLabel>
+            {openSections.performance ? (
+              <>
+                <SidebarNavRow
+                  icon={TrendingUp}
+                  label="Évolution semaine"
+                  locked={evolutionLocked}
+                  lockPlanLabel="Premium"
+                  active={mainView === "evolution"}
+                  onSelect={() => setMainView("evolution")}
+                />
+                <SidebarNavRow
+                  icon={CalendarCheck}
+                  label="Résumé semaine"
+                  locked={resumeLocked}
+                  lockPlanLabel="Premium"
+                  active={mainView === "resume-hebdomadaire"}
+                  onSelect={() => setMainView("resume-hebdomadaire")}
+                />
+                <SidebarNavRow
+                  icon={Target}
+                  label="Prop Firm Score"
+                  locked={propFirmLocked}
+                  lockPlanLabel="Elite"
+                  active={mainView === "prop-firm-score"}
+                  onSelect={() => setMainView("prop-firm-score")}
+                />
+              </>
+            ) : null}
+
+            <SectionLabel sectionKey="signaux">Signaux</SectionLabel>
+            {openSections.signaux ? (
+              <>
+                <SidebarNavRow
+                  icon={Radar}
+                  label="Détection prédictive"
+                  locked={signauxLocked}
+                  lockPlanLabel="Elite"
+                  active={mainView === "detection-predictive"}
+                  onSelect={() => setMainView("detection-predictive")}
+                />
+                <SidebarNavRow
+                  icon={Bell}
+                  label="Alertes Telegram"
+                  locked={signauxLocked}
+                  lockPlanLabel="Elite"
+                  active={mainView === "alertes-telegram"}
+                  onSelect={() => setMainView("alertes-telegram")}
+                />
+                <SidebarNavRow
+                  icon={Webhook}
+                  label="Accès API"
+                  locked={signauxLocked}
+                  lockPlanLabel="Elite"
+                  active={mainView === "acces-api"}
+                  onSelect={() => setMainView("acces-api")}
+                />
+              </>
+            ) : null}
+
+            <SectionLabel sectionKey="aide">Aide</SectionLabel>
+            {openSections.aide ? (
               <SidebarNavRow
-                icon={FileText}
-                label="Mon analyse"
-                active={mainView === "mon-analyse"}
-                onSelect={() => setMainView("mon-analyse")}
+                icon={Headphones}
+                label="Support prioritaire"
+                active={mainView === "support"}
+                locked={isPro}
+                lockPlanLabel="Premium"
+                lockedPath="/help"
+                onSelect={() => setMainView("support")}
               />
             ) : null}
-            <SidebarNavRow
-              icon={BookOpen}
-              label="Journal analyses"
-              active={mainView === "journal-analyses"}
-              onSelect={() => setMainView("journal-analyses")}
-            />
-            <SidebarNavRow
-              icon={History}
-              label="Historique"
-              locked={historiqueLocked}
-              lockPlanLabel="Premium"
-              active={mainView === "historique"}
-              onSelect={() => setMainView("historique")}
-            />
 
-            <SectionLabel>Performance</SectionLabel>
-            <SidebarNavRow
-              icon={TrendingUp}
-              label="Évolution semaine"
-              locked={evolutionLocked}
-              lockPlanLabel="Premium"
-              active={mainView === "evolution"}
-              onSelect={() => setMainView("evolution")}
-            />
-            <SidebarNavRow
-              icon={CalendarCheck}
-              label="Résumé semaine"
-              locked={resumeLocked}
-              lockPlanLabel="Premium"
-              active={mainView === "resume-hebdomadaire"}
-              onSelect={() => setMainView("resume-hebdomadaire")}
-            />
-            <SidebarNavRow
-              icon={Target}
-              label="Prop Firm Score"
-              locked={propFirmLocked}
-              lockPlanLabel="Elite"
-              active={mainView === "prop-firm-score"}
-              onSelect={() => setMainView("prop-firm-score")}
-            />
-
-            <SectionLabel>Signaux</SectionLabel>
-            <SidebarNavRow
-              icon={Radar}
-              label="Détection prédictive"
-              locked={signauxLocked}
-              lockPlanLabel="Elite"
-              active={mainView === "detection-predictive"}
-              onSelect={() => setMainView("detection-predictive")}
-            />
-            <SidebarNavRow
-              icon={Bell}
-              label="Alertes Telegram"
-              locked={signauxLocked}
-              lockPlanLabel="Elite"
-              active={mainView === "alertes-telegram"}
-              onSelect={() => setMainView("alertes-telegram")}
-            />
-            <SidebarNavRow
-              icon={Code2}
-              label="Accès API"
-              locked={signauxLocked}
-              lockPlanLabel="Elite"
-              active={mainView === "acces-api"}
-              onSelect={() => setMainView("acces-api")}
-            />
-
-            <SectionLabel>AIDE</SectionLabel>
-            <SidebarNavRow
-              icon={LifeBuoy}
-              label="Support"
-              active={mainView === "support"}
-              onSelect={() => {
-                if (isPro) {
-                  window.open("/help", "_blank", "noopener,noreferrer");
-                } else {
-                  setMainView("support");
-                }
-              }}
-            />
-
-            <SectionLabel>Compte</SectionLabel>
-            <SidebarNavRow
-              icon={CreditCard}
-              label="Offres"
-              onSelect={() => router.push("/pricing")}
-            />
-            <a
-              href="/api/customer-portal"
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
-            >
-              <Receipt className="h-4 w-4 shrink-0" />
-              Factures
-            </a>
+            <SectionLabel sectionKey="compte">Compte</SectionLabel>
+            {openSections.compte ? (
+              <>
+                <SidebarNavRow
+                  icon={CreditCard}
+                  label="Offres"
+                  onSelect={() => router.push("/pricing")}
+                />
+                <a
+                  href="/api/customer-portal"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
+                >
+                  <Receipt className="h-4 w-4 shrink-0" />
+                  Factures
+                </a>
+              </>
+            ) : null}
           </div>
 
           {showQuotaCard ? (
-            <div className="mt-auto shrink-0 rounded-xl border border-border bg-[#0A0A0F] p-4">
+            <div className="sticky bottom-0 mt-4 rounded-xl border border-border bg-card p-4">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs text-secondary">Analyses restantes</span>
                 <span className="font-mono text-xs text-primary">

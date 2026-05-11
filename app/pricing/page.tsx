@@ -37,7 +37,7 @@ const plans: Plan[] = [
     },
     features: [
       { label: "4 analyses par mois", included: true },
-      { label: "Analyse IA complète GPT-5.4", included: true },
+      { label: "Analyses IA GPT-5.4", included: true },
       { label: "Export PDF", included: true },
       { label: "Journal de vos analyses", included: true },
       { label: "Historique de vos analyses", included: false },
@@ -63,7 +63,7 @@ const plans: Plan[] = [
     },
     features: [
       { label: "24 analyses par mois", included: true },
-      { label: "Analyse IA complète GPT-5.4", included: true },
+      { label: "Analyses IA GPT-5.4", included: true },
       { label: "Export PDF", included: true },
       { label: "Journal de vos analyses", included: true },
       { label: "Historique de vos analyses", included: true },
@@ -88,7 +88,7 @@ const plans: Plan[] = [
     },
     features: [
       { label: "Analyses illimitées", included: true },
-      { label: "Analyse IA complète GPT-5.4", included: true },
+      { label: "Analyses IA GPT-5.4", included: true },
       { label: "Export PDF", included: true },
       { label: "Journal de vos analyses", included: true },
       { label: "Historique de vos analyses", included: true },
