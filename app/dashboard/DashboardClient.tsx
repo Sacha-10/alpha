@@ -22,7 +22,6 @@ import {
   Headphones,
   History,
   Lock,
-  LogOut,
   Menu,
   Radar,
   Receipt,
@@ -722,7 +721,7 @@ export default function DashboardClient() {
           <div className="min-h-0 flex-1 overflow-y-auto px-4">
             {renderSidebarAccordion(closeMobileMenu)}
           </div>
-          <div className="shrink-0 px-4" style={{ backgroundColor: '#12121A' }}>
+          <div className="shrink-0 px-4 pt-2.5" style={{ backgroundColor: '#12121A' }}>
             <div className="h-px bg-border" aria-hidden />
             <button
               type="button"
@@ -730,12 +729,9 @@ export default function DashboardClient() {
                 closeMobileMenu();
                 void signOut();
               }}
-              className="flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 text-sm text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
+              className="flex w-full cursor-pointer items-center rounded-lg py-2.5 text-sm text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
             >
-              <span className="flex items-center gap-3">
-                <LogOut className="h-4 w-4 shrink-0" />
-                Déconnexion
-              </span>
+              Déconnexion
             </button>
           </div>
           {renderQuotaCard()}
