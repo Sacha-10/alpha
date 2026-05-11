@@ -21,6 +21,7 @@ import {
   Headphones,
   History,
   Lock,
+  Menu,
   Radar,
   Receipt,
   ScanLine,
@@ -127,6 +128,7 @@ export default function DashboardClient() {
     aide: false,
     compte: false,
   });
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // BUG 2 — Restore last report from sessionStorage on mount
   useEffect(() => {
@@ -181,6 +183,15 @@ export default function DashboardClient() {
   useEffect(() => {
     void fetchUserData();
   }, [fetchUserData]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const onChange = () => {
+      if (mq.matches) setMobileMenuOpen(false);
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   const runAnalyze = useCallback(async (file: File) => {
     setLoading(true);
@@ -308,6 +319,7 @@ export default function DashboardClient() {
     lockPlanLabel,
     lockedPath = "/pricing",
     onSelect,
+    onAfterNavigate,
   }: {
     icon: ComponentType<{ className?: string }>;
     label: string;
@@ -316,6 +328,7 @@ export default function DashboardClient() {
     lockPlanLabel?: string;
     lockedPath?: string;
     onSelect?: () => void;
+    onAfterNavigate?: () => void;
   }) {
     return (
       <button
@@ -323,9 +336,11 @@ export default function DashboardClient() {
         onClick={() => {
           if (locked) {
             router.push(lockedPath);
+            onAfterNavigate?.();
             return;
           }
           onSelect?.();
+          onAfterNavigate?.();
         }}
         className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-all duration-150 ${
           locked
@@ -350,6 +365,163 @@ export default function DashboardClient() {
   const resumeLocked = isPro;
   const propFirmLocked = !isElite;
   const signauxLocked = !isElite;
+
+  const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
+
+  function renderQuotaCard() {
+    if (!showQuotaCard) return null;
+    return (
+      <div className="sticky bottom-0 z-10 shrink-0 border-t border-border bg-card p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-xs text-secondary">Analyses restantes</span>
+          <span className="font-mono text-xs text-primary">
+            {analysesUsed}/{analysesLimit}
+          </span>
+        </div>
+        <div className="h-1 w-full bg-[#1E2035]">
+          <div
+            className="h-full bg-[#2D6FFF]"
+            style={{ width: `${progressWidth}%` }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  function renderSidebarAccordion(closeMobile?: () => void) {
+    return (
+      <div className="space-y-1">
+        <SectionLabel sectionKey="analyse">Analyse</SectionLabel>
+        {openSections.analyse ? (
+          <>
+            <SidebarNavRow
+              icon={ScanLine}
+              label="Nouvelle analyse"
+              active={mainView === "nouvelle-analyse"}
+              onSelect={() => setMainView("nouvelle-analyse")}
+              onAfterNavigate={closeMobile}
+            />
+            <SidebarNavRow
+              icon={ScrollText}
+              label="Journal analyses"
+              active={mainView === "journal-analyses"}
+              onSelect={() => setMainView("journal-analyses")}
+              onAfterNavigate={closeMobile}
+            />
+            <SidebarNavRow
+              icon={History}
+              label="Historique"
+              locked={historiqueLocked}
+              lockPlanLabel="Premium"
+              active={mainView === "historique"}
+              onSelect={() => setMainView("historique")}
+              onAfterNavigate={closeMobile}
+            />
+          </>
+        ) : null}
+
+        <SectionLabel sectionKey="performance">Performance</SectionLabel>
+        {openSections.performance ? (
+          <>
+            <SidebarNavRow
+              icon={TrendingUp}
+              label="Évolution semaine"
+              locked={evolutionLocked}
+              lockPlanLabel="Premium"
+              active={mainView === "evolution"}
+              onSelect={() => setMainView("evolution")}
+              onAfterNavigate={closeMobile}
+            />
+            <SidebarNavRow
+              icon={CalendarCheck}
+              label="Résumé semaine"
+              locked={resumeLocked}
+              lockPlanLabel="Premium"
+              active={mainView === "resume-hebdomadaire"}
+              onSelect={() => setMainView("resume-hebdomadaire")}
+              onAfterNavigate={closeMobile}
+            />
+            <SidebarNavRow
+              icon={Target}
+              label="Prop Firm Score"
+              locked={propFirmLocked}
+              lockPlanLabel="Elite"
+              active={mainView === "prop-firm-score"}
+              onSelect={() => setMainView("prop-firm-score")}
+              onAfterNavigate={closeMobile}
+            />
+          </>
+        ) : null}
+
+        <SectionLabel sectionKey="signaux">Signaux</SectionLabel>
+        {openSections.signaux ? (
+          <>
+            <SidebarNavRow
+              icon={Radar}
+              label="Détection prédictive"
+              locked={signauxLocked}
+              lockPlanLabel="Elite"
+              active={mainView === "detection-predictive"}
+              onSelect={() => setMainView("detection-predictive")}
+              onAfterNavigate={closeMobile}
+            />
+            <SidebarNavRow
+              icon={Bell}
+              label="Alertes Telegram"
+              locked={signauxLocked}
+              lockPlanLabel="Elite"
+              active={mainView === "alertes-telegram"}
+              onSelect={() => setMainView("alertes-telegram")}
+              onAfterNavigate={closeMobile}
+            />
+            <SidebarNavRow
+              icon={Webhook}
+              label="Accès API"
+              locked={signauxLocked}
+              lockPlanLabel="Elite"
+              active={mainView === "acces-api"}
+              onSelect={() => setMainView("acces-api")}
+              onAfterNavigate={closeMobile}
+            />
+          </>
+        ) : null}
+
+        <SectionLabel sectionKey="aide">Aide</SectionLabel>
+        {openSections.aide ? (
+          <SidebarNavRow
+            icon={Headphones}
+            label="Support prioritaire"
+            active={mainView === "support"}
+            locked={isPro}
+            lockPlanLabel="Premium"
+            lockedPath="/help"
+            onSelect={() => setMainView("support")}
+            onAfterNavigate={closeMobile}
+          />
+        ) : null}
+
+        <SectionLabel sectionKey="compte">Compte</SectionLabel>
+        {openSections.compte ? (
+          <>
+            <SidebarNavRow
+              icon={CreditCard}
+              label="Offres"
+              onSelect={() => router.push("/pricing")}
+              onAfterNavigate={closeMobile}
+            />
+            <a
+              href="/api/customer-portal"
+              onClick={() => closeMobile?.()}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
+            >
+              <Receipt className="h-4 w-4 shrink-0" />
+              Factures
+            </a>
+          </>
+        ) : null}
+      </div>
+    );
+  }
 
   function renderMainContent() {
     if (mainView === "mon-analyse") {
@@ -465,20 +637,23 @@ export default function DashboardClient() {
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-background text-primary">
-      <header className="h-14 shrink-0 border-b border-border bg-card">
-        <div className="flex h-full items-center justify-between px-4">
-          <div className="flex min-w-0 flex-1 items-center gap-6">
-            <button
-              type="button"
-              onClick={() => router.push("/")}
-              className="flex shrink-0 items-center gap-2 text-left"
-            >
-              <LogoSvg />
-              <span className="font-semibold text-primary">AlphaTradeX</span>
-            </button>
+    <div className="flex h-screen flex-col overflow-hidden bg-background text-primary">
+      <header className="z-20 h-14 shrink-0 border-b border-border bg-card">
+        <div className="hidden h-full items-center justify-between px-4 md:flex">
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="flex shrink-0 items-center gap-2 text-left"
+          >
+            <LogoSvg />
+            <span className="font-semibold text-primary">AlphaTradeX</span>
+          </button>
+          <div className="flex min-w-0 flex-1 items-center justify-start pl-6 md:pl-10">
             <div className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green" aria-hidden />
+              <span
+                className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#2D6FFF]"
+                aria-hidden
+              />
               <span className="text-xs text-secondary">IA active</span>
             </div>
           </div>
@@ -496,145 +671,68 @@ export default function DashboardClient() {
             </button>
           </div>
         </div>
+
+        <div className="flex h-full items-center justify-between px-4 md:hidden">
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="flex min-w-0 items-center gap-2 text-left"
+          >
+            <LogoSvg />
+            <span className="truncate font-semibold text-primary">AlphaTradeX</span>
+          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              className="rounded-md border border-border p-2 text-secondary hover:bg-hover hover:text-primary"
+              aria-expanded={mobileMenuOpen}
+              aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            >
+              <Menu className="h-5 w-5" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={() => void signOut()}
+              className="rounded-md border border-border px-3 py-1.5 text-xs text-secondary hover:bg-hover hover:text-primary"
+            >
+              Déconnexion
+            </button>
+          </div>
+        </div>
       </header>
 
-      <div className="flex h-[calc(100vh-56px)] min-h-0">
-        <aside className="h-full w-[280px] shrink-0 overflow-y-auto border-r border-border bg-card px-4 py-5">
-          <div className="space-y-1">
-            <SectionLabel sectionKey="analyse">Analyse</SectionLabel>
-            {openSections.analyse ? (
-              <>
-                <SidebarNavRow
-                  icon={ScanLine}
-                  label="Nouvelle analyse"
-                  active={mainView === "nouvelle-analyse"}
-                  onSelect={() => setMainView("nouvelle-analyse")}
+      {mobileMenuOpen ? (
+        <div className="flex max-h-[calc(100vh-3.5rem)] shrink-0 flex-col overflow-hidden border-b border-border bg-card md:hidden">
+          <div className="shrink-0 space-y-3 px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#2D6FFF]"
+                  aria-hidden
                 />
-                <SidebarNavRow
-                  icon={ScrollText}
-                  label="Journal analyses"
-                  active={mainView === "journal-analyses"}
-                  onSelect={() => setMainView("journal-analyses")}
-                />
-                <SidebarNavRow
-                  icon={History}
-                  label="Historique"
-                  locked={historiqueLocked}
-                  lockPlanLabel="Premium"
-                  active={mainView === "historique"}
-                  onSelect={() => setMainView("historique")}
-                />
-              </>
-            ) : null}
-
-            <SectionLabel sectionKey="performance">Performance</SectionLabel>
-            {openSections.performance ? (
-              <>
-                <SidebarNavRow
-                  icon={TrendingUp}
-                  label="Évolution semaine"
-                  locked={evolutionLocked}
-                  lockPlanLabel="Premium"
-                  active={mainView === "evolution"}
-                  onSelect={() => setMainView("evolution")}
-                />
-                <SidebarNavRow
-                  icon={CalendarCheck}
-                  label="Résumé semaine"
-                  locked={resumeLocked}
-                  lockPlanLabel="Premium"
-                  active={mainView === "resume-hebdomadaire"}
-                  onSelect={() => setMainView("resume-hebdomadaire")}
-                />
-                <SidebarNavRow
-                  icon={Target}
-                  label="Prop Firm Score"
-                  locked={propFirmLocked}
-                  lockPlanLabel="Elite"
-                  active={mainView === "prop-firm-score"}
-                  onSelect={() => setMainView("prop-firm-score")}
-                />
-              </>
-            ) : null}
-
-            <SectionLabel sectionKey="signaux">Signaux</SectionLabel>
-            {openSections.signaux ? (
-              <>
-                <SidebarNavRow
-                  icon={Radar}
-                  label="Détection prédictive"
-                  locked={signauxLocked}
-                  lockPlanLabel="Elite"
-                  active={mainView === "detection-predictive"}
-                  onSelect={() => setMainView("detection-predictive")}
-                />
-                <SidebarNavRow
-                  icon={Bell}
-                  label="Alertes Telegram"
-                  locked={signauxLocked}
-                  lockPlanLabel="Elite"
-                  active={mainView === "alertes-telegram"}
-                  onSelect={() => setMainView("alertes-telegram")}
-                />
-                <SidebarNavRow
-                  icon={Webhook}
-                  label="Accès API"
-                  locked={signauxLocked}
-                  lockPlanLabel="Elite"
-                  active={mainView === "acces-api"}
-                  onSelect={() => setMainView("acces-api")}
-                />
-              </>
-            ) : null}
-
-            <SectionLabel sectionKey="aide">Aide</SectionLabel>
-            {openSections.aide ? (
-              <SidebarNavRow
-                icon={Headphones}
-                label="Support prioritaire"
-                active={mainView === "support"}
-                locked={isPro}
-                lockPlanLabel="Premium"
-                lockedPath="/help"
-                onSelect={() => setMainView("support")}
-              />
-            ) : null}
-
-            <SectionLabel sectionKey="compte">Compte</SectionLabel>
-            {openSections.compte ? (
-              <>
-                <SidebarNavRow
-                  icon={CreditCard}
-                  label="Offres"
-                  onSelect={() => router.push("/pricing")}
-                />
-                <a
-                  href="/api/customer-portal"
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
-                >
-                  <Receipt className="h-4 w-4 shrink-0" />
-                  Factures
-                </a>
-              </>
-            ) : null}
-          </div>
-
-          {showQuotaCard ? (
-            <div className="sticky bottom-0 mt-4 rounded-xl border border-border bg-card p-4">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs text-secondary">Analyses restantes</span>
-                <span className="font-mono text-xs text-primary">
-                  {analysesUsed}/{analysesLimit}
-                </span>
+                <span className="text-xs text-secondary">IA active</span>
               </div>
-              <div className="h-1 w-full bg-[#1E2035]">
-                <div
-                  className="h-full bg-[#2D6FFF]"
-                  style={{ width: `${progressWidth}%` }}
-                />
-              </div>
+              <span className="rounded-md border border-[#2D6FFF40] bg-[#2D6FFF15] px-3 py-1 text-xs font-semibold text-blue">
+                {planLabel}
+              </span>
             </div>
-          ) : null}
+            <p className="text-center text-xs text-secondary">{cycleLabel}</p>
+            <div className="h-px w-full bg-border" aria-hidden />
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3 pt-1">
+            {renderSidebarAccordion(closeMobileMenu)}
+          </div>
+          {renderQuotaCard()}
+        </div>
+      ) : null}
+
+      <div className="flex min-h-0 flex-1">
+        <aside className="hidden h-full w-[280px] shrink-0 flex-col border-r border-border bg-card md:flex">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5">
+            {renderSidebarAccordion()}
+          </div>
+          {renderQuotaCard()}
         </aside>
 
         <main
