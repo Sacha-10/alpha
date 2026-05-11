@@ -3,18 +3,16 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, Upload } from "lucide-react";
 import { useRef, useState, type DragEvent } from "react";
-import ExportGuide from "./ExportGuide";
 
 interface Props {
-  onAnalyze: (file: File) => void;
-  loading: boolean;
+  loading?: boolean;
+  onFileChange?: (file: File | null) => void;
 }
 
-export default function UploadZone({ onAnalyze, loading }: Props) {
+export default function UploadZone({ loading = false, onFileChange }: Props) {
   const [dragging, setDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState("");
-  const [showGuide, setShowGuide] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function handleFile(f: File) {
@@ -26,6 +24,7 @@ export default function UploadZone({ onAnalyze, loading }: Props) {
     }
     setError("");
     setFile(f);
+    onFileChange?.(f);
   }
 
   function handleDrop(e: DragEvent<HTMLDivElement>) {
@@ -38,7 +37,11 @@ export default function UploadZone({ onAnalyze, loading }: Props) {
   return (
     <div className="w-full max-w-2xl mx-auto">
       <motion.div
-        className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${
+        className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
+          loading
+            ? "cursor-not-allowed opacity-60"
+            : "cursor-pointer"
+        } ${
           dragging
             ? "border-blue bg-blue/5 shadow-blue"
             : file
@@ -47,18 +50,21 @@ export default function UploadZone({ onAnalyze, loading }: Props) {
         }`}
         onDragOver={(e) => {
           e.preventDefault();
-          setDragging(true);
+          if (!loading) setDragging(true);
         }}
         onDragLeave={() => setDragging(false)}
-        onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
-        whileHover={{ scale: 1.01 }}
+        onDrop={loading ? undefined : handleDrop}
+        onClick={() => {
+          if (!loading) inputRef.current?.click();
+        }}
+        whileHover={loading ? undefined : { scale: 1.01 }}
       >
         <input
           ref={inputRef}
           type="file"
           accept=".csv"
           className="hidden"
+          disabled={loading}
           onChange={(e) => {
             const f = e.target.files?.[0];
             if (f) handleFile(f);
@@ -99,53 +105,6 @@ export default function UploadZone({ onAnalyze, loading }: Props) {
 
       {error ? (
         <p className="text-red text-sm mt-2 text-center">{error}</p>
-      ) : null}
-
-      <button
-        type="button"
-        onClick={() => file && onAnalyze(file)}
-        disabled={!file || loading}
-        className="btn-primary mx-auto mt-4 block py-2.5 px-6 disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        {loading ? (
-          <span className="flex items-center justify-center gap-3">
-            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-                fill="none"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
-            L&apos;IA analyse vos trades...
-          </span>
-        ) : (
-          "Analyser mes trades"
-        )}
-      </button>
-
-      {loading ? (
-        <div className="mt-4">
-          <div className="w-full bg-card rounded-full h-1.5 overflow-hidden">
-            <motion.div
-              className="h-full bg-blue rounded-full"
-              animate={{ width: ["0%", "85%"] }}
-              transition={{ duration: 10 }}
-            />
-          </div>
-        </div>
-      ) : null}
-
-      {showGuide ? (
-        <ExportGuide onClose={() => setShowGuide(false)} />
       ) : null}
     </div>
   );

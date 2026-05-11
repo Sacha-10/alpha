@@ -15,12 +15,14 @@ import UploadZone from "@/components/UploadZone";
 import type { AiAnalysisResult } from "@/lib/tradingAnalysisTypes";
 import {
   Bell,
+  BookOpen,
   BrainCircuit,
   CalendarCheck,
   Code2,
   CreditCard,
   FileText,
   History,
+  LifeBuoy,
   Lock,
   Radar,
   Receipt,
@@ -64,12 +66,14 @@ type DashboardView =
   | "nouvelle-analyse"
   | "mon-analyse"
   | "historique"
+  | "journal-analyses"
   | "evolution"
   | "resume-hebdomadaire"
   | "prop-firm-score"
   | "detection-predictive"
   | "alertes-telegram"
-  | "acces-api";
+  | "acces-api"
+  | "support";
 
 function normalizeApiError(message: unknown): string {
   if (typeof message !== "string") return "Erreur d'analyse.";
@@ -113,6 +117,8 @@ export default function DashboardClient() {
   const [mainView, setMainView] = useState<DashboardView>("nouvelle-analyse");
 
   const [hasSessionReport, setHasSessionReport] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [uploadZoneKey, setUploadZoneKey] = useState(0);
 
   // BUG 2 — Restore last report from sessionStorage on mount
   useEffect(() => {
@@ -175,6 +181,8 @@ export default function DashboardClient() {
     setAnalysesLeft(undefined);
     setAnalysesLimit(undefined);
     setHasSessionReport(false);
+    setPendingFile(null);
+    setUploadZoneKey((k) => k + 1);
     setMainView((prev) => (prev === "mon-analyse" ? "nouvelle-analyse" : prev));
     // BUG 2 — Clear sessionStorage when user uploads a new file
     sessionStorage.removeItem(SESSION_KEY_REPORT);
@@ -222,13 +230,6 @@ export default function DashboardClient() {
       setLoading(false);
     }
   }, [fetchUserData]);
-
-  const onAnalyzeFile = useCallback(
-    (file: File) => {
-      void runAnalyze(file);
-    },
-    [runAnalyze]
-  );
 
   function formatResetDate(dateStr: string): string {
     const d = new Date(dateStr);
@@ -365,11 +366,14 @@ export default function DashboardClient() {
     if (mainView === "historique") {
       return <EmptyFeaturePage icon={History} title="Historique" />;
     }
+    if (mainView === "journal-analyses") {
+      return <EmptyFeaturePage icon={BookOpen} title="Journal analyses" />;
+    }
     if (mainView === "evolution") {
-      return <EmptyFeaturePage icon={TrendingUp} title="Évolution" />;
+      return <EmptyFeaturePage icon={TrendingUp} title="Évolution semaine" />;
     }
     if (mainView === "resume-hebdomadaire") {
-      return <EmptyFeaturePage icon={CalendarCheck} title="Résumé hebdomadaire" />;
+      return <EmptyFeaturePage icon={CalendarCheck} title="Résumé semaine" />;
     }
     if (mainView === "prop-firm-score") {
       return <EmptyFeaturePage icon={Target} title="Prop Firm Score" />;
@@ -383,42 +387,93 @@ export default function DashboardClient() {
     if (mainView === "acces-api") {
       return <EmptyFeaturePage icon={Code2} title="Accès API" />;
     }
+    if (mainView === "support") {
+      return <EmptyFeaturePage icon={LifeBuoy} title="Support" />;
+    }
 
     // nouvelle-analyse
     return (
-      <>
-        <div>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0">
           <h1 className="text-2xl font-bold text-primary">Nouvelle analyse</h1>
           <p className="mt-1 text-sm text-secondary">Importez votre historique CSV</p>
         </div>
 
-        <div className="mx-auto mt-8 w-full max-w-xl">
-          <UploadZone loading={loading} onAnalyze={onAnalyzeFile} />
+        <div className="mx-auto mt-4 w-full max-w-xl shrink-0">
+          <UploadZone
+            key={uploadZoneKey}
+            loading={loading}
+            onFileChange={setPendingFile}
+          />
+        </div>
+
+        <div className="mt-4 flex shrink-0 flex-wrap justify-center gap-3">
+          <button
+            type="button"
+            className="btn-primary py-2.5 px-6 disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={!pendingFile || loading}
+            onClick={() => {
+              if (pendingFile) void runAnalyze(pendingFile);
+            }}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-3">
+                <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+                L&apos;IA analyse vos trades...
+              </span>
+            ) : (
+              "Analyser mes trades"
+            )}
+          </button>
+          {hasSessionReport ? (
+            <button
+              type="button"
+              className="btn-outline py-2.5 px-6"
+              onClick={() => setMainView("mon-analyse")}
+            >
+              Mon analyse
+            </button>
+          ) : null}
         </div>
 
         {error ? (
-          <p className="mt-4 text-sm text-red" role="alert">
+          <p className="mt-3 shrink-0 text-sm text-red" role="alert">
             {error}
           </p>
         ) : null}
 
         {hasSessionReport && analysis ? (
-          <section className="mt-12">
-            <h2 className="mb-4 text-sm font-semibold text-primary">Dernière analyse</h2>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div className="rounded-xl border border-border bg-card p-5">
+          <section className="mt-6 min-h-0 shrink-0">
+            <h2 className="mb-3 text-sm font-semibold text-primary">Dernière analyse</h2>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              <div className="rounded-xl border border-border bg-card p-4">
                 <p className="text-xs text-secondary">Score psychologique</p>
                 <p className={`mt-2 font-mono text-2xl font-bold ${psychScoreColor}`}>
                   {lastPsychScore ?? "--"}/100
                 </p>
               </div>
-              <div className="rounded-xl border border-border bg-card p-5">
+              <div className="rounded-xl border border-border bg-card p-4">
                 <p className="text-xs text-secondary">Win rate</p>
                 <p className="mt-2 font-mono text-2xl font-bold text-cyan">
                   {lastWinRate !== null ? `${lastWinRate.toFixed(1)}%` : "--"}
                 </p>
               </div>
-              <div className="rounded-xl border border-border bg-card p-5">
+              <div className="rounded-xl border border-border bg-card p-4">
                 <p className="text-xs text-secondary">PnL total</p>
                 <p
                   className={`mt-2 font-mono text-2xl font-bold ${
@@ -433,7 +488,7 @@ export default function DashboardClient() {
             </div>
           </section>
         ) : null}
-      </>
+      </div>
     );
   }
 
@@ -441,15 +496,21 @@ export default function DashboardClient() {
     <div className="h-screen overflow-hidden bg-background text-primary">
       <header className="h-14 shrink-0 border-b border-border bg-card">
         <div className="flex h-full items-center justify-between px-4">
-          <button
-            type="button"
-            onClick={() => router.push("/")}
-            className="flex items-center gap-2 text-left"
-          >
-            <LogoSvg />
-            <span className="font-semibold text-primary">AlphaTradeX</span>
-          </button>
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-1 items-center gap-6">
+            <button
+              type="button"
+              onClick={() => router.push("/")}
+              className="flex shrink-0 items-center gap-2 text-left"
+            >
+              <LogoSvg />
+              <span className="font-semibold text-primary">AlphaTradeX</span>
+            </button>
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green" aria-hidden />
+              <span className="text-xs text-secondary">IA active</span>
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
             <span className="rounded-md border border-[#2D6FFF40] bg-[#2D6FFF15] px-3 py-1 text-xs font-semibold text-blue">
               {planLabel}
             </span>
@@ -484,6 +545,12 @@ export default function DashboardClient() {
               />
             ) : null}
             <SidebarNavRow
+              icon={BookOpen}
+              label="Journal analyses"
+              active={mainView === "journal-analyses"}
+              onSelect={() => setMainView("journal-analyses")}
+            />
+            <SidebarNavRow
               icon={History}
               label="Historique"
               locked={historiqueLocked}
@@ -495,7 +562,7 @@ export default function DashboardClient() {
             <SectionLabel>Performance</SectionLabel>
             <SidebarNavRow
               icon={TrendingUp}
-              label="Évolution"
+              label="Évolution semaine"
               locked={evolutionLocked}
               lockPlanLabel="Premium"
               active={mainView === "evolution"}
@@ -503,7 +570,7 @@ export default function DashboardClient() {
             />
             <SidebarNavRow
               icon={CalendarCheck}
-              label="Résumé hebdomadaire"
+              label="Résumé semaine"
               locked={resumeLocked}
               lockPlanLabel="Premium"
               active={mainView === "resume-hebdomadaire"}
@@ -544,6 +611,20 @@ export default function DashboardClient() {
               onSelect={() => setMainView("acces-api")}
             />
 
+            <SectionLabel>AIDE</SectionLabel>
+            <SidebarNavRow
+              icon={LifeBuoy}
+              label="Support"
+              active={mainView === "support"}
+              onSelect={() => {
+                if (isPro) {
+                  window.open("/help", "_blank", "noopener,noreferrer");
+                } else {
+                  setMainView("support");
+                }
+              }}
+            />
+
             <SectionLabel>Compte</SectionLabel>
             <SidebarNavRow
               icon={CreditCard}
@@ -560,25 +641,28 @@ export default function DashboardClient() {
           </div>
 
           {showQuotaCard ? (
-            <div className="mt-auto shrink-0 rounded-xl border border-border bg-background p-4 pt-6">
-              <p className="mb-2 text-xs text-secondary">Analyses utilisées</p>
-              <div className="h-1 w-full rounded-full bg-border">
-                <div
-                  className="h-full rounded-full bg-[#2D6FFF]"
-                  style={{ width: `${progressWidth}%` }}
-                />
-              </div>
-              <div className="mt-2 flex justify-between gap-2">
+            <div className="mt-auto shrink-0 rounded-xl border border-border bg-[#0A0A0F] p-4">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs text-secondary">Analyses restantes</span>
                 <span className="font-mono text-xs text-primary">
                   {analysesUsed}/{analysesLimit}
                 </span>
-                <span className="text-xs text-secondary">{cycleLabel}</span>
+              </div>
+              <div className="h-1 w-full bg-[#1E2035]">
+                <div
+                  className="h-full bg-[#2D6FFF]"
+                  style={{ width: `${progressWidth}%` }}
+                />
               </div>
             </div>
           ) : null}
         </aside>
 
-        <main className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-[#0A0A0F] p-8">
+        <main
+          className={`flex min-h-0 flex-1 flex-col bg-[#0A0A0F] p-6 ${
+            mainView === "nouvelle-analyse" ? "overflow-hidden" : "overflow-y-auto"
+          }`}
+        >
           <div className="flex shrink-0 flex-col gap-4">
             {showSuccessBanner ? (
               <div
@@ -610,9 +694,7 @@ export default function DashboardClient() {
             ) : null}
           </div>
 
-          <div
-            className={`flex min-h-0 flex-1 flex-col ${mainView === "nouvelle-analyse" ? "space-y-6" : ""}`}
-          >
+          <div className="flex min-h-0 flex-1 flex-col">
             {mainView !== "nouvelle-analyse" && mainView !== "mon-analyse" ? (
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
                 {renderMainContent()}
