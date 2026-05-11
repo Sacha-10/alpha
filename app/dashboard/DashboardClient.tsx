@@ -701,7 +701,7 @@ export default function DashboardClient() {
       </header>
 
       {mobileMenuOpen ? (
-        <div className="flex max-h-[calc(100vh-3.5rem)] shrink-0 flex-col overflow-hidden border-b border-border bg-card md:hidden">
+        <div className="flex max-h-[calc(100vh-3.5rem)] shrink-0 flex-col overflow-hidden border-b border-border bg-card md:hidden" style={{ backgroundColor: '#12121A' }}>
           <div className="shrink-0 space-y-3 px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
@@ -729,7 +729,7 @@ export default function DashboardClient() {
                 closeMobileMenu();
                 void signOut();
               }}
-              className="w-full px-4 py-3 text-left text-sm font-normal text-secondary hover:text-primary"
+              className="w-full px-4 py-2.5 text-left text-sm font-normal text-secondary hover:text-primary"
             >
               Déconnexion
             </button>
