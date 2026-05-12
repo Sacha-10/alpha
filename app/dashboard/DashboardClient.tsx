@@ -729,7 +729,7 @@ export default function DashboardClient() {
                 closeMobileMenu();
                 void signOut();
               }}
-              className="flex w-full cursor-pointer items-center rounded-lg py-2.5 text-xs text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
+              className="mt-3 flex w-full cursor-pointer items-center rounded-lg py-2.5 text-xs text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
             >
               Déconnexion
             </button>
