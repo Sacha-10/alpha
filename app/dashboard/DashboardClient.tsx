@@ -722,14 +722,14 @@ export default function DashboardClient() {
             {renderSidebarAccordion(closeMobileMenu)}
           </div>
           <div className="shrink-0 px-4 py-3" style={{ backgroundColor: '#12121A' }}>
-            <div className="h-px bg-border" aria-hidden />
+            <div className="mb-3 h-px bg-border" aria-hidden />
             <button
               type="button"
               onClick={() => {
                 closeMobileMenu();
                 void signOut();
               }}
-              className="mt-3 flex w-full cursor-pointer items-center rounded-lg py-2.5 text-xs text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
+              className="flex w-full cursor-pointer items-center rounded-lg py-2.5 text-xs text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
             >
               Déconnexion
             </button>
