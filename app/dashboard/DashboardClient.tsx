@@ -721,8 +721,8 @@ export default function DashboardClient() {
           <div className="min-h-0 flex-1 overflow-y-auto px-4">
             {renderSidebarAccordion(closeMobileMenu)}
           </div>
-          <div className="shrink-0 px-4 py-3" style={{ backgroundColor: '#12121A' }}>
-            <div className="mb-3 h-px bg-border" aria-hidden />
+          <div className="shrink-0 px-4 pt-2.5" style={{ backgroundColor: '#12121A' }}>
+            <div className="h-px bg-border" aria-hidden />
             <button
               type="button"
               onClick={() => {
