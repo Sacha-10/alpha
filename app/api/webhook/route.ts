@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { resend } from '@/lib/resend';
+import { getConfirmationPaiementHTML } from '@/lib/emails/confirmationPaiement';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -81,6 +83,22 @@ export async function POST(req: NextRequest) {
       if (updateError) {
         console.error('[webhook] ERREUR Supabase update:', JSON.stringify(updateError))
       }
+
+      // Envoi email confirmation
+      const prenom = session.customer_details?.name?.split(' ')[0] || 'Trader';
+      const renewalDate = new Date(subscription.current_period_end * 1000).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+
+      await resend.emails.send({
+        from: 'AlphaTradeX <contact@alphatradex.ai>',
+        to: session.customer_details?.email || '',
+        subject: `${prenom}, votre accès AlphaTradeX est activé.`,
+        html: getConfirmationPaiementHTML({
+          prenom,
+          plan: planName,
+          analysesLimit: parseInt(analysesLimit),
+          renewalDate,
+        }),
+      });
 
       // Persist plan info in subscription metadata so the
       // customer.subscription.updated handler can read it
