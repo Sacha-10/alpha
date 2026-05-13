@@ -25,7 +25,12 @@ export function getConfirmationPaiementHTML({
       <td align="center">
         <table width="560" cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;">
 
-          <img src="https://alphatradex.ai/logo.png" width="44" height="44" alt="AlphaTradeX" style="border-radius:8px;display:block;"/>
+          <!-- LOGO -->
+          <tr>
+            <td align="center" style="padding-top:40px;padding-bottom:40px;">
+              <img src="https://alphatradex.ai/logo.png" width="44" height="44" alt="AlphaTradeX" style="border-radius:8px;"/>
+            </td>
+          </tr>
 
           <!-- LIGNE BLEUE -->
           <tr>
