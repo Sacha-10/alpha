@@ -10,7 +10,7 @@ export function getConfirmationPaiementHTML({
   renewalDate: string;
 }) {
   const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
-  const analysesText = analysesLimit >= 999999 ? 'Illimitées' : `${analysesLimit} par mois`;
+  const analysesText = analysesLimit >= 999999 ? 'Illimitées' : `${analysesLimit}/mois`;
 
   return `<!DOCTYPE html>
 <html lang="fr">
@@ -25,13 +25,7 @@ export function getConfirmationPaiementHTML({
       <td align="center">
         <table width="560" cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;">
 
-          <svg width="44" height="44" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" style="border-radius:8px;">
-  <rect width="600" height="600" rx="125" ry="125" fill="#0A0A0F"/>
-  <svg x="75" y="75" width="450" height="450" viewBox="0 0 24 24" fill="#0A0A0F" stroke="#2D6FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-    <polyline points="16 7 22 7 22 13"/>
-  </svg>
-</svg>
+          <img src="https://alphatradex.ai/logo.png" width="44" height="44" alt="AlphaTradeX" style="border-radius:8px;display:block;"/>
 
           <!-- LIGNE BLEUE -->
           <tr>
