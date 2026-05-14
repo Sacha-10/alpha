@@ -7,7 +7,6 @@ import Stripe from 'stripe'
 export const maxDuration = 60
 
 const PLAN_LIMITS: Record<string, number> = {
-  starter: 4,
   pro: 4,
   premium: 24,
   elite: 999999,
@@ -67,6 +66,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    if (userData.subscription_status !== 'active') {
+      return NextResponse.json(
+        { error: 'Un abonnement actif est requis pour accéder aux analyses.', upgrade: true },
+        { status: 403 }
+      )
+    }
+
     // Reset basé sur la période de facturation Stripe (current_period_start)
     const resetDate = new Date(userData.analyses_reset_date)
     let periodStart: Date | null = null
@@ -123,6 +129,7 @@ export async function POST(req: NextRequest) {
       .insert({
         user_id: user.id,
         report,
+        plan: userData.subscription_plan,
         created_at: new Date().toISOString()
       })
 
