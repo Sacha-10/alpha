@@ -1,23 +1,9 @@
-export function getConfirmationPaiementHTML({
-  prenom,
-  plan,
-  analysesLimit,
-  renewalDate,
-}: {
-  prenom: string;
-  plan: string;
-  analysesLimit: number;
-  renewalDate: string;
-}) {
-  const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
-  const analysesText = analysesLimit >= 999999 ? 'Illimitées' : `${analysesLimit}/mois`;
-
-  return `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AlphaTradeX</title>
+  <title>Preview — Email Confirmation</title>
 </head>
 <body style="margin:0;padding:0;background-color:#0A0A0F;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0A0A0F;padding:48px 16px;">
@@ -49,8 +35,8 @@ export function getConfirmationPaiementHTML({
           <!-- TITRE -->
           <tr>
             <td style="padding-bottom:32px;">
-              <div style="color:#F0F4FF;font-size:28px;font-weight:700;line-height:1.25;letter-spacing:-0.01em;">${prenom}</div>
-              <div style="color:#F0F4FF;font-size:28px;font-weight:700;line-height:1.25;letter-spacing:-0.01em;margin-top:8px;">Votre statut <span style="color:#2D6FFF;">${planLabel}</span> est activé.</div>
+              <div style="color:#F0F4FF;font-size:28px;font-weight:700;line-height:1.25;letter-spacing:-0.01em;">Sacha</div>
+              <div style="color:#F0F4FF;font-size:28px;font-weight:700;line-height:1.25;letter-spacing:-0.01em;margin-top:8px;">Votre statut <span style="color:#2D6FFF;">Pro</span> est activé.</div>
             </td>
           </tr>
 
@@ -69,19 +55,19 @@ export function getConfirmationPaiementHTML({
                 <tr>
                   <td style="padding-bottom:20px;border-bottom:1px solid #1E2035;">
                     <div style="color:#8892AA;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;">Plan</div>
-                    <div style="color:#F0F4FF;font-size:15px;font-weight:600;">${planLabel}</div>
+                    <div style="color:#F0F4FF;font-size:15px;font-weight:600;">Pro</div>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding-top:20px;padding-bottom:20px;border-bottom:1px solid #1E2035;">
                     <div style="color:#8892AA;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;">Analyses disponibles</div>
-                    <div style="color:#F0F4FF;font-size:15px;font-weight:600;">${analysesText}</div>
+                    <div style="color:#F0F4FF;font-size:15px;font-weight:600;">4/mois</div>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding-top:20px;">
                     <div style="color:#8892AA;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;">Prochain cycle</div>
-                    <div style="color:#F0F4FF;font-size:15px;font-weight:600;">${renewalDate}</div>
+                    <div style="color:#F0F4FF;font-size:15px;font-weight:600;">13 juin 2026</div>
                   </td>
                 </tr>
               </table>
@@ -121,5 +107,4 @@ export function getConfirmationPaiementHTML({
     </tr>
   </table>
 </body>
-</html>`;
-}
+</html>
