@@ -12,6 +12,7 @@ import {
   useState,
 } from "react";
 import TradeReport from "@/components/TradeReport";
+import TradeJournal from "@/components/TradeJournal";
 import UploadZone from "@/components/UploadZone";
 import type { AiAnalysisResult } from "@/lib/tradingAnalysisTypes";
 import {
@@ -112,6 +113,7 @@ export default function DashboardClient() {
   const [error, setError] = useState<string | null>(null);
 
   const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string>('');
   const [analysesResetDate, setAnalysesResetDate] = useState<string | null>(null);
 
   const [showSuccessBanner, setShowSuccessBanner] = useState(paymentSuccess || checkout === "success");
@@ -161,6 +163,7 @@ export default function DashboardClient() {
   const fetchUserData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
+    setUserId(user.id);
     const { data } = await supabase
       .from("users")
       .select("subscription_plan, analyses_used, analyses_limit, analyses_reset_date")
@@ -546,7 +549,7 @@ export default function DashboardClient() {
       return <EmptyFeaturePage icon={History} title="Historique" />;
     }
     if (mainView === "journal-analyses") {
-      return <div />;
+      return <TradeJournal userId={userId} plan={subscriptionPlan} />;
     }
     if (mainView === "evolution") {
       return <EmptyFeaturePage icon={TrendingUp} title="Évolution semaine" />;
