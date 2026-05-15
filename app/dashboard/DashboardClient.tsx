@@ -546,7 +546,7 @@ export default function DashboardClient() {
       return <EmptyFeaturePage icon={History} title="Historique" />;
     }
     if (mainView === "journal-analyses") {
-      return <EmptyFeaturePage icon={ScrollText} title="Journal analyses" />;
+      return <div />;
     }
     if (mainView === "evolution") {
       return <EmptyFeaturePage icon={TrendingUp} title="Évolution semaine" />;

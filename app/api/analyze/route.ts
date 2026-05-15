@@ -125,14 +125,33 @@ export async function POST(req: NextRequest) {
       })
       .eq('id', user.id)
 
-    await supabase.from('analyses')
+    const { data: analysisData } = await supabase.from('analyses')
       .insert({
         user_id: user.id,
         report,
-        trades,
         plan: userData.subscription_plan,
         created_at: new Date().toISOString()
       })
+      .select('id')
+      .single()
+
+    if (analysisData?.id && trades?.length) {
+      const tradesToInsert = trades.map((trade: any) => ({
+        user_id: user.id,
+        analysis_id: analysisData.id,
+        opened_at: trade.openedAt ? new Date(trade.openedAt).toISOString() : null,
+        closed_at: trade.closedAt ? new Date(trade.closedAt).toISOString() : null,
+        symbol: trade.symbol ?? null,
+        side: trade.side ?? null,
+        entry: trade.entry ?? null,
+        exit: trade.exit ?? null,
+        volume: trade.volume ?? null,
+        profit: trade.profit ?? null,
+        created_at: new Date().toISOString()
+      }))
+
+      await supabase.from('trades').insert(tradesToInsert)
+    }
 
     return NextResponse.json({
       ...report,
