@@ -129,6 +129,7 @@ export async function POST(req: NextRequest) {
       .insert({
         user_id: user.id,
         report,
+        trades,
         plan: userData.subscription_plan,
         created_at: new Date().toISOString()
       })
