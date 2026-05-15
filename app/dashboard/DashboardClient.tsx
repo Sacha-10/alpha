@@ -751,7 +751,7 @@ export default function DashboardClient() {
 
         <main
           className={`flex min-h-0 flex-1 flex-col bg-[#0A0A0F] p-6 ${
-            mainView === "nouvelle-analyse" ? "overflow-hidden" : "overflow-y-auto"
+            mainView === "nouvelle-analyse" || mainView === "mon-analyse" || mainView === "journal-analyses" ? "overflow-y-auto" : "overflow-hidden"
           }`}
         >
           <div className="flex shrink-0 flex-col gap-4">
@@ -786,7 +786,7 @@ export default function DashboardClient() {
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col">
-            {mainView !== "nouvelle-analyse" && mainView !== "mon-analyse" ? (
+            {mainView !== "nouvelle-analyse" && mainView !== "mon-analyse" && mainView !== "journal-analyses" ? (
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
                 {renderMainContent()}
               </div>
