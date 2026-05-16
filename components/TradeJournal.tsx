@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
 import { detectAndParse } from '@/lib/parseCSV'
-import { Upload, ChevronLeft, ChevronRight, Download, CheckCircle2 } from 'lucide-react'
+import { Upload, ChevronLeft, ChevronRight, Download, X } from 'lucide-react'
 
 type TradeRow = {
   id: string
@@ -98,7 +98,6 @@ export default function TradeJournal({ userId, plan }: Props) {
   const [dateFrom, setDateFrom] = useState(sevenDaysAgoStr)
   const [dateTo, setDateTo] = useState(todayStr)
   const [tooltip, setTooltip] = useState<{ x: number; y: number; date: string; pnl: number } | null>(null)
-  const [dragging, setDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
 
@@ -119,6 +118,18 @@ export default function TradeJournal({ userId, plan }: Props) {
   }, [userId, plan])
 
   useEffect(() => { loadTrades() }, [loadTrades])
+
+  useEffect(() => {
+    if (!importSuccess) return
+    const t = setTimeout(() => setImportSuccess(null), 10000)
+    return () => clearTimeout(t)
+  }, [importSuccess])
+
+  useEffect(() => {
+    if (!importError) return
+    const t = setTimeout(() => setImportError(null), 10000)
+    return () => clearTimeout(t)
+  }, [importError])
 
   const handleFile = async (file: File) => {
     if (!file.name.endsWith('.csv')) {
@@ -144,13 +155,6 @@ export default function TradeJournal({ userId, plan }: Props) {
     } finally {
       setImporting(false)
     }
-  }
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setDragging(false)
-    const file = e.dataTransfer.files[0]
-    if (file) handleFile(file)
   }
 
   const filteredTrades = trades.filter(t => {
@@ -339,37 +343,33 @@ export default function TradeJournal({ userId, plan }: Props) {
             <p className="text-sm text-secondary mt-1">Du {firstTradeDate} au {lastTradeDate}</p>
           )}
         </div>
-        <button onClick={exportCSV} className="btn-outline flex items-center gap-2 text-sm px-4 py-2">
-          <Download className="h-4 w-4" />
-          Exporter
-        </button>
+        <div className="flex items-center gap-2">
+          <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
+          <button onClick={() => fileInputRef.current?.click()} className="btn-outline flex items-center gap-2 text-sm px-4 py-2">
+            <Upload className="h-4 w-4" />
+            Importer
+          </button>
+          <span className="text-secondary">·</span>
+          <button onClick={exportCSV} className="btn-outline flex items-center gap-2 text-sm px-4 py-2">
+            <Download className="h-4 w-4" />
+            Exporter
+          </button>
+        </div>
       </div>
 
-      {/* IMPORT CSV */}
-      <div
-        className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer mb-6 transition-colors ${dragging ? 'border-blue bg-blue/5' : importSuccess ? 'border-green/50 bg-green/5' : 'border-border hover:border-blue/50'}`}
-        onDragOver={e => { e.preventDefault(); setDragging(true) }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
-        {importing ? (
-          <p className="text-secondary text-sm">Import en cours...</p>
-        ) : importSuccess ? (
-          <div className="flex items-center justify-center gap-2 text-green text-sm">
-            <CheckCircle2 className="h-4 w-4" />
-            {importSuccess}
-          </div>
-        ) : (
-          <>
-            <Upload className="h-6 w-6 text-secondary mx-auto mb-2" />
-            <p className="text-primary text-sm font-medium">Importez votre historique de trades</p>
-            <p className="text-secondary text-xs mt-1">MT4 · MT5 · Binance · Bybit · TradingView · FTMO · FundedNext</p>
-          </>
-        )}
-        {importError && <p className="text-red text-xs mt-2">{importError}</p>}
-      </div>
+      {/* TOASTS */}
+      {importError && (
+        <div className="flex items-center justify-between gap-3 bg-red/10 border border-red/30 text-red rounded-lg px-4 py-3 text-sm mb-6">
+          <span>{importError}</span>
+          <button onClick={() => setImportError(null)} className="shrink-0 hover:opacity-70 transition-opacity"><X className="h-4 w-4" /></button>
+        </div>
+      )}
+      {importSuccess && (
+        <div className="flex items-center justify-between gap-3 bg-green/10 border border-green/30 text-green rounded-lg px-4 py-3 text-sm mb-6">
+          <span>{importSuccess}</span>
+          <button onClick={() => setImportSuccess(null)} className="shrink-0 hover:opacity-70 transition-opacity"><X className="h-4 w-4" /></button>
+        </div>
+      )}
 
       {/* TOGGLE VUE + DATE RANGE */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -391,85 +391,6 @@ export default function TradeJournal({ userId, plan }: Props) {
         <div className="card rounded p-8 text-center text-secondary">Chargement...</div>
       ) : (
         <>
-          {/* COURBE PNL CUMULÉ */}
-          {cumulPoints.length > 1 && (
-            <div className="card rounded p-4 mb-6 relative">
-              <p className="text-xs text-secondary uppercase tracking-wide mb-3">PnL cumulé</p>
-              <svg ref={svgRef} width="100%" height="120" style={{ overflow: 'visible' }}
-                onMouseLeave={() => setTooltip(null)}
-                onMouseMove={e => {
-                  if (!svgRef.current || cumulPoints.length < 2) return
-                  const rect = svgRef.current.getBoundingClientRect()
-                  const x = e.clientX - rect.left
-                  const w = rect.width
-                  const idx = Math.round((x / w) * (cumulPoints.length - 1))
-                  const pt = cumulPoints[Math.max(0, Math.min(idx, cumulPoints.length - 1))]
-                  const minP = Math.min(...cumulPoints.map(p => p.cumul))
-                  const maxP = Math.max(...cumulPoints.map(p => p.cumul))
-                  const range = maxP - minP || 1
-                  const py = 10 + ((maxP - pt.cumul) / range) * 100
-                  setTooltip({ x: (idx / (cumulPoints.length - 1)) * w, y: py, date: pt.date, pnl: pt.cumul })
-                }}
-              >
-                {(() => {
-                  const minP = Math.min(...cumulPoints.map(p => p.cumul))
-                  const maxP = Math.max(...cumulPoints.map(p => p.cumul))
-                  const range = maxP - minP || 1
-                  const n = cumulPoints.length
-                  const pts = cumulPoints.map((p, i) => `${(i / (n - 1)) * 100}%,${10 + ((maxP - p.cumul) / range) * 100}`)
-                  const polyline = pts.join(' ')
-                  const area = `0,110 ${polyline} 100%,110`
-                  return (
-                    <>
-                      <defs>
-                        <linearGradient id="pnlGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#2D6FFF" stopOpacity="0.2" />
-                          <stop offset="100%" stopColor="#2D6FFF" stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      <polygon points={area} fill="url(#pnlGrad)" />
-                      <polyline points={polyline} fill="none" stroke="#2D6FFF" strokeWidth="2" strokeLinejoin="round" />
-                      {tooltip && (
-                        <>
-                          <circle cx={`${(cumulPoints.findIndex(p => p.date === tooltip.date) / (n-1)) * 100}%`} cy={tooltip.y} r="4" fill="#2D6FFF" />
-                          <line x1={`${(cumulPoints.findIndex(p => p.date === tooltip.date) / (n-1)) * 100}%`} y1="0" x2={`${(cumulPoints.findIndex(p => p.date === tooltip.date) / (n-1)) * 100}%`} y2="120" stroke="#2D6FFF" strokeWidth="1" strokeDasharray="4" />
-                        </>
-                      )}
-                    </>
-                  )
-                })()}
-              </svg>
-              {tooltip && (
-                <div className="absolute pointer-events-none bg-card border border-border rounded px-3 py-2 text-xs text-primary" style={{ left: Math.min(tooltip.x, 200), top: tooltip.y - 40, transform: 'translateX(-50%)' }}>
-                  <p className="text-secondary">{tooltip.date}</p>
-                  <p className={`font-bold ${tooltip.pnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(tooltip.pnl)}</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* STATISTIQUES */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="card rounded p-4">
-              <p className="text-xs text-secondary uppercase tracking-wide mb-1">PnL total</p>
-              <p className={`text-2xl font-bold ${totalPnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(totalPnl)}</p>
-            </div>
-            <div className="card rounded p-4">
-              <p className="text-xs text-secondary uppercase tracking-wide mb-1">Win rate</p>
-              <p className="text-2xl font-bold text-primary">{winRate}%</p>
-            </div>
-            <div className="card rounded p-4">
-              <p className="text-xs text-secondary uppercase tracking-wide mb-1">Meilleur jour</p>
-              <p className="text-lg font-bold text-green">{bestDay ? formatPnl(bestDay.pnl) : '--'}</p>
-              {bestDay && <p className="text-xs text-secondary mt-1">{bestDay.date}</p>}
-            </div>
-            <div className="card rounded p-4">
-              <p className="text-xs text-secondary uppercase tracking-wide mb-1">Pire jour</p>
-              <p className="text-lg font-bold text-red">{worstDay ? formatPnl(worstDay.pnl) : '--'}</p>
-              {worstDay && <p className="text-xs text-secondary mt-1">{worstDay.date}</p>}
-            </div>
-          </div>
-
           {/* VUE JOUR — CALENDRIER */}
           {view === 'day' && (
             <div className="card rounded p-4 mb-6">
@@ -593,6 +514,85 @@ export default function TradeJournal({ userId, plan }: Props) {
               )}
             </div>
           )}
+
+          {/* COURBE PNL CUMULÉ */}
+          {cumulPoints.length > 1 && (
+            <div className="card rounded p-4 mb-6 relative">
+              <p className="text-xs text-secondary uppercase tracking-wide mb-3">PnL cumulé</p>
+              <svg ref={svgRef} width="100%" height="120" style={{ overflow: 'visible' }}
+                onMouseLeave={() => setTooltip(null)}
+                onMouseMove={e => {
+                  if (!svgRef.current || cumulPoints.length < 2) return
+                  const rect = svgRef.current.getBoundingClientRect()
+                  const x = e.clientX - rect.left
+                  const w = rect.width
+                  const idx = Math.round((x / w) * (cumulPoints.length - 1))
+                  const pt = cumulPoints[Math.max(0, Math.min(idx, cumulPoints.length - 1))]
+                  const minP = Math.min(...cumulPoints.map(p => p.cumul))
+                  const maxP = Math.max(...cumulPoints.map(p => p.cumul))
+                  const range = maxP - minP || 1
+                  const py = 10 + ((maxP - pt.cumul) / range) * 100
+                  setTooltip({ x: (idx / (cumulPoints.length - 1)) * w, y: py, date: pt.date, pnl: pt.cumul })
+                }}
+              >
+                {(() => {
+                  const minP = Math.min(...cumulPoints.map(p => p.cumul))
+                  const maxP = Math.max(...cumulPoints.map(p => p.cumul))
+                  const range = maxP - minP || 1
+                  const n = cumulPoints.length
+                  const pts = cumulPoints.map((p, i) => `${(i / (n - 1)) * 100}%,${10 + ((maxP - p.cumul) / range) * 100}`)
+                  const polyline = pts.join(' ')
+                  const area = `0,110 ${polyline} 100%,110`
+                  return (
+                    <>
+                      <defs>
+                        <linearGradient id="pnlGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#2D6FFF" stopOpacity="0.2" />
+                          <stop offset="100%" stopColor="#2D6FFF" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <polygon points={area} fill="url(#pnlGrad)" />
+                      <polyline points={polyline} fill="none" stroke="#2D6FFF" strokeWidth="2" strokeLinejoin="round" />
+                      {tooltip && (
+                        <>
+                          <circle cx={`${(cumulPoints.findIndex(p => p.date === tooltip.date) / (n-1)) * 100}%`} cy={tooltip.y} r="4" fill="#2D6FFF" />
+                          <line x1={`${(cumulPoints.findIndex(p => p.date === tooltip.date) / (n-1)) * 100}%`} y1="0" x2={`${(cumulPoints.findIndex(p => p.date === tooltip.date) / (n-1)) * 100}%`} y2="120" stroke="#2D6FFF" strokeWidth="1" strokeDasharray="4" />
+                        </>
+                      )}
+                    </>
+                  )
+                })()}
+              </svg>
+              {tooltip && (
+                <div className="absolute pointer-events-none bg-card border border-border rounded px-3 py-2 text-xs text-primary" style={{ left: Math.min(tooltip.x, 200), top: tooltip.y - 40, transform: 'translateX(-50%)' }}>
+                  <p className="text-secondary">{tooltip.date}</p>
+                  <p className={`font-bold ${tooltip.pnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(tooltip.pnl)}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* STATISTIQUES */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="card rounded p-4">
+              <p className="text-xs text-secondary uppercase tracking-wide mb-1">PnL total</p>
+              <p className={`text-2xl font-bold ${totalPnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(totalPnl)}</p>
+            </div>
+            <div className="card rounded p-4">
+              <p className="text-xs text-secondary uppercase tracking-wide mb-1">Win rate</p>
+              <p className="text-2xl font-bold text-primary">{winRate}%</p>
+            </div>
+            <div className="card rounded p-4">
+              <p className="text-xs text-secondary uppercase tracking-wide mb-1">Meilleur jour</p>
+              <p className="text-lg font-bold text-green">{bestDay ? formatPnl(bestDay.pnl) : '--'}</p>
+              {bestDay && <p className="text-xs text-secondary mt-1">{bestDay.date}</p>}
+            </div>
+            <div className="card rounded p-4">
+              <p className="text-xs text-secondary uppercase tracking-wide mb-1">Pire jour</p>
+              <p className="text-lg font-bold text-red">{worstDay ? formatPnl(worstDay.pnl) : '--'}</p>
+              {worstDay && <p className="text-xs text-secondary mt-1">{worstDay.date}</p>}
+            </div>
+          </div>
         </>
       )}
     </div>
