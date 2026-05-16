@@ -334,7 +334,7 @@ export default function TradeJournal({ userId, plan }: Props) {
       {/* EN-TÊTE */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-primary">Journal de vos analyses</h1>
+          <h1 className="text-2xl font-bold text-primary">Journal de trades</h1>
           {firstTradeDate && lastTradeDate && (
             <p className="text-sm text-secondary mt-1">Du {firstTradeDate} au {lastTradeDate}</p>
           )}

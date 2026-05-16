@@ -410,7 +410,7 @@ export default function DashboardClient() {
             />
             <SidebarNavRow
               icon={ScrollText}
-              label="Journal analyses"
+              label="Journal de trades"
               active={mainView === "journal-analyses"}
               onSelect={() => setMainView("journal-analyses")}
               onAfterNavigate={closeMobile}
