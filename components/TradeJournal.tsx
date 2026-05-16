@@ -268,22 +268,23 @@ export default function TradeJournal({ userId, plan }: Props) {
   const lastDay = new Date(currentMonth.year, currentMonth.month + 1, 0)
   let startDow = firstDay.getDay()
   startDow = startDow === 0 ? 6 : startDow - 1
+  const localStr = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
   const calDays: { date: string; inMonth: boolean }[] = []
   for (let i = startDow - 1; i >= 0; i--) {
     const d = new Date(firstDay)
     d.setDate(d.getDate() - i - 1)
-    calDays.push({ date: d.toISOString().split('T')[0], inMonth: false })
+    calDays.push({ date: localStr(d), inMonth: false })
   }
   for (let i = 1; i <= lastDay.getDate(); i++) {
     const d = new Date(currentMonth.year, currentMonth.month, i)
-    calDays.push({ date: d.toISOString().split('T')[0], inMonth: true })
+    calDays.push({ date: localStr(d), inMonth: true })
   }
   const remaining = 7 - (calDays.length % 7)
   if (remaining < 7) {
     for (let i = 1; i <= remaining; i++) {
       const d = new Date(lastDay)
       d.setDate(d.getDate() + i)
-      calDays.push({ date: d.toISOString().split('T')[0], inMonth: false })
+      calDays.push({ date: localStr(d), inMonth: false })
     }
   }
 
@@ -401,13 +402,13 @@ export default function TradeJournal({ userId, plan }: Props) {
 
       {/* BARRE DE CONTRÔLES — Mobile */}
       <div ref={mobileDropdownRef} className="flex md:hidden items-center justify-between gap-2 mb-6 relative">
-        <div>
+        <div className="flex items-center">
           <button onClick={() => setMobileDropdownOpen(o => !o)} className="text-sm text-primary font-medium">
             {view === 'day' ? 'Jour' : view === 'week' ? 'Semaine' : view === 'month' ? 'Mois' : 'Année'} ›
           </button>
         </div>
         {mobileDropdownOpen && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-card p-4 z-50 flex items-center justify-center gap-2">
+          <div className="absolute top-0 left-0 right-0 bg-card border border-border rounded-xl z-50 flex items-center justify-center gap-2 px-3 py-2">
             {(['day','week','month','year'] as const).flatMap((v, i) => [
               ...(i > 0 ? [<span key={`sep-${v}`} className="text-secondary">·</span>] : []),
               <button key={v} onClick={() => { setView(v); setMobileDropdownOpen(false) }} className={`text-sm ${view === v ? 'text-primary font-semibold' : 'text-secondary'}`}>
@@ -416,10 +417,10 @@ export default function TradeJournal({ userId, plan }: Props) {
             ])}
           </div>
         )}
-        <div className="flex items-center gap-1">
-          <input type="date" value={dateFrom} min="2026-01-01" max={dateTo} onChange={e => setDateFrom(e.target.value)} className="bg-transparent border-none text-secondary text-xs focus:text-primary outline-none cursor-pointer" />
-          <span className="text-secondary text-xs">→</span>
-          <input type="date" value={dateTo} min={dateFrom} max={`${new Date().getFullYear()}-12-31`} onChange={e => setDateTo(e.target.value)} className="bg-transparent border-none text-secondary text-xs focus:text-primary outline-none cursor-pointer" />
+        <div className="flex items-center gap-2">
+          <input type="date" value={dateFrom} min="2026-01-01" max={dateTo} onChange={e => setDateFrom(e.target.value)} className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer" />
+          <span className="text-secondary">→</span>
+          <input type="date" value={dateTo} min={dateFrom} max={`${new Date().getFullYear()}-12-31`} onChange={e => setDateTo(e.target.value)} className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer" />
         </div>
         <div className="flex items-center gap-2">
           <Upload className="h-4 w-4 text-secondary hover:text-primary cursor-pointer" onClick={() => fileInputRef.current?.click()} />
