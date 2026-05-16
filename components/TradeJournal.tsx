@@ -100,6 +100,8 @@ export default function TradeJournal({ userId, plan }: Props) {
   const [tooltip, setTooltip] = useState<{ x: number; y: number; date: string; pnl: number } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false)
+  const mobileDropdownRef = useRef<HTMLDivElement>(null)
 
   const minNav = { year: 2026, month: 0 }
   const maxNav = { year: new Date().getFullYear(), month: 11 }
@@ -130,6 +132,17 @@ export default function TradeJournal({ userId, plan }: Props) {
     const t = setTimeout(() => setImportError(null), 10000)
     return () => clearTimeout(t)
   }, [importError])
+
+  useEffect(() => {
+    if (!mobileDropdownOpen) return
+    const handler = (e: MouseEvent) => {
+      if (mobileDropdownRef.current && !mobileDropdownRef.current.contains(e.target as Node)) {
+        setMobileDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [mobileDropdownOpen])
 
   const handleFile = async (file: File) => {
     if (!file.name.endsWith('.csv')) {
@@ -336,25 +349,12 @@ export default function TradeJournal({ userId, plan }: Props) {
     <div className="w-full">
 
       {/* EN-TÊTE */}
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-primary">Journal de trades</h1>
-          {firstTradeDate && lastTradeDate && (
-            <p className="text-sm text-secondary mt-1">Du {firstTradeDate} au {lastTradeDate}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
-          <button onClick={() => fileInputRef.current?.click()} className="btn-outline flex items-center gap-2 text-sm px-4 py-2">
-            <Upload className="h-4 w-4" />
-            Importer
-          </button>
-          <span className="text-secondary">·</span>
-          <button onClick={exportCSV} className="btn-outline flex items-center gap-2 text-sm px-4 py-2">
-            <Download className="h-4 w-4" />
-            Exporter
-          </button>
-        </div>
+      <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-primary">Journal de trades</h1>
+        {firstTradeDate && lastTradeDate && (
+          <p className="text-sm text-secondary mt-1">Du {firstTradeDate} au {lastTradeDate}</p>
+        )}
       </div>
 
       {/* TOASTS */}
@@ -371,19 +371,60 @@ export default function TradeJournal({ userId, plan }: Props) {
         </div>
       )}
 
-      {/* TOGGLE VUE + DATE RANGE */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1">
-          {(['day','week','month','year'] as const).map(v => (
-            <button key={v} onClick={() => setView(v)} className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${view === v ? 'bg-blue text-primary' : 'text-secondary hover:text-primary'}`}>
+      {/* BARRE DE CONTRÔLES — Desktop */}
+      <div className="hidden md:flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          {(['day','week','month','year'] as const).flatMap((v, i) => [
+            ...(i > 0 ? [<span key={`sep-${v}`} className="text-secondary mx-2">·</span>] : []),
+            <button key={v} onClick={() => setView(v)} className={`text-sm transition-colors ${view === v ? 'text-primary font-semibold' : 'text-secondary hover:text-primary'}`}>
               {v === 'day' ? 'Jour' : v === 'week' ? 'Semaine' : v === 'month' ? 'Mois' : 'Année'}
             </button>
-          ))}
+          ])}
         </div>
-        <div className="flex items-center gap-2 text-sm">
-          <input type="date" value={dateFrom} min="2026-01-01" max={dateTo} onChange={e => setDateFrom(e.target.value)} className="bg-card border border-border rounded-lg px-3 py-2 text-primary text-sm" />
+        <div className="flex items-center gap-2">
+          <input type="date" value={dateFrom} min="2026-01-01" max={dateTo} onChange={e => setDateFrom(e.target.value)} className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer" />
           <span className="text-secondary">→</span>
-          <input type="date" value={dateTo} min={dateFrom} max={`${new Date().getFullYear()}-12-31`} onChange={e => setDateTo(e.target.value)} className="bg-card border border-border rounded-lg px-3 py-2 text-primary text-sm" />
+          <input type="date" value={dateTo} min={dateFrom} max={`${new Date().getFullYear()}-12-31`} onChange={e => setDateTo(e.target.value)} className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer" />
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={() => fileInputRef.current?.click()} className="btn-outline flex items-center gap-2 text-sm px-3 py-1.5">
+            <Upload className="h-4 w-4" />
+            Importer
+          </button>
+          <span className="text-secondary">·</span>
+          <button onClick={exportCSV} className="btn-outline flex items-center gap-2 text-sm px-3 py-1.5">
+            <Download className="h-4 w-4" />
+            Exporter
+          </button>
+        </div>
+      </div>
+
+      {/* BARRE DE CONTRÔLES — Mobile */}
+      <div ref={mobileDropdownRef} className="flex md:hidden items-center justify-between gap-2 mb-6 relative">
+        <div>
+          <button onClick={() => setMobileDropdownOpen(o => !o)} className="text-sm text-primary font-medium">
+            {view === 'day' ? 'Jour' : view === 'week' ? 'Semaine' : view === 'month' ? 'Mois' : 'Année'} ›
+          </button>
+        </div>
+        {mobileDropdownOpen && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-card p-4 z-50 flex items-center justify-center gap-2">
+            {(['day','week','month','year'] as const).flatMap((v, i) => [
+              ...(i > 0 ? [<span key={`sep-${v}`} className="text-secondary">·</span>] : []),
+              <button key={v} onClick={() => { setView(v); setMobileDropdownOpen(false) }} className={`text-sm ${view === v ? 'text-primary font-semibold' : 'text-secondary'}`}>
+                {v === 'day' ? 'Jour' : v === 'week' ? 'Semaine' : v === 'month' ? 'Mois' : 'Année'}
+              </button>
+            ])}
+          </div>
+        )}
+        <div className="flex items-center gap-1">
+          <input type="date" value={dateFrom} min="2026-01-01" max={dateTo} onChange={e => setDateFrom(e.target.value)} className="bg-transparent border-none text-secondary text-xs focus:text-primary outline-none cursor-pointer" />
+          <span className="text-secondary text-xs">→</span>
+          <input type="date" value={dateTo} min={dateFrom} max={`${new Date().getFullYear()}-12-31`} onChange={e => setDateTo(e.target.value)} className="bg-transparent border-none text-secondary text-xs focus:text-primary outline-none cursor-pointer" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Upload className="h-4 w-4 text-secondary hover:text-primary cursor-pointer" onClick={() => fileInputRef.current?.click()} />
+          <span className="text-secondary">·</span>
+          <Download className="h-4 w-4 text-secondary hover:text-primary cursor-pointer" onClick={exportCSV} />
         </div>
       </div>
 
