@@ -610,7 +610,7 @@ export default function DashboardClient() {
             <p className="text-primary text-sm font-medium">Importez votre historique de trades</p>
             <p className="text-secondary text-xs mt-1">MT4 · MT5 · Binance · Bybit · TradingView · FTMO · FundedNext</p>
           </div>
-          <div className="mt-4 w-full max-w-md">
+          <div className="mt-4 w-full max-w-md mx-auto">
           {hasSessionReport ? (
             <div className="grid grid-cols-2 gap-3">
               <button
