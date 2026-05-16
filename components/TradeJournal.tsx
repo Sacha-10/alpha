@@ -389,8 +389,6 @@ export default function TradeJournal({ userId, plan }: Props) {
 
       {loading ? (
         <div className="card rounded p-8 text-center text-secondary">Chargement...</div>
-      ) : trades.length === 0 ? (
-        <div className="card rounded p-8 text-center text-secondary">Aucun trade sur cette période. Importez votre historique CSV pour commencer.</div>
       ) : (
         <>
           {/* COURBE PNL CUMULÉ */}
