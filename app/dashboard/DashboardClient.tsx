@@ -578,11 +578,11 @@ export default function DashboardClient() {
 
     // nouvelle-analyse
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center">
-        <div className="w-full max-w-md text-center">
-          <h1 className="text-2xl font-bold text-primary">Analyser vos trades</h1>
-        </div>
-        <div className="mt-4 w-full max-w-md">
+      <div className="flex h-full w-full items-center justify-center">
+        <div className="w-full">
+          <div className="text-center mb-4">
+            <h1 className="text-2xl font-bold text-primary">Analyser vos trades</h1>
+          </div>
           <div
             key={uploadZoneKey}
             className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer mb-6 transition-colors ${dragging ? "border-blue bg-blue/5" : pendingFile ? "border-green/50 bg-green/5" : "border-border hover:border-blue/50"}`}
@@ -610,8 +610,7 @@ export default function DashboardClient() {
             <p className="text-primary text-sm font-medium">Importez votre historique de trades</p>
             <p className="text-secondary text-xs mt-1">MT4 · MT5 · Binance · Bybit · TradingView · FTMO · FundedNext</p>
           </div>
-        </div>
-        <div className="mt-4 w-full max-w-md">
+          <div>
           {hasSessionReport ? (
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -690,11 +689,12 @@ export default function DashboardClient() {
           )}
         </div>
 
-        {error ? (
-          <p className="mt-3 text-sm text-red" role="alert">
-            {error}
-          </p>
-        ) : null}
+          {error ? (
+            <p className="mt-3 text-sm text-red" role="alert">
+              {error}
+            </p>
+          ) : null}
+        </div>
       </div>
     );
   }
