@@ -585,7 +585,7 @@ export default function DashboardClient() {
         <div className="mt-4 w-full max-w-md">
           <div
             key={uploadZoneKey}
-            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${dragging ? "border-blue bg-blue/5" : pendingFile ? "border-green/50 bg-green/5" : "border-border hover:border-blue/50"}`}
+            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer mb-6 transition-colors ${dragging ? "border-blue bg-blue/5" : pendingFile ? "border-green/50 bg-green/5" : "border-border hover:border-blue/50"}`}
             onDragOver={e => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
             onDrop={e => {
