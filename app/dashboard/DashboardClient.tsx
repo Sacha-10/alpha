@@ -9,11 +9,11 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import TradeReport from "@/components/TradeReport";
 import TradeJournal from "@/components/TradeJournal";
-import UploadZone from "@/components/UploadZone";
 import type { AiAnalysisResult } from "@/lib/tradingAnalysisTypes";
 import {
   Bell,
@@ -30,6 +30,7 @@ import {
   ScrollText,
   Target,
   TrendingUp,
+  Upload,
   Webhook,
 } from "lucide-react";
 
@@ -132,6 +133,8 @@ export default function DashboardClient() {
     compte: false,
   });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // BUG 2 — Restore last report from sessionStorage on mount
   useEffect(() => {
@@ -400,7 +403,7 @@ export default function DashboardClient() {
           <>
             <SidebarNavRow
               icon={ScanLine}
-              label="Nouvelle analyse"
+              label="Analyser vos trades"
               active={mainView === "nouvelle-analyse"}
               onSelect={() => setMainView("nouvelle-analyse")}
               onAfterNavigate={closeMobile}
@@ -577,58 +580,114 @@ export default function DashboardClient() {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center">
         <div className="w-full max-w-md text-center">
-          <h1 className="text-2xl font-bold text-primary">Nouvelle analyse</h1>
-          <p className="mt-1 text-sm text-secondary">Importez votre historique CSV</p>
+          <h1 className="text-2xl font-bold text-primary">Analyser vos trades</h1>
         </div>
         <div className="mt-4 w-full max-w-md">
-          <UploadZone
+          <div
             key={uploadZoneKey}
-            loading={loading}
-            onFileChange={setPendingFile}
-          />
-        </div>
-        <div className="mt-4 flex flex-wrap justify-center gap-3">
-          <button
-            type="button"
-            className="btn-primary py-2.5 px-6 disabled:cursor-not-allowed disabled:opacity-40"
-            disabled={!pendingFile || loading}
-            onClick={() => {
-              if (pendingFile) void runAnalyze(pendingFile);
+            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${dragging ? "border-blue bg-blue/5" : pendingFile ? "border-green/50 bg-green/5" : "border-border hover:border-blue/50"}`}
+            onDragOver={e => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={e => {
+              e.preventDefault();
+              setDragging(false);
+              const file = e.dataTransfer.files[0];
+              if (file) setPendingFile(file);
             }}
+            onClick={() => fileInputRef.current?.click()}
           >
-            {loading ? (
-              <span className="flex items-center justify-center gap-3">
-                <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                  />
-                </svg>
-                L&apos;IA analyse vos trades...
-              </span>
-            ) : (
-              "Analyser mes trades"
-            )}
-          </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              className="hidden"
+              onChange={e => {
+                const f = e.target.files?.[0];
+                if (f) setPendingFile(f);
+              }}
+            />
+            <Upload className="h-6 w-6 text-secondary mx-auto mb-2" />
+            <p className="text-primary text-sm font-medium">Importez votre historique de trades</p>
+            <p className="text-secondary text-xs mt-1">MT4 · MT5 · Binance · Bybit · TradingView · FTMO · FundedNext</p>
+          </div>
+        </div>
+        <div className="mt-4 w-full max-w-md">
           {hasSessionReport ? (
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                className="btn-primary py-2.5 disabled:cursor-not-allowed disabled:opacity-40"
+                disabled={!pendingFile || loading}
+                onClick={() => {
+                  if (pendingFile) void runAnalyze(pendingFile);
+                }}
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-3">
+                    <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
+                    </svg>
+                    L&apos;IA analyse vos trades...
+                  </span>
+                ) : (
+                  "Analyser mes trades"
+                )}
+              </button>
+              <button
+                type="button"
+                className="btn-primary py-2.5"
+                onClick={() => setMainView("mon-analyse")}
+              >
+                Mon analyse
+              </button>
+            </div>
+          ) : (
             <button
               type="button"
-              className="btn-outline py-2.5 px-6"
-              onClick={() => setMainView("mon-analyse")}
+              className="btn-primary w-full py-2.5 disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={!pendingFile || loading}
+              onClick={() => {
+                if (pendingFile) void runAnalyze(pendingFile);
+              }}
             >
-              Mon analyse
+              {loading ? (
+                <span className="flex items-center justify-center gap-3">
+                  <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
+                  </svg>
+                  L&apos;IA analyse vos trades...
+                </span>
+              ) : (
+                "Analyser mes trades"
+              )}
             </button>
-          ) : null}
+          )}
         </div>
 
         {error ? (
