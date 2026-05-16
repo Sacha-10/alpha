@@ -612,7 +612,7 @@ export default function DashboardClient() {
           </div>
           <div className="mt-4 w-full max-w-md mx-auto">
           {hasSessionReport ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-wrap justify-center gap-3">
               <button
                 type="button"
                 className="btn-primary py-2.5 disabled:cursor-not-allowed disabled:opacity-40"
