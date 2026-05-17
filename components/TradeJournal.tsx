@@ -70,6 +70,8 @@ export default function TradeJournal({ userId, plan }: Props) {
   const [currentMonth, setCurrentMonth] = useState({ year: today.getFullYear(), month: today.getMonth() })
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
+  const [selectedWeek, setSelectedWeek] = useState<string | null>(null)
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null)
   const [view, setView] = useState<'day' | 'month'>('day')
   const [dateFrom, setDateFrom] = useState(sevenDaysAgoStr)
   const [dateTo, setDateTo] = useState(todayStr)
@@ -257,6 +259,39 @@ export default function TradeJournal({ userId, plan }: Props) {
   const lastTradeDate = allSorted[allSorted.length - 1]?.opened_at?.split('T')[0]
   const selectedDayTrades = selectedDay ? (dayMap[selectedDay] || []) : []
 
+  // Données panneau semaine
+  const selectedWeekDays = selectedWeek ? calWeeks.find(w => w[0].date === selectedWeek) : null
+  const selectedWeekTrades = selectedWeekDays ? selectedWeekDays.flatMap(({ date }) => dayMap[date] || []) : []
+  const selectedWeekPnl = selectedWeekTrades.reduce((s, t) => s + (t.profit || 0), 0)
+  const selectedWeekWins = selectedWeekTrades.filter(t => (t.profit || 0) > 0).length
+  const selectedWeekWr = selectedWeekTrades.length > 0 ? Math.round((selectedWeekWins / selectedWeekTrades.length) * 100) : 0
+  const selectedWeekDayStats = selectedWeekDays
+    ? selectedWeekDays
+        .map(({ date }) => ({ date, pnl: (dayMap[date] || []).reduce((s, t) => s + (t.profit || 0), 0), count: (dayMap[date] || []).length }))
+        .filter(d => d.count > 0)
+    : []
+  const selectedWeekBestDay = selectedWeekDayStats.length > 0 ? selectedWeekDayStats.reduce((a, b) => a.pnl > b.pnl ? a : b) : null
+  const selectedWeekWorstDay = selectedWeekDayStats.length > 0 ? selectedWeekDayStats.reduce((a, b) => a.pnl < b.pnl ? a : b) : null
+
+  // Données panneau mois
+  const selectedMonthTrades = selectedMonth ? (monthMap[selectedMonth] || []) : []
+  const selectedMonthPnl = selectedMonthTrades.reduce((s, t) => s + (t.profit || 0), 0)
+  const selectedMonthWins = selectedMonthTrades.filter(t => (t.profit || 0) > 0).length
+  const selectedMonthWr = selectedMonthTrades.length > 0 ? Math.round((selectedMonthWins / selectedMonthTrades.length) * 100) : 0
+  const selectedMonthDayMapLocal: Record<string, TradeRow[]> = {}
+  selectedMonthTrades.forEach(t => {
+    if (!t.opened_at) return
+    const d = t.opened_at.split('T')[0]
+    if (!selectedMonthDayMapLocal[d]) selectedMonthDayMapLocal[d] = []
+    selectedMonthDayMapLocal[d].push(t)
+  })
+  const selectedMonthDayStats = Object.entries(selectedMonthDayMapLocal).map(([date, ts]) => ({
+    date,
+    pnl: ts.reduce((s, t) => s + (t.profit || 0), 0),
+  }))
+  const selectedMonthBestDay = selectedMonthDayStats.length > 0 ? selectedMonthDayStats.reduce((a, b) => a.pnl > b.pnl ? a : b) : null
+  const selectedMonthWorstDay = selectedMonthDayStats.length > 0 ? selectedMonthDayStats.reduce((a, b) => a.pnl < b.pnl ? a : b) : null
+
   return (
     <div className="w-full">
 
@@ -366,6 +401,8 @@ export default function TradeJournal({ userId, plan }: Props) {
                 const weekPnl = weekTrades.reduce((s, t) => s + (t.profit || 0), 0)
                 const weekWins = weekTrades.filter(t => (t.profit || 0) > 0).length
                 const weekWr = weekTrades.length > 0 ? Math.round((weekWins / weekTrades.length) * 100) : 0
+                const weekKey = week[0].date
+                const isWeekSelected = selectedWeek === weekKey
                 return (
                   <div key={wi} className="grid grid-cols-8 gap-1 mb-1">
                     {week.map(({ date, inMonth }) => {
@@ -376,7 +413,11 @@ export default function TradeJournal({ userId, plan }: Props) {
                       return (
                         <div
                           key={date}
-                          onClick={() => inMonth && setSelectedDay(isSelected ? null : date)}
+                          onClick={() => {
+                            if (!inMonth) return
+                            setSelectedDay(isSelected ? null : date)
+                            setSelectedWeek(null)
+                          }}
                           className={[
                             'rounded p-1.5 min-h-[64px] border transition-all',
                             !inMonth ? 'opacity-40 cursor-default' : 'cursor-pointer',
@@ -388,20 +429,24 @@ export default function TradeJournal({ userId, plan }: Props) {
                           <p className={`text-xs font-medium ${isToday ? 'text-blue' : 'text-secondary'}`}>{new Date(date + 'T12:00:00').getDate()}</p>
                           {pnl !== null && (
                             <>
-                              <p className={`text-xs font-bold mt-0.5 ${pnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(pnl)}</p>
-                              <p className="text-xs text-secondary">{day?.length} trade{day?.length !== 1 ? 's' : ''}</p>
+                              <p className={`text-xs font-bold mt-0.5 hidden md:block ${pnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(pnl)}</p>
+                              <p className="text-xs text-secondary hidden md:block">{day?.length} trade{day?.length !== 1 ? 's' : ''}</p>
                             </>
                           )}
                         </div>
                       )
                     })}
-                    <div className={[
-                      'rounded p-1.5 min-h-[64px] border',
-                      weekTrades.length > 0 ? (weekPnl > 0 ? 'bg-green/10 border-green/30' : weekPnl < 0 ? 'bg-red/10 border-red/30' : 'bg-card border-border') : 'bg-card border-border',
-                    ].join(' ')}>
-                      <p className={`text-xs font-bold ${weekTrades.length > 0 ? (weekPnl >= 0 ? 'text-green' : 'text-red') : 'text-secondary'}`}>{formatPnl(weekPnl)}</p>
-                      <p className="text-xs text-secondary">{weekTrades.length} trade{weekTrades.length !== 1 ? 's' : ''}</p>
-                      <p className="text-xs text-secondary">{weekWr}%</p>
+                    <div
+                      onClick={() => { setSelectedWeek(isWeekSelected ? null : weekKey); setSelectedDay(null) }}
+                      className={[
+                        'rounded p-1.5 min-h-[64px] border cursor-pointer transition-all',
+                        weekTrades.length > 0 ? (weekPnl > 0 ? 'bg-green/10 border-green/30' : weekPnl < 0 ? 'bg-red/10 border-red/30' : 'bg-card border-border') : 'bg-card border-border',
+                        isWeekSelected ? 'ring-2 ring-blue' : 'hover:border-blue/50',
+                      ].join(' ')}
+                    >
+                      <p className={`text-xs font-bold hidden md:block ${weekTrades.length > 0 ? (weekPnl >= 0 ? 'text-green' : 'text-red') : 'text-secondary'}`}>{formatPnl(weekPnl)}</p>
+                      <p className="text-xs text-secondary hidden md:block">{weekTrades.length} trade{weekTrades.length !== 1 ? 's' : ''}</p>
+                      <p className="text-xs text-secondary hidden md:block">{weekWr}%</p>
                     </div>
                   </div>
                 )
@@ -425,7 +470,7 @@ export default function TradeJournal({ userId, plan }: Props) {
                 </button>
               </div>
               <div className="grid grid-cols-4 gap-2">
-                {MONTHS_FR.map((monthName, mi) => {
+                {Array.from({ length: 12 }, (_, mi) => {
                   const key = `${currentYear}-${String(mi + 1).padStart(2, '0')}`
                   const ts = monthMap[key] || []
                   const pnl = ts.reduce((s, t) => s + (t.profit || 0), 0)
@@ -433,21 +478,21 @@ export default function TradeJournal({ userId, plan }: Props) {
                   const wr = ts.length > 0 ? Math.round((wins / ts.length) * 100) : 0
                   const isCurrentMonth = currentYear === today.getFullYear() && mi === today.getMonth()
                   const hasData = ts.length > 0
+                  const isSelected = selectedMonth === key
                   return (
                     <div
                       key={mi}
-                      onClick={() => { setCurrentMonth({ year: currentYear, month: mi }); setView('day') }}
+                      onClick={() => setSelectedMonth(isSelected ? null : key)}
                       className={[
                         'bg-card border rounded p-3 cursor-pointer transition-all',
                         hasData ? (pnl > 0 ? 'bg-green/10 border-green/30' : pnl < 0 ? 'bg-red/10 border-red/30' : 'border-border') : 'border-border opacity-40',
-                        isCurrentMonth ? 'ring-2 ring-blue' : '',
-                        'hover:border-blue/50',
+                        isCurrentMonth || isSelected ? 'ring-2 ring-blue' : 'hover:border-blue/50',
                       ].join(' ')}
                     >
-                      <p className="text-xs font-semibold text-primary">{monthName}</p>
-                      <p className={`text-xs font-bold mt-1 ${hasData ? (pnl >= 0 ? 'text-green' : 'text-red') : 'text-secondary'}`}>{formatPnl(hasData ? pnl : 0)}</p>
-                      <p className="text-xs text-secondary">{ts.length} trade{ts.length !== 1 ? 's' : ''}</p>
-                      <p className="text-xs text-secondary">{wr}%</p>
+                      <p className="text-xs font-semibold text-primary">{mi + 1}</p>
+                      <p className={`text-xs font-bold mt-1 hidden md:block ${hasData ? (pnl >= 0 ? 'text-green' : 'text-red') : 'text-secondary'}`}>{formatPnl(hasData ? pnl : 0)}</p>
+                      <p className="text-xs text-secondary hidden md:block">{ts.length} trade{ts.length !== 1 ? 's' : ''}</p>
+                      <p className="text-xs text-secondary hidden md:block">{wr}%</p>
                     </div>
                   )
                 })}
@@ -479,6 +524,70 @@ export default function TradeJournal({ userId, plan }: Props) {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* PANNEAU STATISTIQUES SEMAINE */}
+          {selectedWeek && view === 'day' && (
+            <div className="card rounded p-6 mb-6">
+              <h2 className="text-lg font-semibold text-primary mb-4">Semaine du {selectedWeek}</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div>
+                  <p className="text-xs text-secondary uppercase tracking-wide mb-1">PnL total</p>
+                  <p className={`text-xl font-bold ${selectedWeekPnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(selectedWeekPnl)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-secondary uppercase tracking-wide mb-1">Trades</p>
+                  <p className="text-xl font-bold text-primary">{selectedWeekTrades.length}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-secondary uppercase tracking-wide mb-1">Win rate</p>
+                  <p className="text-xl font-bold text-primary">{selectedWeekWr}%</p>
+                </div>
+                <div>
+                  <p className="text-xs text-secondary uppercase tracking-wide mb-1">Meilleur jour</p>
+                  <p className="text-lg font-bold text-green">{selectedWeekBestDay ? formatPnl(selectedWeekBestDay.pnl) : '--'}</p>
+                  {selectedWeekBestDay && <p className="text-xs text-secondary mt-1">{selectedWeekBestDay.date}</p>}
+                </div>
+                <div>
+                  <p className="text-xs text-secondary uppercase tracking-wide mb-1">Pire jour</p>
+                  <p className="text-lg font-bold text-red">{selectedWeekWorstDay ? formatPnl(selectedWeekWorstDay.pnl) : '--'}</p>
+                  {selectedWeekWorstDay && <p className="text-xs text-secondary mt-1">{selectedWeekWorstDay.date}</p>}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PANNEAU STATISTIQUES MOIS */}
+          {selectedMonth && view === 'month' && (
+            <div className="card rounded p-6 mb-6">
+              <h2 className="text-lg font-semibold text-primary mb-4">
+                {MONTHS_FR[parseInt(selectedMonth.split('-')[1]) - 1]} {selectedMonth.split('-')[0]}
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div>
+                  <p className="text-xs text-secondary uppercase tracking-wide mb-1">PnL total</p>
+                  <p className={`text-xl font-bold ${selectedMonthPnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(selectedMonthPnl)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-secondary uppercase tracking-wide mb-1">Trades</p>
+                  <p className="text-xl font-bold text-primary">{selectedMonthTrades.length}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-secondary uppercase tracking-wide mb-1">Win rate</p>
+                  <p className="text-xl font-bold text-primary">{selectedMonthWr}%</p>
+                </div>
+                <div>
+                  <p className="text-xs text-secondary uppercase tracking-wide mb-1">Meilleur jour</p>
+                  <p className="text-lg font-bold text-green">{selectedMonthBestDay ? formatPnl(selectedMonthBestDay.pnl) : '--'}</p>
+                  {selectedMonthBestDay && <p className="text-xs text-secondary mt-1">{selectedMonthBestDay.date}</p>}
+                </div>
+                <div>
+                  <p className="text-xs text-secondary uppercase tracking-wide mb-1">Pire jour</p>
+                  <p className="text-lg font-bold text-red">{selectedMonthWorstDay ? formatPnl(selectedMonthWorstDay.pnl) : '--'}</p>
+                  {selectedMonthWorstDay && <p className="text-xs text-secondary mt-1">{selectedMonthWorstDay.date}</p>}
+                </div>
+              </div>
             </div>
           )}
 
