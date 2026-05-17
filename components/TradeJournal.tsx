@@ -25,16 +25,6 @@ type DayData = {
   lossCount: number
 }
 
-type PeriodData = {
-  label: string
-  dateStart: string
-  dateEnd: string
-  trades: TradeRow[]
-  pnl: number
-  winCount: number
-  lossCount: number
-}
-
 type Props = {
   userId: string
   plan: string | null
@@ -55,21 +45,6 @@ function formatDate(dateStr: string): string {
 function formatTime(dateStr: string | null): string {
   if (!dateStr) return '--'
   return new Date(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-}
-
-function getWeekKey(dateStr: string): string {
-  const d = new Date(dateStr + 'T12:00:00')
-  const day = d.getDay() === 0 ? 6 : d.getDay() - 1
-  const monday = new Date(d)
-  monday.setDate(d.getDate() - day)
-  return monday.toISOString().split('T')[0]
-}
-
-function getWeekLabel(mondayStr: string): string {
-  const monday = new Date(mondayStr + 'T12:00:00')
-  const sunday = new Date(monday)
-  sunday.setDate(monday.getDate() + 6)
-  return `Du ${monday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} au ${sunday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`
 }
 
 export default function TradeJournal({ userId, plan }: Props) {
@@ -93,8 +68,9 @@ export default function TradeJournal({ userId, plan }: Props) {
   const [importError, setImportError] = useState<string | null>(null)
   const [importSuccess, setImportSuccess] = useState<string | null>(null)
   const [currentMonth, setCurrentMonth] = useState({ year: today.getFullYear(), month: today.getMonth() })
+  const [currentYear, setCurrentYear] = useState(today.getFullYear())
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
-  const [view, setView] = useState<'day' | 'week' | 'month' | 'year'>('day')
+  const [view, setView] = useState<'day' | 'month'>('day')
   const [dateFrom, setDateFrom] = useState(sevenDaysAgoStr)
   const [dateTo, setDateTo] = useState(todayStr)
   const [tooltip, setTooltip] = useState<{ x: number; y: number; date: string; pnl: number } | null>(null)
@@ -192,27 +168,6 @@ export default function TradeJournal({ userId, plan }: Props) {
     lossCount: ts.filter(t => (t.profit || 0) < 0).length,
   })).sort((a, b) => a.date.localeCompare(b.date))
 
-  const weekMap: Record<string, TradeRow[]> = {}
-  filteredTrades.forEach(t => {
-    if (!t.opened_at) return
-    const key = getWeekKey(t.opened_at.split('T')[0])
-    if (!weekMap[key]) weekMap[key] = []
-    weekMap[key].push(t)
-  })
-  const weekDataList: PeriodData[] = Object.entries(weekMap).map(([monday, ts]) => {
-    const sunday = new Date(monday + 'T12:00:00')
-    sunday.setDate(sunday.getDate() + 6)
-    return {
-      label: getWeekLabel(monday),
-      dateStart: monday,
-      dateEnd: sunday.toISOString().split('T')[0],
-      trades: ts,
-      pnl: ts.reduce((s, t) => s + (t.profit || 0), 0),
-      winCount: ts.filter(t => (t.profit || 0) > 0).length,
-      lossCount: ts.filter(t => (t.profit || 0) < 0).length,
-    }
-  }).sort((a, b) => a.dateStart.localeCompare(b.dateStart))
-
   const monthMap: Record<string, TradeRow[]> = {}
   filteredTrades.forEach(t => {
     if (!t.opened_at) return
@@ -220,36 +175,6 @@ export default function TradeJournal({ userId, plan }: Props) {
     if (!monthMap[key]) monthMap[key] = []
     monthMap[key].push(t)
   })
-  const monthDataList: PeriodData[] = Object.entries(monthMap).map(([key, ts]) => {
-    const [y, m] = key.split('-').map(Number)
-    const lastD = new Date(y, m, 0).getDate()
-    return {
-      label: `${MONTHS_FR[m - 1]} ${y}`,
-      dateStart: `${key}-01`,
-      dateEnd: `${key}-${lastD}`,
-      trades: ts,
-      pnl: ts.reduce((s, t) => s + (t.profit || 0), 0),
-      winCount: ts.filter(t => (t.profit || 0) > 0).length,
-      lossCount: ts.filter(t => (t.profit || 0) < 0).length,
-    }
-  }).sort((a, b) => a.dateStart.localeCompare(b.dateStart))
-
-  const yearMap: Record<string, TradeRow[]> = {}
-  filteredTrades.forEach(t => {
-    if (!t.opened_at) return
-    const key = t.opened_at.slice(0, 4)
-    if (!yearMap[key]) yearMap[key] = []
-    yearMap[key].push(t)
-  })
-  const yearDataList: PeriodData[] = Object.entries(yearMap).map(([year, ts]) => ({
-    label: year,
-    dateStart: `${year}-01-01`,
-    dateEnd: `${year}-12-31`,
-    trades: ts,
-    pnl: ts.reduce((s, t) => s + (t.profit || 0), 0),
-    winCount: ts.filter(t => (t.profit || 0) > 0).length,
-    lossCount: ts.filter(t => (t.profit || 0) < 0).length,
-  })).sort((a, b) => a.dateStart.localeCompare(b.dateStart))
 
   const totalPnl = filteredTrades.reduce((s, t) => s + (t.profit || 0), 0)
   const totalTrades = filteredTrades.length
@@ -304,7 +229,15 @@ export default function TradeJournal({ userId, plan }: Props) {
     if (!canNext) return
     setCurrentMonth(prev => prev.month === 11 ? { year: prev.year + 1, month: 0 } : { ...prev, month: prev.month + 1 })
   }
-  const goToday = () => setCurrentMonth({ year: today.getFullYear(), month: today.getMonth() })
+  const goToday = () => {
+    setCurrentMonth({ year: today.getFullYear(), month: today.getMonth() })
+    setCurrentYear(today.getFullYear())
+  }
+
+  const canPrevYear = currentYear > minNav.year
+  const canNextYear = currentYear < maxNav.year
+  const prevYear = () => { if (canPrevYear) setCurrentYear(y => y - 1) }
+  const nextYear = () => { if (canNextYear) setCurrentYear(y => y + 1) }
 
   const exportCSV = () => {
     const headers = ['Date ouverture','Date fermeture','Symbole','Côté','Entry','Exit','Volume','Profit']
@@ -323,28 +256,6 @@ export default function TradeJournal({ userId, plan }: Props) {
   const firstTradeDate = allSorted[0]?.opened_at?.split('T')[0]
   const lastTradeDate = allSorted[allSorted.length - 1]?.opened_at?.split('T')[0]
   const selectedDayTrades = selectedDay ? (dayMap[selectedDay] || []) : []
-
-  const PeriodRow = ({ p }: { p: PeriodData }) => {
-    const wr = p.trades.length > 0 ? Math.round((p.winCount / p.trades.length) * 100) : 0
-    return (
-      <div className={`card rounded p-4 flex items-center justify-between gap-4 border ${p.pnl > 0 ? 'border-green/30 bg-green/5' : p.pnl < 0 ? 'border-red/30 bg-red/5' : 'border-border'}`}>
-        <div>
-          <p className="text-sm font-semibold text-primary">{p.label}</p>
-          <p className="text-xs text-secondary mt-0.5">{p.trades.length} trade{p.trades.length !== 1 ? 's' : ''}</p>
-        </div>
-        <div className="flex items-center gap-6">
-          <div className="text-right">
-            <p className="text-xs text-secondary uppercase tracking-wide">Win rate</p>
-            <p className="text-sm font-bold text-primary">{wr}%</p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-secondary uppercase tracking-wide">PnL</p>
-            <p className={`text-sm font-bold ${p.pnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(p.pnl)}</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="w-full">
@@ -375,12 +286,9 @@ export default function TradeJournal({ userId, plan }: Props) {
       {/* BARRE DE CONTRÔLES — Desktop */}
       <div className="hidden md:flex items-center justify-between mb-6">
         <div className="flex items-center">
-          {(['day','week','month','year'] as const).flatMap((v, i) => [
-            ...(i > 0 ? [<span key={`sep-${v}`} className="text-secondary mx-2">·</span>] : []),
-            <button key={v} onClick={() => setView(v)} className={`text-sm transition-colors ${view === v ? 'text-primary font-semibold' : 'text-secondary hover:text-primary'}`}>
-              {v === 'day' ? 'Jour' : v === 'week' ? 'Semaine' : v === 'month' ? 'Mois' : 'Année'}
-            </button>
-          ])}
+          <button onClick={() => setView('day')} className={`text-sm transition-colors ${view === 'day' ? 'text-primary font-semibold' : 'text-secondary hover:text-primary'}`}>Jour</button>
+          <span className="text-secondary mx-2">·</span>
+          <button onClick={() => setView('month')} className={`text-sm transition-colors ${view === 'month' ? 'text-primary font-semibold' : 'text-secondary hover:text-primary'}`}>Mois</button>
         </div>
         <div className="flex items-center gap-2">
           <input type="date" value={dateFrom} min="2026-01-01" max={dateTo} onChange={e => setDateFrom(e.target.value)} className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer" />
@@ -404,17 +312,14 @@ export default function TradeJournal({ userId, plan }: Props) {
       <div ref={mobileDropdownRef} className="flex md:hidden items-center justify-between gap-2 mb-6 relative">
         <div className="flex items-center">
           <button onClick={() => setMobileDropdownOpen(o => !o)} className="text-sm text-primary font-medium">
-            {view === 'day' ? 'Jour' : view === 'week' ? 'Semaine' : view === 'month' ? 'Mois' : 'Année'} ›
+            {view === 'day' ? 'Jour' : 'Mois'} ›
           </button>
         </div>
         {mobileDropdownOpen && (
           <div className="absolute top-0 left-0 right-0 bg-card border border-border rounded-xl z-50 flex items-center justify-center gap-2 px-3 py-2">
-            {(['day','week','month','year'] as const).flatMap((v, i) => [
-              ...(i > 0 ? [<span key={`sep-${v}`} className="text-secondary">·</span>] : []),
-              <button key={v} onClick={() => { setView(v); setMobileDropdownOpen(false) }} className={`text-sm ${view === v ? 'text-primary font-semibold' : 'text-secondary'}`}>
-                {v === 'day' ? 'Jour' : v === 'week' ? 'Semaine' : v === 'month' ? 'Mois' : 'Année'}
-              </button>
-            ])}
+            <button onClick={() => { setView('day'); setMobileDropdownOpen(false) }} className={`text-sm ${view === 'day' ? 'text-primary font-semibold' : 'text-secondary'}`}>Jour</button>
+            <span className="text-secondary">·</span>
+            <button onClick={() => { setView('month'); setMobileDropdownOpen(false) }} className={`text-sm ${view === 'month' ? 'text-primary font-semibold' : 'text-secondary'}`}>Mois</button>
           </div>
         )}
         <div className="flex items-center gap-2">
@@ -449,10 +354,11 @@ export default function TradeJournal({ userId, plan }: Props) {
                 </button>
               </div>
 
-              <div className="grid grid-cols-7 mb-2">
+              <div className="grid grid-cols-8 mb-2">
                 {DAYS_FR.map(d => (
                   <div key={d} className="text-center text-xs text-secondary py-1">{d}</div>
                 ))}
+                <div />
               </div>
 
               {calWeeks.map((week, wi) => {
@@ -461,39 +367,41 @@ export default function TradeJournal({ userId, plan }: Props) {
                 const weekWins = weekTrades.filter(t => (t.profit || 0) > 0).length
                 const weekWr = weekTrades.length > 0 ? Math.round((weekWins / weekTrades.length) * 100) : 0
                 return (
-                  <div key={wi}>
-                    <div className="grid grid-cols-7 gap-1 mb-1">
-                      {week.map(({ date, inMonth }) => {
-                        const day = dayMap[date]
-                        const pnl = day ? day.reduce((s, t) => s + (t.profit || 0), 0) : null
-                        const isSelected = selectedDay === date
-                        const isToday = date === todayStr
-                        return (
-                          <div
-                            key={date}
-                            onClick={() => inMonth && setSelectedDay(isSelected ? null : date)}
-                            className={`
-                              rounded p-1.5 min-h-[64px] border cursor-pointer transition-all
-                              ${!inMonth ? 'opacity-40' : ''}
-                              ${isSelected ? 'ring-2 ring-blue' : ''}
-                              ${pnl !== null && pnl > 0 ? 'bg-green/10 border-green/30' : pnl !== null && pnl < 0 ? 'bg-red/10 border-red/30' : 'bg-card border-border'}
-                              ${inMonth ? 'hover:border-blue/50' : 'cursor-default'}
-                            `}
-                          >
-                            <p className={`text-xs font-medium ${isToday ? 'text-blue' : 'text-secondary'}`}>{new Date(date + 'T12:00:00').getDate()}</p>
-                            {pnl !== null && (
-                              <>
-                                <p className={`text-xs font-bold mt-0.5 ${pnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(pnl)}</p>
-                                <p className="text-xs text-secondary">{day?.length} trade{day?.length !== 1 ? 's' : ''}</p>
-                              </>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                    <div className={`col-span-7 rounded px-3 py-1.5 mb-2 flex items-center justify-between border ${weekPnl >= 0 ? 'bg-green/5 border-green/20' : 'bg-red/5 border-red/20'}`}>
-                      <span className="text-xs text-secondary">{weekTrades.length} trade{weekTrades.length !== 1 ? 's' : ''} · {weekWr}% win rate</span>
-                      <span className={`text-xs font-bold ${weekPnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(weekPnl)}</span>
+                  <div key={wi} className="grid grid-cols-8 gap-1 mb-1">
+                    {week.map(({ date, inMonth }) => {
+                      const day = dayMap[date]
+                      const pnl = day ? day.reduce((s, t) => s + (t.profit || 0), 0) : null
+                      const isSelected = selectedDay === date
+                      const isToday = date === todayStr
+                      return (
+                        <div
+                          key={date}
+                          onClick={() => inMonth && setSelectedDay(isSelected ? null : date)}
+                          className={[
+                            'rounded p-1.5 min-h-[64px] border transition-all',
+                            !inMonth ? 'opacity-40 cursor-default' : 'cursor-pointer',
+                            isSelected ? 'ring-2 ring-blue' : '',
+                            pnl !== null && pnl > 0 ? 'bg-green/10 border-green/30' : pnl !== null && pnl < 0 ? 'bg-red/10 border-red/30' : 'bg-card border-border',
+                            inMonth && !isSelected ? 'hover:border-blue/50' : '',
+                          ].join(' ')}
+                        >
+                          <p className={`text-xs font-medium ${isToday ? 'text-blue' : 'text-secondary'}`}>{new Date(date + 'T12:00:00').getDate()}</p>
+                          {pnl !== null && (
+                            <>
+                              <p className={`text-xs font-bold mt-0.5 ${pnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(pnl)}</p>
+                              <p className="text-xs text-secondary">{day?.length} trade{day?.length !== 1 ? 's' : ''}</p>
+                            </>
+                          )}
+                        </div>
+                      )
+                    })}
+                    <div className={[
+                      'rounded p-1.5 min-h-[64px] border',
+                      weekTrades.length > 0 ? (weekPnl > 0 ? 'bg-green/10 border-green/30' : weekPnl < 0 ? 'bg-red/10 border-red/30' : 'bg-card border-border') : 'bg-card border-border',
+                    ].join(' ')}>
+                      <p className={`text-xs font-bold ${weekTrades.length > 0 ? (weekPnl >= 0 ? 'text-green' : 'text-red') : 'text-secondary'}`}>{formatPnl(weekPnl)}</p>
+                      <p className="text-xs text-secondary">{weekTrades.length} trade{weekTrades.length !== 1 ? 's' : ''}</p>
+                      <p className="text-xs text-secondary">{weekWr}%</p>
                     </div>
                   </div>
                 )
@@ -501,30 +409,49 @@ export default function TradeJournal({ userId, plan }: Props) {
             </div>
           )}
 
-          {/* VUE SEMAINE */}
-          {view === 'week' && (
-            <div className="space-y-2 mb-6">
-              {weekDataList.length === 0 ? (
-                <div className="card rounded p-8 text-center text-secondary">Aucun trade sur cette période.</div>
-              ) : weekDataList.map((p, i) => <PeriodRow key={i} p={p} />)}
-            </div>
-          )}
-
           {/* VUE MOIS */}
           {view === 'month' && (
-            <div className="space-y-2 mb-6">
-              {monthDataList.length === 0 ? (
-                <div className="card rounded p-8 text-center text-secondary">Aucun trade sur cette période.</div>
-              ) : monthDataList.map((p, i) => <PeriodRow key={i} p={p} />)}
-            </div>
-          )}
-
-          {/* VUE ANNÉE */}
-          {view === 'year' && (
-            <div className="space-y-2 mb-6">
-              {yearDataList.length === 0 ? (
-                <div className="card rounded p-8 text-center text-secondary">Aucun trade sur cette période.</div>
-              ) : yearDataList.map((p, i) => <PeriodRow key={i} p={p} />)}
+            <div className="card rounded p-4 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <button onClick={prevYear} disabled={!canPrevYear} className={`p-2 rounded border border-border ${canPrevYear ? 'text-primary hover:border-blue' : 'text-secondary opacity-40 cursor-not-allowed'}`}>
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <div className="flex items-center gap-3">
+                  <button onClick={goToday} className="text-xs text-secondary border border-border rounded px-3 py-1 hover:border-blue hover:text-primary transition-colors">Today</button>
+                  <span className="text-primary font-semibold">{currentYear}</span>
+                </div>
+                <button onClick={nextYear} disabled={!canNextYear} className={`p-2 rounded border border-border ${canNextYear ? 'text-primary hover:border-blue' : 'text-secondary opacity-40 cursor-not-allowed'}`}>
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {MONTHS_FR.map((monthName, mi) => {
+                  const key = `${currentYear}-${String(mi + 1).padStart(2, '0')}`
+                  const ts = monthMap[key] || []
+                  const pnl = ts.reduce((s, t) => s + (t.profit || 0), 0)
+                  const wins = ts.filter(t => (t.profit || 0) > 0).length
+                  const wr = ts.length > 0 ? Math.round((wins / ts.length) * 100) : 0
+                  const isCurrentMonth = currentYear === today.getFullYear() && mi === today.getMonth()
+                  const hasData = ts.length > 0
+                  return (
+                    <div
+                      key={mi}
+                      onClick={() => { setCurrentMonth({ year: currentYear, month: mi }); setView('day') }}
+                      className={[
+                        'bg-card border rounded p-3 cursor-pointer transition-all',
+                        hasData ? (pnl > 0 ? 'bg-green/10 border-green/30' : pnl < 0 ? 'bg-red/10 border-red/30' : 'border-border') : 'border-border opacity-40',
+                        isCurrentMonth ? 'ring-2 ring-blue' : '',
+                        'hover:border-blue/50',
+                      ].join(' ')}
+                    >
+                      <p className="text-xs font-semibold text-primary">{monthName}</p>
+                      <p className={`text-xs font-bold mt-1 ${hasData ? (pnl >= 0 ? 'text-green' : 'text-red') : 'text-secondary'}`}>{formatPnl(hasData ? pnl : 0)}</p>
+                      <p className="text-xs text-secondary">{ts.length} trade{ts.length !== 1 ? 's' : ''}</p>
+                      <p className="text-xs text-secondary">{wr}%</p>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           )}
 
