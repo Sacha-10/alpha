@@ -491,12 +491,10 @@ export default function TradeJournal({ userId, plan }: Props) {
                         )
                       })}
                     </div>
-                    {weekTrades.length > 0 && (
-                      <div className={`col-span-7 rounded px-3 py-1.5 mb-2 flex items-center justify-between border ${weekPnl >= 0 ? 'bg-green/5 border-green/20' : 'bg-red/5 border-red/20'}`}>
-                        <span className="text-xs text-secondary">{weekTrades.length} trade{weekTrades.length !== 1 ? 's' : ''} · {weekWr}% win rate</span>
-                        <span className={`text-xs font-bold ${weekPnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(weekPnl)}</span>
-                      </div>
-                    )}
+                    <div className={`col-span-7 rounded px-3 py-1.5 mb-2 flex items-center justify-between border ${weekPnl >= 0 ? 'bg-green/5 border-green/20' : 'bg-red/5 border-red/20'}`}>
+                      <span className="text-xs text-secondary">{weekTrades.length} trade{weekTrades.length !== 1 ? 's' : ''} · {weekWr}% win rate</span>
+                      <span className={`text-xs font-bold ${weekPnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(weekPnl)}</span>
+                    </div>
                   </div>
                 )
               })}
@@ -558,9 +556,13 @@ export default function TradeJournal({ userId, plan }: Props) {
           )}
 
           {/* COURBE PNL CUMULÉ */}
-          {cumulPoints.length > 1 && (
-            <div className="card rounded p-4 mb-6 relative">
-              <p className="text-xs text-secondary uppercase tracking-wide mb-3">PnL cumulé</p>
+          <div className="card rounded p-4 mb-6 relative">
+            <p className="text-xs text-secondary uppercase tracking-wide mb-3">PnL cumulé</p>
+            {cumulPoints.length < 2 ? (
+              <svg width="100%" height="120">
+                <line x1="0" y1="60" x2="100%" y2="60" stroke="#2D6FFF" strokeWidth="2" strokeOpacity="0.3" />
+              </svg>
+            ) : (
               <svg ref={svgRef} width="100%" height="120" style={{ overflow: 'visible' }}
                 onMouseLeave={() => setTooltip(null)}
                 onMouseMove={e => {
@@ -605,14 +607,14 @@ export default function TradeJournal({ userId, plan }: Props) {
                   )
                 })()}
               </svg>
-              {tooltip && (
-                <div className="absolute pointer-events-none bg-card border border-border rounded px-3 py-2 text-xs text-primary" style={{ left: Math.min(tooltip.x, 200), top: tooltip.y - 40, transform: 'translateX(-50%)' }}>
-                  <p className="text-secondary">{tooltip.date}</p>
-                  <p className={`font-bold ${tooltip.pnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(tooltip.pnl)}</p>
-                </div>
-              )}
-            </div>
-          )}
+            )}
+            {tooltip && (
+              <div className="absolute pointer-events-none bg-card border border-border rounded px-3 py-2 text-xs text-primary" style={{ left: Math.min(tooltip.x, 200), top: tooltip.y - 40, transform: 'translateX(-50%)' }}>
+                <p className="text-secondary">{tooltip.date}</p>
+                <p className={`font-bold ${tooltip.pnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(tooltip.pnl)}</p>
+              </div>
+            )}
+          </div>
 
           {/* STATISTIQUES */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
