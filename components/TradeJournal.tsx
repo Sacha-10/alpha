@@ -297,7 +297,6 @@ export default function TradeJournal({ userId, plan }: Props) {
         </div>
         <div className="flex items-center gap-2">
           <input type="date" value={dateFrom} min="2026-01-01" max={dateTo} onChange={e => setDateFrom(e.target.value)} className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer" />
-          <span className="text-secondary">→</span>
           <input type="date" value={dateTo} min={dateFrom} max={`${new Date().getFullYear()}-12-31`} onChange={e => setDateTo(e.target.value)} className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer" />
         </div>
         <div className="flex items-center gap-2">
@@ -327,7 +326,6 @@ export default function TradeJournal({ userId, plan }: Props) {
         )}
         <div className="flex items-center gap-2">
           <input type="date" value={dateFrom} min="2026-01-01" max={dateTo} onChange={e => setDateFrom(e.target.value)} className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer" />
-          <span className="text-secondary">→</span>
           <input type="date" value={dateTo} min={dateFrom} max={`${new Date().getFullYear()}-12-31`} onChange={e => setDateTo(e.target.value)} className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer" />
         </div>
         <div className="flex items-center gap-2">
