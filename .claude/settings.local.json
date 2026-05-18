@@ -21,7 +21,8 @@
       "Bash(Out-Null)",
       "Bash(Select-Object FullName)",
       "Bash(npm uninstall *)",
-      "Bash(findstr /i \"puppeteer\\\\|chromium\")"
+      "Bash(findstr /i \"puppeteer\\\\|chromium\")",
+      "Bash(git checkout *)"
     ]
   }
 }

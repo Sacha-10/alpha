@@ -484,7 +484,7 @@ export default function TradeJournal({ userId, plan }: Props) {
                       key={mi}
                       onClick={() => setSelectedMonth(isSelected ? null : key)}
                       className={[
-                        'bg-card border rounded p-3 cursor-pointer transition-all',
+                        'bg-card border rounded p-3 cursor-pointer transition-all min-h-[92px]',
                         hasData ? (pnl > 0 ? 'bg-green/10 border-green/30' : pnl < 0 ? 'bg-red/10 border-red/30' : 'border-border') : 'border-border opacity-40',
                         isCurrentMonth || isSelected ? 'ring-2 ring-blue' : 'hover:border-blue/50',
                       ].join(' ')}
