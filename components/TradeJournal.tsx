@@ -17,14 +17,6 @@ type TradeRow = {
   profit: number | null
 }
 
-type DayData = {
-  date: string
-  trades: TradeRow[]
-  pnl: number
-  winCount: number
-  lossCount: number
-}
-
 type Props = {
   userId: string
   plan: string | null
@@ -75,9 +67,7 @@ export default function TradeJournal({ userId, plan }: Props) {
   const [view, setView] = useState<'day' | 'month'>('day')
   const [dateFrom, setDateFrom] = useState(sevenDaysAgoStr)
   const [dateTo, setDateTo] = useState(todayStr)
-  const [tooltip, setTooltip] = useState<{ x: number; y: number; date: string; pnl: number } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const svgRef = useRef<SVGSVGElement>(null)
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false)
   const mobileDropdownRef = useRef<HTMLDivElement>(null)
 
@@ -162,14 +152,6 @@ export default function TradeJournal({ userId, plan }: Props) {
     dayMap[d].push(t)
   })
 
-  const dayDataList: DayData[] = Object.entries(dayMap).map(([date, ts]) => ({
-    date,
-    trades: ts,
-    pnl: ts.reduce((s, t) => s + (t.profit || 0), 0),
-    winCount: ts.filter(t => (t.profit || 0) > 0).length,
-    lossCount: ts.filter(t => (t.profit || 0) < 0).length,
-  })).sort((a, b) => a.date.localeCompare(b.date))
-
   const monthMap: Record<string, TradeRow[]> = {}
   filteredTrades.forEach(t => {
     if (!t.opened_at) return
@@ -178,18 +160,6 @@ export default function TradeJournal({ userId, plan }: Props) {
     monthMap[key].push(t)
   })
 
-  const totalPnl = filteredTrades.reduce((s, t) => s + (t.profit || 0), 0)
-  const totalTrades = filteredTrades.length
-  const winRate = totalTrades > 0 ? Math.round((filteredTrades.filter(t => (t.profit || 0) > 0).length / totalTrades) * 100) : 0
-  const bestDay = dayDataList.length > 0 ? dayDataList.reduce((a, b) => a.pnl > b.pnl ? a : b) : null
-  const worstDay = dayDataList.length > 0 ? dayDataList.reduce((a, b) => a.pnl < b.pnl ? a : b) : null
-
-  const cumulPoints: { date: string; cumul: number }[] = []
-  let cumul = 0
-  dayDataList.forEach(d => {
-    cumul += d.pnl
-    cumulPoints.push({ date: d.date, cumul })
-  })
 
   const firstDay = new Date(currentMonth.year, currentMonth.month, 1)
   const lastDay = new Date(currentMonth.year, currentMonth.month + 1, 0)
@@ -591,88 +561,6 @@ export default function TradeJournal({ userId, plan }: Props) {
             </div>
           )}
 
-          {/* COURBE PNL CUMULÉ */}
-          <div className="card rounded p-4 mb-6 relative">
-            <p className="text-xs text-secondary uppercase tracking-wide mb-3">PnL cumulé</p>
-            {cumulPoints.length < 2 ? (
-              <svg width="100%" height="120">
-                <line x1="0" y1="60" x2="100%" y2="60" stroke="#2D6FFF" strokeWidth="2" strokeOpacity="0.3" />
-              </svg>
-            ) : (
-              <svg ref={svgRef} width="100%" height="120" style={{ overflow: 'visible' }}
-                onMouseLeave={() => setTooltip(null)}
-                onMouseMove={e => {
-                  if (!svgRef.current || cumulPoints.length < 2) return
-                  const rect = svgRef.current.getBoundingClientRect()
-                  const x = e.clientX - rect.left
-                  const w = rect.width
-                  const idx = Math.round((x / w) * (cumulPoints.length - 1))
-                  const pt = cumulPoints[Math.max(0, Math.min(idx, cumulPoints.length - 1))]
-                  const minP = Math.min(...cumulPoints.map(p => p.cumul))
-                  const maxP = Math.max(...cumulPoints.map(p => p.cumul))
-                  const range = maxP - minP || 1
-                  const py = 10 + ((maxP - pt.cumul) / range) * 100
-                  setTooltip({ x: (idx / (cumulPoints.length - 1)) * w, y: py, date: pt.date, pnl: pt.cumul })
-                }}
-              >
-                {(() => {
-                  const minP = Math.min(...cumulPoints.map(p => p.cumul))
-                  const maxP = Math.max(...cumulPoints.map(p => p.cumul))
-                  const range = maxP - minP || 1
-                  const n = cumulPoints.length
-                  const pts = cumulPoints.map((p, i) => `${(i / (n - 1)) * 100}%,${10 + ((maxP - p.cumul) / range) * 100}`)
-                  const polyline = pts.join(' ')
-                  const area = `0,110 ${polyline} 100%,110`
-                  return (
-                    <>
-                      <defs>
-                        <linearGradient id="pnlGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#2D6FFF" stopOpacity="0.2" />
-                          <stop offset="100%" stopColor="#2D6FFF" stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      <polygon points={area} fill="url(#pnlGrad)" />
-                      <polyline points={polyline} fill="none" stroke="#2D6FFF" strokeWidth="2" strokeLinejoin="round" />
-                      {tooltip && (
-                        <>
-                          <circle cx={`${(cumulPoints.findIndex(p => p.date === tooltip.date) / (n-1)) * 100}%`} cy={tooltip.y} r="4" fill="#2D6FFF" />
-                          <line x1={`${(cumulPoints.findIndex(p => p.date === tooltip.date) / (n-1)) * 100}%`} y1="0" x2={`${(cumulPoints.findIndex(p => p.date === tooltip.date) / (n-1)) * 100}%`} y2="120" stroke="#2D6FFF" strokeWidth="1" strokeDasharray="4" />
-                        </>
-                      )}
-                    </>
-                  )
-                })()}
-              </svg>
-            )}
-            {tooltip && (
-              <div className="absolute pointer-events-none bg-card border border-border rounded px-3 py-2 text-xs text-primary" style={{ left: Math.min(tooltip.x, 200), top: tooltip.y - 40, transform: 'translateX(-50%)' }}>
-                <p className="text-secondary">{tooltip.date}</p>
-                <p className={`font-bold ${tooltip.pnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(tooltip.pnl)}</p>
-              </div>
-            )}
-          </div>
-
-          {/* STATISTIQUES */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="card rounded p-4">
-              <p className="text-xs text-secondary uppercase tracking-wide mb-1">PnL total</p>
-              <p className={`text-2xl font-bold ${totalPnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(totalPnl)}</p>
-            </div>
-            <div className="card rounded p-4">
-              <p className="text-xs text-secondary uppercase tracking-wide mb-1">Win rate</p>
-              <p className="text-2xl font-bold text-primary">{winRate}%</p>
-            </div>
-            <div className="card rounded p-4">
-              <p className="text-xs text-secondary uppercase tracking-wide mb-1">Meilleur jour</p>
-              <p className="text-lg font-bold text-green">{bestDay ? formatPnl(bestDay.pnl) : '--'}</p>
-              {bestDay && <p className="text-xs text-secondary mt-1">{bestDay.date}</p>}
-            </div>
-            <div className="card rounded p-4">
-              <p className="text-xs text-secondary uppercase tracking-wide mb-1">Pire jour</p>
-              <p className="text-lg font-bold text-red">{worstDay ? formatPnl(worstDay.pnl) : '--'}</p>
-              {worstDay && <p className="text-xs text-secondary mt-1">{worstDay.date}</p>}
-            </div>
-          </div>
         </>
       )}
     </div>
