@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
 import { detectAndParse } from '@/lib/parseCSV'
 import { Upload, ChevronLeft, ChevronRight, Download, X } from 'lucide-react'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
+import * as Popover from '@radix-ui/react-popover'
 
 type TradeRow = {
   id: string
@@ -26,6 +25,121 @@ type Props = {
 
 const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
 const DAYS_FR = ['Lu','Ma','Me','Je','Ve','Sa','Di']
+
+type DatePickerCustomProps = {
+  value: string
+  onChange: (val: string) => void
+  minDate?: Date
+  maxDate?: Date
+}
+
+function DatePickerCustom({ value, onChange, minDate, maxDate }: DatePickerCustomProps) {
+  const [open, setOpen] = useState(false)
+  const todayLocal = new Date()
+  const todayStr = `${todayLocal.getFullYear()}-${String(todayLocal.getMonth()+1).padStart(2,'0')}-${String(todayLocal.getDate()).padStart(2,'0')}`
+  const parsed = value ? new Date(value + 'T12:00:00') : todayLocal
+  const [calMonth, setCalMonth] = useState({ year: parsed.getFullYear(), month: parsed.getMonth() })
+
+  const display = value
+    ? `${value.slice(8,10)}/${value.slice(5,7)}/${value.slice(0,4)}`
+    : '--/--/----'
+
+  const localStr = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+
+  const minStr = minDate ? localStr(minDate) : null
+  const maxStr = maxDate ? localStr(maxDate) : null
+
+  const firstDay = new Date(calMonth.year, calMonth.month, 1)
+  const lastDay = new Date(calMonth.year, calMonth.month + 1, 0)
+  let startDow = firstDay.getDay()
+  startDow = startDow === 0 ? 6 : startDow - 1
+
+  const calDays: { date: string; inMonth: boolean }[] = []
+  for (let i = startDow - 1; i >= 0; i--) {
+    const d = new Date(firstDay)
+    d.setDate(d.getDate() - i - 1)
+    calDays.push({ date: localStr(d), inMonth: false })
+  }
+  for (let i = 1; i <= lastDay.getDate(); i++) {
+    calDays.push({ date: localStr(new Date(calMonth.year, calMonth.month, i)), inMonth: true })
+  }
+  const remaining = 7 - (calDays.length % 7)
+  if (remaining < 7) {
+    for (let i = 1; i <= remaining; i++) {
+      const d = new Date(lastDay)
+      d.setDate(d.getDate() + i)
+      calDays.push({ date: localStr(d), inMonth: false })
+    }
+  }
+
+  const canPrev = !minDate || calMonth.year > minDate.getFullYear() || (calMonth.year === minDate.getFullYear() && calMonth.month > minDate.getMonth())
+  const canNext = !maxDate || calMonth.year < maxDate.getFullYear() || (calMonth.year === maxDate.getFullYear() && calMonth.month < maxDate.getMonth())
+
+  return (
+    <Popover.Root open={open} onOpenChange={o => {
+      if (o && value) {
+        const d = new Date(value + 'T12:00:00')
+        setCalMonth({ year: d.getFullYear(), month: d.getMonth() })
+      }
+      setOpen(o)
+    }}>
+      <Popover.Trigger asChild>
+        <button className="text-secondary text-sm hover:text-primary cursor-pointer bg-transparent border-none outline-none">
+          {display}
+        </button>
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content
+          style={{ background: '#12121A', border: '1px solid #1E2035', borderRadius: '12px', padding: '16px', zIndex: 50 }}
+          sideOffset={8}
+          align="start"
+          onOpenAutoFocus={e => e.preventDefault()}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <button
+              onClick={() => setCalMonth(prev => prev.month === 0 ? { year: prev.year - 1, month: 11 } : { ...prev, month: prev.month - 1 })}
+              disabled={!canPrev}
+              className={`p-1 text-sm ${canPrev ? 'text-primary hover:text-blue cursor-pointer' : 'text-secondary opacity-40 cursor-not-allowed'}`}
+            >&lt;</button>
+            <span className="text-sm font-semibold text-primary">{MONTHS_FR[calMonth.month]} {calMonth.year}</span>
+            <button
+              onClick={() => setCalMonth(prev => prev.month === 11 ? { year: prev.year + 1, month: 0 } : { ...prev, month: prev.month + 1 })}
+              disabled={!canNext}
+              className={`p-1 text-sm ${canNext ? 'text-primary hover:text-blue cursor-pointer' : 'text-secondary opacity-40 cursor-not-allowed'}`}
+            >&gt;</button>
+          </div>
+          <div className="grid grid-cols-7 mb-1">
+            {DAYS_FR.map(d => (
+              <div key={d} className="text-center text-xs text-secondary py-1 w-8">{d}</div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7">
+            {calDays.map(({ date, inMonth }) => {
+              const isSelected = date === value
+              const isToday = date === todayStr
+              const disabled = !inMonth || (minStr ? date < minStr : false) || (maxStr ? date > maxStr : false)
+              return (
+                <button
+                  key={date}
+                  onClick={() => { if (!disabled) { onChange(date); setOpen(false) } }}
+                  className={[
+                    'w-8 h-8 text-xs rounded flex items-center justify-center',
+                    isSelected ? 'text-white' : isToday ? 'text-blue' : 'text-secondary',
+                    disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer hover:bg-[#1A1A28]',
+                  ].join(' ')}
+                  style={isSelected ? { background: '#2D6FFF' } : undefined}
+                >
+                  {new Date(date + 'T12:00:00').getDate()}
+                </button>
+              )
+            })}
+          </div>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  )
+}
 
 function formatPnl(pnl: number): string {
   return (pnl >= 0 ? '+' : '') + pnl.toFixed(2) + '€'
@@ -298,23 +412,15 @@ export default function TradeJournal({ userId, plan }: Props) {
           <button onClick={() => setView('month')} className={`text-sm transition-colors ${view === 'month' ? 'text-primary font-semibold' : 'text-secondary hover:text-primary'}`}>Mois</button>
         </div>
         <div className="flex items-center gap-2">
-          <DatePicker
-            selected={new Date(dateFrom)}
-            onChange={(date: Date | null) => date && setDateFrom(date.toISOString().split('T')[0])}
-            dateFormat="dd/MM/yyyy"
-            locale="fr"
-            className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer w-24"
-            calendarClassName="atx-calendar"
+          <DatePickerCustom
+            value={dateFrom}
+            onChange={setDateFrom}
             minDate={new Date('2026-01-01')}
             maxDate={new Date(`${new Date().getFullYear()}-12-31`)}
           />
-          <DatePicker
-            selected={new Date(dateTo)}
-            onChange={(date: Date | null) => date && setDateTo(date.toISOString().split('T')[0])}
-            dateFormat="dd/MM/yyyy"
-            locale="fr"
-            className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer w-24"
-            calendarClassName="atx-calendar"
+          <DatePickerCustom
+            value={dateTo}
+            onChange={setDateTo}
             minDate={new Date('2026-01-01')}
             maxDate={new Date(`${new Date().getFullYear()}-12-31`)}
           />
@@ -345,23 +451,15 @@ export default function TradeJournal({ userId, plan }: Props) {
           </div>
         )}
         <div className="flex items-center gap-2">
-          <DatePicker
-            selected={new Date(dateFrom)}
-            onChange={(date: Date | null) => date && setDateFrom(date.toISOString().split('T')[0])}
-            dateFormat="dd/MM/yyyy"
-            locale="fr"
-            className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer w-24"
-            calendarClassName="atx-calendar"
+          <DatePickerCustom
+            value={dateFrom}
+            onChange={setDateFrom}
             minDate={new Date('2026-01-01')}
             maxDate={new Date(`${new Date().getFullYear()}-12-31`)}
           />
-          <DatePicker
-            selected={new Date(dateTo)}
-            onChange={(date: Date | null) => date && setDateTo(date.toISOString().split('T')[0])}
-            dateFormat="dd/MM/yyyy"
-            locale="fr"
-            className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer w-24"
-            calendarClassName="atx-calendar"
+          <DatePickerCustom
+            value={dateTo}
+            onChange={setDateTo}
             minDate={new Date('2026-01-01')}
             maxDate={new Date(`${new Date().getFullYear()}-12-31`)}
           />
