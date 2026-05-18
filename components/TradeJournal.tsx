@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
 import { detectAndParse } from '@/lib/parseCSV'
 import { Upload, ChevronLeft, ChevronRight, Download, X } from 'lucide-react'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 
 type TradeRow = {
   id: string
@@ -296,8 +298,26 @@ export default function TradeJournal({ userId, plan }: Props) {
           <button onClick={() => setView('month')} className={`text-sm transition-colors ${view === 'month' ? 'text-primary font-semibold' : 'text-secondary hover:text-primary'}`}>Mois</button>
         </div>
         <div className="flex items-center gap-2">
-          <input type="date" value={dateFrom} min="2026-01-01" max={dateTo} onChange={e => setDateFrom(e.target.value)} className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer" />
-          <input type="date" value={dateTo} min={dateFrom} max={`${new Date().getFullYear()}-12-31`} onChange={e => setDateTo(e.target.value)} className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer" />
+          <DatePicker
+            selected={new Date(dateFrom)}
+            onChange={(date: Date | null) => date && setDateFrom(date.toISOString().split('T')[0])}
+            dateFormat="dd/MM/yyyy"
+            locale="fr"
+            className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer w-24"
+            calendarClassName="atx-calendar"
+            minDate={new Date('2026-01-01')}
+            maxDate={new Date(`${new Date().getFullYear()}-12-31`)}
+          />
+          <DatePicker
+            selected={new Date(dateTo)}
+            onChange={(date: Date | null) => date && setDateTo(date.toISOString().split('T')[0])}
+            dateFormat="dd/MM/yyyy"
+            locale="fr"
+            className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer w-24"
+            calendarClassName="atx-calendar"
+            minDate={new Date('2026-01-01')}
+            maxDate={new Date(`${new Date().getFullYear()}-12-31`)}
+          />
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => fileInputRef.current?.click()} className="text-sm text-secondary hover:text-primary cursor-pointer">
@@ -325,8 +345,26 @@ export default function TradeJournal({ userId, plan }: Props) {
           </div>
         )}
         <div className="flex items-center gap-2">
-          <input type="date" value={dateFrom} min="2026-01-01" max={dateTo} onChange={e => setDateFrom(e.target.value)} className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer" />
-          <input type="date" value={dateTo} min={dateFrom} max={`${new Date().getFullYear()}-12-31`} onChange={e => setDateTo(e.target.value)} className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer" />
+          <DatePicker
+            selected={new Date(dateFrom)}
+            onChange={(date: Date | null) => date && setDateFrom(date.toISOString().split('T')[0])}
+            dateFormat="dd/MM/yyyy"
+            locale="fr"
+            className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer w-24"
+            calendarClassName="atx-calendar"
+            minDate={new Date('2026-01-01')}
+            maxDate={new Date(`${new Date().getFullYear()}-12-31`)}
+          />
+          <DatePicker
+            selected={new Date(dateTo)}
+            onChange={(date: Date | null) => date && setDateTo(date.toISOString().split('T')[0])}
+            dateFormat="dd/MM/yyyy"
+            locale="fr"
+            className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer w-24"
+            calendarClassName="atx-calendar"
+            minDate={new Date('2026-01-01')}
+            maxDate={new Date(`${new Date().getFullYear()}-12-31`)}
+          />
         </div>
         <div className="flex items-center gap-2">
           <Upload className="h-4 w-4 text-secondary hover:text-primary cursor-pointer" onClick={() => fileInputRef.current?.click()} />

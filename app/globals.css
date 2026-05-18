@@ -169,3 +169,50 @@ body {
   will-change: transform;
   backface-visibility: hidden;
 }
+
+.atx-calendar {
+  background: #12121A !important;
+  border: 1px solid #1E2035 !important;
+  border-radius: 12px !important;
+  font-family: "Inter", sans-serif !important;
+  color: #F0F4FF !important;
+}
+
+.atx-calendar .react-datepicker__header {
+  background: #12121A !important;
+  border-bottom: 1px solid #1E2035 !important;
+}
+
+.atx-calendar .react-datepicker__current-month,
+.atx-calendar .react-datepicker__day-name {
+  color: #F0F4FF !important;
+}
+
+.atx-calendar .react-datepicker__day {
+  color: #8892AA !important;
+  border-radius: 6px !important;
+}
+
+.atx-calendar .react-datepicker__day:hover {
+  background: #1E2035 !important;
+  color: #F0F4FF !important;
+}
+
+.atx-calendar .react-datepicker__day--selected,
+.atx-calendar .react-datepicker__day--keyboard-selected {
+  background: #2D6FFF !important;
+  color: #F0F4FF !important;
+}
+
+.atx-calendar .react-datepicker__day--today {
+  color: #2D6FFF !important;
+  font-weight: 600 !important;
+}
+
+.atx-calendar .react-datepicker__navigation-icon::before {
+  border-color: #8892AA !important;
+}
+
+.atx-calendar .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+  border-color: #F0F4FF !important;
+}
