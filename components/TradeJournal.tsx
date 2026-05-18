@@ -489,7 +489,7 @@ export default function TradeJournal({ userId, plan }: Props) {
                         isCurrentMonth || isSelected ? 'ring-2 ring-blue' : 'hover:border-blue/50',
                       ].join(' ')}
                     >
-                      <p className="text-xs font-semibold text-primary">{mi + 1}</p>
+                      <p className="text-xs font-semibold text-primary">{String(mi + 1).padStart(2, '0')}</p>
                       <p className={`text-xs font-bold mt-1 hidden md:block ${hasData ? (pnl >= 0 ? 'text-green' : 'text-red') : 'text-secondary'}`}>{formatPnl(hasData ? pnl : 0)}</p>
                       <p className="text-xs text-secondary hidden md:block">{ts.length} trade{ts.length !== 1 ? 's' : ''}</p>
                       <p className="text-xs text-secondary hidden md:block">{wr}%</p>
