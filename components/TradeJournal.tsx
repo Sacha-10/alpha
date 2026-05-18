@@ -301,13 +301,11 @@ export default function TradeJournal({ userId, plan }: Props) {
           <input type="date" value={dateTo} min={dateFrom} max={`${new Date().getFullYear()}-12-31`} onChange={e => setDateTo(e.target.value)} className="bg-transparent border-none text-secondary text-sm focus:text-primary outline-none cursor-pointer" />
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 text-sm text-secondary hover:text-primary cursor-pointer">
-            <Upload className="h-4 w-4" />
+          <button onClick={() => fileInputRef.current?.click()} className="text-sm text-secondary hover:text-primary cursor-pointer">
             Importer
           </button>
           <span className="text-secondary">·</span>
-          <button onClick={exportCSV} className="flex items-center gap-2 text-sm text-secondary hover:text-primary cursor-pointer">
-            <Download className="h-4 w-4" />
+          <button onClick={exportCSV} className="text-sm text-secondary hover:text-primary cursor-pointer">
             Exporter
           </button>
         </div>
