@@ -134,7 +134,7 @@ function DateRangePicker({ dateFrom, dateTo, onChangeDateFrom, onChangeDateTo }:
               <div key={d} className="text-center text-xs text-secondary py-1 w-8">{d}</div>
             ))}
           </div>
-          <div className="grid grid-cols-7">
+          <div className="grid grid-cols-7 gap-0.5">
             {calDays.map(({ date, inMonth }) => {
               const isFromSelected = step === 'from' ? date === dateFrom : date === pending
               const isToSelected = step === 'from' && date === dateTo
@@ -145,7 +145,7 @@ function DateRangePicker({ dateFrom, dateTo, onChangeDateFrom, onChangeDateTo }:
                   key={date}
                   onClick={() => { if (inMonth) handleDayClick(date) }}
                   className={[
-                    'w-8 h-8 text-xs rounded flex items-center justify-center',
+                    'w-8 h-6 text-xs rounded flex items-center justify-center',
                     !inMonth ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-[#1A1A28]',
                     isFromSelected || isToSelected ? 'text-white' : isToday ? 'text-blue' : 'text-secondary',
                     inRange ? 'bg-blue/15' : '',
