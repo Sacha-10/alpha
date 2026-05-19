@@ -105,7 +105,7 @@ function DateRangePicker({ dateFrom, dateTo, onChangeDateFrom, onChangeDateTo }:
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger asChild>
         <button className="text-secondary text-sm hover:text-primary cursor-pointer bg-transparent border-none outline-none">
-          {formatDisplay(dateFrom)} {formatDisplay(dateTo)}
+          {formatDisplay(dateFrom)} · {formatDisplay(dateTo)}
         </button>
       </Popover.Trigger>
       <Popover.Portal>
@@ -157,7 +157,7 @@ function DateRangePicker({ dateFrom, dateTo, onChangeDateFrom, onChangeDateTo }:
               )
             })}
           </div>
-          <p className="text-xs text-secondary text-center mt-3">Sélectionnez la date de début puis la date de fin</p>
+          <p className="text-xs text-secondary text-center mt-3">Clic 1 &gt; date début · Clic 2 &gt; date fin</p>
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
