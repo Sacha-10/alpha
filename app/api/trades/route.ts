@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url)
     const dateMin = searchParams.get('dateMin')
+    console.log('[api/trades] user:', user?.id, '| dateMin:', dateMin)
 
     let query = supabase
       .from('trades')
@@ -39,6 +40,7 @@ export async function GET(req: NextRequest) {
     }
 
     const { data, error } = await query
+    console.log('[api/trades] trades count:', data?.length, '| error:', error)
     if (error) {
       console.error('[api/trades] Erreur select:', error)
       return NextResponse.json({ error: 'Erreur lors du chargement.' }, { status: 500 })

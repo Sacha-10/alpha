@@ -215,7 +215,10 @@ export default function TradeJournal({ plan }: Props) {
     setLoading(true)
     const dateMin = getDateMin()
     const res = await fetch(`/api/trades?dateMin=${encodeURIComponent(dateMin.toISOString())}`)
-    const json = await res.json()
+    console.log('[TradeJournal] loadTrades response status:', res.status)
+    const data = await res.json()
+    console.log('[TradeJournal] loadTrades data:', data)
+    const json = data
     if (!res.ok) {
       console.error('[TradeJournal] loadTrades erreur:', json.error)
       setTrades([])
