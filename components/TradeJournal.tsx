@@ -627,7 +627,7 @@ export default function TradeJournal({ plan }: Props) {
               ) : (
                 <div className="space-y-2">
                   {selectedDayTrades.map(t => (
-                    <div key={t.id} className="card rounded p-4 flex items-center justify-between gap-4">
+                    <div key={t.id} className="card rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
                       <div className="flex items-center gap-3">
                         <span className="font-bold text-primary">{t.symbol || '--'}</span>
                         <span className={`text-xs px-2 py-0.5 rounded font-medium ${t.side === 'Long' ? 'bg-green/20 text-green' : 'bg-red/20 text-red'}`}>{t.side || '--'}</span>
