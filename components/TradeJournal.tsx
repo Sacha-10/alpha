@@ -600,12 +600,12 @@ export default function TradeJournal({ userId, plan }: Props) {
                       onClick={() => setSelectedMonth(isSelected ? null : key)}
                       className={[
                         'border rounded p-3 cursor-pointer transition-all min-h-[92px]',
-                        hasData ? (pnl > 0 ? 'bg-green/10 border-green/30' : pnl < 0 ? 'bg-red/10 border-red/30' : 'border-border') : 'bg-card border-border opacity-40',
-                        isSelected ? 'ring-2 ring-blue' : 'hover:border-blue/50',
+                        hasData ? (pnl > 0 ? 'bg-green/10 border-green/30' : pnl < 0 ? 'bg-red/10 border-red/30' : 'bg-card border-border') : 'bg-card border-border opacity-40',
+                        isSelected ? 'ring-2 ring-blue' : hasData ? 'hover:border-blue/50' : '',
                       ].join(' ')}
                     >
                       <p className={`text-xs font-semibold ${isCurrentMonth ? 'text-blue' : 'text-secondary'}`}>{String(mi + 1).padStart(2, '0')}</p>
-                      <p className={`text-xs font-bold mt-1 hidden md:block ${hasData ? (pnl >= 0 ? 'text-green' : 'text-red') : 'text-secondary'}`}>{formatPnl(hasData ? pnl : 0)}</p>
+                      {hasData && <p className={`text-xs font-bold mt-1 hidden md:block ${pnl >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(pnl)}</p>}
                       <p className="text-xs text-secondary hidden md:block">{ts.length} trade{ts.length !== 1 ? 's' : ''}</p>
                       <p className="text-xs text-secondary hidden md:block">{wr}%</p>
                     </div>
