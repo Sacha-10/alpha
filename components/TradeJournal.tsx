@@ -631,10 +631,10 @@ export default function TradeJournal({ plan }: Props) {
                       <div className="flex items-center gap-3">
                         <span className="font-bold text-primary">{t.symbol || '--'}</span>
                         <span className={`text-xs px-2 py-0.5 rounded font-medium ${t.side === 'Long' ? 'bg-green/20 text-green' : 'bg-red/20 text-red'}`}>{t.side || '--'}</span>
-                        <span className="text-xs text-secondary">{formatTime(t.opened_at)} → {formatTime(t.closed_at)}</span>
+                        <span className="text-xs text-secondary">{formatTime(t.opened_at)} · {formatTime(t.closed_at)}</span>
                       </div>
                       <div className="flex items-center gap-4 text-xs text-secondary">
-                        <span>{t.entry ?? '--'} → {t.exit ?? '--'}</span>
+                        <span>{t.entry ?? '--'} · {t.exit ?? '--'}</span>
                         <span>Vol. {t.volume ?? '--'}</span>
                         <span className={`font-bold text-sm ${(t.profit || 0) >= 0 ? 'text-green' : 'text-red'}`}>{formatPnl(t.profit || 0)}</span>
                       </div>
