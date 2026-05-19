@@ -39,14 +39,14 @@ export async function POST(req: NextRequest) {
     console.log('[import-trades] Premier trade brut:', JSON.stringify(trades[0]))
     const tradesToInsert = trades.map((trade: any) => ({
       user_id: user.id,
-      opened_at: trade.openedAt ? new Date(trade.openedAt).toISOString() : null,
-      closed_at: trade.closedAt ? new Date(trade.closedAt).toISOString() : null,
+      opened_at: trade.openedAt ?? trade.openTime ?? null,
+      closed_at: trade.closedAt ?? trade.closeTime ?? null,
       symbol: trade.symbol ?? null,
-      side: trade.side ?? null,
-      entry: trade.entry ?? null,
-      exit: trade.exit ?? null,
-      volume: trade.volume ?? null,
-      profit: trade.profit ?? null,
+      side: trade.side ?? trade.direction ?? null,
+      entry: trade.entry ?? trade.entryPrice ?? null,
+      exit: trade.exit ?? trade.exitPrice ?? null,
+      volume: trade.volume ?? trade.lotSize ?? null,
+      profit: trade.profit ?? trade.profitLoss ?? null,
       created_at: new Date().toISOString()
     }))
 
