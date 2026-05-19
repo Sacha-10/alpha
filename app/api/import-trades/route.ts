@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Trades invalides' }, { status: 400 })
     }
 
+    console.log('[import-trades] Premier trade brut:', JSON.stringify(trades[0]))
     const tradesToInsert = trades.map((trade: any) => ({
       user_id: user.id,
       opened_at: trade.openedAt ? new Date(trade.openedAt).toISOString() : null,
