@@ -145,7 +145,7 @@ function DateRangePicker({ dateFrom, dateTo, onChangeDateFrom, onChangeDateTo }:
                   key={date}
                   onClick={() => { if (inMonth) handleDayClick(date) }}
                   className={[
-                    'w-10 h-6 text-xs rounded flex items-center justify-center',
+                    'w-10 h-6 text-xs rounded-xl flex items-center justify-center',
                     !inMonth ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-[#1A1A28]',
                     isFromSelected || isToSelected ? 'text-white' : isToday ? 'text-blue' : 'text-secondary',
                     inRange ? 'bg-blue/15' : '',
