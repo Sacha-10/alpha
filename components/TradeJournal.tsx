@@ -214,7 +214,16 @@ export default function TradeJournal({ plan }: Props) {
   const loadTrades = useCallback(async () => {
     setLoading(true)
     const dateMin = getDateMin()
-    const res = await fetch(`/api/trades?dateMin=${encodeURIComponent(dateMin.toISOString())}`)
+    const { createBrowserClient } = await import('@supabase/ssr')
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    const { data: { session } } = await supabase.auth.getSession()
+    const token = session?.access_token
+    const res = await fetch(`/api/trades?dateMin=${dateMin.toISOString()}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
     console.log('[TradeJournal] loadTrades response status:', res.status)
     const data = await res.json()
     console.log('[TradeJournal] loadTrades data:', data)

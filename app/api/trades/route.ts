@@ -20,10 +20,12 @@ export async function GET(req: NextRequest) {
       }
     )
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    const authHeader = req.headers.get('Authorization')
+    const token = authHeader?.replace('Bearer ', '')
+    if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    if (!user || authError) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { searchParams } = new URL(req.url)
     const dateMin = searchParams.get('dateMin')
