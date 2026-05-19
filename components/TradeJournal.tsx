@@ -664,12 +664,12 @@ export default function TradeJournal({ plan }: Props) {
                 </div>
                 <div>
                   <p className="text-xs text-secondary uppercase tracking-wide mb-1">Meilleur jour</p>
-                  <p className="text-lg font-bold text-green">{selectedWeekBestDay ? formatPnl(selectedWeekBestDay.pnl) : '--'}</p>
+                  <p className={`text-lg font-bold ${selectedWeekBestDay ? (selectedWeekBestDay.pnl >= 0 ? 'text-green' : 'text-red') : 'text-primary'}`}>{selectedWeekBestDay ? formatPnl(selectedWeekBestDay.pnl) : '--'}</p>
                   {selectedWeekBestDay && <p className="text-xs text-secondary mt-1">{selectedWeekBestDay.date}</p>}
                 </div>
                 <div>
                   <p className="text-xs text-secondary uppercase tracking-wide mb-1">Pire jour</p>
-                  <p className="text-lg font-bold text-red">{selectedWeekWorstDay ? formatPnl(selectedWeekWorstDay.pnl) : '--'}</p>
+                  <p className={`text-lg font-bold ${selectedWeekWorstDay ? (selectedWeekWorstDay.pnl >= 0 ? 'text-green' : 'text-red') : 'text-primary'}`}>{selectedWeekWorstDay ? formatPnl(selectedWeekWorstDay.pnl) : '--'}</p>
                   {selectedWeekWorstDay && <p className="text-xs text-secondary mt-1">{selectedWeekWorstDay.date}</p>}
                 </div>
               </div>
@@ -697,12 +697,12 @@ export default function TradeJournal({ plan }: Props) {
                 </div>
                 <div>
                   <p className="text-xs text-secondary uppercase tracking-wide mb-1">Meilleur jour</p>
-                  <p className="text-lg font-bold text-green">{selectedMonthBestDay ? formatPnl(selectedMonthBestDay.pnl) : '--'}</p>
+                  <p className={`text-lg font-bold ${selectedMonthBestDay ? (selectedMonthBestDay.pnl >= 0 ? 'text-green' : 'text-red') : 'text-primary'}`}>{selectedMonthBestDay ? formatPnl(selectedMonthBestDay.pnl) : '--'}</p>
                   {selectedMonthBestDay && <p className="text-xs text-secondary mt-1">{selectedMonthBestDay.date}</p>}
                 </div>
                 <div>
                   <p className="text-xs text-secondary uppercase tracking-wide mb-1">Pire jour</p>
-                  <p className="text-lg font-bold text-red">{selectedMonthWorstDay ? formatPnl(selectedMonthWorstDay.pnl) : '--'}</p>
+                  <p className={`text-lg font-bold ${selectedMonthWorstDay ? (selectedMonthWorstDay.pnl >= 0 ? 'text-green' : 'text-red') : 'text-primary'}`}>{selectedMonthWorstDay ? formatPnl(selectedMonthWorstDay.pnl) : '--'}</p>
                   {selectedMonthWorstDay && <p className="text-xs text-secondary mt-1">{selectedMonthWorstDay.date}</p>}
                 </div>
               </div>

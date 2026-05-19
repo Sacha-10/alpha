@@ -170,7 +170,7 @@ export default function TradeReport({
           ? `-${Math.abs(s.totalPnL).toFixed(0)}€`
           : `+${s.totalPnL.toFixed(0)}€`,
       positive: s.totalPnL > 0,
-      valueClass: s.totalPnL < 0 ? "text-red" : undefined,
+      valueClass: s.totalPnL < 0 ? "text-red" : "text-green",
     },
     {
       label: "Trades Total",
