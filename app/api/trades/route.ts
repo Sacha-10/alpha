@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 export async function GET(req: NextRequest) {
+  console.log('[api/trades] DEBUT requête')
   try {
     const cookieStore = await cookies()
     const supabase = createServerClient(
@@ -25,6 +26,7 @@ export async function GET(req: NextRequest) {
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    console.log('[api/trades] getUser result:', user?.id ?? 'NULL', '| authError:', authError?.message)
     if (!user || authError) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const dateMin = searchParams.get('dateMin')
