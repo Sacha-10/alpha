@@ -20,14 +20,13 @@ export async function GET(req: NextRequest) {
       }
     )
 
-    const authHeader = req.headers.get('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
+    const { searchParams } = new URL(req.url)
+    const token = searchParams.get('token')
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     if (!user || authError) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
-    const { searchParams } = new URL(req.url)
     const dateMin = searchParams.get('dateMin')
     console.log('[api/trades] user:', user?.id, '| dateMin:', dateMin)
 

@@ -221,9 +221,7 @@ export default function TradeJournal({ plan }: Props) {
     )
     const { data: { session } } = await supabase.auth.getSession()
     const token = session?.access_token
-    const res = await fetch(`/api/trades?dateMin=${dateMin.toISOString()}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    const res = await fetch(`/api/trades?dateMin=${dateMin.toISOString()}&token=${token}`)
     console.log('[TradeJournal] loadTrades response status:', res.status)
     const data = await res.json()
     console.log('[TradeJournal] loadTrades data:', data)
