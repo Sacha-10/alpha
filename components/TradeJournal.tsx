@@ -218,12 +218,15 @@ export default function TradeJournal({ userId, plan }: Props) {
   const loadTrades = useCallback(async () => {
     setLoading(true)
     const dateMin = getDateMin()
-    const { data } = await supabase
+    console.log('[TradeJournal] loadTrades: début, dateMin=', dateMin.toISOString())
+    const { data, error } = await supabase
       .from('trades')
       .select('*')
       .eq('user_id', userId)
       .gte('opened_at', dateMin.toISOString())
       .order('opened_at', { ascending: true })
+    if (error) console.error('[TradeJournal] loadTrades: erreur Supabase', error)
+    console.log('[TradeJournal] loadTrades: trades chargés:', (data || []).length, '| Premier:', data?.[0] ?? null)
     setTrades(data || [])
     setLoading(false)
   }, [userId, plan])
@@ -271,6 +274,7 @@ export default function TradeJournal({ userId, plan }: Props) {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Erreur lors de l\'import.')
       setImportSuccess(`${data.count} trades importés avec succès.`)
+      console.log('[TradeJournal] handleFile: import OK, appel loadTrades()')
       await loadTrades()
     } catch (err: any) {
       setImportError(err.message || 'Erreur lors de l\'import.')
