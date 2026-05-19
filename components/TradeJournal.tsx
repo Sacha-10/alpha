@@ -104,8 +104,10 @@ function DateRangePicker({ dateFrom, dateTo, onChangeDateFrom, onChangeDateTo }:
   return (
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger asChild>
-        <button className="text-secondary text-sm hover:text-primary cursor-pointer bg-transparent border-none outline-none">
-          {formatDisplay(dateFrom)} · {formatDisplay(dateTo)}
+        <button className="text-secondary text-sm hover:text-primary cursor-pointer bg-transparent border-none outline-none flex items-center gap-2">
+          <span>{formatDisplay(dateFrom)}</span>
+          <span>·</span>
+          <span>{formatDisplay(dateTo)}</span>
         </button>
       </Popover.Trigger>
       <Popover.Portal>
@@ -429,9 +431,9 @@ export default function TradeJournal({ userId, plan }: Props) {
 
       {/* BARRE DE CONTRÔLES — Desktop */}
       <div className="hidden md:flex items-center justify-between mb-6">
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
           <button onClick={() => setView('day')} className={`text-sm transition-colors ${view === 'day' ? 'text-primary font-semibold' : 'text-secondary hover:text-primary'}`}>Jour</button>
-          <span className="text-secondary mx-2">·</span>
+          <span className="text-secondary">·</span>
           <button onClick={() => setView('month')} className={`text-sm transition-colors ${view === 'month' ? 'text-primary font-semibold' : 'text-secondary hover:text-primary'}`}>Mois</button>
         </div>
         <div className="flex items-center gap-2">
