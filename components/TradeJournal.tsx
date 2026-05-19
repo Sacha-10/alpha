@@ -408,7 +408,7 @@ export default function TradeJournal({ userId, plan }: Props) {
 
       {/* EN-TÊTE */}
       <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
-      <div className="mb-6">
+      <div className="mb-4">
         <h1 className="text-2xl font-bold text-primary">Journal de trades</h1>
         {firstTradeDate && lastTradeDate && (
           <p className="text-sm text-secondary mt-1">Du {firstTradeDate} au {lastTradeDate}</p>
@@ -601,10 +601,10 @@ export default function TradeJournal({ userId, plan }: Props) {
                       className={[
                         'bg-card border rounded p-3 cursor-pointer transition-all min-h-[92px]',
                         hasData ? (pnl > 0 ? 'bg-green/10 border-green/30' : pnl < 0 ? 'bg-red/10 border-red/30' : 'border-border') : 'border-border opacity-40',
-                        isCurrentMonth || isSelected ? 'ring-2 ring-blue' : 'hover:border-blue/50',
+                        isSelected ? 'ring-2 ring-blue' : 'hover:border-blue/50',
                       ].join(' ')}
                     >
-                      <p className="text-xs font-semibold text-primary">{String(mi + 1).padStart(2, '0')}</p>
+                      <p className={`text-xs font-semibold ${isCurrentMonth ? 'text-blue' : 'text-primary'}`}>{String(mi + 1).padStart(2, '0')}</p>
                       <p className={`text-xs font-bold mt-1 hidden md:block ${hasData ? (pnl >= 0 ? 'text-green' : 'text-red') : 'text-secondary'}`}>{formatPnl(hasData ? pnl : 0)}</p>
                       <p className="text-xs text-secondary hidden md:block">{ts.length} trade{ts.length !== 1 ? 's' : ''}</p>
                       <p className="text-xs text-secondary hidden md:block">{wr}%</p>
