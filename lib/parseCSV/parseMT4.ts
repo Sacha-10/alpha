@@ -39,15 +39,11 @@ function calcPips(
 }
 
 export function parseMT4(csvText: string): Trade[] {
-  console.log('[parseMT4] Contenu brut reçu (200 premiers chars):', csvText.slice(0, 200))
   const lines = csvText.split('\n').filter(Boolean)
-  console.log('[parseMT4] Nb lignes (hors vides):', lines.length)
   const headers = lines[0].split(',').map(h =>
     h.trim().replace(/"/g, ''))
-  console.log('[parseMT4] Headers détectés:', headers)
 
   const isMT5 = headers.includes('Position')
-  console.log('[parseMT4] Format détecté:', isMT5 ? 'MT5' : 'MT4')
   
   const result = lines.slice(1).map(line => {
     const cols = line.split(',').map(c => 
@@ -112,12 +108,7 @@ export function parseMT4(csvText: string): Trade[] {
       ),
       session: getSession(openTime),
     } as Trade
-  }).filter(t => {
-    const ok = !!(t.symbol && t.entryPrice > 0)
-    if (!ok) console.warn('[parseMT4] Trade filtré (symbol ou entryPrice manquant):', t)
-    return ok
-  })
-  console.log('[parseMT4] Trades parsés et valides:', result.length, '| Premier résultat:', result[0] ?? null)
+  }).filter(t => !!(t.symbol && t.entryPrice > 0))
   return result
 }
 

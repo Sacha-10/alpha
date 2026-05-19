@@ -3,7 +3,6 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 export async function GET(req: NextRequest) {
-  console.log('[api/trades] DEBUT requête')
   try {
     const cookieStore = await cookies()
     const supabase = createServerClient(
@@ -26,11 +25,9 @@ export async function GET(req: NextRequest) {
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-    console.log('[api/trades] getUser result:', user?.id ?? 'NULL', '| authError:', authError?.message)
     if (!user || authError) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const dateMin = searchParams.get('dateMin')
-    console.log('[api/trades] user:', user?.id, '| dateMin:', dateMin)
 
     let query = supabase
       .from('trades')
@@ -43,9 +40,7 @@ export async function GET(req: NextRequest) {
     }
 
     const { data, error } = await query
-    console.log('[api/trades] trades count:', data?.length, '| error:', error)
     if (error) {
-      console.error('[api/trades] Erreur select:', error)
       return NextResponse.json({ error: 'Erreur lors du chargement.' }, { status: 500 })
     }
 

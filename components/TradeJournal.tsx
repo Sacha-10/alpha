@@ -222,12 +222,8 @@ export default function TradeJournal({ plan }: Props) {
     const { data: { session } } = await supabase.auth.getSession()
     const token = session?.access_token
     const res = await fetch(`/api/trades?dateMin=${dateMin.toISOString()}&token=${token}`)
-    console.log('[TradeJournal] loadTrades response status:', res.status)
-    const data = await res.json()
-    console.log('[TradeJournal] loadTrades data:', data)
-    const json = data
+    const json = await res.json()
     if (!res.ok) {
-      console.error('[TradeJournal] loadTrades erreur:', json.error)
       setTrades([])
     } else {
       setTrades(json.trades ?? [])
@@ -278,7 +274,6 @@ export default function TradeJournal({ plan }: Props) {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Erreur lors de l\'import.')
       setImportSuccess(`${data.count} trades importés avec succès.`)
-      console.log('[TradeJournal] handleFile: import OK, appel loadTrades()')
       await loadTrades()
     } catch (err: any) {
       setImportError(err.message || 'Erreur lors de l\'import.')

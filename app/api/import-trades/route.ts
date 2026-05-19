@@ -28,15 +28,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    console.log('[import-trades] Body reçu:', JSON.stringify(body, null, 2))
     const { trades } = body
-    console.log('[import-trades] Nb trades reçus:', Array.isArray(trades) ? trades.length : 'non-array', '| Premier trade:', trades?.[0] ?? null)
     if (!Array.isArray(trades) || trades.length === 0) {
-      console.warn('[import-trades] Trades invalides ou vides')
       return NextResponse.json({ error: 'Trades invalides' }, { status: 400 })
     }
 
-    console.log('[import-trades] Premier trade brut:', JSON.stringify(trades[0]))
     const tradesToInsert = trades.map((trade: any) => ({
       user_id: user.id,
       opened_at: trade.openedAt ?? trade.openTime ?? null,
@@ -50,14 +46,11 @@ export async function POST(req: NextRequest) {
       created_at: new Date().toISOString()
     }))
 
-    console.log('[import-trades] tradesToInsert[0]:', tradesToInsert[0])
     const { error } = await supabase.from('trades').insert(tradesToInsert)
     if (error) {
-      console.error('[import-trades] Erreur insert:', error)
       return NextResponse.json({ error: 'Erreur lors de l\'import.' }, { status: 500 })
     }
 
-    console.log('[import-trades] Import réussi, count:', tradesToInsert.length)
     return NextResponse.json({ success: true, count: tradesToInsert.length })
   } catch (error: any) {
     console.error('[import-trades] Erreur 500:', error)
