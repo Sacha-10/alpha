@@ -413,9 +413,6 @@ export default function TradeJournal({ plan }: Props) {
       <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-primary">Journal de trades</h1>
-        {firstTradeDate && lastTradeDate && (
-          <p className="text-sm text-secondary mt-1">Du {firstTradeDate} au {lastTradeDate}</p>
-        )}
       </div>
 
       {/* TOASTS */}
