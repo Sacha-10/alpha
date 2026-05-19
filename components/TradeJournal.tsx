@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { getSupabaseClient } from '@/lib/supabase'
 import { detectAndParse } from '@/lib/parseCSV'
 import { Upload, ChevronLeft, ChevronRight, Download, X } from 'lucide-react'
 import * as Popover from '@radix-ui/react-popover'
@@ -19,7 +18,6 @@ type TradeRow = {
 }
 
 type Props = {
-  userId: string
   plan: string | null
 }
 
@@ -180,9 +178,7 @@ function formatTime(dateStr: string | null): string {
   return new Date(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
 
-export default function TradeJournal({ userId, plan }: Props) {
-  const supabase = getSupabaseClient()
-
+export default function TradeJournal({ plan }: Props) {
   const getDateMin = () => {
     if (plan === 'pro') return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     if (plan === 'premium') return new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
@@ -218,18 +214,16 @@ export default function TradeJournal({ userId, plan }: Props) {
   const loadTrades = useCallback(async () => {
     setLoading(true)
     const dateMin = getDateMin()
-    console.log('[TradeJournal] loadTrades: début, dateMin=', dateMin.toISOString())
-    const { data, error } = await supabase
-      .from('trades')
-      .select('*')
-      .eq('user_id', userId)
-      .gte('opened_at', dateMin.toISOString())
-      .order('opened_at', { ascending: true })
-    console.log('[TradeJournal] loadTrades erreur:', error)
-    console.log('[TradeJournal] loadTrades data:', data)
-    setTrades(data || [])
+    const res = await fetch(`/api/trades?dateMin=${encodeURIComponent(dateMin.toISOString())}`)
+    const json = await res.json()
+    if (!res.ok) {
+      console.error('[TradeJournal] loadTrades erreur:', json.error)
+      setTrades([])
+    } else {
+      setTrades(json.trades ?? [])
+    }
     setLoading(false)
-  }, [userId, plan])
+  }, [plan])
 
   useEffect(() => { loadTrades() }, [loadTrades])
 

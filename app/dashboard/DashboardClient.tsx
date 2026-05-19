@@ -552,7 +552,7 @@ export default function DashboardClient() {
       return <EmptyFeaturePage icon={History} title="Historique" />;
     }
     if (mainView === "journal-analyses") {
-      return <TradeJournal userId={userId} plan={subscriptionPlan} />;
+      return <TradeJournal plan={subscriptionPlan} />;
     }
     if (mainView === "evolution") {
       return <EmptyFeaturePage icon={TrendingUp} title="Évolution semaine" />;
