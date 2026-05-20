@@ -80,12 +80,12 @@ export default function AnalysisHistory() {
 
   if (analyses.length === 0) {
     return (
-      <div>
+      <div className="flex h-full flex-col">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-primary">Historique</h1>
         </div>
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <p className="text-center text-secondary text-sm">Aucune analyse disponible.</p>
+        <div className="flex flex-1 items-center justify-center">
+          <p className="text-secondary text-sm">Aucune analyse disponible.</p>
         </div>
       </div>
     )
