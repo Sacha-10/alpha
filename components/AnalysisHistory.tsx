@@ -85,7 +85,7 @@ export default function AnalysisHistory() {
           <h1 className="text-2xl font-bold text-primary">Historique</h1>
         </div>
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <p className="text-secondary text-sm">Aucune analyse disponible.</p>
+          <p className="text-center text-secondary text-sm">Aucune analyse disponible.</p>
         </div>
       </div>
     )
