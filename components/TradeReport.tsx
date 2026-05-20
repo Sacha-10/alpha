@@ -17,7 +17,7 @@ function ScoreCircle({ score, label }: { score: number; label: string }) {
     capped > 60 ? "var(--green)" : capped >= 40 ? "var(--cyan)" : "var(--red)";
   return (
     <div className="flex flex-col items-center">
-      <div className="relative h-24 w-24">
+      <div className="relative h-20 w-20 sm:h-24 sm:w-24">
         <svg
           viewBox="0 0 100 100"
           className="h-full w-full -rotate-90 transform"
@@ -42,13 +42,13 @@ function ScoreCircle({ score, label }: { score: number; label: string }) {
           />
         </svg>
         <span
-          className="absolute inset-0 flex items-center justify-center font-mono text-lg font-bold leading-tight"
+          className="absolute inset-0 flex items-center justify-center font-mono text-sm font-bold leading-tight sm:text-lg"
           style={{ color }}
         >
           {Math.round(capped)}/100
         </span>
       </div>
-      <span className="mt-2 text-center text-sm text-secondary">{label}</span>
+      <span className="mt-2 text-center text-xs text-secondary sm:text-sm">{label}</span>
     </div>
   );
 }
@@ -293,7 +293,7 @@ export default function TradeReport({
         className="card p-6"
       >
         <h2 className="mb-4 text-xl font-bold">Performance par session</h2>
-        <div className="mb-4 grid grid-cols-3 gap-4">
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
             { name: "London", rate: session.londonWinRate },
             { name: "New York", rate: session.newYorkWinRate },
@@ -366,7 +366,8 @@ export default function TradeReport({
             <div key={i} className="rounded-xl bg-hover p-4">
               <p className="mb-1 text-sm text-secondary">{p.label}</p>
               <p
-                className={`font-mono font-bold ${p.positive ? "text-green" : "text-red"}`}
+                className={`truncate font-mono text-sm font-bold sm:text-base ${p.positive ? "text-green" : "text-red"}`}
+                title={p.value}
               >
                 {p.value}
               </p>

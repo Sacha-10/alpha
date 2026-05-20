@@ -24,24 +24,6 @@ function formatDate(iso: string): string {
   })
 }
 
-function getPlanLabel(plan: string): string {
-  return plan.charAt(0).toUpperCase() + plan.slice(1)
-}
-
-function ScorePill({ score }: { score: number }) {
-  const normalized = score > 0 && score <= 1 ? score * 100 : score
-  const capped = Math.min(100, Math.max(0, normalized))
-  const color =
-    capped > 60 ? "text-green border-green/30 bg-green/10"
-    : capped >= 40 ? "text-cyan border-cyan/30 bg-cyan/10"
-    : "text-red border-red/30 bg-red/10"
-  return (
-    <span className={`rounded-full border px-2.5 py-1 font-mono text-xs font-semibold ${color}`}>
-      {Math.round(capped)}/100
-    </span>
-  )
-}
-
 export default function AnalysisHistory() {
   const [analyses, setAnalyses] = useState<AnalysisRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -99,11 +81,8 @@ export default function AnalysisHistory() {
       <div className="space-y-3">
         {analyses.map((a, i) => {
           const isOpen = expandedId === a.id
-          const s = a.report.globalStats
-          const psych = a.report.psychologicalProfile
-          const pnl = s.totalPnL
+          const pnl = a.report.globalStats.totalPnL
           const pnlPositive = pnl >= 0
-          const winRate = s.winRate <= 1 ? s.winRate * 100 : s.winRate
 
           return (
             <motion.div
@@ -116,34 +95,13 @@ export default function AnalysisHistory() {
               <button
                 type="button"
                 onClick={() => setExpandedId(isOpen ? null : a.id)}
-                className="flex w-full items-center justify-between p-5 text-left transition-colors hover:bg-hover"
+                className="flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors hover:bg-hover"
               >
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-sm text-secondary">{formatDate(a.created_at)}</span>
-                  <span className="rounded-md border border-border px-2 py-0.5 font-mono text-xs text-secondary">
-                    {getPlanLabel(a.plan)}
+                <span className="text-sm text-secondary">{formatDate(a.created_at)}</span>
+                <div className="flex items-center gap-3">
+                  <span className={`font-mono text-sm font-semibold ${pnlPositive ? "text-green" : "text-red"}`}>
+                    {pnlPositive ? "+" : ""}{pnl.toFixed(0)}€
                   </span>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="hidden items-center gap-4 sm:flex">
-                    <div className="text-right">
-                      <p className="text-xs text-secondary">Score psycho</p>
-                      <ScorePill score={psych.overallScore} />
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-secondary">Win Rate</p>
-                      <span className="font-mono text-sm font-semibold text-primary">
-                        {winRate.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-secondary">PnL</p>
-                      <span className={`font-mono text-sm font-semibold ${pnlPositive ? "text-green" : "text-red"}`}>
-                        {pnlPositive ? "+" : ""}{pnl.toFixed(0)}€
-                      </span>
-                    </div>
-                  </div>
                   {isOpen
                     ? <ChevronUp className="h-4 w-4 shrink-0 text-secondary" />
                     : <ChevronDown className="h-4 w-4 shrink-0 text-secondary" />
@@ -161,7 +119,7 @@ export default function AnalysisHistory() {
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                     className="overflow-hidden border-t border-border"
                   >
-                    <div className="p-5">
+                    <div className="px-3 py-4 sm:px-5 sm:py-5">
                       <TradeReport report={a.report} />
                     </div>
                   </motion.div>
