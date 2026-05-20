@@ -80,14 +80,14 @@ export default function AnalysisHistory() {
 
   if (analyses.length === 0) {
     return (
-      <div className="flex h-full flex-col">
+      <>
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-primary">Historique</h1>
         </div>
-        <div className="flex flex-1 items-center justify-center">
+        <div className="pointer-events-none fixed inset-0 top-14 left-0 md:left-[280px] flex items-center justify-center">
           <p className="text-secondary text-sm">Aucune analyse disponible.</p>
         </div>
-      </div>
+      </>
     )
   }
 
