@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react'
 import { demoTrades } from '@/lib/demoTrades'
 import { PLANS } from '@/lib/plans'
 import TradeReport from '@/components/TradeReport'
+import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
 import { motion } from 'framer-motion'
 
 const SESSION_KEY = 'atx_demo_report'
@@ -59,9 +61,10 @@ export default function DemoPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background 
-      text-primary p-8 max-w-6xl mx-auto">
-      
+    <div className="relative min-h-screen bg-background text-primary">
+      <Navbar />
+    <main className="max-w-6xl mx-auto pt-24 pb-16 px-8">
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -159,5 +162,9 @@ export default function DemoPage() {
         </>
       )}
     </main>
+    <footer className="border-t border-border bg-background/80 px-6 py-10 backdrop-blur-md">
+      <Footer />
+    </footer>
+    </div>
   )
 }

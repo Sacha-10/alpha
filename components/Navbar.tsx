@@ -39,6 +39,7 @@ export default function Navbar() {
   const router = useRouter();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const [user, setUser] = useState<{ id: string } | null>(null);
+  const [wasLoggedIn, setWasLoggedIn] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
@@ -78,6 +79,10 @@ export default function Navbar() {
   }, [mobileOpen]);
 
   useEffect(() => {
+    setWasLoggedIn(localStorage.getItem("atx_was_logged_in") === "1");
+  }, []);
+
+  useEffect(() => {
     const isPendingOAuth = sessionStorage.getItem("oauth_login_pending") === "1"
     if (isPendingOAuth) sessionStorage.removeItem("oauth_login_pending")
 
@@ -95,6 +100,10 @@ export default function Navbar() {
     // Register FIRST — before any async call — so we never miss SIGNED_IN
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null)
+      if (session) {
+        localStorage.setItem("atx_was_logged_in", "1");
+        setWasLoggedIn(true);
+      }
       if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && isPendingOAuth) {
         await handlePostLogin(session.user.id)
       }
@@ -103,6 +112,10 @@ export default function Navbar() {
     // Fallback: exchange may have completed before the listener above was registered
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
+      if (session) {
+        localStorage.setItem("atx_was_logged_in", "1");
+        setWasLoggedIn(true);
+      }
       if (session && isPendingOAuth) void handlePostLogin(session.user.id)
     })
 
@@ -163,7 +176,7 @@ export default function Navbar() {
             className="hidden items-center gap-2 rounded bg-blue px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-blue/90 md:inline-flex"
           >
             <UserCircle className="h-4 w-4" aria-hidden />
-            Déconnexion
+            Se déconnecter
           </button>
         ) : (
           <button
@@ -172,7 +185,7 @@ export default function Navbar() {
             className="hidden items-center gap-2 rounded bg-blue px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-blue/90 md:inline-flex"
           >
             <UserCircle className="h-4 w-4" aria-hidden />
-            S&apos;inscrire
+            {wasLoggedIn ? "Se connecter" : "S’inscrire"}
           </button>
         )}
 
@@ -216,7 +229,7 @@ export default function Navbar() {
               className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded bg-blue px-4 py-2 font-semibold text-primary transition-all duration-200 hover:bg-blue/90"
             >
               <UserCircle className="h-4 w-4" aria-hidden />
-              Déconnexion
+              Se déconnecter
             </button>
           ) : (
             <button
@@ -228,7 +241,7 @@ export default function Navbar() {
               className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded bg-blue px-4 py-2 font-semibold text-primary transition-all duration-200 hover:bg-blue/90"
             >
               <UserCircle className="h-4 w-4" aria-hidden />
-              S&apos;inscrire
+              {wasLoggedIn ? "Se connecter" : "S'inscrire"}
             </button>
           )}
         </div>

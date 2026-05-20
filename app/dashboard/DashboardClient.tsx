@@ -381,7 +381,7 @@ export default function DashboardClient() {
     return (
       <div className="w-full shrink-0 border-t border-border px-4 pb-5 pt-4" style={{ backgroundColor: '#12121A' }}>
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-xs text-secondary">Analyses restantes</span>
+          <span className="text-xs text-secondary">Analyses utilisées</span>
           <span className="font-mono text-xs text-primary">
             {analysesUsed}/{analysesLimit}
           </span>
@@ -733,7 +733,7 @@ export default function DashboardClient() {
               onClick={() => void signOut()}
               className="rounded-md border border-border px-3 py-1.5 text-xs text-secondary hover:bg-hover hover:text-primary"
             >
-              Déconnexion
+              Se déconnecter
             </button>
           </div>
         </div>
@@ -796,7 +796,7 @@ export default function DashboardClient() {
               }}
               className="flex w-full cursor-pointer items-center rounded-lg mt-4 text-xs text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
             >
-              Déconnexion
+              Se déconnecter
             </button>
           </div>
           {renderQuotaCard()}
