@@ -66,7 +66,7 @@ export default function AnalysisHistory() {
     return (
       <div>
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-primary">Historique de vos analyses</h1>
+          <h1 className="text-2xl font-bold text-primary">Historique</h1>
         </div>
         <div className="flex items-center justify-center py-24">
           <svg className="h-6 w-6 animate-spin text-secondary" viewBox="0 0 24 24">
@@ -82,11 +82,10 @@ export default function AnalysisHistory() {
     return (
       <div>
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-primary">Historique de vos analyses</h1>
+          <h1 className="text-2xl font-bold text-primary">Historique</h1>
         </div>
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <p className="text-secondary text-sm">Aucune analyse enregistrée pour le moment.</p>
-          <p className="mt-2 text-xs text-secondary opacity-60">Vos prochaines analyses apparaîtront ici automatiquement.</p>
+          <p className="text-secondary text-sm">Aucune analyse disponible.</p>
         </div>
       </div>
     )
