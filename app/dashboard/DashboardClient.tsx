@@ -14,6 +14,7 @@ import {
 } from "react";
 import TradeReport from "@/components/TradeReport";
 import TradeJournal from "@/components/TradeJournal";
+import AnalysisHistory from "@/components/AnalysisHistory";
 import type { AiAnalysisResult } from "@/lib/tradingAnalysisTypes";
 import {
   Bell,
@@ -549,7 +550,7 @@ export default function DashboardClient() {
     }
 
     if (mainView === "historique") {
-      return <EmptyFeaturePage icon={History} title="Historique" />;
+      return <AnalysisHistory />;
     }
     if (mainView === "journal-analyses") {
       return <TradeJournal plan={subscriptionPlan} />;
@@ -812,7 +813,7 @@ export default function DashboardClient() {
 
         <main
           className={`flex min-h-0 flex-1 flex-col bg-[#0A0A0F] p-6 ${
-            mainView === "nouvelle-analyse" || mainView === "mon-analyse" || mainView === "journal-analyses" ? "overflow-y-auto" : "overflow-hidden"
+            mainView === "nouvelle-analyse" || mainView === "mon-analyse" || mainView === "journal-analyses" || mainView === "historique" ? "overflow-y-auto" : "overflow-hidden"
           }`}
         >
           <div className="flex shrink-0 flex-col gap-4">
@@ -847,7 +848,7 @@ export default function DashboardClient() {
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col">
-            {mainView !== "nouvelle-analyse" && mainView !== "mon-analyse" && mainView !== "journal-analyses" ? (
+            {mainView !== "nouvelle-analyse" && mainView !== "mon-analyse" && mainView !== "journal-analyses" && mainView !== "historique" ? (
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
                 {renderMainContent()}
               </div>
