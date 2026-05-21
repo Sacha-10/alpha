@@ -171,6 +171,7 @@ export default function DashboardClient() {
         const json = body as { analyses?: Array<{ id: string; report: AiAnalysisResult }> };
         console.log('[DashboardClient] GET /api/analyses OK:', json.analyses?.length ?? 0, 'analyse(s)');
         const latest = json.analyses?.[0];
+        console.log('[DashboardClient] analyses[0] complet:', JSON.stringify(latest ?? null));
         if (latest?.report) {
           setAnalysis(latest.report);
           setHasSessionReport(true);
