@@ -36,8 +36,6 @@ import {
 } from "lucide-react";
 
 const SESSION_KEY_REPORT = "atx_last_report";
-const SESSION_KEY_LEFT = "atx_analyses_left";
-const SESSION_KEY_LIMIT = "atx_analyses_limit";
 
 const LogoSvg = () => (
   <svg
@@ -109,7 +107,7 @@ export default function DashboardClient() {
   const paymentSuccess = searchParams.get("success") === "true";
 
   const [analysis, setAnalysis] = useState<AiAnalysisResult | null>(null);
-  const [analysesLeft, setAnalysesLeft] = useState<number | undefined>();
+  const [analysesUsed, setAnalysesUsed] = useState<number | undefined>();
   const [analysesLimit, setAnalysesLimit] = useState<number | undefined>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -157,6 +155,7 @@ export default function DashboardClient() {
         if (latest?.report) {
           setAnalysis(latest.report);
           setHasSessionReport(true);
+          setMainView("mon-analyse");
           try {
             sessionStorage.setItem(SESSION_KEY_REPORT, JSON.stringify(latest.report));
           } catch { /* ignore */ }
@@ -180,7 +179,6 @@ export default function DashboardClient() {
     return () => clearTimeout(autoHide);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // BUG 3 & 4 — fetchUserData as standalone function, called on mount and after analysis
   const fetchUserData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -193,14 +191,9 @@ export default function DashboardClient() {
     if (data) {
       setSubscriptionPlan(data.subscription_plan ?? null);
       setAnalysesResetDate(data.analyses_reset_date ?? null);
-      // BUG 4 — analysesLeft always derived from Supabase, never local calc
       if (data.analyses_limit != null && data.analyses_used != null) {
-        const left = Math.max(0, data.analyses_limit - data.analyses_used);
-        setAnalysesLeft(left);
+        setAnalysesUsed(data.analyses_used);
         setAnalysesLimit(data.analyses_limit);
-        // Sync sessionStorage so refresh shows correct count
-        sessionStorage.setItem(SESSION_KEY_LEFT, String(left));
-        sessionStorage.setItem(SESSION_KEY_LIMIT, String(data.analyses_limit));
       }
     }
   }, [supabase]);
@@ -222,16 +215,13 @@ export default function DashboardClient() {
     setLoading(true);
     setError(null);
     setAnalysis(null);
-    setAnalysesLeft(undefined);
+    setAnalysesUsed(undefined);
     setAnalysesLimit(undefined);
     setHasSessionReport(false);
     setPendingFile(null);
     setUploadZoneKey((k) => k + 1);
     setMainView((prev) => (prev === "mon-analyse" ? "nouvelle-analyse" : prev));
-    // BUG 2 — Clear sessionStorage when user uploads a new file
     sessionStorage.removeItem(SESSION_KEY_REPORT);
-    sessionStorage.removeItem(SESSION_KEY_LEFT);
-    sessionStorage.removeItem(SESSION_KEY_LIMIT);
     try {
       const trades = await detectAndParse(file);
       if (!trades.length) {
@@ -261,10 +251,8 @@ export default function DashboardClient() {
 
       setAnalysis(report);
       setHasSessionReport(true);
-      // BUG 2 — Save report to sessionStorage
       sessionStorage.setItem(SESSION_KEY_REPORT, JSON.stringify(report));
 
-      // BUG 3 & 4 — Refetch from Supabase to get authoritative counts
       await fetchUserData();
     } catch (e) {
       setError(
@@ -280,10 +268,6 @@ export default function DashboardClient() {
     return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
   }
 
-  const analysesUsed =
-    analysesLimit !== undefined && analysesLeft !== undefined
-      ? Math.max(0, analysesLimit - analysesLeft)
-      : undefined;
   const normalizedPlan = (subscriptionPlan ?? "").toLowerCase();
   const isPro = normalizedPlan === "pro";
   const isElite = normalizedPlan === "elite";
@@ -560,7 +544,7 @@ export default function DashboardClient() {
       return (
         <TradeReport
           report={analysis}
-          analysesLeft={analysesLeft}
+          analysesUsed={analysesUsed}
           analysesLimit={analysesLimit}
         />
       );

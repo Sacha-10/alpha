@@ -6,7 +6,7 @@ import type { AiAnalysisResult, BiasSeverity } from "@/lib/tradingAnalysisTypes"
 
 interface Props {
   report: AiAnalysisResult;
-  analysesLeft?: number;
+  analysesUsed?: number;
   analysesLimit?: number;
 }
 
@@ -81,7 +81,7 @@ function safeStr(v: unknown, fallback = "—"): string {
 
 export default function TradeReport({
   report,
-  analysesLeft,
+  analysesUsed,
   analysesLimit,
 }: Props) {
   const s = report.globalStats;
@@ -125,7 +125,7 @@ export default function TradeReport({
   }
 
   const limit = analysesLimit ?? 0;
-  const used = limit > 0 ? Math.max(0, limit - (analysesLeft ?? 0)) : 0;
+  const used = analysesUsed ?? 0;
   const usedPct = limit > 0 ? Math.min(100, (used / limit) * 100) : 0;
   const isAtLimit = limit > 0 && used >= limit;
   const displayRate = (v: unknown): string => {
@@ -209,7 +209,7 @@ export default function TradeReport({
 
   return (
     <div className="space-y-6">
-      {analysesLeft !== undefined && limit < 999999 && (
+      {analysesUsed !== undefined && limit < 999999 && (
         <div className="card flex items-center justify-between p-6">
           <span className="text-secondary">Analyses utilisées</span>
           <div className="flex items-center gap-3">
