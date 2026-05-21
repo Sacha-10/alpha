@@ -135,19 +135,10 @@ export default function DashboardClient() {
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Restore last report: sessionStorage first (instant), then Supabase (cross-device fallback).
+  // Restore last report: Supabase first (cross-device, most recent), sessionStorage as fallback.
   // Depends on userId so the Supabase fetch is guaranteed to run while the session is active.
   useEffect(() => {
     async function restoreLatestAnalysis() {
-      try {
-        const saved = sessionStorage.getItem(SESSION_KEY_REPORT);
-        if (saved) {
-          setAnalysis(JSON.parse(saved) as AiAnalysisResult);
-          setHasSessionReport(true);
-          return;
-        }
-      } catch { /* ignore */ }
-
       if (!userId) {
         return; // auth not ready yet; re-triggered once fetchUserData sets userId
       }
@@ -157,19 +148,30 @@ export default function DashboardClient() {
         const tokenParam = session?.access_token ? `?token=${session.access_token}` : '';
         const res = await fetch(`/api/analyses${tokenParam}`);
         const body = await res.json().catch(() => ({}));
-        if (!res.ok) return;
-        const json = body as { analyses?: Array<{ id: string; report: AiAnalysisResult }> };
-        const latest = json.analyses?.[0];
-        if (latest?.report) {
-          setAnalysis(latest.report);
-          setHasSessionReport(true);
-          try {
-            sessionStorage.setItem(SESSION_KEY_REPORT, JSON.stringify(latest.report));
-          } catch { /* ignore */ }
+        if (res.ok) {
+          const json = body as { analyses?: Array<{ id: string; report: AiAnalysisResult }> };
+          const latest = json.analyses?.[0];
+          if (latest?.report) {
+            setAnalysis(latest.report);
+            setHasSessionReport(true);
+            try {
+              sessionStorage.setItem(SESSION_KEY_REPORT, JSON.stringify(latest.report));
+            } catch { /* ignore */ }
+            return;
+          }
         }
       } catch (e) {
         console.error('[DashboardClient] GET /api/analyses erreur réseau:', e);
       }
+
+      // Fallback: use sessionStorage if Supabase fetch failed or returned no analysis.
+      try {
+        const saved = sessionStorage.getItem(SESSION_KEY_REPORT);
+        if (saved) {
+          setAnalysis(JSON.parse(saved) as AiAnalysisResult);
+          setHasSessionReport(true);
+        }
+      } catch { /* ignore */ }
     }
 
     void restoreLatestAnalysis();
