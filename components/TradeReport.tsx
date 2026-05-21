@@ -69,6 +69,16 @@ function SeverityBadge({ severity }: { severity: BiasSeverity | string }) {
   );
 }
 
+function safeNum(v: unknown, fallback = 0): number {
+  const n = Number(v);
+  return isNaN(n) ? fallback : n;
+}
+
+function safeStr(v: unknown, fallback = "—"): string {
+  if (v == null || v === "N/A" || v === "") return fallback;
+  return String(v);
+}
+
 export default function TradeReport({
   report,
   analysesLeft,
@@ -118,8 +128,10 @@ export default function TradeReport({
   const used = limit > 0 ? Math.max(0, limit - (analysesLeft ?? 0)) : 0;
   const usedPct = limit > 0 ? Math.min(100, (used / limit) * 100) : 0;
   const isAtLimit = limit > 0 && used >= limit;
-  const displayRate = (v: number) =>
-    v <= 1 ? (v * 100).toFixed(1) : v.toFixed(1);
+  const displayRate = (v: unknown): string => {
+    const n = safeNum(v);
+    return n <= 1 ? (n * 100).toFixed(1) : n.toFixed(1);
+  };
 
   function sessionPctColorClasses(pct: number): { bar: string; text: string } {
     if (pct < 40) return { bar: "var(--red)", text: "text-red" };
@@ -127,9 +139,10 @@ export default function TradeReport({
     return { bar: "var(--green)", text: "text-green" };
   }
 
-  const winRateNum = s.winRate <= 1 ? s.winRate * 100 : s.winRate;
-  const ddNum =
-    s.maxDrawdownPercent <= 1 ? s.maxDrawdownPercent * 100 : s.maxDrawdownPercent;
+  const winRateRaw = safeNum(s.winRate);
+  const winRateNum = winRateRaw <= 1 ? winRateRaw * 100 : winRateRaw;
+  const ddRaw = safeNum(s.maxDrawdownPercent);
+  const ddNum = ddRaw <= 1 ? ddRaw * 100 : ddRaw;
 
   const tokyoRate =
     "tokyoWinRate" in session && typeof session.tokyoWinRate === "number"
@@ -152,8 +165,8 @@ export default function TradeReport({
     },
     {
       label: "Profit Factor",
-      value: s.profitFactor.toFixed(2),
-      positive: s.profitFactor >= 1,
+      value: safeNum(s.profitFactor).toFixed(2),
+      positive: safeNum(s.profitFactor) >= 1,
     },
     {
       label: "Max Drawdown",
@@ -165,31 +178,31 @@ export default function TradeReport({
     },
     {
       label: "PnL Total",
-      value:
-        s.totalPnL < 0
-          ? `-${Math.abs(s.totalPnL).toFixed(0)}€`
-          : `+${s.totalPnL.toFixed(0)}€`,
-      positive: s.totalPnL > 0,
-      valueClass: s.totalPnL < 0 ? "text-red" : "text-green",
+      value: (() => {
+        const pnl = safeNum(s.totalPnL);
+        return pnl < 0 ? `-${Math.abs(pnl).toFixed(0)}€` : `+${pnl.toFixed(0)}€`;
+      })(),
+      positive: safeNum(s.totalPnL) > 0,
+      valueClass: safeNum(s.totalPnL) < 0 ? "text-red" : "text-green",
     },
     {
       label: "Trades Total",
-      value: String(s.totalTrades),
+      value: String(s.totalTrades ?? 0),
       positive: true,
     },
     {
       label: "Sharpe Ratio",
-      value: s.sharpeRatio.toFixed(2),
-      positive: s.sharpeRatio >= 1,
+      value: safeNum(s.sharpeRatio).toFixed(2),
+      positive: safeNum(s.sharpeRatio) >= 1,
     },
     {
       label: "Risk/Reward moyen",
-      value: s.avgRiskReward.toFixed(2),
-      positive: s.avgRiskReward >= 1,
+      value: safeNum(s.avgRiskReward).toFixed(2),
+      positive: safeNum(s.avgRiskReward) >= 1,
     },
     {
       label: "Durée moyenne",
-      value: s.avgTradeDuration,
+      value: safeStr(s.avgTradeDuration),
       positive: true,
     },
   ];
@@ -219,11 +232,11 @@ export default function TradeReport({
         <h2 className="mb-6 text-xl font-bold">Votre performance globale</h2>
         <div className="flex justify-around">
           <ScoreCircle
-            score={psych.overallScore}
+            score={safeNum(psych.overallScore)}
             label="Score psychologique"
           />
-          <ScoreCircle score={risk.score} label="Gestion du risque" />
-          <ScoreCircle score={prop.score} label="Prop Firm Readiness" />
+          <ScoreCircle score={safeNum(risk.score)} label="Gestion du risque" />
+          <ScoreCircle score={safeNum(prop.score)} label="Prop Firm Readiness" />
         </div>
       </motion.div>
 
@@ -263,10 +276,10 @@ export default function TradeReport({
         <h2 className="mb-2 text-xl font-bold">Votre profil psychologique</h2>
         <p className="mb-4 text-secondary">
           Biais dominant :{" "}
-          <span className="ml-1 font-medium text-red">{psych.dominantBias}</span>
+          <span className="ml-1 font-medium text-red">{safeStr(psych.dominantBias)}</span>
         </p>
         <div className="space-y-4">
-          {psych.biases.map((bias, i) => (
+          {(psych.biases ?? []).map((bias, i) => (
             <div key={`${bias.name}-${i}`} className="rounded-xl bg-hover p-4">
               <div className="mb-2 flex items-center justify-between">
                 <span className="font-bold">{bias.name}</span>
@@ -295,9 +308,9 @@ export default function TradeReport({
         <h2 className="mb-4 text-xl font-bold">Performance par session</h2>
         <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
-            { name: "London", rate: session.londonWinRate },
-            { name: "New York", rate: session.newYorkWinRate },
-            { name: "Tokyo", rate: tokyoRate },
+            { name: "London", rate: safeNum(session.londonWinRate) },
+            { name: "New York", rate: safeNum(session.newYorkWinRate) },
+            { name: "Tokyo", rate: safeNum(tokyoRate) },
           ].map((sess, i) => {
             const rateValue = Number(displayRate(sess.rate));
             const se = sessionPctColorClasses(rateValue);
@@ -320,7 +333,7 @@ export default function TradeReport({
             );
           })}
         </div>
-        <p className="text-sm italic text-secondary">{session.insight}</p>
+        <p className="text-sm italic text-secondary">{safeStr(session.insight, "")}</p>
       </motion.div>
 
       <motion.div
@@ -334,32 +347,36 @@ export default function TradeReport({
           {[
             {
               label: "Meilleur jour",
-              value: patterns.bestDayOfWeek,
+              value: safeStr(patterns.bestDayOfWeek),
               positive: true,
             },
             {
               label: "Pire jour",
-              value: patterns.worstDayOfWeek,
+              value: safeStr(patterns.worstDayOfWeek),
               positive: false,
             },
             {
               label: "Meilleure heure",
-              value: patterns.bestTimeOfDay,
+              value: safeStr(patterns.bestTimeOfDay),
               positive: true,
             },
             {
               label: "Pire heure",
-              value: patterns.worstTimeOfDay,
+              value: safeStr(patterns.worstTimeOfDay),
               positive: false,
             },
             {
               label: "Meilleur symbole",
-              value: `${patterns.bestSymbol.symbol} (${displayRate(patterns.bestSymbol.winRate)}%)`,
+              value: patterns.bestSymbol
+                ? `${safeStr(patterns.bestSymbol.symbol)} (${displayRate(patterns.bestSymbol.winRate)}%)`
+                : "—",
               positive: true,
             },
             {
               label: "Pire symbole",
-              value: `${patterns.worstSymbol.symbol} (${displayRate(patterns.worstSymbol.winRate)}%)`,
+              value: patterns.worstSymbol
+                ? `${safeStr(patterns.worstSymbol.symbol)} (${displayRate(patterns.worstSymbol.winRate)}%)`
+                : "—",
               positive: false,
             },
           ].map((p, i) => (
@@ -394,11 +411,11 @@ export default function TradeReport({
               : "✗ Ne passerait pas encore le challenge FTMO"}
           </span>
           <span className="text-sm text-secondary sm:text-base">
-            Temps estimé : {prop.estimatedTimeToReady}
+            Temps estimé : {safeStr(prop.estimatedTimeToReady)}
           </span>
         </div>
         <ul className="space-y-2">
-          {prop.mainObstacles.map((obs, i) => (
+          {(prop.mainObstacles ?? []).map((obs, i) => (
             <li key={i} className="flex gap-2 text-sm text-secondary">
               <span className="text-red">✗</span>
               {obs}
@@ -417,7 +434,7 @@ export default function TradeReport({
           Votre plan d&apos;action personnalisé
         </h2>
         <div className="space-y-4">
-          {report.actionPlan.map((item, i) => {
+          {(report.actionPlan ?? []).map((item, i) => {
             const catColors: Record<string, string> = {
               Psychologie: "bg-red/20 text-red",
               Risque: "bg-cyan/20 text-cyan",
@@ -457,7 +474,7 @@ export default function TradeReport({
       >
         <h2 className="mb-4 text-xl font-bold">L&apos;avis de votre coach IA</h2>
         <p className="text-lg italic leading-relaxed text-secondary">
-          &ldquo;{report.personalizedInsight}&rdquo;
+          &ldquo;{safeStr(report.personalizedInsight)}&rdquo;
         </p>
         <p className="mt-4 font-medium text-blue">
           — Votre coach IA trading
