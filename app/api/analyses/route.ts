@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
-import { getSupabase } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,7 +21,11 @@ export async function GET(req: NextRequest) {
     let user: { id: string } | null = null
 
     if (token) {
-      supabase = getSupabase()
+      supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { global: { headers: { Authorization: `Bearer ${token}` } } }
+      )
       const { data: { user: u }, error } = await supabase.auth.getUser(token)
       if (!u || error) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
       user = u
