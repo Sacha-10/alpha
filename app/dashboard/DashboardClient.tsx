@@ -143,9 +143,13 @@ export default function DashboardClient() {
         return; // auth not ready yet; re-triggered once fetchUserData sets userId
       }
 
+      let tokenParam = '';
       try {
         const { data: { session } } = await supabase.auth.refreshSession();
-        const tokenParam = session?.access_token ? `?token=${session.access_token}` : '';
+        if (session?.access_token) tokenParam = `?token=${session.access_token}`;
+      } catch { /* silent — fetch proceeds without token, uses cookies branch */ }
+
+      try {
         const res = await fetch(`/api/analyses${tokenParam}`);
         const body = await res.json().catch(() => ({}));
         if (res.ok) {
