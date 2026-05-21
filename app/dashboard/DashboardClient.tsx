@@ -152,15 +152,9 @@ export default function DashboardClient() {
         return; // auth not ready yet; re-triggered once fetchUserData sets userId
       }
 
-      // refreshSession() can throw AuthSessionMissingError on desktop (httpOnly-only cookies).
-      // Isolate it so a failure falls through to the cookie branch of the route.
-      let tokenParam = '';
       try {
         const { data: { session } } = await supabase.auth.refreshSession();
-        if (session?.access_token) tokenParam = `?token=${session.access_token}`;
-      } catch { /* no client-side session — cookie branch handles auth */ }
-
-      try {
+        const tokenParam = session?.access_token ? `?token=${session.access_token}` : '';
         const res = await fetch(`/api/analyses${tokenParam}`);
         const body = await res.json().catch(() => ({}));
         if (!res.ok) return;
