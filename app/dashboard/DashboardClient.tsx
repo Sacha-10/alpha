@@ -151,7 +151,9 @@ export default function DashboardClient() {
       if (!userId) return; // auth not ready yet; re-triggered once fetchUserData sets userId
 
       try {
-        const res = await fetch('/api/analyses');
+        const { data: { session } } = await supabase.auth.getSession()
+        const tokenParam = session?.access_token ? `?token=${session.access_token}` : ''
+        const res = await fetch(`/api/analyses${tokenParam}`);
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
           console.error('[DashboardClient] GET /api/analyses erreur', res.status, body);

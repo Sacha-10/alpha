@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { getSupabase } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,24 +13,38 @@ const PLAN_MONTHS: Record<string, number | null> = {
 
 export async function GET(req: NextRequest) {
   try {
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() { return cookieStore.getAll() },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          },
-        },
-      }
-    )
+    const { searchParams } = new URL(req.url)
+    const token = searchParams.get('token')
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let supabase: any
+    let user: { id: string } | null = null
+
+    if (token) {
+      supabase = getSupabase()
+      const { data: { user: u }, error } = await supabase.auth.getUser(token)
+      if (!u || error) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      user = u
+    } else {
+      const cookieStore = await cookies()
+      supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() { return cookieStore.getAll() },
+            setAll(cookiesToSet) {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              )
+            },
+          },
+        }
+      )
+      const { data: { user: u } } = await supabase.auth.getUser()
+      if (!u) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      user = u
+    }
 
     const { data: userData } = await supabase
       .from('users')
