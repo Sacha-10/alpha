@@ -155,7 +155,6 @@ export default function DashboardClient() {
         if (latest?.report) {
           setAnalysis(latest.report);
           setHasSessionReport(true);
-          setMainView("mon-analyse");
           try {
             sessionStorage.setItem(SESSION_KEY_REPORT, JSON.stringify(latest.report));
           } catch { /* ignore */ }

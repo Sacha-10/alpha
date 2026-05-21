@@ -80,9 +80,7 @@ export default function Navbar() {
 
   useEffect(() => {
     setWasLoggedIn(localStorage.getItem("atx_was_logged_in") === "1");
-  }, []);
 
-  useEffect(() => {
     const isPendingOAuth = sessionStorage.getItem("oauth_login_pending") === "1"
     if (isPendingOAuth) sessionStorage.removeItem("oauth_login_pending")
 
