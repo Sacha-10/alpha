@@ -46,6 +46,8 @@ export async function GET(req: NextRequest) {
       user = u
     }
 
+    if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+
     const { data: userData } = await supabase
       .from('users')
       .select('subscription_plan')
