@@ -139,28 +139,37 @@ export default function DashboardClient() {
   // Depends on userId so the Supabase fetch is guaranteed to run while the session is active.
   useEffect(() => {
     async function restoreLatestAnalysis() {
+      console.log('[DashboardClient] restoreLatestAnalysis appelée — userId:', userId || '(vide)');
+
       try {
         const saved = sessionStorage.getItem(SESSION_KEY_REPORT);
         if (saved) {
+          console.log('[DashboardClient] rapport trouvé dans sessionStorage, skip fetch');
           setAnalysis(JSON.parse(saved) as AiAnalysisResult);
           setHasSessionReport(true);
           return;
         }
       } catch { /* ignore */ }
 
-      if (!userId) return; // auth not ready yet; re-triggered once fetchUserData sets userId
+      if (!userId) {
+        console.log('[DashboardClient] userId vide, fetch reporté');
+        return; // auth not ready yet; re-triggered once fetchUserData sets userId
+      }
 
       try {
-        const { data: { session } } = await supabase.auth.getSession()
-        const tokenParam = session?.access_token ? `?token=${session.access_token}` : ''
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('[DashboardClient] session récupérée — access_token présent:', !!session?.access_token);
+        const tokenParam = session?.access_token ? `?token=${session.access_token}` : '';
+        console.log('[DashboardClient] fetch GET /api/analyses en cours...');
         const res = await fetch(`/api/analyses${tokenParam}`);
+        const body = await res.json().catch(() => ({}));
+        console.log('[DashboardClient] GET /api/analyses réponse — status:', res.status, 'body:', body);
         if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
           console.error('[DashboardClient] GET /api/analyses erreur', res.status, body);
           return;
         }
-        const json = (await res.json()) as { analyses?: Array<{ id: string; report: AiAnalysisResult }> };
-        console.log('[DashboardClient] GET /api/analyses réponse:', json.analyses?.length ?? 0, 'analyse(s)');
+        const json = body as { analyses?: Array<{ id: string; report: AiAnalysisResult }> };
+        console.log('[DashboardClient] GET /api/analyses OK:', json.analyses?.length ?? 0, 'analyse(s)');
         const latest = json.analyses?.[0];
         if (latest?.report) {
           setAnalysis(latest.report);
