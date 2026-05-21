@@ -152,8 +152,13 @@ export default function DashboardClient() {
 
       try {
         const res = await fetch('/api/analyses');
-        if (!res.ok) return;
-        const json = (await res.json()) as { analyses?: Array<{ report: AiAnalysisResult }> };
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          console.error('[DashboardClient] GET /api/analyses erreur', res.status, body);
+          return;
+        }
+        const json = (await res.json()) as { analyses?: Array<{ id: string; report: AiAnalysisResult }> };
+        console.log('[DashboardClient] GET /api/analyses réponse:', json.analyses?.length ?? 0, 'analyse(s)');
         const latest = json.analyses?.[0];
         if (latest?.report) {
           setAnalysis(latest.report);
@@ -161,8 +166,12 @@ export default function DashboardClient() {
           try {
             sessionStorage.setItem(SESSION_KEY_REPORT, JSON.stringify(latest.report));
           } catch { /* ignore */ }
+        } else {
+          console.log('[DashboardClient] GET /api/analyses: aucune analyse disponible pour cet utilisateur');
         }
-      } catch { /* ignore */ }
+      } catch (e) {
+        console.error('[DashboardClient] GET /api/analyses erreur réseau:', e);
+      }
     }
 
     void restoreLatestAnalysis();
