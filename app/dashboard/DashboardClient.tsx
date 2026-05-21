@@ -191,7 +191,9 @@ export default function DashboardClient() {
           }
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (err) console.error('[Realtime] analyses subscription error:', err);
+      });
 
     return () => {
       void supabase.removeChannel(channel);
