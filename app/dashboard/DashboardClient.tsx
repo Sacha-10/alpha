@@ -135,7 +135,8 @@ export default function DashboardClient() {
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Restore last report: sessionStorage first (instant), then Supabase (cross-device fallback)
+  // Restore last report: sessionStorage first (instant), then Supabase (cross-device fallback).
+  // Depends on userId so the Supabase fetch is guaranteed to run while the session is active.
   useEffect(() => {
     async function restoreLatestAnalysis() {
       try {
@@ -146,6 +147,8 @@ export default function DashboardClient() {
           return;
         }
       } catch { /* ignore */ }
+
+      if (!userId) return; // auth not ready yet; re-triggered once fetchUserData sets userId
 
       try {
         const res = await fetch('/api/analyses');
@@ -163,7 +166,7 @@ export default function DashboardClient() {
     }
 
     void restoreLatestAnalysis();
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     if (!showSuccessBanner) return;
