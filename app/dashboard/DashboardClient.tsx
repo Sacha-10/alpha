@@ -176,6 +176,29 @@ export default function DashboardClient() {
   }, [userId]);
 
   useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel(`analyses-insert:${userId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'analyses', filter: `user_id=eq.${userId}` },
+        (payload) => {
+          const report = (payload.new as { report: AiAnalysisResult }).report;
+          if (report) {
+            setAnalysis(report);
+            setHasSessionReport(true);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     if (!showSuccessBanner) return;
     const url = new URL(window.location.href);
     url.searchParams.delete("success");
