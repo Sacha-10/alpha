@@ -3,6 +3,7 @@ import { parseBinance } from './parseBinance'
 import { parseTradingView } from './parseTradingView'
 import { parseFTMO } from './parseFTMO'
 import { parseBybit } from './parseBybit'
+import { normalizeCSV } from './utils'
 
 export type { Trade }
 export type { NormalizedTrade } from './types'
@@ -10,7 +11,7 @@ export type { NormalizedTrade } from './types'
 export async function detectAndParse(
   file: File
 ): Promise<Trade[]> {
-  const text = await file.text()
+  const text = normalizeCSV(await file.text())
   const firstLine = text.split('\n')[0].toLowerCase()
 
   // FTMO Metrix : comme MT5 ("position") mais avec une colonne "fee" en plus

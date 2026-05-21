@@ -1,30 +1,31 @@
 import { Trade } from './parseMT4'
+import { detectDelimiter, makeCSVParser } from './utils'
 
 // Format Binance Futures : Date, Symbol, Side, Price, Qty, Realized Profit, Fee
 // Format Binance Spot    : Date, Pair,   Type, Price, Amount, Total, Fee, Fee Coin
 // Détecté via la présence de "Realized Profit" dans les headers
 export function parseBinance(csvText: string): Trade[] {
-  const lines = csvText.split('\n').filter(Boolean)
-  const headers = lines[0].split(',').map(h =>
-    h.trim().replace(/"/g, ''))
+  const lines = csvText.split('\n').filter(line => line.trim())
+  const delimiter = detectDelimiter(lines[0])
+  const { line: parseLine, num: parseNum } = makeCSVParser(delimiter)
+  const headers = parseLine(lines[0])
 
   const isFutures = headers.includes('Realized Profit')
   const trades: Trade[] = []
   const partialOrders: Record<string, any[]> = {}
 
   lines.slice(1).forEach(line => {
-    const cols = line.split(',').map(c =>
-      c.trim().replace(/"/g, ''))
+    const cols = parseLine(line)
 
     const time = new Date(cols[0])
     // Spot exporte parfois "BTC/USDT" — on normalise en "BTCUSDT"
     const symbol = cols[1].replace('/', '')
     const side = cols[2].toUpperCase() as 'BUY' | 'SELL'
-    const price = parseFloat(cols[3]) || 0
-    const qty = parseFloat(cols[4]) || 0
+    const price = parseNum(cols[3])
+    const qty = parseNum(cols[4])
     // cols[5] = Realized Profit (futures) ou Total montant (spot, non pertinent)
-    const pnl = isFutures ? (parseFloat(cols[5]) || 0) : 0
-    const fee = parseFloat(cols[6]) || 0
+    const pnl = isFutures ? parseNum(cols[5]) : 0
+    const fee = parseNum(cols[6])
 
     if (!partialOrders[symbol]) {
       partialOrders[symbol] = []

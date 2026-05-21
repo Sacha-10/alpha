@@ -1,4 +1,5 @@
 import { Trade } from './parseMT4'
+import { detectDelimiter, makeCSVParser } from './utils'
 
 // Format FTMO Metrix (Trading Journal > Export CSV) :
 // Position, Symbol, Type, Volume, Price(open), S/L, T/P, Time(open),
@@ -27,15 +28,17 @@ function calcPips(
 }
 
 export function parseFTMO(csvText: string): Trade[] {
-  const lines = csvText.split('\n').filter(Boolean)
+  const lines = csvText.split('\n').filter(line => line.trim())
+  const delimiter = detectDelimiter(lines[0])
+  const { line: parseLine, num: parseNum } = makeCSVParser(delimiter)
 
   return lines.slice(1).map(line => {
-    const cols = line.split(',').map(c => c.trim().replace(/"/g, ''))
+    const cols = parseLine(line)
 
     const openTime = new Date(cols[7])
     const closeTime = new Date(cols[9])
-    const entryPrice = parseFloat(cols[4]) || 0
-    const exitPrice = parseFloat(cols[8]) || 0
+    const entryPrice = parseNum(cols[4])
+    const exitPrice = parseNum(cols[8])
     const direction: Trade['direction'] =
       cols[2].toLowerCase() === 'buy' ? 'BUY' : 'SELL'
 
@@ -43,19 +46,19 @@ export function parseFTMO(csvText: string): Trade[] {
       ticket: cols[0],
       symbol: cols[1],
       direction,
-      lotSize: parseFloat(cols[3]) || 0,
+      lotSize: parseNum(cols[3]),
       entryPrice,
       exitPrice,
-      stopLoss: parseFloat(cols[5]) || null,
-      takeProfit: parseFloat(cols[6]) || null,
+      stopLoss: parseNum(cols[5]) || null,
+      takeProfit: parseNum(cols[6]) || null,
       openTime,
       closeTime,
       durationMinutes: Math.round(
         (closeTime.getTime() - openTime.getTime()) / 60000
       ),
-      commission: (parseFloat(cols[10]) || 0) + (parseFloat(cols[11]) || 0),
-      swap: parseFloat(cols[12]) || 0,
-      profitLoss: parseFloat(cols[13]) || 0,
+      commission: parseNum(cols[10]) + parseNum(cols[11]),
+      swap: parseNum(cols[12]),
+      profitLoss: parseNum(cols[13]),
       profitLossPips: calcPips(cols[1], entryPrice, exitPrice, direction),
       session: getSession(openTime),
     } as Trade

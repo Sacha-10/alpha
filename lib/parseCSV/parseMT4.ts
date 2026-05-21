@@ -1,3 +1,5 @@
+import { detectDelimiter, makeCSVParser } from './utils'
+
 export interface Trade {
   ticket: string
   symbol: string
@@ -26,34 +28,34 @@ function getSession(date: Date): Trade['session'] {
 }
 
 function calcPips(
-  symbol: string, 
-  entry: number, 
-  exit: number, 
+  symbol: string,
+  entry: number,
+  exit: number,
   direction: string
 ): number {
-  const diff = direction === 'BUY' 
-    ? exit - entry 
+  const diff = direction === 'BUY'
+    ? exit - entry
     : entry - exit
   if (symbol.includes('JPY')) return diff * 100
   return diff * 10000
 }
 
 export function parseMT4(csvText: string): Trade[] {
-  const lines = csvText.split('\n').filter(Boolean)
-  const headers = lines[0].split(',').map(h =>
-    h.trim().replace(/"/g, ''))
+  const lines = csvText.split('\n').filter(line => line.trim())
+  const delimiter = detectDelimiter(lines[0])
+  const { line: parseLine, num: parseNum } = makeCSVParser(delimiter)
+  const headers = parseLine(lines[0])
 
   const isMT5 = headers.includes('Position')
-  
+
   const result = lines.slice(1).map(line => {
-    const cols = line.split(',').map(c => 
-      c.trim().replace(/"/g, ''))
-    
+    const cols = parseLine(line)
+
     if (isMT5) {
       const openTime = new Date(cols[7])
       const closeTime = new Date(cols[9])
-      const entryPrice = parseFloat(cols[4]) || 0
-      const exitPrice = parseFloat(cols[8]) || 0
+      const entryPrice = parseNum(cols[4])
+      const exitPrice = parseNum(cols[8])
       const direction: Trade['direction'] = cols[2] === 'buy' ? 'BUY' : 'SELL'
       const durationMinutes = Math.round(
         (closeTime.getTime() - openTime.getTime()) / 60000
@@ -62,22 +64,22 @@ export function parseMT4(csvText: string): Trade[] {
         ticket: cols[0],
         symbol: cols[1],
         direction,
-        lotSize: parseFloat(cols[3]) || 0,
+        lotSize: parseNum(cols[3]),
         entryPrice,
         exitPrice,
-        stopLoss: parseFloat(cols[5]) || null,
-        takeProfit: parseFloat(cols[6]) || null,
+        stopLoss: parseNum(cols[5]) || null,
+        takeProfit: parseNum(cols[6]) || null,
         openTime,
         closeTime,
         durationMinutes,
-        commission: parseFloat(cols[10]) || 0,
-        swap: parseFloat(cols[11]) || 0,
-        profitLoss: parseFloat(cols[12]) || 0,
+        commission: parseNum(cols[10]),
+        swap: parseNum(cols[11]),
+        profitLoss: parseNum(cols[12]),
         profitLossPips: calcPips(cols[1], entryPrice, exitPrice, direction),
         session: getSession(openTime),
       } as Trade
     }
-    
+
     const openTime = new Date(cols[1])
     const closeTime = new Date(cols[8])
     const durationMinutes = Math.round(
@@ -85,30 +87,27 @@ export function parseMT4(csvText: string): Trade[] {
     )
     const direction = cols[2].toUpperCase()
       .includes('BUY') ? 'BUY' : 'SELL'
-    const entryPrice = parseFloat(cols[5]) || 0
-    const exitPrice = parseFloat(cols[9]) || 0
-    
+    const entryPrice = parseNum(cols[5])
+    const exitPrice = parseNum(cols[9])
+
     return {
       ticket: cols[0],
       symbol: cols[4],
       direction,
-      lotSize: parseFloat(cols[3]) || 0,
+      lotSize: parseNum(cols[3]),
       entryPrice,
       exitPrice,
-      stopLoss: parseFloat(cols[6]) || null,
-      takeProfit: parseFloat(cols[7]) || null,
+      stopLoss: parseNum(cols[6]) || null,
+      takeProfit: parseNum(cols[7]) || null,
       openTime,
       closeTime,
       durationMinutes,
-      commission: parseFloat(cols[10]) || 0,
-      swap: parseFloat(cols[11]) || 0,
-      profitLoss: parseFloat(cols[12]) || 0,
-      profitLossPips: calcPips(
-        cols[4], entryPrice, exitPrice, direction
-      ),
+      commission: parseNum(cols[10]),
+      swap: parseNum(cols[11]),
+      profitLoss: parseNum(cols[12]),
+      profitLossPips: calcPips(cols[4], entryPrice, exitPrice, direction),
       session: getSession(openTime),
     } as Trade
   }).filter(t => !!(t.symbol && t.entryPrice > 0))
   return result
 }
-

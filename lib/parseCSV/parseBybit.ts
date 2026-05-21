@@ -1,21 +1,24 @@
 import { Trade } from './parseMT4'
+import { detectDelimiter, makeCSVParser } from './utils'
 
 // Format Bybit CSV (Trade History export) :
 // Date, Symbol, Side, Price, Quantity, Fee, Realized P&L, Order ID
 export function parseBybit(csvText: string): Trade[] {
-  const lines = csvText.split('\n').filter(Boolean)
+  const lines = csvText.split('\n').filter(line => line.trim())
+  const delimiter = detectDelimiter(lines[0])
+  const { line: parseLine, num: parseNum } = makeCSVParser(delimiter)
 
   return lines.slice(1).map(line => {
-    const cols = line.split(',').map(c => c.trim().replace(/"/g, ''))
+    const cols = parseLine(line)
 
     const time = new Date(cols[0])
     const symbol = cols[1]
     const direction: Trade['direction'] =
       cols[2].toUpperCase() === 'BUY' ? 'BUY' : 'SELL'
-    const price = parseFloat(cols[3]) || 0
-    const qty = parseFloat(cols[4]) || 0
-    const fee = parseFloat(cols[5]) || 0
-    const pnl = parseFloat(cols[6]) || 0
+    const price = parseNum(cols[3])
+    const qty = parseNum(cols[4])
+    const fee = parseNum(cols[5])
+    const pnl = parseNum(cols[6])
     const orderId = cols[7]
 
     return {
