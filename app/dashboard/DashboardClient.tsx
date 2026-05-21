@@ -137,17 +137,34 @@ export default function DashboardClient() {
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // BUG 2 — Restore last report from sessionStorage on mount
+  // Restore last report: sessionStorage first (instant), then Supabase (cross-device fallback)
   useEffect(() => {
-    try {
-      const savedReport = sessionStorage.getItem(SESSION_KEY_REPORT);
-      if (savedReport) {
-        setAnalysis(JSON.parse(savedReport) as AiAnalysisResult);
-        setHasSessionReport(true);
-      }
-    } catch {
-      // ignore corrupted sessionStorage
+    async function restoreLatestAnalysis() {
+      try {
+        const saved = sessionStorage.getItem(SESSION_KEY_REPORT);
+        if (saved) {
+          setAnalysis(JSON.parse(saved) as AiAnalysisResult);
+          setHasSessionReport(true);
+          return;
+        }
+      } catch { /* ignore */ }
+
+      try {
+        const res = await fetch('/api/analyses');
+        if (!res.ok) return;
+        const json = (await res.json()) as { analyses?: Array<{ report: AiAnalysisResult }> };
+        const latest = json.analyses?.[0];
+        if (latest?.report) {
+          setAnalysis(latest.report);
+          setHasSessionReport(true);
+          try {
+            sessionStorage.setItem(SESSION_KEY_REPORT, JSON.stringify(latest.report));
+          } catch { /* ignore */ }
+        }
+      } catch { /* ignore */ }
     }
+
+    void restoreLatestAnalysis();
   }, []);
 
   useEffect(() => {

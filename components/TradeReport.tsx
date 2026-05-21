@@ -48,7 +48,7 @@ function ScoreCircle({ score, label }: { score: number; label: string }) {
           {Math.round(capped)}/100
         </span>
       </div>
-      <span className="mt-2 text-center text-xs text-secondary sm:text-sm">{label}</span>
+      <span className="mt-2 w-20 text-center text-[10px] leading-tight text-secondary sm:w-24 sm:text-xs">{label}</span>
     </div>
   );
 }
@@ -200,7 +200,7 @@ export default function TradeReport({
         <div className="card flex items-center justify-between p-6">
           <span className="text-secondary">Analyses utilisées</span>
           <div className="flex items-center gap-3">
-            <div className="h-2 w-32 rounded-full bg-hover">
+            <div className="h-2 w-20 rounded-full bg-hover sm:w-32">
               <div
                 className={`h-full rounded-full ${isAtLimit ? "bg-red" : "bg-blue"}`}
                 style={{ width: `${usedPct}%` }}
@@ -366,7 +366,7 @@ export default function TradeReport({
             <div key={i} className="rounded-xl bg-hover p-4">
               <p className="mb-1 text-sm text-secondary">{p.label}</p>
               <p
-                className={`truncate font-mono text-sm font-bold sm:text-base ${p.positive ? "text-green" : "text-red"}`}
+                className={`break-words font-mono text-sm font-bold sm:text-base ${p.positive ? "text-green" : "text-red"}`}
                 title={p.value}
               >
                 {p.value}
@@ -385,15 +385,15 @@ export default function TradeReport({
         <h2 className="mb-4 text-xl font-bold">
           Êtes-vous prêt pour une prop firm ?
         </h2>
-        <div className="mb-4 flex flex-wrap items-center gap-4">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
           <span
-            className={`rounded-full px-4 py-2 font-bold ${prop.wouldPassFTMO ? "bg-green/20 text-green" : "bg-red/20 text-red"}`}
+            className={`rounded-xl px-3 py-1.5 text-sm font-bold sm:rounded-full sm:px-4 sm:py-2 sm:text-base ${prop.wouldPassFTMO ? "bg-green/20 text-green" : "bg-red/20 text-red"}`}
           >
             {prop.wouldPassFTMO
               ? "✓ Passerait le challenge FTMO"
               : "✗ Ne passerait pas encore le challenge FTMO"}
           </span>
-          <span className="text-secondary">
+          <span className="text-sm text-secondary sm:text-base">
             Temps estimé : {prop.estimatedTimeToReady}
           </span>
         </div>
