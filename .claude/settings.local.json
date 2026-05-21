@@ -22,7 +22,8 @@
       "Bash(Select-Object FullName)",
       "Bash(npm uninstall *)",
       "Bash(findstr /i \"puppeteer\\\\|chromium\")",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(Remove-Item *)"
     ]
   }
 }

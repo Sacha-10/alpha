@@ -117,17 +117,6 @@ export async function POST(req: NextRequest) {
       )
     }
     const { trades } = await req.json()
-    const keyFields = ['profitLoss', 'entryPrice', 'exitPrice', 'lotSize'] as const
-    const missingCounts = Object.fromEntries(
-      keyFields.map(f => [
-        f,
-        trades?.filter((t: any) => t[f] == null || (typeof t[f] === 'number' && isNaN(t[f]))).length ?? 0,
-      ])
-    )
-    console.log('[DEBUG /api/analyze] total trades reçus:', trades?.length ?? 'undefined')
-    console.log('[DEBUG /api/analyze] 10 premiers trades:', JSON.stringify(trades?.slice(0, 10), null, 2))
-    console.log('[DEBUG /api/analyze] 10 derniers trades:', JSON.stringify(trades?.slice(-10), null, 2))
-    console.log('[DEBUG /api/analyze] champs manquants (null/undefined/NaN):', missingCounts)
     const report = await analyzeTradesMember(trades)
 
     await supabase.from('users')
