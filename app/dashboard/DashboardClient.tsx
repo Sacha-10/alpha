@@ -157,19 +157,8 @@ export default function DashboardClient() {
       }
 
       try {
-        const { data: { session: rawSession } } = await supabase.auth.getSession();
-        let session = rawSession;
-        if (session) {
-          const nowSecs = Math.floor(Date.now() / 1000);
-          const isExpired = !session.expires_at || session.expires_at <= nowSecs;
-          if (isExpired) {
-            console.log('[DashboardClient] session expirée, rafraîchissement...');
-            const { data: { session: refreshed } } = await supabase.auth.refreshSession();
-            session = refreshed;
-            console.log('[DashboardClient] session rafraîchie — access_token présent:', !!session?.access_token);
-          }
-        }
-        console.log('[DashboardClient] session récupérée — access_token présent:', !!session?.access_token);
+        const { data: { session } } = await supabase.auth.refreshSession();
+        console.log('[DashboardClient] session rafraîchie — access_token présent:', !!session?.access_token);
         const tokenParam = session?.access_token ? `?token=${session.access_token}` : '';
         console.log('[DashboardClient] fetch GET /api/analyses en cours...');
         const res = await fetch(`/api/analyses${tokenParam}`);

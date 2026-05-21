@@ -71,7 +71,11 @@ export async function GET(req: NextRequest) {
 
     const { data, error } = await query
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((error as any).status === 406) return NextResponse.json({ error: 'Token expiré' }, { status: 401 })
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
 
     return NextResponse.json({ analyses: data ?? [] })
   } catch (error: any) {
