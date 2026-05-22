@@ -274,10 +274,10 @@ export default function TradeReport({
         className="card p-6"
       >
         <h2 className="mb-2 text-xl font-bold">Votre profil psychologique</h2>
-        <p className="mb-4 text-secondary">
-          Biais dominant :{" "}
-          <span className="ml-1 font-medium text-red">{safeStr(psych.dominantBias)}</span>
-        </p>
+        <div className="mb-4">
+          <p className="mb-1 text-sm text-secondary">Biais dominant</p>
+          <p className="font-medium text-red">{safeStr(psych.dominantBias)}</p>
+        </div>
         <div className="space-y-4">
           {(psych.biases ?? []).map((bias, i) => (
             <div key={`${bias.name}-${i}`} className="rounded-xl bg-hover p-4">
@@ -402,17 +402,17 @@ export default function TradeReport({
         <h2 className="mb-4 text-xl font-bold">
           Êtes-vous prêt pour une prop firm ?
         </h2>
-        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+        <div className="mb-4 flex flex-col gap-3">
           <span
-            className={`rounded-full px-3 py-1.5 text-sm font-bold ${prop.wouldPassFTMO ? "bg-green/20 text-green" : "bg-red/20 text-red"}`}
+            className={`self-start rounded-full px-3 py-1.5 text-sm font-bold ${prop.wouldPassFTMO ? "bg-green/20 text-green" : "bg-red/20 text-red"}`}
           >
             {prop.wouldPassFTMO
               ? "✓ Passerait le challenge FTMO"
               : "✗ Ne passerait pas encore le challenge FTMO"}
           </span>
-          <span className="text-sm text-secondary">
+          <p className="text-sm text-secondary">
             Temps estimé : {safeStr(prop.estimatedTimeToReady)}
-          </span>
+          </p>
         </div>
         <ul className="space-y-2">
           {(prop.mainObstacles ?? []).map((obs, i) => (

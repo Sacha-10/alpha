@@ -63,7 +63,7 @@ export default function DemoPage() {
   return (
     <div className="relative min-h-screen bg-background text-primary">
       <Navbar />
-    <main className="max-w-6xl mx-auto pt-40 pb-28 px-8">
+    <main className="max-w-[1200px] mx-auto pt-40 pb-28 px-6 sm:px-8">
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
