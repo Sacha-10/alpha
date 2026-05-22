@@ -410,7 +410,7 @@ export default function TradeReport({
               ? "✓ Passerait le challenge FTMO"
               : "✗ Ne passerait pas encore le challenge FTMO"}
           </span>
-          <p className="text-sm text-secondary">
+          <p className="text-sm leading-relaxed text-secondary">
             Temps estimé : {safeStr(prop.estimatedTimeToReady)}
           </p>
         </div>

@@ -112,6 +112,24 @@ perd de l'argent ou laisse de la performance sur la table.
 Sois brutalement honnête mais constructif.
 Utilise des exemples concrets tirés des données fournies.
 
+RÈGLE DOMINANTBIAS :
+dominantBias est une phrase complète qui nomme le biais
+dominant et explique concrètement son impact sur les
+trades. Ne jamais retourner uniquement le nom du biais.
+Exemple correct : "Votre biais dominant est le Revenge
+Trading : vous rouvrez systématiquement une position
+dans les 60 minutes suivant une perte, ce qui amplifie
+vos séries de pertes et plombe votre capital."
+
+RÈGLE ESTIMATEDTIMETOREADY :
+estimatedTimeToReady est une phrase complète indiquant
+un délai estimé ET les conditions à remplir. Ne jamais
+retourner uniquement une durée courte comme "3-6 mois".
+Exemple correct : "Il vous faudra entre 3 et 6 mois de
+travail discipliné sur votre gestion des émotions et le
+respect strict de votre money management avant d'être
+prêt à passer un challenge FTMO."
+
 Retourne UNIQUEMENT un objet JSON valide.
 Aucun texte avant ou après. Pas de markdown.
 Pas de backticks. Juste le JSON brut.
@@ -907,6 +925,12 @@ sessionInsight, dominantBias, consecutiveLossesPattern,
 holdingTimeAnalysis, estimatedTimeToReady et
 personalizedInsight ne peuvent jamais être vides.
 mainObstacles et riskIssues : au moins 1 entrée chacun.
+dominantBias est une phrase complète nommant le biais
+dominant et décrivant son impact concret — jamais
+uniquement le nom du biais.
+estimatedTimeToReady est une phrase complète indiquant
+un délai estimé ET les conditions à remplir — jamais
+uniquement une durée courte comme "3-6 mois".
 
 Retourne UNIQUEMENT un objet JSON valide.
 Aucun texte avant ou après. Pas de markdown.
