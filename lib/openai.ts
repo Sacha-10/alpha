@@ -432,10 +432,13 @@ function computeStats(rawTrades: Trade[]): ComputedStats {
   const avgPnl = totalPnL / n
   const variance = pnls.reduce((s, p) => s + (p - avgPnl) ** 2, 0) / n
   const stdDev = Math.sqrt(variance)
-  const sharpeRatio = stdDev === 0 ? 0 : r2((avgPnl / stdDev) * Math.sqrt(252))
+  const sharpeRatio = stdDev === 0 ? 0 : r2((avgPnl / stdDev) * Math.sqrt(n))
 
+  const chronoPnls = [...trades]
+    .sort((a, b) => a.openTime.getTime() - b.openTime.getTime())
+    .map(t => t.profitLoss)
   let peak = 0, equity = 0, maxDDAbs = 0, maxDDRatio = 0
-  for (const pnl of pnls) {
+  for (const pnl of chronoPnls) {
     equity += pnl
     if (equity > peak) peak = equity
     const ddAbs = peak - equity
