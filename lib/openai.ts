@@ -434,20 +434,34 @@ function computeStats(rawTrades: Trade[]): ComputedStats {
   const stdDev = Math.sqrt(variance)
   const sharpeRatio = stdDev === 0 ? 0 : r2((avgPnl / stdDev) * Math.sqrt(n))
 
-  const chronoPnls = [...trades]
-    .sort((a, b) => a.openTime.getTime() - b.openTime.getTime())
-    .map(t => t.profitLoss)
+  const validTimeCount = trades.filter(t => !isNaN(t.openTime.getTime())).length
+  const sortedTrades = validTimeCount >= 2
+    ? [...trades].sort((a, b) => {
+        const aOk = !isNaN(a.openTime.getTime())
+        const bOk = !isNaN(b.openTime.getTime())
+        if (!aOk && !bOk) return 0
+        if (!aOk) return 1
+        if (!bOk) return -1
+        return a.openTime.getTime() - b.openTime.getTime()
+      })
+    : [...trades]
+  const chronoPnls = sortedTrades.map(t => t.profitLoss)
   let peak = 0, equity = 0, maxDDAbs = 0, maxDDRatio = 0
   for (const pnl of chronoPnls) {
     equity += pnl
     if (equity > peak) peak = equity
     const ddAbs = peak - equity
     if (ddAbs > maxDDAbs) maxDDAbs = ddAbs
-    const ratio = peak > 0 ? ddAbs / peak : 0
-    if (ratio > maxDDRatio) maxDDRatio = ratio
+    if (peak > 0) {
+      const ratio = ddAbs / peak
+      if (ratio > maxDDRatio) maxDDRatio = ratio
+    }
   }
   const maxDrawdownAbs = r2(maxDDAbs)
   const maxDrawdownPct = r2(maxDDRatio * 100)
+  console.error('[drawdown] validTimeCount=%d sorted=%s maxDDAbs=%d maxDDPct=%d%', validTimeCount, validTimeCount >= 2 ? 'chrono' : 'original', maxDrawdownAbs, maxDrawdownPct)
+  console.error('[drawdown] first5:', sortedTrades.slice(0, 5).map(t => ({ openTime: t.openTime, pnl: t.profitLoss })))
+  console.error('[drawdown] last5:', sortedTrades.slice(-5).map(t => ({ openTime: t.openTime, pnl: t.profitLoss })))
 
   const avgDurMin = Math.round(
     trades.reduce((s, t) => s + t.durationMinutes, 0) / n
