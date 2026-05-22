@@ -92,7 +92,7 @@ Prop firm score de 25 à 45/100 si PnL négatif.
 Un trader PnL négatif ne passe jamais FTMO.
 
 RÈGLE WIN RATE :
-Win Rate global de 47% à 57%.
+Win Rate global de 45% à 65%.
 
 RÈGLE TOTAL TRADES :
 totalTrades doit être exactement 120.
