@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Download } from "lucide-react";
+import { Check, Download, X } from "lucide-react";
 import type { AiAnalysisResult, BiasSeverity } from "@/lib/tradingAnalysisTypes";
 
 interface Props {
@@ -197,7 +197,7 @@ export default function TradeReport({
       positive: safeNum(s.sharpeRatio) >= 1,
     },
     {
-      label: "Risk/Reward moyen",
+      label: "Risk/Reward",
       value: safeNum(s.avgRiskReward).toFixed(2),
       positive: safeNum(s.avgRiskReward) >= 1,
     },
@@ -404,15 +404,15 @@ export default function TradeReport({
         <p className="mb-4 text-sm leading-relaxed text-secondary">
           Temps estimé : {safeStr(prop.estimatedTimeToReady)}
         </p>
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {(prop.mainObstacles ?? []).map((obs, i) => (
-            <li key={i} className="flex gap-2 text-sm text-secondary">
+            <li key={i} className="flex items-start gap-2 text-sm">
               {prop.wouldPassFTMO ? (
-                <span className="text-green">✓</span>
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-green" aria-hidden />
               ) : (
-                <span className="text-red">✗</span>
+                <X className="mt-0.5 h-4 w-4 shrink-0 text-red" aria-hidden />
               )}
-              {obs}
+              <span className={prop.wouldPassFTMO ? "text-primary" : "text-secondary"}>{obs}</span>
             </li>
           ))}
         </ul>

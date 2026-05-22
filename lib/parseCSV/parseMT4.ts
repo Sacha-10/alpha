@@ -1,4 +1,4 @@
-import { detectDelimiter, makeCSVParser } from './utils'
+import { detectDelimiter, makeCSVParser, cleanSymbol } from './utils'
 
 export interface Trade {
   ticket: string
@@ -60,9 +60,10 @@ export function parseMT4(csvText: string): Trade[] {
       const durationMinutes = Math.round(
         (closeTime.getTime() - openTime.getTime()) / 60000
       )
+      const sym = cleanSymbol(cols[1])
       return {
         ticket: cols[0],
-        symbol: cols[1],
+        symbol: sym,
         direction,
         lotSize: parseNum(cols[3]),
         entryPrice,
@@ -75,7 +76,7 @@ export function parseMT4(csvText: string): Trade[] {
         commission: parseNum(cols[10]),
         swap: parseNum(cols[11]),
         profitLoss: parseNum(cols[12]),
-        profitLossPips: calcPips(cols[1], entryPrice, exitPrice, direction),
+        profitLossPips: calcPips(sym, entryPrice, exitPrice, direction),
         session: getSession(openTime),
       } as Trade
     }
@@ -89,10 +90,11 @@ export function parseMT4(csvText: string): Trade[] {
       .includes('BUY') ? 'BUY' : 'SELL'
     const entryPrice = parseNum(cols[5])
     const exitPrice = parseNum(cols[9])
+    const sym = cleanSymbol(cols[4])
 
     return {
       ticket: cols[0],
-      symbol: cols[4],
+      symbol: sym,
       direction,
       lotSize: parseNum(cols[3]),
       entryPrice,
@@ -105,7 +107,7 @@ export function parseMT4(csvText: string): Trade[] {
       commission: parseNum(cols[10]),
       swap: parseNum(cols[11]),
       profitLoss: parseNum(cols[12]),
-      profitLossPips: calcPips(cols[4], entryPrice, exitPrice, direction),
+      profitLossPips: calcPips(sym, entryPrice, exitPrice, direction),
       session: getSession(openTime),
     } as Trade
   }).filter(t => !!(t.symbol && t.entryPrice > 0))

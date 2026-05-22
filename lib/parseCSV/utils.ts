@@ -1,3 +1,7 @@
+export function cleanSymbol(raw: string): string {
+  return raw.toUpperCase().replace(/[^A-Z0-9/.]/g, '')
+}
+
 export function normalizeCSV(text: string): string {
   // Strip UTF-8 BOM (common in MT4/MT5 exports, causes header mismatch on mobile Safari)
   const stripped = text.codePointAt(0) === 0xFEFF ? text.slice(1) : text

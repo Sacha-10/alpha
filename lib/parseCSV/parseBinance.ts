@@ -1,5 +1,5 @@
 import { Trade } from './parseMT4'
-import { detectDelimiter, makeCSVParser } from './utils'
+import { detectDelimiter, makeCSVParser, cleanSymbol } from './utils'
 
 // Format Binance Futures : Date, Symbol, Side, Price, Qty, Realized Profit, Fee
 // Format Binance Spot    : Date, Pair,   Type, Price, Amount, Total, Fee, Fee Coin
@@ -18,8 +18,7 @@ export function parseBinance(csvText: string): Trade[] {
     const cols = parseLine(line)
 
     const time = new Date(cols[0])
-    // Spot exporte parfois "BTC/USDT" — on normalise en "BTCUSDT"
-    const symbol = cols[1].replace('/', '')
+    const symbol = cleanSymbol(cols[1])
     const side = cols[2].toUpperCase() as 'BUY' | 'SELL'
     const price = parseNum(cols[3])
     const qty = parseNum(cols[4])

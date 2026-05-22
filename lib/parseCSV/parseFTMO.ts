@@ -1,5 +1,5 @@
 import { Trade } from './parseMT4'
-import { detectDelimiter, makeCSVParser } from './utils'
+import { detectDelimiter, makeCSVParser, cleanSymbol } from './utils'
 
 // Format FTMO Metrix (Trading Journal > Export CSV) :
 // Position, Symbol, Type, Volume, Price(open), S/L, T/P, Time(open),
@@ -41,10 +41,11 @@ export function parseFTMO(csvText: string): Trade[] {
     const exitPrice = parseNum(cols[8])
     const direction: Trade['direction'] =
       cols[2].toLowerCase() === 'buy' ? 'BUY' : 'SELL'
+    const sym = cleanSymbol(cols[1])
 
     return {
       ticket: cols[0],
-      symbol: cols[1],
+      symbol: sym,
       direction,
       lotSize: parseNum(cols[3]),
       entryPrice,
@@ -59,7 +60,7 @@ export function parseFTMO(csvText: string): Trade[] {
       commission: parseNum(cols[10]) + parseNum(cols[11]),
       swap: parseNum(cols[12]),
       profitLoss: parseNum(cols[13]),
-      profitLossPips: calcPips(cols[1], entryPrice, exitPrice, direction),
+      profitLossPips: calcPips(sym, entryPrice, exitPrice, direction),
       session: getSession(openTime),
     } as Trade
   }).filter(t => t.symbol && t.entryPrice > 0)

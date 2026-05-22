@@ -1,5 +1,5 @@
 import { Trade } from './parseMT4'
-import { detectDelimiter, makeCSVParser } from './utils'
+import { detectDelimiter, makeCSVParser, cleanSymbol } from './utils'
 
 // Format attendu (TradingView Strategy Tester — Liste des trades fermés) :
 // Trade #, Type, Signal, Entry Date/Time, Entry Price, Exit Date/Time, Exit Price, Contracts, Profit, ...
@@ -26,7 +26,7 @@ export function parseTradingView(csvText: string): Trade[] {
 
     return {
       ticket: cols[0],
-      symbol: cols[2] || 'UNKNOWN',
+      symbol: cleanSymbol(cols[2]) || 'UNKNOWN',
       direction,
       lotSize,
       entryPrice,
