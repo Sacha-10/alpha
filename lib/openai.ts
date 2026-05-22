@@ -419,8 +419,8 @@ function toDate(v: unknown): Date {
 
 function sessionOf(d: Date): 'London' | 'New York' | 'Tokyo' {
   const h = d.getUTCHours()
-  if (h >= 7 && h < 13) return 'London'
-  if (h >= 13 && h < 20) return 'New York'
+  if (h >= 7 && h < 14) return 'London'
+  if (h >= 14) return 'New York'
   return 'Tokyo'
 }
 
@@ -498,7 +498,7 @@ function computeStats(rawTrades: Trade[]): ComputedStats {
   const bestTrade = trades.reduce((b, t) => t.profitLoss > b.profitLoss ? t : b)
   const worstTrade = trades.reduce((b, t) => t.profitLoss < b.profitLoss ? t : b)
 
-  // Sessions (London 07-13 UTC / New York 13-20 UTC / Tokyo 20-07 UTC)
+  // Sessions (London 07-14 UTC / New York 14-00 UTC / Tokyo 00-07 UTC)
   const sessMap: Record<string, { wins: number; total: number }> = {
     'London': { wins: 0, total: 0 },
     'New York': { wins: 0, total: 0 },
