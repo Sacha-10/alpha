@@ -459,10 +459,6 @@ function computeStats(rawTrades: Trade[]): ComputedStats {
   }
   const maxDrawdownAbs = r2(maxDDAbs)
   const maxDrawdownPct = r2(maxDDRatio * 100)
-  console.error('[drawdown] validTimeCount=%d sorted=%s maxDDAbs=%d maxDDPct=%d%', validTimeCount, validTimeCount >= 2 ? 'chrono' : 'original', maxDrawdownAbs, maxDrawdownPct)
-  console.error('[drawdown] first5:', sortedTrades.slice(0, 5).map(t => ({ openTime: t.openTime, pnl: t.profitLoss })))
-  console.error('[drawdown] last5:', sortedTrades.slice(-5).map(t => ({ openTime: t.openTime, pnl: t.profitLoss })))
-
   const avgDurMin = Math.round(
     trades.reduce((s, t) => s + t.durationMinutes, 0) / n
   )
