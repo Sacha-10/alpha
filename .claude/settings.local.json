@@ -23,7 +23,11 @@
       "Bash(npm uninstall *)",
       "Bash(findstr /i \"puppeteer\\\\|chromium\")",
       "Bash(git checkout *)",
-      "Bash(Remove-Item *)"
+      "Bash(Remove-Item *)",
+      "Bash(dir C:\\\\Users\\\\sacha\\\\dev\\\\SaasAi\\\\Alpha\\\\alpha\\\\app\\\\api *)",
+      "Bash(Write-Output \"Dossier .next supprimé\")",
+      "Read(//mnt/c/Users/sacha/dev/SaasAi/Alpha/**)",
+      "Bash(rm -rf .next)"
     ]
   }
 }

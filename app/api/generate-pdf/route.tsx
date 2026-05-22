@@ -268,10 +268,26 @@ export async function POST(req: NextRequest) {
     if (process.env.NODE_ENV === 'production') {
       const chromium = (await import('@sparticuz/chromium')).default;
       const puppeteer = (await import('puppeteer-core')).default;
+      // CHROMIUM_PATH takes priority; getBinPath() may throw on Vercel when
+      // __filename is undefined, so we catch and surface a clear error.
+      let execPath: string | undefined = process.env.CHROMIUM_PATH;
+      if (!execPath) {
+        try {
+          execPath = await chromium.executablePath();
+        } catch {
+          // path.dirname(__filename) is undefined on some Vercel runtimes
+        }
+      }
+      if (!execPath) {
+        throw new Error(
+          'Chromium executable path is undefined. ' +
+          'Set the CHROMIUM_PATH environment variable on Vercel.'
+        );
+      }
       browser = await puppeteer.launch({
         args: chromium.args,
         defaultViewport: { width: 1280, height: 720 },
-        executablePath: await chromium.executablePath(),
+        executablePath: execPath,
         headless: true,
       });
     } else {
