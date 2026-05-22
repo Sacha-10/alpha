@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Download } from "lucide-react";
 import type { AiAnalysisResult, BiasSeverity } from "@/lib/tradingAnalysisTypes";
 
 interface Props {
@@ -229,7 +230,7 @@ export default function TradeReport({
         animate={{ opacity: 1, y: 0 }}
         className="card p-6"
       >
-        <h2 className="mb-6 text-xl font-bold">Votre performance globale</h2>
+        <h2 className="mb-6 text-xl font-bold">Performance globale</h2>
         <div className="flex justify-around">
           <ScoreCircle
             score={safeNum(psych.overallScore)}
@@ -273,7 +274,7 @@ export default function TradeReport({
         transition={{ delay: 0.2 }}
         className="card p-6"
       >
-        <h2 className="mb-2 text-xl font-bold">Votre profil psychologique</h2>
+        <h2 className="mb-2 text-xl font-bold">Profil psychologique</h2>
         <div className="mb-4">
           <p className="mb-1 text-sm text-secondary">Biais dominant</p>
           <p className="font-medium text-red">{safeStr(psych.dominantBias)}</p>
@@ -342,7 +343,7 @@ export default function TradeReport({
         transition={{ delay: 0.35 }}
         className="card p-6"
       >
-        <h2 className="mb-4 text-xl font-bold">Vos patterns de performance</h2>
+        <h2 className="mb-4 text-xl font-bold">Patterns de performance</h2>
         <div className="grid grid-cols-2 gap-4">
           {[
             {
@@ -399,25 +400,18 @@ export default function TradeReport({
         transition={{ delay: 0.4 }}
         className="card p-6"
       >
-        <h2 className="mb-4 text-xl font-bold">
-          Êtes-vous prêt pour une prop firm ?
-        </h2>
-        <div className="mb-4 flex flex-col gap-3">
-          <span
-            className={`self-start rounded-full px-3 py-1.5 text-sm font-bold ${prop.wouldPassFTMO ? "bg-green/20 text-green" : "bg-red/20 text-red"}`}
-          >
-            {prop.wouldPassFTMO
-              ? "✓ Passerait le challenge FTMO"
-              : "✗ Ne passerait pas encore le challenge FTMO"}
-          </span>
-          <p className="text-sm leading-relaxed text-secondary">
-            Temps estimé : {safeStr(prop.estimatedTimeToReady)}
-          </p>
-        </div>
+        <h2 className="mb-4 text-xl font-bold">Prop Firm Readiness</h2>
+        <p className="mb-4 text-sm leading-relaxed text-secondary">
+          Temps estimé : {safeStr(prop.estimatedTimeToReady)}
+        </p>
         <ul className="space-y-2">
           {(prop.mainObstacles ?? []).map((obs, i) => (
             <li key={i} className="flex gap-2 text-sm text-secondary">
-              <span className="text-red">✗</span>
+              {prop.wouldPassFTMO ? (
+                <span className="text-green">✓</span>
+              ) : (
+                <span className="text-red">✗</span>
+              )}
               {obs}
             </li>
           ))}
@@ -430,9 +424,7 @@ export default function TradeReport({
         transition={{ delay: 0.45 }}
         className="card p-6"
       >
-        <h2 className="mb-4 text-xl font-bold">
-          Votre plan d&apos;action personnalisé
-        </h2>
+        <h2 className="mb-4 text-xl font-bold">Plan d&apos;action</h2>
         <div className="space-y-4">
           {(report.actionPlan ?? []).map((item, i) => {
             const catColors: Record<string, string> = {
@@ -472,12 +464,9 @@ export default function TradeReport({
         transition={{ delay: 0.5 }}
         className="card border-blue/30 bg-blue/5 p-6"
       >
-        <h2 className="mb-4 text-xl font-bold">L&apos;avis de votre coach IA</h2>
+        <h2 className="mb-4 text-xl font-bold">Analyste IA</h2>
         <p className="text-lg italic leading-relaxed text-secondary">
           &ldquo;{safeStr(report.personalizedInsight)}&rdquo;
-        </p>
-        <p className="mt-4 font-medium text-blue">
-          — Votre coach IA trading
         </p>
       </motion.div>
 
@@ -489,15 +478,18 @@ export default function TradeReport({
           type="button"
           onClick={handleDownloadPdf}
           disabled={pdfLoading}
-          className="btn-outline"
+          className="btn-outline inline-flex items-center gap-2"
         >
           {pdfLoading ? (
             <>
-              <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
               Génération en cours...
             </>
           ) : (
-            "Télécharger mon rapport PDF"
+            <>
+              <Download className="h-4 w-4" />
+              Exporter
+            </>
           )}
         </button>
       </div>

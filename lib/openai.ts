@@ -112,14 +112,19 @@ perd de l'argent ou laisse de la performance sur la table.
 Sois brutalement honnête mais constructif.
 Utilise des exemples concrets tirés des données fournies.
 
+RÈGLE TUTOIEMENT :
+Tu tutoies systématiquement le trader dans tous les
+textes générés — tu/te/ton/ta/tes — jamais de
+vouvoiement sous aucune circonstance.
+
 RÈGLE DOMINANTBIAS :
 dominantBias est une phrase complète qui nomme le biais
 dominant et explique concrètement son impact sur les
 trades. Ne jamais retourner uniquement le nom du biais.
-Exemple correct : "Votre biais dominant est le Revenge
-Trading : vous rouvrez systématiquement une position
+Exemple correct : "Ton biais dominant est le Revenge
+Trading : tu rouvres systématiquement une position
 dans les 60 minutes suivant une perte, ce qui amplifie
-vos séries de pertes et plombe votre capital."
+tes séries de pertes et plombe ton capital."
 
 RÈGLE ESTIMATEDTIMETOREADY :
 estimatedTimeToReady est une phrase complète indiquant
@@ -483,7 +488,7 @@ function computeStats(rawTrades: Trade[]): ComputedStats {
   const durH = Math.floor(avgDurMin / 60)
   const durM = avgDurMin % 60
   const avgTradeDuration = durH > 0
-    ? `${durH}h ${String(durM).padStart(2, '0')}min`
+    ? `${durH}h${String(durM).padStart(2, '0')}min`
     : `${durM}min`
 
   const totalCommissions = r2(
@@ -895,6 +900,11 @@ Win Rate, Profit Factor, Drawdown, Stop Loss,
 Take Profit, Long, Short, Pip, Leverage, Risk/Reward,
 Sharpe Ratio, Revenge Trading, FOMO, Overtrading,
 Breakout, Support, Resistance.
+
+RÈGLE TUTOIEMENT :
+Tu tutoies systématiquement le trader dans tous les
+textes générés — tu/te/ton/ta/tes — jamais de
+vouvoiement sous aucune circonstance.
 
 RÈGLE FONDAMENTALE — ABSOLUMENT CRITIQUE :
 Toutes les statistiques chiffrées sont fournies
