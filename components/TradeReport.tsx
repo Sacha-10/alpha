@@ -158,6 +158,7 @@ export default function TradeReport({
     value: string;
     positive: boolean;
     valueClass?: string;
+    showWarning?: boolean;
   }[] = [
     {
       label: "Win Rate",
@@ -174,6 +175,7 @@ export default function TradeReport({
       value: `${displayRate(s.maxDrawdownPercent)}%`,
       positive: false,
       valueClass: ddNum > 20 ? "text-red" : "text-secondary",
+      showWarning: ddNum > 10,
     },
     {
       label: "PnL Total",
@@ -188,6 +190,7 @@ export default function TradeReport({
       label: "Trades Total",
       value: String(s.totalTrades ?? 0),
       positive: true,
+      valueClass: "text-primary",
     },
     {
       label: "Sharpe Ratio",
@@ -203,6 +206,7 @@ export default function TradeReport({
       label: "Durée moyenne",
       value: safeStr(s.avgTradeDuration),
       positive: true,
+      valueClass: "text-primary",
     },
   ];
 
@@ -228,7 +232,7 @@ export default function TradeReport({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h2 className="mb-6 text-xl font-bold">Performance globale</h2>
+        <h2 className="mb-4 text-xl font-bold">Performance globale</h2>
         <div className="flex justify-around">
           <ScoreCircle
             score={safeNum(psych.overallScore)}
@@ -248,8 +252,11 @@ export default function TradeReport({
         <h2 className="mb-4 text-xl font-bold">Statistiques clés</h2>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {keyStats.map((stat, i) => (
-            <div key={i} className="rounded-xl bg-hover p-4">
-              <p className="mb-1 text-sm text-secondary">{stat.label}</p>
+            <div key={i} className={`rounded-xl p-4 ${stat.showWarning ? "bg-red/10" : "bg-hover"}`}>
+              <div className="mb-1 flex items-center justify-between">
+                <p className="text-sm text-secondary">{stat.label}</p>
+                {stat.showWarning && <span className="text-sm leading-none">⚠️</span>}
+              </div>
               <p
                 className={`font-mono text-xl font-bold ${
                   stat.valueClass !== undefined
@@ -272,11 +279,7 @@ export default function TradeReport({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <h2 className="mb-2 text-xl font-bold">Profil psychologique</h2>
-        <div className="mb-4">
-          <p className="mb-1 text-sm text-secondary">Biais dominant</p>
-          <p className="font-medium text-red">{safeStr(psych.dominantBias)}</p>
-        </div>
+        <h2 className="mb-4 text-xl font-bold">Profil psychologique</h2>
         <div className="space-y-4">
           {(psych.biases ?? []).map((bias, i) => (
             <div key={`${bias.name}-${i}`} className="rounded-xl bg-hover p-4">
@@ -356,12 +359,12 @@ export default function TradeReport({
             },
             {
               label: "Meilleure heure",
-              value: safeStr(patterns.bestTimeOfDay),
+              value: safeStr(patterns.bestTimeOfDay).replace(/ UTC$/i, ""),
               positive: true,
             },
             {
               label: "Pire heure",
-              value: safeStr(patterns.worstTimeOfDay),
+              value: safeStr(patterns.worstTimeOfDay).replace(/ UTC$/i, ""),
               positive: false,
             },
             {
@@ -433,16 +436,16 @@ export default function TradeReport({
             };
             return (
               <div key={i} className="rounded-xl bg-hover p-4">
-                <div className="mb-2 flex flex-wrap items-center gap-1.5">
-                  <span className="font-mono text-xs font-semibold text-secondary">
+                <div className="mb-2 flex items-center gap-1.5 overflow-hidden">
+                  <span className="shrink-0 font-mono text-xs font-semibold text-secondary">
                     {item.priority}
                   </span>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${catColors[item.category] ?? "bg-secondary/20 text-secondary"}`}
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${catColors[item.category] ?? "bg-secondary/20 text-secondary"}`}
                   >
                     {item.category}
                   </span>
-                  <span className="text-xs text-secondary">{item.timeframe}</span>
+                  <span className="truncate text-xs text-secondary">{item.timeframe}</span>
                 </div>
                 <p className="mb-1 font-medium">{item.action}</p>
                 <p className="text-sm text-secondary">{item.expectedImpact}</p>
@@ -459,7 +462,7 @@ export default function TradeReport({
         transition={{ delay: 0.5 }}
       >
         <h2 className="mb-4 text-xl font-bold">Analyste IA</h2>
-        <p className="text-lg leading-relaxed text-secondary">
+        <p className="text-sm leading-relaxed text-secondary">
           {safeStr(report.personalizedInsight)}
         </p>
       </motion.div>
