@@ -49,7 +49,7 @@ function ScoreCircle({ score, label }: { score: number; label: string }) {
           {Math.round(capped)}/100
         </span>
       </div>
-      <span className="mt-2 w-24 text-center text-xs text-secondary">{label}</span>
+      <span className="mt-2 w-24 text-center text-xs text-secondary sm:w-auto sm:whitespace-nowrap">{label}</span>
     </div>
   );
 }
@@ -171,9 +171,7 @@ export default function TradeReport({
     },
     {
       label: "Max Drawdown",
-      value: `${displayRate(s.maxDrawdownPercent)}%${
-        ddNum > 20 ? " ⚠️" : ""
-      }`,
+      value: `${displayRate(s.maxDrawdownPercent)}%`,
       positive: false,
       valueClass: ddNum > 20 ? "text-red" : "text-secondary",
     },
@@ -225,10 +223,10 @@ export default function TradeReport({
         </div>
       )}
 
+      {/* Performance globale — sans card wrapper */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card p-6"
       >
         <h2 className="mb-6 text-xl font-bold">Performance globale</h2>
         <div className="flex justify-around">
@@ -241,11 +239,11 @@ export default function TradeReport({
         </div>
       </motion.div>
 
+      {/* Statistiques clés — sans card wrapper */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="card p-6"
       >
         <h2 className="mb-4 text-xl font-bold">Statistiques clés</h2>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -268,11 +266,11 @@ export default function TradeReport({
         </div>
       </motion.div>
 
+      {/* Profil psychologique — sans card wrapper */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="card p-6"
       >
         <h2 className="mb-2 text-xl font-bold">Profil psychologique</h2>
         <div className="mb-4">
@@ -292,19 +290,17 @@ export default function TradeReport({
                 </div>
               </div>
               <p className="mb-2 text-sm text-secondary">{bias.description}</p>
-              <p className="text-xs italic text-secondary/70">
-                &ldquo;{bias.evidence}&rdquo;
-              </p>
+              <p className="text-xs text-secondary/70">{bias.evidence}</p>
             </div>
           ))}
         </div>
       </motion.div>
 
+      {/* Performance par session — sans card wrapper */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="card p-6"
       >
         <h2 className="mb-4 text-xl font-bold">Performance par session</h2>
         <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -316,32 +312,34 @@ export default function TradeReport({
             const rateValue = Number(displayRate(sess.rate));
             const se = sessionPctColorClasses(rateValue);
             return (
-            <div key={i} className="rounded-xl bg-hover p-4 text-center">
-              <p className="mb-2 text-sm text-secondary">{sess.name}</p>
-              <div className="mb-2 h-3 w-full rounded-full bg-background">
-                <div
-                  className="h-full rounded-full"
-                  style={{
-                    width: `${Math.min(100, rateValue)}%`,
-                    background: se.bar,
-                  }}
-                />
+              <div key={i} className="rounded-xl bg-hover p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm text-secondary">{sess.name}</span>
+                  <span className={`font-mono font-bold ${se.text}`}>
+                    {displayRate(sess.rate)}%
+                  </span>
+                </div>
+                <div className="h-3 w-full rounded-full bg-background">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${Math.min(100, rateValue)}%`,
+                      background: se.bar,
+                    }}
+                  />
+                </div>
               </div>
-              <p className={`font-mono font-bold ${se.text}`}>
-                {displayRate(sess.rate)}%
-              </p>
-            </div>
             );
           })}
         </div>
-        <p className="text-sm italic text-secondary">{safeStr(session.insight, "")}</p>
+        <p className="text-sm text-secondary">{safeStr(session.insight, "")}</p>
       </motion.div>
 
+      {/* Patterns de performance — sans card wrapper */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.35 }}
-        className="card p-6"
       >
         <h2 className="mb-4 text-xl font-bold">Patterns de performance</h2>
         <div className="grid grid-cols-2 gap-4">
@@ -394,23 +392,23 @@ export default function TradeReport({
         </div>
       </motion.div>
 
+      {/* Prop Firm Readiness — sans card wrapper */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="card p-6"
       >
         <h2 className="mb-4 text-xl font-bold">Prop Firm Readiness</h2>
         <p className="mb-4 text-sm leading-relaxed text-secondary">
-          Temps estimé : {safeStr(prop.estimatedTimeToReady)}
+          {safeStr(prop.estimatedTimeToReady)}
         </p>
         <ul className="space-y-3">
           {(prop.mainObstacles ?? []).map((obs, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm">
+            <li key={i} className="text-sm leading-relaxed">
               {prop.wouldPassFTMO ? (
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-green" aria-hidden />
+                <Check className="mr-1.5 inline h-4 w-4 align-text-bottom text-green" aria-hidden />
               ) : (
-                <X className="mt-0.5 h-4 w-4 shrink-0 text-red" aria-hidden />
+                <X className="mr-1.5 inline h-4 w-4 align-text-bottom text-red" aria-hidden />
               )}
               <span className={prop.wouldPassFTMO ? "text-primary" : "text-secondary"}>{obs}</span>
             </li>
@@ -418,11 +416,11 @@ export default function TradeReport({
         </ul>
       </motion.div>
 
+      {/* Plan d'action — sans card wrapper */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.45 }}
-        className="card p-6"
       >
         <h2 className="mb-4 text-xl font-bold">Plan d&apos;action</h2>
         <div className="space-y-4">
@@ -434,39 +432,35 @@ export default function TradeReport({
               Timing: "bg-cyan/20 text-cyan",
             };
             return (
-              <div key={i} className="flex gap-4 rounded-xl bg-hover p-4">
-                <span className="font-mono text-3xl font-bold text-blue/30">
-                  {item.priority}
-                </span>
-                <div className="flex-1">
-                  <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <span
-                      className={`rounded-full px-2 py-1 text-xs ${catColors[item.category] ?? "bg-secondary/20 text-secondary"}`}
-                    >
-                      {item.category}
-                    </span>
-                    <span className="text-xs text-secondary">{item.timeframe}</span>
-                  </div>
-                  <p className="mb-1 font-medium">{item.action}</p>
-                  <p className="text-sm text-secondary">
-                    Impact : {item.expectedImpact}
-                  </p>
+              <div key={i} className="rounded-xl bg-hover p-4">
+                <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                  <span className="font-mono text-xs font-semibold text-secondary">
+                    {item.priority}
+                  </span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${catColors[item.category] ?? "bg-secondary/20 text-secondary"}`}
+                  >
+                    {item.category}
+                  </span>
+                  <span className="text-xs text-secondary">{item.timeframe}</span>
                 </div>
+                <p className="mb-1 font-medium">{item.action}</p>
+                <p className="text-sm text-secondary">{item.expectedImpact}</p>
               </div>
             );
           })}
         </div>
       </motion.div>
 
+      {/* Analyste IA — sans card wrapper */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="card border-blue/30 bg-blue/5 p-6"
       >
         <h2 className="mb-4 text-xl font-bold">Analyste IA</h2>
-        <p className="text-lg italic leading-relaxed text-secondary">
-          &ldquo;{safeStr(report.personalizedInsight)}&rdquo;
+        <p className="text-lg leading-relaxed text-secondary">
+          {safeStr(report.personalizedInsight)}
         </p>
       </motion.div>
 
@@ -478,7 +472,7 @@ export default function TradeReport({
           type="button"
           onClick={handleDownloadPdf}
           disabled={pdfLoading}
-          className="btn-outline inline-flex items-center gap-2"
+          className="btn-primary inline-flex items-center gap-2"
         >
           {pdfLoading ? (
             <>
