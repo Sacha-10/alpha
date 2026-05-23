@@ -97,6 +97,13 @@ Win Rate global de 45% à 65%.
 RÈGLE TOTAL TRADES :
 totalTrades doit être exactement 120.
 
+RÈGLE TIMEFRAME :
+Le timeframe de chaque action du plan d'action doit
+être court et concis — maximum 4 mots.
+Exemples : "20 trades", "4 semaines", "Immédiat",
+"Dès maintenant", "2 semaines", "30 jours".
+Jamais de phrase complète dans le timeframe.
+
 RÈGLE VARIATIONS :
 Chaque analyse doit être unique et différente.
 Varie le biais dominant à chaque analyse.
@@ -929,6 +936,13 @@ qu'il y a de patterns dans biasPatterns.
 RÈGLE ACTION PLAN :
 Génère exactement 3 actions (priority 1, 2, 3).
 Chaque action doit être concrète et mesurable.
+
+RÈGLE TIMEFRAME :
+Le timeframe de chaque action du plan d'action doit
+être court et concis — maximum 4 mots.
+Exemples : "20 trades", "4 semaines", "Immédiat",
+"Dès maintenant", "2 semaines", "30 jours".
+Jamais de phrase complète dans le timeframe.
 
 RÈGLE VALEURS TEXTUELLES OBLIGATOIRES :
 sessionInsight, dominantBias, consecutiveLossesPattern,

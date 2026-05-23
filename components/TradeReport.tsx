@@ -80,6 +80,11 @@ function safeStr(v: unknown, fallback = "—"): string {
   return String(v);
 }
 
+function truncateWords(str: string, maxWords: number): string {
+  const words = str.trim().split(/\s+/);
+  return words.length <= maxWords ? str : words.slice(0, maxWords).join(" ");
+}
+
 export default function TradeReport({
   report,
   analysesUsed,
@@ -252,10 +257,9 @@ export default function TradeReport({
         <h2 className="mb-4 text-xl font-bold">Statistiques clés</h2>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {keyStats.map((stat, i) => (
-            <div key={i} className={`rounded-xl p-4 ${stat.showWarning ? "bg-red/10" : "bg-hover"}`}>
-              <div className="mb-1 flex items-center justify-between">
+            <div key={i} className="rounded-xl bg-hover p-4">
+              <div className="mb-1">
                 <p className="text-sm text-secondary">{stat.label}</p>
-                {stat.showWarning && <span className="text-sm leading-none">⚠️</span>}
               </div>
               <p
                 className={`font-mono text-xl font-bold ${
@@ -266,7 +270,7 @@ export default function TradeReport({
                       : "text-red"
                 }`}
               >
-                {stat.value}
+                {stat.value}{stat.showWarning && <span className="ml-1 text-base leading-none">⚠️</span>}
               </p>
             </div>
           ))}
@@ -280,6 +284,9 @@ export default function TradeReport({
         transition={{ delay: 0.2 }}
       >
         <h2 className="mb-4 text-xl font-bold">Profil psychologique</h2>
+        {psych.dominantBias && (
+          <p className="mb-4 text-sm leading-relaxed text-red">{psych.dominantBias}</p>
+        )}
         <div className="space-y-4">
           {(psych.biases ?? []).map((bias, i) => (
             <div key={`${bias.name}-${i}`} className="rounded-xl bg-hover p-4">
@@ -445,7 +452,7 @@ export default function TradeReport({
                   >
                     {item.category}
                   </span>
-                  <span className="truncate text-xs text-secondary">{item.timeframe}</span>
+                  <span className="truncate text-xs text-secondary">{truncateWords(item.timeframe, 4)}</span>
                 </div>
                 <p className="mb-1 font-medium">{item.action}</p>
                 <p className="text-sm text-secondary">{item.expectedImpact}</p>
