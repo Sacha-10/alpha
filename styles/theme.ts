@@ -6,6 +6,7 @@ export const theme = {
     accentBlue: "#2D6FFF",
     accentCyan: "#00E5FF",
     accentRed: "#FF3D57",
+    accentOrange: "#FFB800",
     accentGreen: "#00E5B0",
     textPrimary: "#F0F4FF",
     textSecondary: "#8892AA",

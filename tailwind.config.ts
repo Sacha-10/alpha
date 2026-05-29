@@ -26,6 +26,7 @@ const config: Config = {
         hover: theme.colors.backgroundHover,
         blue: theme.colors.accentBlue,
         cyan: theme.colors.accentCyan,
+        orange: theme.colors.accentOrange,
         red: theme.colors.accentRed,
         green: theme.colors.accentGreen,
         primary: theme.colors.textPrimary,

@@ -15,7 +15,7 @@ function ScoreCircle({ score, label }: { score: number; label: string }) {
   const normalized = score > 0 && score <= 1 ? score * 100 : score;
   const capped = Math.min(100, Math.max(0, normalized));
   const color =
-    capped > 60 ? "var(--green)" : capped >= 40 ? "var(--cyan)" : "var(--red)";
+    capped > 60 ? "var(--cyan)" : capped >= 40 ? "var(--orange)" : "var(--red)";
   return (
     <div className="flex flex-col items-center">
       <div className="relative h-20 w-20 sm:h-24 sm:w-24">
@@ -56,14 +56,14 @@ function ScoreCircle({ score, label }: { score: number; label: string }) {
 
 function SeverityBadge({ severity }: { severity: BiasSeverity | string }) {
   const styles: Record<string, string> = {
-    CRITIQUE: "bg-red/20 text-red border-red/30",
-    ÉLEVÉ: "bg-red/20 text-red border-red/30",
-    MOYEN: "bg-cyan/20 text-cyan border-cyan/30",
-    FAIBLE: "bg-green/20 text-green border-green/30",
+    CRITIQUE: "bg-red/20 text-red",
+    ÉLEVÉ: "bg-red/20 text-red",
+    MOYEN: "bg-orange/20 text-orange",
+    FAIBLE: "bg-cyan/20 text-cyan",
   };
   return (
     <span
-      className={`rounded-full border px-2 py-1 text-xs font-medium ${styles[severity] ?? styles.FAIBLE}`}
+      className={`rounded-full px-2 py-1 text-xs font-medium ${styles[severity] ?? styles.FAIBLE}`}
     >
       {severity}
     </span>
@@ -141,8 +141,8 @@ export default function TradeReport({
 
   function sessionPctColorClasses(pct: number): { bar: string; text: string } {
     if (pct < 40) return { bar: "var(--red)", text: "text-red" };
-    if (pct <= 60) return { bar: "var(--cyan)", text: "text-cyan" };
-    return { bar: "var(--green)", text: "text-green" };
+    if (pct <= 60) return { bar: "var(--orange)", text: "text-orange" };
+    return { bar: "var(--cyan)", text: "text-cyan" };
   }
 
   const winRateRaw = safeNum(s.winRate);
@@ -437,8 +437,8 @@ export default function TradeReport({
           {(report.actionPlan ?? []).map((item, i) => {
             const catColors: Record<string, string> = {
               Psychologie: "bg-red/20 text-red",
-              Risque: "bg-cyan/20 text-cyan",
-              Stratégie: "bg-blue/20 text-blue",
+              Risque: "bg-orange/20 text-orange",
+              Stratégie: "bg-orange/20 text-orange",
               Timing: "bg-cyan/20 text-cyan",
             };
             return (
