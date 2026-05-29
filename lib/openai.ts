@@ -150,9 +150,9 @@ RÈGLE ESTIMATEDTIMETOREADY :
 estimatedTimeToReady est une phrase complète indiquant
 un délai estimé ET les conditions à remplir. Ne jamais
 retourner uniquement une durée courte comme "3-6 mois".
-Exemple correct : "Il vous faudra entre 3 et 6 mois de
-travail discipliné sur votre gestion des émotions et le
-respect strict de votre money management avant d'être
+Exemple correct : "Il te faudra entre 3 et 6 mois de
+travail discipliné sur ta gestion des émotions et le
+respect strict de ton money management avant d'être
 prêt à passer un challenge FTMO."
 
 Retourne UNIQUEMENT un objet JSON valide.

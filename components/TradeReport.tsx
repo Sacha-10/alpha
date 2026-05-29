@@ -179,7 +179,7 @@ export default function TradeReport({
       label: "Max Drawdown",
       value: `${displayRate(s.maxDrawdownPercent)}%`,
       positive: false,
-      valueClass: ddNum > 20 ? "text-red" : "text-secondary",
+      valueClass: ddNum > 10 ? "text-red" : "text-secondary",
       showWarning: ddNum > 10,
     },
     {
