@@ -290,9 +290,9 @@ export default function TradeReport({
         <div className="space-y-4">
           {(psych.biases ?? []).map((bias, i) => (
             <div key={`${bias.name}-${i}`} className="rounded-xl bg-hover p-4">
-              <div className="mb-2 flex items-center justify-between">
+              <div className="mb-2 flex items-center justify-between gap-2">
                 <span className="font-bold">{bias.name}</span>
-                <div className="flex items-center gap-2">
+                <div className="flex shrink-0 items-center gap-2">
                   <span className="text-sm text-secondary">
                     {bias.frequency}%
                   </span>
@@ -443,7 +443,7 @@ export default function TradeReport({
             };
             return (
               <div key={i} className="rounded-xl bg-hover p-4">
-                <div className="mb-2 flex items-center gap-1.5 overflow-hidden">
+                <div className="mb-2 flex items-center gap-1.5">
                   <span className="shrink-0 font-mono text-xs font-semibold text-secondary">
                     {item.priority}
                   </span>
@@ -452,7 +452,7 @@ export default function TradeReport({
                   >
                     {item.category}
                   </span>
-                  <span className="truncate text-xs text-secondary">{truncateWords(item.timeframe, 4)}</span>
+                  <span className="text-xs text-secondary">{item.timeframe}</span>
                 </div>
                 <p className="mb-1 font-medium">{item.action}</p>
                 <p className="text-sm text-secondary">{item.expectedImpact}</p>

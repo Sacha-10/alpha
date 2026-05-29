@@ -72,6 +72,14 @@ pour chaque sévérité — FAIBLE toujours de 20 à 30,
 MOYEN toujours de 35 à 45, ÉLEVÉ toujours de
 50 à 60, CRITIQUE toujours de 65 à 75.
 
+RÈGLE NOM DU BIAIS :
+Le champ "name" de chaque biais doit contenir
+uniquement le nom principal sans sous-nom directionnel.
+Exemple correct : "Biais directionnel"
+Exemple incorrect : "Biais directionnel BUY"
+Le sous-nom (BUY/SELL) doit apparaître uniquement
+dans la description et l'evidence.
+
 RÈGLE SYMBOLES :
 bestSymbol = symbole avec le Win Rate le plus élevé.
 worstSymbol = symbole avec le Win Rate le plus bas.
@@ -94,14 +102,19 @@ Un trader PnL négatif ne passe jamais FTMO.
 RÈGLE WIN RATE :
 Win Rate global de 45% à 65%.
 
+RÈGLE UNITÉS :
+Dans tous les textes générés, toujours ajouter "%"
+après les valeurs de Win Rate et Max Drawdown,
+et toujours ajouter "€" après les valeurs de PnL.
+
 RÈGLE TOTAL TRADES :
 totalTrades doit être exactement 120.
 
 RÈGLE TIMEFRAME :
 Le timeframe de chaque action du plan d'action doit
-être court et concis — maximum 4 mots.
-Exemples : "20 trades", "4 semaines", "Immédiat",
-"Dès maintenant", "2 semaines", "30 jours".
+être court et concis — maximum 2 mots.
+Exemples : "20 trades", "4 semaines", "De suite",
+"Prochain trade", "2 semaines", "30 jours".
 Jamais de phrase complète dans le timeframe.
 
 RÈGLE VARIATIONS :
@@ -124,7 +137,7 @@ Tu tutoies systématiquement le trader dans tous les
 textes générés — tu/te/ton/ta/tes — jamais de
 vouvoiement sous aucune circonstance.
 
-RÈGLE DOMINANTBIAS :
+RÈGLE BIAIS DOMINANT :
 dominantBias est une phrase complète qui nomme le biais
 dominant et explique concrètement son impact sur les
 trades. Ne jamais retourner uniquement le nom du biais.
@@ -913,6 +926,11 @@ Tu tutoies systématiquement le trader dans tous les
 textes générés — tu/te/ton/ta/tes — jamais de
 vouvoiement sous aucune circonstance.
 
+RÈGLE UNITÉS :
+Dans tous les textes générés, toujours ajouter "%"
+après les valeurs de Win Rate et Max Drawdown,
+et toujours ajouter "€" après les valeurs de PnL.
+
 RÈGLE FONDAMENTALE — ABSOLUMENT CRITIQUE :
 Toutes les statistiques chiffrées sont fournies
 dans le bloc STATS. Tu n'inventes, ne calcules,
@@ -933,15 +951,23 @@ Tu n'en supprimes PAS.
 Retourne exactement autant d'entrées dans biases
 qu'il y a de patterns dans biasPatterns.
 
+RÈGLE NOM DU BIAIS :
+Le champ "name" de chaque biais doit contenir
+uniquement le nom principal sans sous-nom directionnel.
+Exemple correct : "Biais directionnel"
+Exemple incorrect : "Biais directionnel BUY"
+Le sous-nom (BUY/SELL) doit apparaître uniquement
+dans la description et l'evidence.
+
 RÈGLE ACTION PLAN :
 Génère exactement 3 actions (priority 1, 2, 3).
 Chaque action doit être concrète et mesurable.
 
 RÈGLE TIMEFRAME :
 Le timeframe de chaque action du plan d'action doit
-être court et concis — maximum 4 mots.
-Exemples : "20 trades", "4 semaines", "Immédiat",
-"Dès maintenant", "2 semaines", "30 jours".
+être court et concis — maximum 2 mots.
+Exemples : "20 trades", "4 semaines", "De suite",
+"Prochain trade", "2 semaines", "30 jours".
 Jamais de phrase complète dans le timeframe.
 
 RÈGLE VALEURS TEXTUELLES OBLIGATOIRES :
