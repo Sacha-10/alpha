@@ -6,7 +6,7 @@ const placeholderAnon =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiJ9.build-placeholder-signature";
 
 const nextConfig = {
-  serverExternalPackages: ['puppeteer-core', '@sparticuz/chromium', 'react-dom'],
+  serverExternalPackages: ['puppeteer-core', '@sparticuz/chromium'],
   outputFileTracingIncludes: {
     '/api/generate-pdf': ['./node_modules/@sparticuz/chromium/**/*'],
   },
