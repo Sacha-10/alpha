@@ -189,7 +189,7 @@ export default function TradeReport({
         return pnl < 0 ? `-${Math.abs(pnl).toFixed(0)}€` : `+${pnl.toFixed(0)}€`;
       })(),
       positive: safeNum(s.totalPnL) > 0,
-      valueClass: safeNum(s.totalPnL) < 0 ? "text-red" : "text-green",
+      valueClass: safeNum(s.totalPnL) < 0 ? "text-red" : "text-cyan",
     },
     {
       label: "Trades Total",
@@ -266,7 +266,7 @@ export default function TradeReport({
                   stat.valueClass !== undefined
                     ? stat.valueClass
                     : stat.positive
-                      ? "text-green"
+                      ? "text-cyan"
                       : "text-red"
                 }`}
               >
@@ -392,7 +392,7 @@ export default function TradeReport({
             <div key={i} className="rounded-xl bg-hover p-4">
               <p className="mb-1 text-sm text-secondary">{p.label}</p>
               <p
-                className={`break-words font-mono text-sm font-bold sm:text-base ${p.positive ? "text-green" : "text-red"}`}
+                className={`break-words font-mono text-sm font-bold sm:text-base ${p.positive ? "text-cyan" : "text-red"}`}
                 title={p.value}
               >
                 {p.value}

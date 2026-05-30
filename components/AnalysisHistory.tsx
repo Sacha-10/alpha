@@ -97,7 +97,7 @@ export default function AnalysisHistory() {
               >
                 <span className="text-sm text-secondary">{formatDate(a.created_at)}</span>
                 <div className="flex items-center gap-3">
-                  <span className={`font-mono text-sm font-semibold ${pnlPositive ? "text-green" : "text-red"}`}>
+                  <span className={`font-mono text-sm font-semibold ${pnlPositive ? "text-cyan" : "text-red"}`}>
                     {pnlPositive ? "+" : ""}{pnl.toFixed(0)}€
                   </span>
                   {isOpen
