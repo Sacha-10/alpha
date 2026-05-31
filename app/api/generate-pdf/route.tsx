@@ -340,7 +340,8 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { report } = await req.json() as { report: AiAnalysisResult };
+    const { report, screenWidth: rawWidth } = await req.json() as { report: AiAnalysisResult; screenWidth?: number };
+    const screenWidth = Math.round(Math.max(320, Math.min(3840, rawWidth ?? 1200)));
     const date = new Date().toLocaleDateString('fr-FR');
     const html = buildHtml(report, date);
 
@@ -364,7 +365,7 @@ export async function POST(req: NextRequest) {
       }
       browser = await puppeteer.launch({
         args: chromium.args,
-        defaultViewport: { width: 1280, height: 720 },
+        defaultViewport: { width: screenWidth, height: 720 },
         executablePath: execPath,
         headless: true,
       });
@@ -381,7 +382,7 @@ export async function POST(req: NextRequest) {
     }
 
     const page = await browser.newPage();
-    await page.setViewport({ width: 1200, height: 800, deviceScaleFactor: 2 });
+    await page.setViewport({ width: screenWidth, height: 800, deviceScaleFactor: 2 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
     const contentHeight = await page.evaluate(
@@ -389,7 +390,7 @@ export async function POST(req: NextRequest) {
     );
 
     const pdfBuffer = await page.pdf({
-      width: '1200px',
+      width: `${screenWidth}px`,
       height: `${contentHeight}px`,
       printBackground: true,
       pageRanges: '1',
