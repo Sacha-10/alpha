@@ -100,14 +100,14 @@ function buildBody(report: AiAnalysisResult): string {
   const pnlStr = pnl < 0 ? `-${Math.abs(pnl).toFixed(0)}€` : `+${pnl.toFixed(0)}€`;
 
   const keyStats = [
-    { label: 'Win Rate',       value: `${displayRate(s.winRate)}%`,            color: winRateNum >= 50                  ? 'var(--cyan)' : 'var(--red)' },
-    { label: 'Profit Factor',  value: safeNum(s.profitFactor).toFixed(2),      color: safeNum(s.profitFactor) >= 1      ? 'var(--cyan)' : 'var(--red)' },
-    { label: 'Max Drawdown',   value: `${displayRate(s.maxDrawdownPercent)}%`, color: ddNum > 10                        ? 'var(--red)'  : 'var(--secondary)' },
-    { label: 'PnL Total',      value: pnlStr,                                  color: pnl < 0                           ? 'var(--red)'  : 'var(--cyan)' },
-    { label: 'Trades Total',   value: String(s.totalTrades ?? 0),              color: 'var(--primary)' },
-    { label: 'Sharpe Ratio',   value: safeNum(s.sharpeRatio).toFixed(2),       color: safeNum(s.sharpeRatio) >= 1       ? 'var(--cyan)' : 'var(--red)' },
-    { label: 'Risk/Reward',    value: safeNum(s.avgRiskReward).toFixed(2),     color: safeNum(s.avgRiskReward) >= 1     ? 'var(--cyan)' : 'var(--red)' },
-    { label: 'Durée moyenne',  value: safeStr(s.avgTradeDuration),             color: 'var(--primary)' },
+    { label: 'Win Rate',       value: `${displayRate(s.winRate)}%`,            color: winRateNum >= 50              ? 'var(--cyan)' : 'var(--red)',       warn: false },
+    { label: 'Profit Factor',  value: safeNum(s.profitFactor).toFixed(2),      color: safeNum(s.profitFactor) >= 1  ? 'var(--cyan)' : 'var(--red)',       warn: false },
+    { label: 'Max Drawdown',   value: `${displayRate(s.maxDrawdownPercent)}%`, color: ddNum > 10                    ? 'var(--red)'  : 'var(--cyan)',       warn: ddNum > 10 },
+    { label: 'PnL Total',      value: pnlStr,                                  color: pnl < 0                       ? 'var(--red)'  : 'var(--cyan)',       warn: false },
+    { label: 'Trades Total',   value: String(s.totalTrades ?? 0),              color: 'var(--primary)',                                                   warn: false },
+    { label: 'Sharpe Ratio',   value: safeNum(s.sharpeRatio).toFixed(2),       color: safeNum(s.sharpeRatio) >= 1   ? 'var(--cyan)' : 'var(--red)',       warn: false },
+    { label: 'Risk/Reward',    value: safeNum(s.avgRiskReward).toFixed(2),     color: safeNum(s.avgRiskReward) >= 1 ? 'var(--cyan)' : 'var(--red)',       warn: false },
+    { label: 'Durée moyenne',  value: safeStr(s.avgTradeDuration),             color: 'var(--primary)',                                                   warn: false },
   ];
 
   const catColor: Record<string, string> = {
@@ -118,10 +118,17 @@ function buildBody(report: AiAnalysisResult): string {
   };
   const catDefault = 'background:rgba(136,146,170,.2);color:var(--secondary)';
 
+  const tokyoRate =
+    'tokyoWinRate' in session && typeof (session as Record<string, unknown>).tokyoWinRate === 'number'
+      ? (session as Record<string, unknown>).tokyoWinRate as number
+      : 'asianWinRate' in session && typeof (session as Record<string, unknown>).asianWinRate === 'number'
+        ? (session as Record<string, unknown>).asianWinRate as number
+        : 30;
+
   const sessions = [
-    { name: 'London',   rate: safeNum(session.londonWinRate)   },
-    { name: 'New York', rate: safeNum(session.newYorkWinRate)  },
-    { name: 'Tokyo',    rate: safeNum(session.tokyoWinRate)    },
+    { name: 'London',   rate: safeNum(session.londonWinRate)  },
+    { name: 'New York', rate: safeNum(session.newYorkWinRate) },
+    { name: 'Tokyo',    rate: safeNum(tokyoRate)              },
   ];
 
   const perfPatterns = [
@@ -165,7 +172,7 @@ function buildBody(report: AiAnalysisResult): string {
       ${keyStats.map(st => `
       <div style="border-radius:12px;background:var(--hover);padding:16px;">
         <p style="margin:0 0 4px;font-size:14px;color:var(--secondary);">${esc(st.label)}</p>
-        <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:bold;color:${st.color};">${esc(st.value)}</p>
+        <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:bold;color:${st.color};">${esc(st.value)}${st.warn ? '<span style="margin-left:4px;font-size:16px;line-height:1;">⚠️</span>' : ''}</p>
       </div>`).join('')}
     </div>
   </div>
