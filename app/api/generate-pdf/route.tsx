@@ -345,7 +345,7 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
       word-break: break-word;
     }
     @media (max-width: 639px) {
-      body { padding: 12px; }
+      body { padding: 16px 12px; }
     }
     @media (min-width: 640px) {
       .r-score-circle { height: 96px; width: 96px; }
