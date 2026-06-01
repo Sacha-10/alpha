@@ -303,6 +303,7 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
     *, *::before, *::after { box-sizing: border-box; }
     html {
       background-color: ${bgColor};
+      overflow: hidden;
     }
     body {
       margin: 0;
@@ -312,6 +313,7 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
       font-family: 'Inter', sans-serif;
       font-size: 14px;
       line-height: 1.5;
+      overflow: hidden;
     }
     /* ── responsive classes ───────────────────────────── */
     .r-score-circle {
@@ -442,7 +444,7 @@ export async function POST(req: NextRequest) {
         return rect.bottom + pb;
       }
       return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
-    }));
+    })) + 2;
 
     await page.setViewport({ width: viewportWidth, height: contentHeight });
 

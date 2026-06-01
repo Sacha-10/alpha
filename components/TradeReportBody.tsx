@@ -109,7 +109,7 @@ export function TradeReportBody({ report }: { report: AiAnalysisResult }) {
     value: string;
     positive: boolean;
     valueClass?: string;
-    showWarning?: boolean;
+  
   }[] = [
     {
       label: "Win Rate",
@@ -126,7 +126,6 @@ export function TradeReportBody({ report }: { report: AiAnalysisResult }) {
       value: `${displayRate(s.maxDrawdownPercent)}%`,
       positive: false,
       valueClass: ddNum > 10 ? "text-red" : "text-cyan",
-      showWarning: ddNum > 10,
     },
     {
       label: "PnL Total",
@@ -195,9 +194,6 @@ export function TradeReportBody({ report }: { report: AiAnalysisResult }) {
                 }`}
               >
                 {stat.value}
-                {stat.showWarning && (
-                  <span className="ml-1 text-base leading-none">⚠️</span>
-                )}
               </p>
             </div>
           ))}
