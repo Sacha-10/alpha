@@ -431,10 +431,10 @@ export async function POST(req: NextRequest) {
     }
 
     const page = await browser.newPage();
-    // screen mode: Puppeteer renders exactly as the browser — no print-media
-    // layout quirks, so the measured height is pixel-perfect with no buffer needed
     await page.emulateMediaType('screen');
-    await page.setViewport({ width: viewportWidth, height: 5000 });
+    // height:1 → layout is 100% content-driven; no fixed viewport height influences
+    // flex/grid sizing. Content overflows naturally and scrollHeight is authoritative.
+    await page.setViewport({ width: viewportWidth, height: 1 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
     await page.evaluate(() => document.fonts.ready);
 
@@ -442,15 +442,19 @@ export async function POST(req: NextRequest) {
       const wrapper = document.querySelector('body > div') as HTMLElement | null;
       if (wrapper) {
         const rect = wrapper.getBoundingClientRect();
-        const pb = parseFloat(window.getComputedStyle(document.body).paddingBottom);
+        const pb = parseFloat(window.getComputedStyle(document.body).paddingBottom) || 0;
         return rect.bottom + pb;
       }
-      return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      return Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        document.body.offsetHeight,
+      );
     }));
 
-    // Align viewport to exact PDF dimensions — eliminates top/bottom hairline artifacts
-    // caused by the 5000px layout viewport being cropped to contentHeight at PDF render time
     await page.setViewport({ width: viewportWidth, height: contentHeight });
+    // Double RAF: guarantees Chromium completes reflow before PDF snapshot
+    await page.evaluate(() => new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(r))));
 
     const pdfBuffer = await page.pdf({
       width: `${viewportWidth}px`,
