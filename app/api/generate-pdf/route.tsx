@@ -271,10 +271,11 @@ function buildBody(report: AiAnalysisResult): string {
 
 // ── document builder ──────────────────────────────────────────────────────────
 
-function buildHtml(report: AiAnalysisResult, date: string): string {
+function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): string {
   const body = buildBody(report);
+  const bgColor = isMobile ? '#12121A' : '#0A0A0F';
 
-  return `<!DOCTYPE html>
+  const head = `<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -301,12 +302,12 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
     @page { margin: 0; }
     *, *::before, *::after { box-sizing: border-box; }
     html {
-      background-color: #0A0A0F;
+      background-color: ${bgColor};
     }
     body {
       margin: 0;
-      padding: 24px;
-      background-color: #0A0A0F;
+      padding: ${isMobile ? '16px 12px' : '24px'};
+      background-color: ${bgColor};
       color: #F0F4FF;
       font-family: 'Inter', sans-serif;
       font-size: 14px;
@@ -345,9 +346,6 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
       font-size: 14px; font-weight: bold;
       word-break: break-word;
     }
-    @media (max-width: 639px) {
-      body { padding: 16px 12px; }
-    }
     @media (min-width: 640px) {
       .r-score-circle { height: 96px; width: 96px; }
       .r-score-text { font-size: 18px; }
@@ -359,7 +357,19 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
       .r-stat-grid { grid-template-columns: repeat(4, 1fr); }
     }
   </style>
-</head>
+</head>`;
+
+  if (isMobile) {
+    return `${head}
+<body>
+  <div style="width:100%;">
+    ${body}
+  </div>
+</body>
+</html>`;
+  }
+
+  return `${head}
 <body>
   <div style="width:100%;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;
@@ -389,10 +399,10 @@ export async function POST(req: NextRequest) {
   try {
     const { report, screenWidth: rawWidth } = await req.json() as { report: AiAnalysisResult; screenWidth?: number };
     const screenWidth = Math.round(Math.max(320, Math.min(3840, rawWidth ?? 1200)));
-    const viewportWidth = screenWidth < 640 ? screenWidth : 1200;
-    console.error('[generate-pdf] screenWidth reçu:', rawWidth, '→ normalisé:', screenWidth, '→ viewportWidth:', viewportWidth);
+    const isMobile = screenWidth < 640;
+    const viewportWidth = isMobile ? screenWidth : 1200;
     const date = new Date().toLocaleDateString('fr-FR');
-    const html = buildHtml(report, date);
+    const html = buildHtml(report, date, isMobile);
 
     let browser;
     if (process.env.NODE_ENV === 'production') {
@@ -431,13 +441,14 @@ export async function POST(req: NextRequest) {
     }
 
     const page = await browser.newPage();
-    await page.setViewport({ width: viewportWidth, height: 800 });
-    console.error('[generate-pdf] viewport configuré:', { width: viewportWidth, height: 800 });
+    await page.setViewport({ width: viewportWidth, height: 5000 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    const contentHeight = await page.evaluate(() =>
+    const contentHeight = Math.ceil(await page.evaluate(() =>
       Math.max(document.body.scrollHeight, document.documentElement.scrollHeight),
-    );
+    ));
+
+    await page.setViewport({ width: viewportWidth, height: contentHeight });
 
     const pdfBuffer = await page.pdf({
       width: `${viewportWidth}px`,
