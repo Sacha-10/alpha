@@ -27,7 +27,10 @@ export default function TradeReport({
       const res = await fetch("/api/generate-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ report, screenWidth: window.innerWidth }),
+        body: JSON.stringify({
+          report,
+          screenWidth: window.innerWidth < 768 ? window.innerWidth : 1200,
+        }),
       });
       if (!res.ok) {
         throw new Error("Erreur lors de la génération du PDF");

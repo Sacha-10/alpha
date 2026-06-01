@@ -37,18 +37,15 @@ function scoreCircle(score: number, label: string): string {
   const color =
     capped > 60 ? 'var(--cyan)' : capped >= 40 ? 'var(--orange)' : 'var(--red)';
   return `<div style="display:flex;flex-direction:column;align-items:center;">
-  <div style="position:relative;height:96px;width:96px;">
+  <div class="r-score-circle">
     <svg viewBox="0 0 100 100" style="height:100%;width:100%;transform:rotate(-90deg)">
       <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border)" stroke-width="8"/>
       <circle cx="50" cy="50" r="45" fill="none" stroke="${color}" stroke-width="8"
         stroke-dasharray="${(capped * 2.83).toFixed(1)} 283" stroke-linecap="round"/>
     </svg>
-    <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-                 font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:bold;color:${color};">
-      ${Math.round(capped)}/100
-    </span>
+    <span class="r-score-text" style="color:${color};">${Math.round(capped)}/100</span>
   </div>
-  <span style="margin-top:8px;font-size:12px;color:var(--secondary);text-align:center;white-space:nowrap;">${esc(label)}</span>
+  <span class="r-score-label">${esc(label)}</span>
 </div>`;
 }
 
@@ -168,7 +165,7 @@ function buildBody(report: AiAnalysisResult): string {
   <!-- Statistiques clés -->
   <div>
     <h2 style="margin:0 0 16px;font-size:20px;font-weight:bold;">Statistiques clés</h2>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+    <div class="r-stat-grid">
       ${keyStats.map(st => `
       <div style="border-radius:12px;background:var(--hover);padding:16px;">
         <p style="margin:0 0 4px;font-size:14px;color:var(--secondary);">${esc(st.label)}</p>
@@ -202,7 +199,7 @@ function buildBody(report: AiAnalysisResult): string {
   <!-- Performance par session -->
   <div>
     <h2 style="margin:0 0 16px;font-size:20px;font-weight:bold;">Performance par session</h2>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+    <div class="r-session-grid">
       ${sessions.map(sess => {
         const rv = Number(displayRate(sess.rate));
         const sc = sessionColors(rv);
@@ -228,7 +225,7 @@ function buildBody(report: AiAnalysisResult): string {
       ${perfPatterns.map(p => `
       <div style="border-radius:12px;background:var(--hover);padding:16px;">
         <p style="margin:0 0 4px;font-size:14px;color:var(--secondary);">${esc(p.label)}</p>
-        <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:bold;color:${p.color};word-break:break-word;">${esc(p.value)}</p>
+        <p class="r-pattern-val" style="color:${p.color};">${esc(p.value)}</p>
       </div>`).join('')}
     </div>
   </div>
@@ -311,6 +308,52 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
       font-size: 14px;
       line-height: 1.5;
     }
+    /* ── responsive classes ───────────────────────────── */
+    .r-score-circle {
+      position: relative;
+      height: 80px;
+      width: 80px;
+    }
+    .r-score-text {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px; font-weight: bold; line-height: 1.1;
+    }
+    .r-score-label {
+      margin-top: 8px; font-size: 12px; color: var(--secondary);
+      text-align: center; width: 96px;
+    }
+    .r-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .r-session-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .r-pattern-val {
+      margin: 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px; font-weight: bold;
+      word-break: break-word;
+    }
+    @media (max-width: 639px) {
+      body { padding: 16px; }
+    }
+    @media (min-width: 640px) {
+      .r-score-circle { height: 96px; width: 96px; }
+      .r-score-text { font-size: 18px; }
+      .r-score-label { width: auto; white-space: nowrap; }
+      .r-session-grid { grid-template-columns: repeat(3, 1fr); }
+      .r-pattern-val { font-size: 16px; }
+    }
+    @media (min-width: 768px) {
+      .r-stat-grid { grid-template-columns: repeat(4, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -382,6 +425,7 @@ export async function POST(req: NextRequest) {
     }
 
     const page = await browser.newPage();
+    await page.emulateMediaType('screen');
     await page.setViewport({ width: screenWidth, height: 800, deviceScaleFactor: 2 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
