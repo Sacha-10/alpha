@@ -360,7 +360,7 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
   </style>
 </head>
 <body>
-  <div style="max-width:900px;margin:0 auto;">
+  <div style="max-width:1200px;margin:0 auto;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;
                 padding-bottom:16px;border-bottom:1px solid #1E2035;margin-bottom:32px;">
       <div>
