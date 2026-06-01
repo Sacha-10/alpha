@@ -346,7 +346,7 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
       word-break: break-word;
     }
     @media (max-width: 639px) {
-      body { padding: 16px 12px; }
+      body { padding: 16px 37px; }
     }
     @media (min-width: 640px) {
       .r-score-circle { height: 96px; width: 96px; }
@@ -438,9 +438,16 @@ export async function POST(req: NextRequest) {
     console.error('[generate-pdf] viewport configuré:', { width: viewportWidth, height: 800 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    const contentHeight = await page.evaluate(
-      () => document.body.scrollHeight,
-    );
+    const contentHeight = await page.evaluate(() => {
+      const wrapper = document.body.firstElementChild as HTMLElement;
+      if (!wrapper) return document.body.scrollHeight;
+      const style = window.getComputedStyle(document.body);
+      return Math.ceil(
+        parseFloat(style.paddingTop) +
+        wrapper.offsetHeight +
+        parseFloat(style.paddingBottom),
+      );
+    });
 
     const pdfBuffer = await page.pdf({
       width: `${viewportWidth}px`,
