@@ -303,7 +303,6 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
     *, *::before, *::after { box-sizing: border-box; }
     html {
       background-color: ${bgColor};
-      overflow: hidden;
     }
     body {
       margin: 0;
@@ -313,7 +312,6 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
       font-family: 'Inter', sans-serif;
       font-size: 14px;
       line-height: 1.5;
-      overflow: hidden;
     }
     /* ── responsive classes ───────────────────────────── */
     .r-score-circle {
@@ -433,20 +431,22 @@ export async function POST(req: NextRequest) {
     }
 
     const page = await browser.newPage();
+    // screen mode: Puppeteer renders exactly as the browser — no print-media
+    // layout quirks, so the measured height is pixel-perfect with no buffer needed
+    await page.emulateMediaType('screen');
     await page.setViewport({ width: viewportWidth, height: 5000 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.evaluate(() => document.fonts.ready);
 
     const contentHeight = Math.ceil(await page.evaluate(() => {
-      const wrapper = document.querySelector('body > div');
+      const wrapper = document.querySelector('body > div') as HTMLElement | null;
       if (wrapper) {
         const rect = wrapper.getBoundingClientRect();
         const pb = parseFloat(window.getComputedStyle(document.body).paddingBottom);
         return rect.bottom + pb;
       }
       return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
-    })) + 2;
-
-    await page.setViewport({ width: viewportWidth, height: contentHeight });
+    }));
 
     const pdfBuffer = await page.pdf({
       width: `${viewportWidth}px`,
