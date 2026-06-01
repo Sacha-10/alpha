@@ -388,7 +388,9 @@ export async function POST(req: NextRequest) {
   try {
     const { report, screenWidth: rawWidth } = await req.json() as { report: AiAnalysisResult; screenWidth?: number };
     const screenWidth = Math.round(Math.max(320, Math.min(3840, rawWidth ?? 1200)));
-    const viewportWidth = screenWidth < 640 ? screenWidth : 1200;
+    // Mobile: subtract 50px (main p-6 both sides = 48px + card border both sides = 2px)
+    // so the PDF content width matches what TradeReport sees inside the accordion card.
+    const viewportWidth = screenWidth < 640 ? Math.max(320, screenWidth - 50) : 1200;
     console.error('[generate-pdf] screenWidth reçu:', rawWidth, '→ normalisé:', screenWidth, '→ viewportWidth:', viewportWidth);
     const date = new Date().toLocaleDateString('fr-FR');
     const html = buildHtml(report, date);
