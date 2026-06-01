@@ -389,7 +389,7 @@ export async function POST(req: NextRequest) {
   try {
     const { report, screenWidth: rawWidth } = await req.json() as { report: AiAnalysisResult; screenWidth?: number };
     const screenWidth = Math.round(Math.max(320, Math.min(3840, rawWidth ?? 1200)));
-    const viewportWidth = screenWidth < 640 ? screenWidth - 74 : 1200;
+    const viewportWidth = screenWidth < 640 ? screenWidth : 1200;
     console.error('[generate-pdf] screenWidth reçu:', rawWidth, '→ normalisé:', screenWidth, '→ viewportWidth:', viewportWidth);
     const date = new Date().toLocaleDateString('fr-FR');
     const html = buildHtml(report, date);
