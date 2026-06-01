@@ -454,7 +454,7 @@ export async function POST(req: NextRequest) {
 
     await page.setViewport({ width: viewportWidth, height: contentHeight });
     // Double RAF: guarantees Chromium completes reflow before PDF snapshot
-    await page.evaluate(() => new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+    await page.evaluate('new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))');
 
     const pdfBuffer = await page.pdf({
       width: `${viewportWidth}px`,
