@@ -299,6 +299,10 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
       --border:     #1E2035;
     }
     *, *::before, *::after { box-sizing: border-box; }
+    html {
+      background-color: #0A0A0F;
+      overflow: hidden;
+    }
     body {
       margin: 0;
       padding: 32px;
@@ -426,7 +430,7 @@ export async function POST(req: NextRequest) {
 
     const page = await browser.newPage();
     await page.emulateMediaType('screen');
-    await page.setViewport({ width: screenWidth, height: 800, deviceScaleFactor: 2 });
+    await page.setViewport({ width: screenWidth, height: 800 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
     const contentHeight = await page.evaluate(
