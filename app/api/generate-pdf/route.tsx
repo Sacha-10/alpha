@@ -434,7 +434,6 @@ export async function POST(req: NextRequest) {
     }
 
     const page = await browser.newPage();
-    await page.emulateMediaType('screen');
     await page.setViewport({ width: viewportWidth, height: 800 });
     console.error('[generate-pdf] viewport configuré:', { width: viewportWidth, height: 800 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -443,12 +442,17 @@ export async function POST(req: NextRequest) {
       () => document.body.scrollHeight,
     );
 
+    await page.addStyleTag({
+      content: `@page { margin: 0; size: ${viewportWidth}px ${contentHeight}px; }`,
+    });
+
     const pdfBuffer = await page.pdf({
       width: `${viewportWidth}px`,
       height: `${contentHeight}px`,
       printBackground: true,
       pageRanges: '1',
-      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      preferCSSPageSize: true,
+      margin: { top: '0', right: '0', bottom: '0', left: '0' },
     });
 
     await browser.close();
