@@ -439,19 +439,24 @@ export async function POST(req: NextRequest) {
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
     const contentHeight = await page.evaluate(
-      () => document.body.scrollHeight,
+      () => Math.max(document.body.scrollHeight, document.documentElement.scrollHeight),
     );
 
-    await page.addStyleTag({
-      content: `@page { margin: 0; size: ${viewportWidth}px ${contentHeight}px; }`,
-    });
+    // On mobile (narrow pages), preferCSSPageSize + @page size triggers a Chromium
+    // intrinsic-margin bug that adds white borders regardless of margin:0. Desktop
+    // (1200px) is unaffected. Keep the CSS-driven path only for desktop.
+    if (screenWidth >= 640) {
+      await page.addStyleTag({
+        content: `@page { margin: 0; size: ${viewportWidth}px ${contentHeight}px; }`,
+      });
+    }
 
     const pdfBuffer = await page.pdf({
       width: `${viewportWidth}px`,
       height: `${contentHeight}px`,
       printBackground: true,
       pageRanges: '1',
-      preferCSSPageSize: true,
+      ...(screenWidth >= 640 ? { preferCSSPageSize: true } : {}),
       margin: { top: '0', right: '0', bottom: '0', left: '0' },
     });
 
