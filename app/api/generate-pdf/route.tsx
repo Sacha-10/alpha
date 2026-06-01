@@ -448,6 +448,10 @@ export async function POST(req: NextRequest) {
       return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
     }));
 
+    // Align viewport to exact PDF dimensions — eliminates top/bottom hairline artifacts
+    // caused by the 5000px layout viewport being cropped to contentHeight at PDF render time
+    await page.setViewport({ width: viewportWidth, height: contentHeight });
+
     const pdfBuffer = await page.pdf({
       width: `${viewportWidth}px`,
       height: `${contentHeight}px`,
