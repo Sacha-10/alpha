@@ -346,7 +346,7 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
       word-break: break-word;
     }
     @media (max-width: 639px) {
-      body { padding: 16px 37px; }
+      body { padding: 16px 12px; }
     }
     @media (min-width: 640px) {
       .r-score-circle { height: 96px; width: 96px; }
@@ -389,10 +389,7 @@ export async function POST(req: NextRequest) {
   try {
     const { report, screenWidth: rawWidth } = await req.json() as { report: AiAnalysisResult; screenWidth?: number };
     const screenWidth = Math.round(Math.max(320, Math.min(3840, rawWidth ?? 1200)));
-    // Mobile: use full screen width so the PDF exactly fills the device screen.
-    // Subtracting UI chrome (74px) made the PDF narrower than the screen, causing
-    // PDF viewers to add white margins on both sides. The PDF body has its own padding.
-    const viewportWidth = screenWidth < 640 ? screenWidth : 1200;
+    const viewportWidth = screenWidth < 640 ? screenWidth - 74 : 1200;
     console.error('[generate-pdf] screenWidth reçu:', rawWidth, '→ normalisé:', screenWidth, '→ viewportWidth:', viewportWidth);
     const date = new Date().toLocaleDateString('fr-FR');
     const html = buildHtml(report, date);
@@ -438,16 +435,9 @@ export async function POST(req: NextRequest) {
     console.error('[generate-pdf] viewport configuré:', { width: viewportWidth, height: 800 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    const contentHeight = await page.evaluate(() => {
-      const wrapper = document.body.firstElementChild as HTMLElement;
-      if (!wrapper) return document.body.scrollHeight;
-      const style = window.getComputedStyle(document.body);
-      return Math.ceil(
-        parseFloat(style.paddingTop) +
-        wrapper.offsetHeight +
-        parseFloat(style.paddingBottom),
-      );
-    });
+    const contentHeight = await page.evaluate(() =>
+      Math.max(document.body.scrollHeight, document.documentElement.scrollHeight),
+    );
 
     const pdfBuffer = await page.pdf({
       width: `${viewportWidth}px`,
