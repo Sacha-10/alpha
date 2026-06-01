@@ -360,7 +360,7 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
   </style>
 </head>
 <body>
-  <div style="max-width:1200px;margin:0 auto;">
+  <div style="width:100%;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;
                 padding-bottom:16px;border-bottom:1px solid #1E2035;margin-bottom:32px;">
       <div>
@@ -388,7 +388,8 @@ export async function POST(req: NextRequest) {
   try {
     const { report, screenWidth: rawWidth } = await req.json() as { report: AiAnalysisResult; screenWidth?: number };
     const screenWidth = Math.round(Math.max(320, Math.min(3840, rawWidth ?? 1200)));
-    console.error('[generate-pdf] screenWidth reçu:', rawWidth, '→ normalisé:', screenWidth);
+    const viewportWidth = screenWidth < 640 ? screenWidth : 1200;
+    console.error('[generate-pdf] screenWidth reçu:', rawWidth, '→ normalisé:', screenWidth, '→ viewportWidth:', viewportWidth);
     const date = new Date().toLocaleDateString('fr-FR');
     const html = buildHtml(report, date);
 
@@ -412,7 +413,7 @@ export async function POST(req: NextRequest) {
       }
       browser = await puppeteer.launch({
         args: chromium.args,
-        defaultViewport: { width: screenWidth, height: 720 },
+        defaultViewport: { width: viewportWidth, height: 720 },
         executablePath: execPath,
         headless: true,
       });
@@ -430,8 +431,8 @@ export async function POST(req: NextRequest) {
 
     const page = await browser.newPage();
     await page.emulateMediaType('screen');
-    await page.setViewport({ width: screenWidth, height: 800 });
-    console.error('[generate-pdf] viewport configuré:', { width: screenWidth, height: 800 });
+    await page.setViewport({ width: viewportWidth, height: 800 });
+    console.error('[generate-pdf] viewport configuré:', { width: viewportWidth, height: 800 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
     const contentHeight = await page.evaluate(
@@ -439,7 +440,7 @@ export async function POST(req: NextRequest) {
     );
 
     const pdfBuffer = await page.pdf({
-      width: `${screenWidth}px`,
+      width: `${viewportWidth}px`,
       height: `${contentHeight}px`,
       printBackground: true,
       pageRanges: '1',
