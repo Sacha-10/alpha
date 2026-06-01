@@ -301,7 +301,6 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
     *, *::before, *::after { box-sizing: border-box; }
     html {
       background-color: #0A0A0F;
-      overflow: hidden;
     }
     body {
       margin: 0;
@@ -389,6 +388,7 @@ export async function POST(req: NextRequest) {
   try {
     const { report, screenWidth: rawWidth } = await req.json() as { report: AiAnalysisResult; screenWidth?: number };
     const screenWidth = Math.round(Math.max(320, Math.min(3840, rawWidth ?? 1200)));
+    console.error('[generate-pdf] screenWidth reçu:', rawWidth, '→ normalisé:', screenWidth);
     const date = new Date().toLocaleDateString('fr-FR');
     const html = buildHtml(report, date);
 
@@ -431,10 +431,11 @@ export async function POST(req: NextRequest) {
     const page = await browser.newPage();
     await page.emulateMediaType('screen');
     await page.setViewport({ width: screenWidth, height: 800 });
+    console.error('[generate-pdf] viewport configuré:', { width: screenWidth, height: 800 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
     const contentHeight = await page.evaluate(
-      () => document.documentElement.scrollHeight,
+      () => document.body.scrollHeight,
     );
 
     const pdfBuffer = await page.pdf({
