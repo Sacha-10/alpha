@@ -359,16 +359,6 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
   </style>
 </head>`;
 
-  if (isMobile) {
-    return `${head}
-<body>
-  <div style="width:100%;">
-    ${body}
-  </div>
-</body>
-</html>`;
-  }
-
   return `${head}
 <body>
   <div style="width:100%;">
@@ -444,9 +434,15 @@ export async function POST(req: NextRequest) {
     await page.setViewport({ width: viewportWidth, height: 5000 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    const contentHeight = Math.ceil(await page.evaluate(() =>
-      Math.max(document.body.scrollHeight, document.documentElement.scrollHeight),
-    ));
+    const contentHeight = Math.ceil(await page.evaluate(() => {
+      const wrapper = document.querySelector('body > div');
+      if (wrapper) {
+        const rect = wrapper.getBoundingClientRect();
+        const pb = parseFloat(window.getComputedStyle(document.body).paddingBottom);
+        return rect.bottom + pb;
+      }
+      return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    }));
 
     await page.setViewport({ width: viewportWidth, height: contentHeight });
 
