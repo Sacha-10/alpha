@@ -451,7 +451,6 @@ export async function POST(req: NextRequest) {
       height: `${contentHeight}px`,
       printBackground: true,
       pageRanges: '1',
-      preferCSSPageSize: true,
       margin: { top: '0', right: '0', bottom: '0', left: '0' },
     });
 
