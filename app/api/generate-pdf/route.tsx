@@ -304,7 +304,7 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
     }
     body {
       margin: 0;
-      padding: 32px;
+      padding: 24px;
       background-color: #0A0A0F;
       color: #F0F4FF;
       font-family: 'Inter', sans-serif;
@@ -345,7 +345,7 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
       word-break: break-word;
     }
     @media (max-width: 639px) {
-      body { padding: 16px; }
+      body { padding: 12px; }
     }
     @media (min-width: 640px) {
       .r-score-circle { height: 96px; width: 96px; }

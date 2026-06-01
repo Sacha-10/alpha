@@ -29,7 +29,7 @@ export default function TradeReport({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           report,
-          screenWidth: window.innerWidth < 768 ? window.innerWidth : 1200,
+          screenWidth: window.innerWidth < 640 ? window.innerWidth : 1200,
         }),
       });
       if (!res.ok) {
