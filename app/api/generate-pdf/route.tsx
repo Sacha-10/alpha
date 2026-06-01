@@ -298,6 +298,7 @@ function buildHtml(report: AiAnalysisResult, date: string): string {
       --secondary:  #8892AA;
       --border:     #1E2035;
     }
+    @page { margin: 0; }
     *, *::before, *::after { box-sizing: border-box; }
     html {
       background-color: #0A0A0F;
