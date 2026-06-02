@@ -432,9 +432,10 @@ export async function POST(req: NextRequest) {
 
     const page = await browser.newPage();
     await page.emulateMediaType('screen');
-    // height:1 → layout is 100% content-driven; no fixed viewport height influences
-    // flex/grid sizing. Content overflows naturally and scrollHeight is authoritative.
-    await page.setViewport({ width: viewportWidth, height: 1 });
+    // height:5000 → content fits in viewport, no scrollbar appears.
+    // A scrollbar (from height:1 overflow) would narrow the layout by ~15px and cause
+    // a reflow after setViewport(contentHeight), making the measured height inaccurate.
+    await page.setViewport({ width: viewportWidth, height: 5000 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
     await page.evaluate(() => document.fonts.ready);
 
