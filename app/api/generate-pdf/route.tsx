@@ -432,35 +432,31 @@ export async function POST(req: NextRequest) {
 
     const page = await browser.newPage();
     await page.emulateMediaType('screen');
-    // height:5000 → content fits in viewport, no scrollbar appears.
-    // A scrollbar (from height:1 overflow) would narrow the layout by ~15px and cause
-    // a reflow after setViewport(contentHeight), making the measured height inaccurate.
+    // height:5000 keeps all content above the fold so no scrollbar narrows the layout.
+    // The PDF renderer uses page.pdf() dimensions for capture, not the viewport height,
+    // so we never resize the viewport — any resize would trigger a reflow and risk
+    // making the measured height stale before the PDF snapshot.
     await page.setViewport({ width: viewportWidth, height: 5000 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
     await page.evaluate(() => document.fonts.ready);
 
-    const contentHeight = Math.ceil(await page.evaluate(() => {
-      const wrapper = document.querySelector('body > div') as HTMLElement | null;
-      if (wrapper) {
-        const rect = wrapper.getBoundingClientRect();
-        const pb = parseFloat(window.getComputedStyle(document.body).paddingBottom) || 0;
-        return rect.bottom + pb;
-      }
-      return Math.max(
-        document.body.scrollHeight,
-        document.documentElement.scrollHeight,
-        document.body.offsetHeight,
-      );
-    }));
+    // body.getBoundingClientRect().height = paddingTop + content + paddingBottom.
+    // Equivalent to the full page height. We also check scrollHeight to catch any
+    // absolutely-positioned overflow that getBoundingClientRect might miss.
+    const contentHeight = await page.evaluate(() => {
+      void document.body.offsetHeight; // flush pending layout
+      const { height } = document.body.getBoundingClientRect();
+      return Math.max(Math.ceil(height), document.body.scrollHeight);
+    });
 
-    await page.setViewport({ width: viewportWidth, height: contentHeight });
-    // Double RAF: guarantees Chromium completes reflow before PDF snapshot
-    await page.evaluate('new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))');
-
+    // +1px guards against CSS-pixel → PDF-point DPI rounding (1px = 0.75pt; Chromium
+    // may floor fractional points making the page 1px short and bleeding page 2).
+    // pageRanges:'1' is the definitive safety net: even a 1px page-2 sliver is excluded.
     const pdfBuffer = await page.pdf({
       width: `${viewportWidth}px`,
-      height: `${contentHeight}px`,
+      height: `${contentHeight + 1}px`,
       printBackground: true,
+      pageRanges: '1',
       margin: { top: '0', right: '0', bottom: '0', left: '0' },
     });
 
