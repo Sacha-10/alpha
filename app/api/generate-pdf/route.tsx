@@ -41,7 +41,7 @@ function scoreCircle(score: number, label: string): string {
     <svg viewBox="0 0 100 100" style="height:100%;width:100%;transform:rotate(-90deg)">
       <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border)" stroke-width="8"/>
       <circle cx="50" cy="50" r="45" fill="none" stroke="${color}" stroke-width="8"
-        stroke-dasharray="${(capped * 2.83).toFixed(1)} 283" stroke-linecap="round"/>
+        stroke-dasharray="${capped * 2.83} 283" stroke-linecap="round"/>
     </svg>
     <span class="r-score-text" style="color:${color};">${Math.round(capped)}/100</span>
   </div>
@@ -301,6 +301,8 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
     }
     @page { margin: 0; }
     *, *::before, *::after { box-sizing: border-box; }
+    *::-webkit-scrollbar { display: none; width: 0; height: 0; }
+    * { scrollbar-width: none; }
     html {
       background-color: ${bgColor};
       overflow: hidden;
