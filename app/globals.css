@@ -64,10 +64,8 @@ html {
   overflow-x: clip;
   overflow-y: auto;
   position: static;
-  scrollbar-gutter: stable;
   scroll-behavior: smooth;
-  scrollbar-color: var(--blue) var(--background);
-  scrollbar-width: thin;
+  scrollbar-width: none;
 }
 
 body {
@@ -135,18 +133,9 @@ body {
   color: var(--primary);
 }
 
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--background);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--blue);
-  border-radius: var(--radius);
+html::-webkit-scrollbar {
+  display: none;
+  width: 0;
 }
 
 @layer utilities {

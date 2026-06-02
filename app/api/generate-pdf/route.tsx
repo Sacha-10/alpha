@@ -303,6 +303,7 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
     *, *::before, *::after { box-sizing: border-box; }
     html {
       background-color: ${bgColor};
+      overflow: hidden;
     }
     body {
       margin: 0;
@@ -312,6 +313,7 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
       font-family: 'Inter', sans-serif;
       font-size: 14px;
       line-height: 1.5;
+      overflow: hidden;
     }
     /* ── responsive classes ───────────────────────────── */
     .r-score-circle {
@@ -432,31 +434,21 @@ export async function POST(req: NextRequest) {
 
     const page = await browser.newPage();
     await page.emulateMediaType('screen');
-    // height:5000 keeps all content above the fold so no scrollbar narrows the layout.
-    // The PDF renderer uses page.pdf() dimensions for capture, not the viewport height,
-    // so we never resize the viewport — any resize would trigger a reflow and risk
-    // making the measured height stale before the PDF snapshot.
-    await page.setViewport({ width: viewportWidth, height: 5000 });
+    await page.setViewport({ width: viewportWidth, height: 720 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
     await page.evaluate(() => document.fonts.ready);
 
-    // body.getBoundingClientRect().height = paddingTop + content + paddingBottom.
-    // Equivalent to the full page height. We also check scrollHeight to catch any
-    // absolutely-positioned overflow that getBoundingClientRect might miss.
+    // overflow:hidden on html/body means no scrollbar can ever appear and affect layout.
+    // scrollHeight reports full content height regardless of overflow setting.
     const contentHeight = await page.evaluate(() => {
-      void document.body.offsetHeight; // flush pending layout
-      const { height } = document.body.getBoundingClientRect();
-      return Math.max(Math.ceil(height), document.body.scrollHeight);
+      void document.body.offsetHeight;
+      return document.documentElement.scrollHeight;
     });
 
-    // +1px guards against CSS-pixel → PDF-point DPI rounding (1px = 0.75pt; Chromium
-    // may floor fractional points making the page 1px short and bleeding page 2).
-    // pageRanges:'1' is the definitive safety net: even a 1px page-2 sliver is excluded.
     const pdfBuffer = await page.pdf({
       width: `${viewportWidth}px`,
-      height: `${contentHeight + 1}px`,
+      height: `${contentHeight}px`,
       printBackground: true,
-      pageRanges: '1',
       margin: { top: '0', right: '0', bottom: '0', left: '0' },
     });
 
