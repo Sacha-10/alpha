@@ -70,7 +70,7 @@ export default function DemoPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-background text-primary">
+    <div className="min-h-screen bg-background text-primary">
       <Navbar />
     <main className="px-6 pt-40 pb-28">
       <div className="mx-auto max-w-[1200px]">

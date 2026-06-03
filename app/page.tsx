@@ -110,7 +110,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-background text-primary" style={{ zIndex: 0 }}>
+    <div className="min-h-screen bg-background text-primary">
       <Navbar />
 
       <main className="relative">
