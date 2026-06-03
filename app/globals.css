@@ -64,6 +64,8 @@ body {
  * overflow-x sur body casse souvent le scroll sur iOS → clip horizontal sur html seulement.
  */
 html {
+  background-color: var(--background);
+  color-scheme: dark;
   height: auto;
   min-height: 100%;
   overflow-x: clip;

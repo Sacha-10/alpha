@@ -47,6 +47,8 @@ export default function RootLayout({
   return (
     <html lang="fr" data-scroll-behavior="smooth" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
+        <meta name="theme-color" content="#0A0A0F" />
+        <meta name="color-scheme" content="dark" />
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body>
