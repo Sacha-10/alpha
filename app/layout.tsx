@@ -45,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" data-scroll-behavior="smooth" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang="fr" data-scroll-behavior="smooth" className={`${inter.variable} ${jetbrainsMono.variable}`} style={{ backgroundColor: '#0A0A0F', colorScheme: 'dark' }}>
       <head>
         <meta name="theme-color" content="#0A0A0F" />
         <meta name="color-scheme" content="dark" />
