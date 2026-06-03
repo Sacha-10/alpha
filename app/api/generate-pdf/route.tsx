@@ -301,7 +301,11 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
       --border:     #1E2035;
     }
     @page { margin: 0; }
-    *, *::before, *::after { box-sizing: border-box; }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
     *::-webkit-scrollbar { display: none; width: 0; height: 0; }
     * { scrollbar-width: none; }
     html {
@@ -410,7 +414,7 @@ export async function POST(req: NextRequest) {
       }
       browser = await puppeteer.launch({
         args: chromium.args,
-        defaultViewport: { width: viewportWidth, height: 720 },
+        defaultViewport: null,
         executablePath: execPath,
         headless: true,
       });
@@ -427,7 +431,7 @@ export async function POST(req: NextRequest) {
     }
 
     const page = await browser.newPage();
-    await page.emulateMediaType('screen');
+    await page.emulateMediaType('print');
     await page.setViewport({ width: viewportWidth, height: 720 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
     await page.evaluate(() => document.fonts.ready);
