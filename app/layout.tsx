@@ -50,8 +50,14 @@ export default function RootLayout({
         <meta name="theme-color" content="#0A0A0F" />
         <meta name="color-scheme" content="dark" />
         <link rel="manifest" href="/manifest.json" />
+        {/* Désactive la scroll-restoration navigateur avant tout — empêche le jump de position au refresh */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{if('scrollRestoration' in history){history.scrollRestoration='manual';}}catch(e){}})();` }} />
+        {/* Bloque toutes les transitions pendant le 1er paint pour éliminer le flash blanc */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{document.documentElement.classList.remove('hydrated');}catch(e){}})();` }} />
       </head>
-      <body>
+      <body style={{ backgroundColor: '#0A0A0F' }}>
+        {/* Active les transitions après hydratation complète (double rAF = après le 1er vrai paint) */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){requestAnimationFrame(function(){requestAnimationFrame(function(){document.documentElement.classList.add('hydrated');});});})();` }} />
         <div
           aria-hidden
           style={{
@@ -64,7 +70,7 @@ export default function RootLayout({
             background: "radial-gradient(circle, rgba(45, 111, 255, 0.20) 0%, transparent 70%)",
             borderRadius: "50%",
             pointerEvents: "none",
-            zIndex: 1,
+            zIndex: 0,
           }}
         />
         <ScrollReset />

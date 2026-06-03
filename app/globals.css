@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -30,16 +28,17 @@
   --border-rgb: 30, 32, 53;
 }
 
-*,
-*::before,
-*::after {
+/* Transitions désactivées pendant le 1er paint — activées par la classe .hydrated injectée après hydratation */
+html.hydrated *,
+html.hydrated *::before,
+html.hydrated *::after {
   transition-property: color, background-color, border-color, box-shadow, opacity;
   transition-duration: 200ms;
   transition-timing-function: ease;
 }
 
-html,
-body {
+html.hydrated,
+html.hydrated body {
   transition: none;
 }
 
@@ -158,7 +157,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--blue);
-  border-radius: var(--radius);
+  border-radius: 3px;
 }
 
 @layer utilities {
