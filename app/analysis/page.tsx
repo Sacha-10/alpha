@@ -27,6 +27,15 @@ export default function DemoPage() {
     }
   }, [])
 
+  useEffect(() => {
+    if (report) {
+      document.body.classList.add("hide-glow");
+    } else {
+      document.body.classList.remove("hide-glow");
+    }
+    return () => document.body.classList.remove("hide-glow");
+  }, [report])
+
   async function handleDemo() {
     setLoading(true)
     setError('')

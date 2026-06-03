@@ -27,7 +27,9 @@
       "Bash(dir C:\\\\Users\\\\sacha\\\\dev\\\\SaasAi\\\\Alpha\\\\alpha\\\\app\\\\api *)",
       "Bash(Write-Output \"Dossier .next supprimé\")",
       "Read(//mnt/c/Users/sacha/dev/SaasAi/Alpha/**)",
-      "Bash(rm -rf .next)"
+      "Bash(rm -rf .next)",
+      "Bash(xargs grep -l \"TradeReport\\\\|TradeReportBody\")",
+      "Bash(awk '/^commit/{commit=$2} /stroke-dasharray.*2\\\\.83.*toFixed|toFixed.*2\\\\.83.*283/{found=1} found && /^\\\\-.*toFixed.*283/{print commit\" REMOVE: \"$0; found=0} found && /^\\\\+.*2\\\\.83.*283/{print commit\" ADD: \"$0; found=0}')"
     ]
   }
 }

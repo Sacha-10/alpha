@@ -60,6 +60,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: `(function(){requestAnimationFrame(function(){requestAnimationFrame(function(){document.documentElement.classList.add('hydrated');});});})();` }} />
         <div
           aria-hidden
+          className="radial-glow"
           style={{
             position: "fixed",
             top: "50%",

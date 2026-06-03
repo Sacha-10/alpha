@@ -160,6 +160,10 @@ body {
   border-radius: 3px;
 }
 
+body.hide-glow .radial-glow {
+  display: none;
+}
+
 @layer utilities {
   .hover\:glow-blue:hover {
     box-shadow: 0 0 40px rgba(45, 111, 255, 0.15);

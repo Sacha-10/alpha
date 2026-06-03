@@ -135,6 +135,11 @@ export default function DashboardClient() {
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    document.body.classList.add("hide-glow");
+    return () => document.body.classList.remove("hide-glow");
+  }, []);
+
   // Restore last report: Supabase first (cross-device, most recent), sessionStorage as fallback.
   // Depends on userId so the Supabase fetch is guaranteed to run while the session is active.
   useEffect(() => {
