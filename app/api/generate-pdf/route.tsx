@@ -273,7 +273,8 @@ function buildBody(report: AiAnalysisResult): string {
 
 function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): string {
   const body = buildBody(report);
-  const bgColor = isMobile ? '#12121A' : '#0A0A0F';
+  const bgColor = '#0A0A0F';
+  const bodyPadding = isMobile ? '16px 12px' : '24px';
 
   const head = `<!DOCTYPE html>
 <html lang="fr">
@@ -309,7 +310,7 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
     }
     body {
       margin: 0;
-      padding: ${isMobile ? '16px 12px' : '24px'};
+      padding: ${bodyPadding};
       background-color: ${bgColor};
       color: #F0F4FF;
       font-family: 'Inter', sans-serif;
@@ -317,48 +318,39 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
       line-height: 1.5;
       overflow: hidden;
     }
-    /* ── responsive classes ───────────────────────────── */
+    /* ── layout direct basé sur isMobile — sans @media queries ── */
     .r-score-circle {
       position: relative;
-      height: 80px;
-      width: 80px;
+      height: ${isMobile ? '80px' : '96px'};
+      width: ${isMobile ? '80px' : '96px'};
     }
     .r-score-text {
       position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 14px; font-weight: bold; line-height: 1.1;
+      font-size: ${isMobile ? '14px' : '18px'}; font-weight: bold; line-height: 1.1;
     }
     .r-score-label {
       margin-top: 8px; font-size: 12px; color: var(--secondary);
-      text-align: center; width: 96px;
+      text-align: center;
+      ${isMobile ? 'width: 96px;' : 'width: auto; white-space: nowrap;'}
     }
     .r-stat-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: ${isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)'};
       gap: 16px;
     }
     .r-session-grid {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: ${isMobile ? '1fr' : 'repeat(3, 1fr)'};
       gap: 12px;
       margin-bottom: 16px;
     }
     .r-pattern-val {
       margin: 0;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 14px; font-weight: bold;
+      font-size: ${isMobile ? '14px' : '16px'}; font-weight: bold;
       word-break: break-word;
-    }
-    @media (min-width: 640px) {
-      .r-score-circle { height: 96px; width: 96px; }
-      .r-score-text { font-size: 18px; }
-      .r-score-label { width: auto; white-space: nowrap; }
-      .r-session-grid { grid-template-columns: repeat(3, 1fr); }
-      .r-pattern-val { font-size: 16px; }
-    }
-    @media (min-width: 768px) {
-      .r-stat-grid { grid-template-columns: repeat(4, 1fr); }
     }
   </style>
 </head>`;
