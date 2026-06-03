@@ -71,7 +71,7 @@ export default function RootLayout({
             background: "radial-gradient(circle, rgba(45, 111, 255, 0.20) 0%, transparent 70%)",
             borderRadius: "50%",
             pointerEvents: "none",
-            zIndex: 0,
+            zIndex: 1,
           }}
         />
         <ScrollReset />
