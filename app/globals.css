@@ -38,6 +38,11 @@
   transition-timing-function: ease;
 }
 
+html,
+body {
+  transition: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -64,10 +69,15 @@ html {
   overflow-x: clip;
   overflow-y: auto;
   position: static;
-  scrollbar-gutter: stable;
   scroll-behavior: smooth;
   scrollbar-color: var(--blue) var(--background);
   scrollbar-width: thin;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html {
+    scrollbar-gutter: stable;
+  }
 }
 
 body {
