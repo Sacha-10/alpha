@@ -271,7 +271,7 @@ function buildBody(report: AiAnalysisResult): string {
 
 // ── document builder ──────────────────────────────────────────────────────────
 
-function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): string {
+function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean, viewportWidth: number): string {
   const body = buildBody(report);
   const bgColor = '#0A0A0F';
   const bodyPadding = isMobile ? '16px 12px' : '24px';
@@ -280,7 +280,7 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=${viewportWidth}, initial-scale=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
@@ -392,7 +392,7 @@ export async function POST(req: NextRequest) {
     const isMobile = screenWidth < 640;
     const viewportWidth = isMobile ? screenWidth : 1200;
     const date = new Date().toLocaleDateString('fr-FR');
-    const html = buildHtml(report, date, isMobile);
+    const html = buildHtml(report, date, isMobile, viewportWidth);
 
     let browser;
     if (process.env.NODE_ENV === 'production') {
