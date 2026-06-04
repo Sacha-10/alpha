@@ -29,7 +29,17 @@
       "Read(//mnt/c/Users/sacha/dev/SaasAi/Alpha/**)",
       "Bash(rm -rf .next)",
       "Bash(xargs grep -l \"TradeReport\\\\|TradeReportBody\")",
-      "Bash(awk '/^commit/{commit=$2} /stroke-dasharray.*2\\\\.83.*toFixed|toFixed.*2\\\\.83.*283/{found=1} found && /^\\\\-.*toFixed.*283/{print commit\" REMOVE: \"$0; found=0} found && /^\\\\+.*2\\\\.83.*283/{print commit\" ADD: \"$0; found=0}')"
+      "Bash(awk '/^commit/{commit=$2} /stroke-dasharray.*2\\\\.83.*toFixed|toFixed.*2\\\\.83.*283/{found=1} found && /^\\\\-.*toFixed.*283/{print commit\" REMOVE: \"$0; found=0} found && /^\\\\+.*2\\\\.83.*283/{print commit\" ADD: \"$0; found=0}')",
+      "Bash(npm run *)",
+      "Bash(echo \"Server started, PID: $!\")",
+      "Bash(curl -s http://localhost:3000/api/generate-pdf -o /tmp/test.pdf --max-time 5 -w \"%{http_code}\")",
+      "Bash(curl *)",
+      "Read(//tmp/**)",
+      "Bash(start \"\" \"/tmp/rapport-test.pdf\")",
+      "Bash(cmd.exe /c \"start /tmp/rapport-test.pdf\")",
+      "Bash(cmd.exe /c \"start C:\\\\\\\\Users\\\\\\\\sacha\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\rapport-test.pdf\")",
+      "Bash(powershell.exe -Command \"Start-Process 'C:\\\\\\\\Users\\\\\\\\sacha\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\rapport-test.pdf'\")",
+      "Bash(powershell.exe *)"
     ]
   }
 }

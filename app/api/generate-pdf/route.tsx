@@ -274,7 +274,14 @@ function buildBody(report: AiAnalysisResult): string {
 function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean, viewportWidth: number): string {
   const body = buildBody(report);
   const bgColor = '#0A0A0F';
-  const bodyPadding = isMobile ? '16px 12px' : '24px';
+
+  // Spacing system — identical visual ratios on every viewport width (desktop, mobile, visitor, member)
+  // vw units scale with Puppeteer viewport; clamp() sets floor/ceiling for extreme sizes
+  const spV = 'clamp(24px, 2.5vw, 48px)';  // viewport edge ↔ header/footer content (zones 1 & 5)
+  const spS = 'clamp(14px, 1.3vw, 20px)';  // header/footer content ↔ separator line  (zones 2 & 4b)
+  const spB = 'clamp(28px, 2.8vw, 40px)';  // separator line ↔ main content           (zones 3 & 4a)
+  const spH = 'clamp(12px, 2.0vw, 40px)';  // horizontal padding (auto-adapts: 12px mobile → 24px desktop)
+  const bodyPadding = `${spV} ${spH}`;
 
   const head = `<!DOCTYPE html>
 <html lang="fr">
@@ -362,14 +369,14 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean, vi
 <body>
   <div style="width:100%;">
     <div style="display:flex;justify-content:space-between;align-items:center;
-                padding-bottom:16px;border-bottom:1px solid #1E2035;margin-bottom:32px;">
+                padding-bottom:${spS};border-bottom:1px solid #1E2035;margin-bottom:${spB};">
       <h1 style="margin:0;font-size:24px;font-weight:bold;color:#2D6FFF;">AlphaTradeX</h1>
       <p style="margin:0;font-size:12px;color:#8892AA;">${date}</p>
     </div>
 
     ${body}
 
-    <div style="margin-top:32px;padding-top:16px;border-top:1px solid #1E2035;">
+    <div style="margin-top:${spB};padding-top:${spS};border-top:1px solid #1E2035;">
       <span style="font-size:12px;color:#8892AA;">alphatradex.ai</span>
     </div>
   </div>
