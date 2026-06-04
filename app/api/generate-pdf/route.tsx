@@ -414,7 +414,7 @@ export async function POST(req: NextRequest) {
       }
       browser = await puppeteer.launch({
         args: chromium.args,
-        defaultViewport: null,
+        defaultViewport: { width: viewportWidth, height: 720 },
         executablePath: execPath,
         headless: true,
       });
@@ -426,13 +426,13 @@ export async function POST(req: NextRequest) {
       browser = await puppeteer.launch({
         executablePath,
         headless: true,
+        defaultViewport: { width: viewportWidth, height: 720 },
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
     }
 
     const page = await browser.newPage();
     await page.emulateMediaType('print');
-    await page.setViewport({ width: viewportWidth, height: 720 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
     await page.evaluate(() => document.fonts.ready);
 
