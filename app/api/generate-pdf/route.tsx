@@ -274,7 +274,7 @@ function buildBody(report: AiAnalysisResult): string {
 function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): string {
   const body = buildBody(report);
 
-  const outer = isMobile ? '24px' : '40px';
+  const outer = isMobile ? '16px' : '20px';
   const side  = isMobile ? '20px' : '40px';
   const gap   = isMobile ? '20px' : '28px';
   const sep   = isMobile ? '12px' : '16px';
