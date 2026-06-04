@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import type { AiAnalysisResult, BiasSeverity } from '@/lib/tradingAnalysisTypes';
 
-// ── helpers ──────────────────────────────────────────────────────────────────
+// ── helpers ───────────────────────────────────────────────────────────────────
 
 function safeNum(v: unknown, fallback = 0): number {
   const n = Number(v);
@@ -273,11 +273,11 @@ function buildBody(report: AiAnalysisResult): string {
 
 function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): string {
   const body = buildBody(report);
-  const bgColor = '#0A0A0F';
 
-  const sp = isMobile
-    ? { outer: '24px', side: '20px', gap: '20px', sep: '12px' }
-    : { outer: '40px', side: '40px', gap: '28px', sep: '16px' };
+  const outer = isMobile ? '24px' : '40px';
+  const side  = isMobile ? '20px' : '40px';
+  const gap   = isMobile ? '20px' : '28px';
+  const sep   = isMobile ? '12px' : '16px';
 
   return `<!DOCTYPE html>
 <html lang="fr">
@@ -311,13 +311,13 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
     *::-webkit-scrollbar { display: none; width: 0; height: 0; }
     * { scrollbar-width: none; }
     html {
-      background-color: ${bgColor};
+      background-color: #0A0A0F;
       overflow: hidden;
     }
     body {
       margin: 0;
-      padding: ${sp.outer} ${sp.side};
-      background-color: ${bgColor};
+      padding: ${outer} ${side};
+      background-color: #0A0A0F;
       color: #F0F4FF;
       font-family: 'Inter', sans-serif;
       font-size: 14px;
@@ -360,15 +360,25 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
   </style>
 </head>
 <body>
-  <header style="display:flex;justify-content:space-between;align-items:center;
-                 padding-bottom:${sp.sep};border-bottom:1px solid #1E2035;margin-bottom:${sp.gap};">
+  <header style="
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: ${sep};
+    border-bottom: 1px solid #1E2035;
+    margin-bottom: ${gap};
+  ">
     <span style="font-size:20px;font-weight:700;color:#2D6FFF;letter-spacing:-0.3px;">AlphaTradeX</span>
     <span style="font-size:12px;color:#8892AA;">${date}</span>
   </header>
 
   ${body}
 
-  <footer style="margin-top:${sp.gap};padding-top:${sp.sep};border-top:1px solid #1E2035;">
+  <footer style="
+    margin-top: ${gap};
+    padding-top: ${sep};
+    border-top: 1px solid #1E2035;
+  ">
     <span style="font-size:12px;color:#8892AA;">alphatradex.ai</span>
   </footer>
 </body>
@@ -378,45 +388,33 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
 // ── route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  let browser: import('puppeteer-core').Browser | undefined;
   try {
-    const { report, screenWidth: rawWidth } = await req.json() as { report: AiAnalysisResult; screenWidth?: number };
+    const { report, screenWidth: rawWidth } = await req.json() as {
+      report: AiAnalysisResult;
+      screenWidth?: number;
+    };
     const screenWidth = Math.round(Math.max(320, Math.min(3840, rawWidth ?? 1200)));
     const isMobile = screenWidth < 640;
     const viewportWidth = isMobile ? screenWidth : 1200;
     const date = new Date().toLocaleDateString('fr-FR');
     const html = buildHtml(report, date, isMobile);
 
-    let browser;
     if (process.env.NODE_ENV === 'production') {
       const chromium = (await import('@sparticuz/chromium')).default;
       const puppeteer = (await import('puppeteer-core')).default;
-      let execPath: string | undefined = process.env.CHROMIUM_PATH;
-      if (!execPath) {
-        try {
-          execPath = await chromium.executablePath();
-        } catch {
-          // path.dirname(__filename) is undefined on some Vercel runtimes
-        }
-      }
-      if (!execPath) {
-        throw new Error(
-          'Chromium executable path is undefined. ' +
-          'Set the CHROMIUM_PATH environment variable on Vercel.',
-        );
-      }
       browser = await puppeteer.launch({
         args: chromium.args,
         defaultViewport: { width: viewportWidth, height: 720 },
-        executablePath: execPath,
-        headless: true,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
       });
     } else {
       const puppeteer = (await import('puppeteer-core')).default;
-      const executablePath =
-        process.env.CHROME_PATH ||
-        'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
       browser = await puppeteer.launch({
-        executablePath,
+        executablePath:
+          process.env.CHROME_PATH ||
+          'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
         headless: true,
         defaultViewport: { width: viewportWidth, height: 720 },
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -424,16 +422,13 @@ export async function POST(req: NextRequest) {
     }
 
     const page = await browser.newPage();
-    await page.emulateMediaType('print');
+    await page.emulateMediaType('screen');
     await page.setContent(html, { waitUntil: 'networkidle0' });
     await page.evaluate(() => document.fonts.ready);
 
-    // overflow:hidden on html/body means no scrollbar can ever appear and affect layout.
-    // scrollHeight reports full content height regardless of overflow setting.
-    const contentHeight = await page.evaluate(() => {
-      void document.body.offsetHeight;
-      return document.documentElement.scrollHeight;
-    });
+    const contentHeight = await page.evaluate(
+      () => document.documentElement.scrollHeight,
+    );
 
     const pdfBuffer = await page.pdf({
       width: `${viewportWidth}px`,
@@ -441,8 +436,6 @@ export async function POST(req: NextRequest) {
       printBackground: true,
       margin: { top: '0', right: '0', bottom: '0', left: '0' },
     });
-
-    await browser.close();
 
     const filename = `alphatradex-rapport-${date.replace(/\//g, '-')}.pdf`;
     return new Response(Buffer.from(pdfBuffer), {
@@ -452,7 +445,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    console.error('[generate-pdf] CRASH:', err);
+    console.error('[generate-pdf]', err);
     return new Response(
       JSON.stringify({
         error: 'PDF generation failed',
@@ -460,5 +453,7 @@ export async function POST(req: NextRequest) {
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } },
     );
+  } finally {
+    await browser?.close();
   }
 }
