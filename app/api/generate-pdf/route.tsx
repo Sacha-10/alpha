@@ -312,7 +312,6 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
     * { scrollbar-width: none; }
     html {
       background-color: #0A0A0F;
-      overflow: hidden;
     }
     body {
       margin: 0;
@@ -322,7 +321,6 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
       font-family: 'Inter', sans-serif;
       font-size: 14px;
       line-height: 1.5;
-      overflow: hidden;
     }
     .r-score-circle {
       position: relative;
@@ -426,8 +424,8 @@ export async function POST(req: NextRequest) {
     await page.setContent(html, { waitUntil: 'networkidle0' });
     await page.evaluate(() => document.fonts.ready);
 
-    const contentHeight = await page.evaluate(
-      () => document.documentElement.scrollHeight,
+    const contentHeight = await page.evaluate(() =>
+      Math.max(document.documentElement.scrollHeight, document.body.scrollHeight),
     );
 
     const pdfBuffer = await page.pdf({
