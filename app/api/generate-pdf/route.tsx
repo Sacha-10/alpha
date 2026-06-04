@@ -271,19 +271,15 @@ function buildBody(report: AiAnalysisResult): string {
 
 // ── document builder ──────────────────────────────────────────────────────────
 
-function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean, viewportWidth: number): string {
+function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): string {
   const body = buildBody(report);
   const bgColor = '#0A0A0F';
 
-  // Spacing system — identical visual ratios on every viewport width (desktop, mobile, visitor, member)
-  // vw units scale with Puppeteer viewport; clamp() sets floor/ceiling for extreme sizes
-  const spV = 'clamp(24px, 2.5vw, 48px)';  // viewport edge ↔ header/footer content (zones 1 & 5)
-  const spS = 'clamp(14px, 1.3vw, 20px)';  // header/footer content ↔ separator line  (zones 2 & 4b)
-  const spB = 'clamp(28px, 2.8vw, 40px)';  // separator line ↔ main content           (zones 3 & 4a)
-  const spH = 'clamp(12px, 2.0vw, 40px)';  // horizontal padding (auto-adapts: 12px mobile → 24px desktop)
-  const bodyPadding = `${spV} ${spH}`;
+  const sp = isMobile
+    ? { outer: '24px', side: '20px', gap: '20px', sep: '12px' }
+    : { outer: '40px', side: '40px', gap: '28px', sep: '16px' };
 
-  const head = `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -320,7 +316,7 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean, vi
     }
     body {
       margin: 0;
-      padding: ${bodyPadding};
+      padding: ${sp.outer} ${sp.side};
       background-color: ${bgColor};
       color: #F0F4FF;
       font-family: 'Inter', sans-serif;
@@ -328,7 +324,6 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean, vi
       line-height: 1.5;
       overflow: hidden;
     }
-    /* ── layout direct basé sur isMobile — sans @media queries ── */
     .r-score-circle {
       position: relative;
       height: ${isMobile ? '80px' : '96px'};
@@ -363,23 +358,19 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean, vi
       word-break: break-word;
     }
   </style>
-</head>`;
-
-  return `${head}
+</head>
 <body>
-  <div style="width:100%;">
-    <div style="display:flex;justify-content:space-between;align-items:center;
-                padding-bottom:${spS};border-bottom:1px solid #1E2035;margin-bottom:${spB};">
-      <h1 style="margin:0;font-size:24px;font-weight:bold;color:#2D6FFF;">AlphaTradeX</h1>
-      <p style="margin:0;font-size:12px;color:#8892AA;">${date}</p>
-    </div>
+  <header style="display:flex;justify-content:space-between;align-items:center;
+                 padding-bottom:${sp.sep};border-bottom:1px solid #1E2035;margin-bottom:${sp.gap};">
+    <span style="font-size:20px;font-weight:700;color:#2D6FFF;letter-spacing:-0.3px;">AlphaTradeX</span>
+    <span style="font-size:12px;color:#8892AA;">${date}</span>
+  </header>
 
-    ${body}
+  ${body}
 
-    <div style="margin-top:${spB};padding-top:${spS};border-top:1px solid #1E2035;">
-      <span style="font-size:12px;color:#8892AA;">alphatradex.ai</span>
-    </div>
-  </div>
+  <footer style="margin-top:${sp.gap};padding-top:${sp.sep};border-top:1px solid #1E2035;">
+    <span style="font-size:12px;color:#8892AA;">alphatradex.ai</span>
+  </footer>
 </body>
 </html>`;
 }
@@ -393,7 +384,7 @@ export async function POST(req: NextRequest) {
     const isMobile = screenWidth < 640;
     const viewportWidth = isMobile ? screenWidth : 1200;
     const date = new Date().toLocaleDateString('fr-FR');
-    const html = buildHtml(report, date, isMobile, viewportWidth);
+    const html = buildHtml(report, date, isMobile);
 
     let browser;
     if (process.env.NODE_ENV === 'production') {
