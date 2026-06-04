@@ -39,7 +39,9 @@
       "Bash(cmd.exe /c \"start /tmp/rapport-test.pdf\")",
       "Bash(cmd.exe /c \"start C:\\\\\\\\Users\\\\\\\\sacha\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\rapport-test.pdf\")",
       "Bash(powershell.exe -Command \"Start-Process 'C:\\\\\\\\Users\\\\\\\\sacha\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\rapport-test.pdf'\")",
-      "Bash(powershell.exe *)"
+      "Bash(powershell.exe *)",
+      "Bash(git config *)",
+      "Bash(git reset *)"
     ]
   }
 }
