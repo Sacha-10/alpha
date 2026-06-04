@@ -361,21 +361,16 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean, vi
   return `${head}
 <body>
   <div style="width:100%;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;
+    <div style="display:flex;justify-content:space-between;align-items:center;
                 padding-bottom:16px;border-bottom:1px solid #1E2035;margin-bottom:32px;">
-      <div>
-        <h1 style="margin:0;font-size:24px;font-weight:bold;color:#2D6FFF;">AlphaTradeX</h1>
-        <p style="margin:4px 0 0;font-size:13px;color:#8892AA;">Rapport d'analyse</p>
-      </div>
+      <h1 style="margin:0;font-size:24px;font-weight:bold;color:#2D6FFF;">AlphaTradeX</h1>
       <p style="margin:0;font-size:12px;color:#8892AA;">${date}</p>
     </div>
 
     ${body}
 
-    <div style="margin-top:32px;padding-top:16px;border-top:1px solid #1E2035;
-                display:flex;justify-content:space-between;">
-      <span style="font-size:11px;color:#8892AA;">Généré par AlphaTradeX &bull; alphatradex.ai</span>
-      <span style="font-size:11px;color:#8892AA;">${date}</span>
+    <div style="margin-top:32px;padding-top:16px;border-top:1px solid #1E2035;">
+      <span style="font-size:12px;color:#8892AA;">alphatradex.ai</span>
     </div>
   </div>
 </body>
