@@ -275,7 +275,7 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
   const body = buildBody(report);
 
   const outer = isMobile ? '16px' : '20px';
-  const side  = isMobile ? '20px' : '40px';
+  const side  = '20px';
   const gap   = isMobile ? '20px' : '28px';
   const sep   = isMobile ? '12px' : '16px';
 
@@ -394,7 +394,7 @@ export async function POST(req: NextRequest) {
     };
     const screenWidth = Math.round(Math.max(320, Math.min(3840, rawWidth ?? 1200)));
     const isMobile = screenWidth < 640;
-    const viewportWidth = isMobile ? screenWidth : 1200;
+    const viewportWidth = screenWidth;
     const date = new Date().toLocaleDateString('fr-FR');
     const html = buildHtml(report, date, isMobile);
 
