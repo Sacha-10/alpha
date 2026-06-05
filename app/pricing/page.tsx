@@ -180,7 +180,17 @@ const faqItems: FaqItem[] = [
   {
     question: "Mes données sont-elles en sécurité ?",
     answer:
-      "Votre CSV est traité puis supprimé immédiatement après analyse. Seul l'historique de vos rapports est conservé selon votre plan. Aucun accès à votre compte de trading. Aucune donnée revendue.",
+      "Votre CSV est traité puis supprimé. Seul l'historique de vos analyses est conservé selon votre plan. Aucun accès à votre compte.",
+  },
+  {
+    question: "Quels formats sont acceptés ?",
+    answer:
+      "Les exports CSV de MT4, MT5, Binance, Bybit, TradingView, FTMO et FundedNext. Guide d'export disponible sur la page Aide.",
+  },
+  {
+    question: "Comment fonctionne l'accès anticipé ?",
+    answer:
+      "Les 200 premiers membres vont rejoindre la plateforme à prix préférentiel. Vous ne serez jamais rebasculé sur le prix public, quelle que soit l'évolution de la plateforme. Ce prix est verrouillé à vie.",
   },
   {
     question: "Puis-je changer ou résilier mon plan ?",
@@ -188,19 +198,9 @@ const faqItems: FaqItem[] = [
       "Depuis votre compte, à tout moment. Upgrade immédiat, facturé au prorata. Downgrade et résiliation effectifs à votre prochaine date de souscription. Sans condition ni pénalité.",
   },
   {
-    question: "Comment fonctionne l'accès anticipé ?",
-    answer:
-      "Les 200 premiers membres rejoignent la plateforme à prix préférentiel. Ce prix est verrouillé à vie — vous ne serez jamais rebasculé sur le prix public, quelle que soit l'évolution de la plateforme.",
-  },
-  {
-    question: "Quels formats de trades sont compatibles ?",
-    answer:
-      "Les exports CSV de MT4, MT5, Binance, Bybit, TradingView, FTMO et FundedNext. Le guide d'export complet est disponible sur la page Aide.",
-  },
-  {
     question: "À qui s'adresse AlphaTradeX ?",
     answer:
-      "Aux traders qui exigent la vérité sur leur exécution. Pas aux débutants en quête de formation. Un minimum de 50 trades est nécessaire pour que l'IA identifie vos patterns avec précision.",
+      "Aux traders qui exigent la vérité sur leur exécution. Pas aux débutants en quête de formation.",
   },
 ];
 

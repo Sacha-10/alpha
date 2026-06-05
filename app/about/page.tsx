@@ -358,6 +358,7 @@ export default function AboutPage() {
         <section className="px-6 py-28 text-center">
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
+              <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Commencer</p>
               <h2 className="text-4xl font-bold text-primary md:text-5xl">
                 Votre mirror.
                 <br />
