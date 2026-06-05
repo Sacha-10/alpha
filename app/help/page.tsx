@@ -343,7 +343,7 @@ export default function AidePage() {
           <div className="max-w-[1200px] mx-auto">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Commencer</p>
-              <h2 className="text-4xl md:text-5xl font-bold text-primary">
+              <h2 className="mx-auto mt-4 text-4xl font-bold text-primary md:text-5xl">
                 Votre mirror.
                 <br />
                 Sans filtre.
