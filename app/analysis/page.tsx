@@ -89,7 +89,7 @@ export default function DemoPage() {
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem(SESSION_KEY)
-      if (saved) { setReport(JSON.parse(saved)); setView('rapport') }
+      if (saved) { setReport(JSON.parse(saved)) }
     } catch {
       // ignore corrupted sessionStorage
     }
@@ -192,54 +192,63 @@ export default function DemoPage() {
           </div>
         </section>
 
-        <section className="px-6 py-24">
+        <section className="px-6 py-24 text-center">
           <div className="mx-auto max-w-[1200px]">
-            {view === 'analyse' ? (
-              <>
-                <RevealSection>
-                  <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Analyse gratuite</p>
-                  <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
-                    Votre première analyse.<br />Sans inscription.
-                  </h2>
-                  <p className="mx-auto mt-6 max-w-[480px] text-base leading-relaxed text-secondary">
-                    Analyse basée sur 120 trades.
-                  </p>
-                </RevealSection>
-                <RevealSection delay={80}>
-                  <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-                    <button
-                      type="button"
-                      onClick={handleDemo}
-                      disabled={loading || used}
-                      className="btn-primary inline-flex items-center gap-2 disabled:opacity-50"
-                    >
-                      Découvrir l&apos;analyse
-                      <ArrowRight size={16} aria-hidden />
-                    </button>
+            <RevealSection>
+              <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Analyse gratuite</p>
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
+                Votre première analyse.<br />Sans inscription.
+              </h2>
+              <p className="mx-auto mt-6 max-w-[480px] text-base leading-relaxed text-secondary">
+                Analyse basée sur 120 trades.
+              </p>
+            </RevealSection>
+            <RevealSection delay={80}>
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+                <button
+                  type="button"
+                  onClick={handleDemo}
+                  disabled={loading || used}
+                  className="btn-primary inline-flex items-center gap-2 disabled:opacity-50"
+                >
+                  Découvrir l&apos;analyse
+                  <ArrowRight size={16} aria-hidden />
+                </button>
+              </div>
+              {used && (
+                <p className="mt-4 text-sm text-red">Analyse utilisée.</p>
+              )}
+              {loading && (
+                <div className="mt-8 max-w-md mx-auto">
+                  <div className="w-full bg-card rounded-full h-2 overflow-hidden">
+                    <motion.div
+                      className="h-full bg-blue rounded-full"
+                      animate={{ width: ['0%', '90%'] }}
+                      transition={{ duration: 8 }}
+                    />
                   </div>
-                  {used && (
-                    <p className="mt-4 text-sm text-red">Analyse utilisée.</p>
-                  )}
-                  {loading && (
-                    <div className="mt-8 max-w-md mx-auto">
-                      <div className="w-full bg-card rounded-full h-2 overflow-hidden">
-                        <motion.div
-                          className="h-full bg-blue rounded-full"
-                          animate={{ width: ['0%', '90%'] }}
-                          transition={{ duration: 8 }}
-                        />
-                      </div>
-                      <p className="text-secondary mt-3 text-sm">L&apos;IA analyse les trades...</p>
-                    </div>
-                  )}
-                  {error && <p className="text-red mt-4 text-sm">{error}</p>}
-                </RevealSection>
-              </>
-            ) : (
-              <TradeReport report={report} />
-            )}
+                  <p className="text-secondary mt-3 text-sm">L&apos;IA analyse les trades...</p>
+                </div>
+              )}
+            </RevealSection>
           </div>
         </section>
+
+        {view === 'rapport' && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 50,
+              overflowY: 'auto',
+              background: 'var(--background)',
+            }}
+          >
+            <div className="mx-auto max-w-[1200px] px-6 py-10">
+              <TradeReport report={report} />
+            </div>
+          </div>
+        )}
 
         <section className="px-6 py-28 text-center">
           <div className="mx-auto max-w-[1200px]">
