@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { ArrowRight, Upload, Brain, FileText } from 'lucide-react'
+import { ArrowRight, Upload, Brain, FileText, ScrollText } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -235,6 +235,16 @@ export default function DemoPage() {
                   Découvrir l&apos;analyse
                   <ArrowRight size={16} aria-hidden />
                 </button>
+                {report && (
+                  <button
+                    type="button"
+                    onClick={() => setView('rapport')}
+                    className="btn-outline inline-flex items-center gap-2"
+                  >
+                    Mon analyse
+                    <ScrollText size={16} aria-hidden />
+                  </button>
+                )}
               </div>
               {used && (
                 <p className="mt-4 text-sm text-red">Analyse utilisée.</p>
