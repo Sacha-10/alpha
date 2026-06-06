@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { ArrowRight, ScrollText, Upload, Brain, FileText } from 'lucide-react'
+import { ArrowRight, Upload, Brain, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -192,7 +192,7 @@ export default function DemoPage() {
           </div>
         </section>
 
-        <section className="px-6 py-24 text-center">
+        <section className="px-6 py-24">
           <div className="mx-auto max-w-[1200px]">
             {view === 'analyse' ? (
               <>
@@ -236,44 +236,7 @@ export default function DemoPage() {
                 </RevealSection>
               </>
             ) : (
-              <>
-                <div className="mb-8 flex flex-wrap items-center justify-center gap-4">
-                  <button
-                    type="button"
-                    onClick={handleDemo}
-                    disabled={loading || used}
-                    className="btn-primary inline-flex items-center gap-2 disabled:opacity-50"
-                  >
-                    Découvrir l&apos;analyse
-                    <ArrowRight size={16} aria-hidden />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setView('rapport')}
-                    className="btn-outline inline-flex items-center gap-2"
-                  >
-                    Mon analyse
-                    <ScrollText size={16} aria-hidden />
-                  </button>
-                </div>
-                {used && (
-                  <p className="mb-6 text-sm text-red">Analyse utilisée.</p>
-                )}
-                {loading && (
-                  <div className="mb-8 max-w-md mx-auto">
-                    <div className="w-full bg-card rounded-full h-2 overflow-hidden">
-                      <motion.div
-                        className="h-full bg-blue rounded-full"
-                        animate={{ width: ['0%', '90%'] }}
-                        transition={{ duration: 8 }}
-                      />
-                    </div>
-                    <p className="text-secondary mt-3 text-sm">L&apos;IA analyse les trades...</p>
-                  </div>
-                )}
-                {error && <p className="text-red mb-6 text-sm">{error}</p>}
-                <TradeReport report={report} />
-              </>
+              <TradeReport report={report} />
             )}
           </div>
         </section>
