@@ -85,6 +85,7 @@ export default function DemoPage() {
   const [error, setError] = useState<string>('')
   const [used, setUsed] = useState(false)
   const [view, setView] = useState<'analyse' | 'rapport'>('analyse')
+  const prevViewRef = useRef<'analyse' | 'rapport'>('analyse')
 
   useEffect(() => {
     try {
@@ -105,12 +106,21 @@ export default function DemoPage() {
   }, [report])
 
   useEffect(() => {
+    const prevView = prevViewRef.current
+    prevViewRef.current = view
+
     if (view === 'rapport') {
+      document.documentElement.style.overflow = 'hidden'
       document.body.style.overflow = 'hidden'
     } else {
+      document.documentElement.style.overflow = ''
       document.body.style.overflow = ''
+      if (prevView === 'rapport') {
+        window.scrollTo(0, 0)
+      }
     }
     return () => {
+      document.documentElement.style.overflow = ''
       document.body.style.overflow = ''
     }
   }, [view])
