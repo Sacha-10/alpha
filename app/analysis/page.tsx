@@ -104,6 +104,17 @@ export default function DemoPage() {
     return () => document.body.classList.remove("hide-glow");
   }, [report])
 
+  useEffect(() => {
+    if (view === 'rapport') {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [view])
+
   async function handleDemo() {
     setLoading(true)
     setError('')
