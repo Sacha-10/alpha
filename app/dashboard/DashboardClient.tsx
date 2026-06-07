@@ -296,6 +296,7 @@ export default function DashboardClient() {
 
       setAnalysis(report);
       setHasSessionReport(true);
+      setMainView('mon-analyse');
       sessionStorage.setItem(SESSION_KEY_REPORT, JSON.stringify(report));
 
       await fetchUserData();
