@@ -695,7 +695,7 @@ export default function DashboardClient() {
               </button>
               <button
                 type="button"
-                className="btn-primary py-2.5"
+                className="btn-outline py-2.5"
                 onClick={() => setMainView("mon-analyse")}
               >
                 Mon analyse
