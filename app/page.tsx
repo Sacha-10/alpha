@@ -127,14 +127,16 @@ export default function HomePage() {
       <main className="relative overflow-x-clip">
         <RevealSection className="min-h-screen pt-16 flex items-center justify-center bg-gradient-to-b from-background to-card">
           <div className="mx-auto max-w-[1200px] px-6 pb-20 pt-4 md:pb-0 md:pt-0 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-6">AlphaTradeX</p>
-          <h1 className="mx-auto mt-8 max-w-[1200px] text-balance md:[text-wrap:normal] text-4xl font-bold leading-tight text-primary md:text-6xl xl:text-5xl">
+          <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">AlphaTradeX</p>
+          <h1 className="mx-auto mt-6 max-w-[1200px] text-balance md:[text-wrap:normal] text-4xl font-bold leading-tight text-primary md:text-6xl xl:text-5xl">
             Les meilleurs traders n&apos;ont pas plus travaillé.
             <br />
-            Ils ont mieux <span className="text-cyan">compris</span>.
+            Ils ont mieux <span className="text-blue">compris</span>.
           </h1>
 
-          <p className="mx-auto mt-6 max-w-[600px] text-lg text-secondary">
+          <div className="mx-auto mt-10 h-px w-12 bg-blue" />
+
+          <p className="mx-auto mt-6 max-w-[520px] leading-relaxed text-lg text-secondary">
             Notre IA analyse chaque trade, chaque décision, chaque pattern pour que vous ne répétiez plus jamais les
             mêmes erreurs.
           </p>
@@ -161,7 +163,7 @@ export default function HomePage() {
         </RevealSection>
 
         <RevealSection className="bg-card">
-          <div className="mx-auto max-w-[1200px] px-6 py-20 [perspective:1000px]">
+          <div className="mx-auto max-w-[1200px] px-6 py-20">
             <div className="text-center mb-12">
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Tableau de bord</p>
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
@@ -171,7 +173,7 @@ export default function HomePage() {
                 Un dashboard pensé pour les traders qui exigent la précision.
               </p>
             </div>
-            <div className="card glow-blue rounded overflow-hidden [transform:rotateX(5deg)]" style={{ height: '520px' }}>
+            <div className="card glow-blue rounded overflow-hidden" style={{ height: '520px' }}>
               {/* Topbar desktop */}
               <div className="hidden md:flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
                 <div className="flex items-center gap-2">
@@ -270,11 +272,11 @@ export default function HomePage() {
         <RevealSection id="services" className="bg-card">
           <div className="mx-auto max-w-[1200px] px-6 py-20">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Services</p>
-          <h2 className="text-center text-3xl font-bold text-primary md:text-4xl">
+          <h2 className="text-center text-4xl font-bold text-primary md:text-5xl">
             Tout ce qu&apos;il faut pour trader au plus haut{" "}
-            <span className="text-cyan">niveau</span>.
+            <span className="text-primary">niveau</span>.
           </h2>
-          <p className="mt-3 text-center text-secondary">Passez de l&apos;instinct à la stratégie.</p>
+          <p className="mt-6 max-w-[480px] mx-auto text-base leading-relaxed text-secondary text-center">Passez de l&apos;instinct à la stratégie.</p>
 
           <div className="mt-12 grid gap-5 md:grid-cols-3">
             <ServiceCard
@@ -299,16 +301,16 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection className="bg-background px-6 py-20">
-          <div className="mx-auto max-w-[1200px] text-center">
-            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Technologie</p>
-            <h2 className="mx-auto mt-8 max-w-[1200px] text-3xl font-bold leading-tight text-primary md:text-5xl">
+        <RevealSection className="bg-background">
+          <div className="mx-auto max-w-[1200px] px-6 py-20 text-center">
+            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Technologie</p>
+            <h2 className="mx-auto mt-4 max-w-[700px] text-3xl font-bold leading-tight text-primary md:text-5xl">
               Propulsé par{" "}
-              <span className="text-cyan">GPT-5.4</span>.
+              <span className="text-primary">GPT-5.4</span>.
               <br />
               Le modèle le plus avancé d&apos;OpenAI.
             </h2>
-            <p className="mx-auto mt-6 max-w-[1200px] text-lg text-secondary">
+            <p className="mt-6 max-w-[480px] mx-auto text-lg text-secondary">
               Pendant que les autres vont passer leur temps à deviner, vous savez. Le résultat : la précision du
               modèle IA le plus avancé au monde dans chaque analyse.
             </p>
@@ -341,15 +343,15 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection className="bg-card px-6 py-20">
-          <div className="mx-auto max-w-[1200px]">
+        <RevealSection className="bg-card">
+          <div className="mx-auto max-w-[1200px] px-6 py-20">
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Système</p>
-            <h2 className="text-center text-3xl font-bold text-primary md:text-5xl">
+            <h2 className="text-center text-4xl font-bold text-primary md:text-5xl">
               Le système que les traders{" "}
-              <span className="text-cyan">disciplinés</span>{" "}
+              <span className="text-primary">disciplinés</span>{" "}
               vont utiliser.
             </h2>
-            <p className="mx-auto mt-5 max-w-[1200px] text-center text-lg text-secondary">
+            <p className="mt-5 max-w-[480px] mx-auto text-center text-lg text-secondary">
               Passez d&apos;un trading émotionnel à une exécution maîtrisée, mesurable et optimisée. Éliminer de
               manière définitive vos erreurs structurelles
             </p>
@@ -400,15 +402,15 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection className="bg-background px-6 py-20">
-          <div className="mx-auto max-w-[1200px]">
+        <RevealSection className="bg-background">
+          <div className="mx-auto max-w-[1200px] px-6 py-20">
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Témoignages</p>
-            <h2 className="text-center text-3xl font-bold text-primary md:text-5xl">
+            <h2 className="text-center text-4xl font-bold text-primary md:text-5xl">
               Ce que les traders{" "}
-              <span className="text-cyan">sérieux</span> ont vu
+              <span className="text-primary">sérieux</span> ont vu
               que les autres ont ignoré.
             </h2>
-            <p className="mx-auto mt-5 max-w-[1200px] text-center text-lg text-secondary">
+            <p className="mt-5 max-w-[480px] mx-auto text-center text-lg text-secondary">
               Une lecture précise de leurs erreurs, de leurs forces et de leurs réels leviers de performance.
             </p>
 
@@ -454,23 +456,35 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection id="analyse" className="bg-card px-6 py-28 text-center">
+        <RevealSection id="analyse" className="bg-card">
+          <div className="mx-auto max-w-[1200px] px-6 py-28 text-center">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Analyse gratuite</p>
-          <h2 className="text-3xl font-bold text-primary md:text-4xl">
+          <h2 className="text-4xl font-bold text-primary md:text-5xl">
             Ce que l&apos;IA{" "}
-            <span className="text-cyan">révèle</span> en 60
+            <span className="text-primary">révèle</span> en 60
             secondes.
           </h2>
-          <p className="mt-2 text-secondary">Aucune inscription requise</p>
-          <button
-            type="button"
-            onClick={() => router.push("/analysis")}
-            className="mx-auto mt-8 inline-flex items-center gap-2 rounded bg-blue px-7 py-3 font-semibold text-primary transition-all duration-200 hover:bg-blue/90"
-          >
-            Analyse gratuite
-            <ArrowRight className="h-5 w-5" aria-hidden />
-          </button>
-          <p className="mx-auto mt-4 max-w-sm text-sm text-secondary">Sans carte bancaire. Démonstration immédiate.</p>
+          <p className="mt-6 max-w-[480px] mx-auto text-base leading-relaxed text-secondary">Aucune inscription requise</p>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <button
+              type="button"
+              onClick={() => router.push("/analysis")}
+              className="btn-primary inline-flex items-center gap-2"
+            >
+              Analyse gratuite
+              <ArrowRight className="h-5 w-5" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={() => void connectGoogle()}
+              className="btn-outline inline-flex items-center gap-2"
+            >
+              <UserCircle className="h-5 w-5" aria-hidden />
+              S&apos;inscrire
+            </button>
+          </div>
+          <p className="mt-6 text-xs text-secondary">Accès anticipé · 200 places · Prix public à venir · Sans carte bancaire</p>
+          </div>
         </RevealSection>
       </main>
 
@@ -479,18 +493,26 @@ export default function HomePage() {
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Commencer</p>
           <h2 className="text-3xl font-bold text-primary md:text-5xl">
             Rejoignez l&apos;
-            <span className="text-cyan">élite</span> des
+            <span className="text-primary">élite</span> des
             traders.
           </h2>
           <p className="mx-auto mt-6 max-w-[400px] text-lg leading-relaxed text-secondary">Votre historique. 60 secondes. La vérité.</p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <button
               type="button"
               onClick={() => void connectGoogle()}
-              className="inline-flex items-center gap-2 rounded bg-blue px-6 py-3 font-semibold text-primary transition-all duration-200 hover:bg-blue/90"
+              className="btn-primary inline-flex items-center gap-2"
             >
               <UserCircle className="h-5 w-5" aria-hidden />
               S&apos;inscrire
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/analysis")}
+              className="btn-outline inline-flex items-center gap-2"
+            >
+              Analyse gratuite
+              <ArrowRight className="h-5 w-5" aria-hidden />
             </button>
           </div>
           <p className="mt-6 text-xs text-secondary">Accès anticipé · 200 places · Prix public à venir · Sans carte bancaire</p>
@@ -512,11 +534,6 @@ export default function HomePage() {
         >
           <ArrowRight className="h-5 w-5 -rotate-90" aria-hidden />
         </button>
-      </div>
-
-      <div className="hidden">
-        <ShieldCheck className="h-4 w-4" />
-        <Trophy className="h-4 w-4" />
       </div>
     </div>
   );
