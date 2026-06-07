@@ -42,7 +42,8 @@
       "Bash(powershell.exe *)",
       "Bash(git config *)",
       "Bash(git reset *)",
-      "Bash(xargs grep -l \"share\\\\|public.*report\\\\|visiteur\")"
+      "Bash(xargs grep -l \"share\\\\|public.*report\\\\|visiteur\")",
+      "Bash(npx eslint *)"
     ]
   }
 }

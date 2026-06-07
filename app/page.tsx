@@ -9,10 +9,8 @@ import {
   ArrowRight,
   BarChart3,
   BellRing,
-  Brain,
   BrainCircuit,
-  CheckCircle2,
-  FileDown,
+  ChevronDown,
   ShieldCheck,
   TrendingUp,
   Trophy,
@@ -74,7 +72,7 @@ function ServiceCard({
 }) {
   return (
     <article
-      className="card rounded p-7 transition-all duration-200 hover:border-blue hover:glow-blue"
+      className="card rounded p-7 transition-all duration-200 hover:border-blue"
       style={{ transitionDelay: `${delayMs}ms` }}
     >
       <div className="mb-5">{icon}</div>
@@ -113,8 +111,8 @@ export default function HomePage() {
     <div className="min-h-screen bg-background text-primary">
       <Navbar />
 
-      <main className="relative">
-        <RevealSection className="min-h-screen pt-16 flex items-center justify-center bg-gradient-to-b from-[#0A0A0F] to-[#12121A]">
+      <main className="relative overflow-x-clip">
+        <RevealSection className="min-h-screen pt-16 flex items-center justify-center bg-gradient-to-b from-background to-card">
           <div className="mx-auto max-w-[1200px] px-6 pb-20 pt-4 md:pb-0 md:pt-0 text-center">
           <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-secondary">
             <span className="h-2 w-2 animate-pulse rounded-full bg-blue" />
@@ -136,7 +134,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => void connectGoogle()}
-              className="inline-flex items-center gap-2 rounded bg-blue px-6 py-3 font-semibold text-primary transition-all duration-200 hover:bg-blue/90"
+              className="btn-primary inline-flex items-center gap-2"
             >
               <UserCircle className="h-5 w-5" aria-hidden />
               S&apos;inscrire
@@ -144,96 +142,99 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => router.push("/analysis")}
-              className="inline-flex items-center gap-2 rounded border border-border bg-transparent px-6 py-3 font-semibold text-primary transition-all duration-200 hover:border-blue"
+              className="btn-outline inline-flex items-center gap-2"
             >
-              Analyse Gratuite
+              Analyse gratuite
               <ArrowRight className="h-5 w-5" aria-hidden />
             </button>
           </div>
           </div>
         </RevealSection>
 
-        <RevealSection className="bg-[#12121A]">
+        <RevealSection className="bg-card">
           <div className="mx-auto max-w-[1200px] px-6 pb-20 pt-20 [perspective:1000px]">
+            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-8 text-center">Tableau de bord</p>
             <div className="card glow-blue rounded p-6 [transform:rotateX(5deg)]">
               <div className="mb-5 flex items-center justify-between border-b border-border pb-4">
-                <p className="text-sm text-secondary">Tableau de bord trading premium</p>
-                <span className="inline-flex items-center gap-1 rounded-full border border-green/40 bg-green/10 px-2 py-1 text-xs text-green">
-                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
-                  IA Active
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-background text-blue">
+                    <BrainCircuit className="h-4 w-4" aria-hidden />
+                  </span>
+                  <span className="text-sm font-semibold text-primary">AlphaTradeX</span>
+                </div>
+                <div className="hidden items-center gap-1.5 sm:flex">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue" aria-hidden />
+                  <span className="text-xs text-secondary">IA active</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-md border border-blue/40 bg-blue/10 px-3 py-1 text-xs font-semibold text-blue">
+                    Elite
+                  </span>
+                  <span className="rounded-md border border-border px-3 py-1.5 text-xs text-secondary">
+                    Se déconnecter
+                  </span>
+                </div>
               </div>
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="rounded border border-border bg-background/50 p-4">
-                  <p className="text-xs text-secondary">Rendement</p>
-                  <p className="mt-2 font-mono text-2xl text-primary">+2 847€</p>
+
+              <div className="grid gap-4 md:grid-cols-[200px_1fr]">
+                <div className="hidden rounded border border-border bg-background/50 p-3 md:block">
+                  <div className="space-y-1">
+                    {["Analyse", "Performance", "Signaux", "Aide", "Compte"].map((section) => (
+                      <div
+                        key={section}
+                        className="flex items-center justify-between rounded px-2 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-secondary"
+                      >
+                        <span>{section}</span>
+                        <ChevronDown className="h-3.5 w-3.5" aria-hidden />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="rounded border border-border bg-background/50 p-4">
-                  <p className="text-xs text-secondary">Win Rate</p>
-                  <p className="mt-2 font-mono text-2xl text-cyan">68%</p>
+
+                <div className="rounded border border-border bg-background/50 p-6 text-center">
+                  <div className="mx-auto max-w-sm rounded-xl border-2 border-dashed border-border p-6">
+                    <Upload className="mx-auto mb-2 h-6 w-6 text-secondary" aria-hidden />
+                    <p className="text-sm font-medium text-primary">Importez votre historique de trades</p>
+                    <p className="mt-1 text-xs text-secondary">MT4 · MT5 · Binance · Bybit · TradingView</p>
+                  </div>
+                  <button type="button" className="btn-primary mt-5 py-2.5">
+                    Analyser mes trades
+                  </button>
                 </div>
-                <div className="rounded border border-border bg-background/50 p-4">
-                  <p className="text-xs text-secondary">Drawdown</p>
-                  <p className="mt-2 font-mono text-2xl text-green">4.2%</p>
-                </div>
-              </div>
-              <div className="mt-5 grid gap-3 text-xs text-secondary md:grid-cols-3">
-                <span className="inline-flex items-center gap-1 rounded border border-border bg-background/40 px-3 py-2">
-                  <Upload className="h-4 w-4 text-blue" aria-hidden />
-                  Importer
-                </span>
-                <span className="inline-flex items-center gap-1 rounded border border-border bg-background/40 px-3 py-2">
-                  <BrainCircuit className="h-4 w-4 text-cyan" aria-hidden />
-                  Analyse IA
-                </span>
-                <span className="inline-flex items-center gap-1 rounded border border-border bg-background/40 px-3 py-2">
-                  <FileDown className="h-4 w-4 text-green" aria-hidden />
-                  Rapport
-                </span>
               </div>
             </div>
           </div>
         </RevealSection>
 
-        <RevealSection className="border-y border-border bg-[#0A0A0F] py-4">
-          <div className="overflow-hidden text-secondary">
-            <div className="animate-landing-marquee whitespace-nowrap">
-              {[
-                "Approuvé par les traders sur",
-                "MT4",
-                "MT5",
-                "Binance",
-                "Bybit",
-                "TradingView",
-                "FTMO",
-                "FundedNext",
-                "Approuvé par les traders sur",
-                "MT4",
-                "MT5",
-                "Binance",
-                "Bybit",
-                "TradingView",
-                "FTMO",
-                "FundedNext",
-              ].map((item, index) => (
-                <span key={`${item}-${index}`} className="inline-flex items-center px-6 text-sm">
-                  {index % 2 === 1 ? <span className="mx-3 h-1.5 w-1.5 rounded-full bg-blue" /> : null}
-                  {item}
-                </span>
+        <RevealSection className="bg-background">
+          <div className="mx-auto max-w-[1200px] px-6 py-20 text-center">
+            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Compatibilité</p>
+            <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary">
+              Vos plateformes.<br />Notre analyse.
+            </h2>
+            <p className="mx-auto mt-4 max-w-[400px] text-sm text-secondary">
+              Votre historique importé. Vos biais exposés.
+            </p>
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
+              {["MT4", "MT5", "Binance", "Bybit", "TradingView", "FTMO", "FundedNext"].map((platform) => (
+                <div key={platform} className="card cursor-default rounded px-7 py-3 font-mono text-sm font-semibold text-primary transition-colors duration-200 hover:border-blue">
+                  {platform}
+                </div>
               ))}
             </div>
           </div>
         </RevealSection>
 
-        <RevealSection id="services" className="bg-[#12121A]">
+        <RevealSection id="services" className="bg-card">
           <div className="mx-auto max-w-[1200px] px-6 py-20">
+          <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Nos services</p>
           <h2 className="text-center text-3xl font-bold text-primary md:text-4xl">
             Tout ce qu&apos;il faut pour trader au plus haut{" "}
             <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">niveau</span>.
           </h2>
           <p className="mt-3 text-center text-secondary">Passez de l&apos;instinct à la stratégie.</p>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-12 grid gap-5 md:grid-cols-3">
             <ServiceCard
               icon={<BrainCircuit className="h-8 w-8 text-blue" aria-hidden />}
               title="Avantage psychologique"
@@ -258,10 +259,7 @@ export default function HomePage() {
 
         <RevealSection className="bg-background px-6 py-20">
           <div className="mx-auto max-w-[1200px] text-center">
-            <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-secondary">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-blue" />
-              Technologie Exclusive
-            </div>
+            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Technologie</p>
             <h2 className="mx-auto mt-8 max-w-[1200px] text-3xl font-bold leading-tight text-primary md:text-5xl">
               Propulsé par{" "}
               <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">GPT-5.4</span>.
@@ -274,14 +272,14 @@ export default function HomePage() {
             </p>
 
             <div className="mt-12 grid gap-6 lg:grid-cols-3">
-              <article className="card rounded p-7">
+              <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                 <BrainCircuit className="h-8 w-8 text-blue" aria-hidden />
                 <h3 className="mt-5 text-xl font-semibold text-primary">Précision Chirurgicale</h3>
                 <p className="mt-3 text-sm leading-relaxed text-secondary">
                   GPT-5.4 raisonne comme un analyste senior. Il voit ce que les autres modèles ne peuvent pas voir.
                 </p>
               </article>
-              <article className="card rounded p-7">
+              <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                 <ShieldCheck className="h-8 w-8 text-cyan" aria-hidden />
                 <h3 className="mt-5 text-xl font-semibold text-primary">Fiabilité Inégalée</h3>
                 <p className="mt-3 text-sm leading-relaxed text-secondary">
@@ -289,7 +287,7 @@ export default function HomePage() {
                   décision est fondée.
                 </p>
               </article>
-              <article className="card rounded p-7">
+              <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                 <TrendingUp className="h-8 w-8 text-green" aria-hidden />
                 <h3 className="mt-5 text-xl font-semibold text-primary">Exécution immédiate</h3>
                 <p className="mt-3 text-sm leading-relaxed text-secondary">
@@ -301,8 +299,9 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection className="bg-[#12121A] px-6 py-20">
+        <RevealSection className="bg-card px-6 py-20">
           <div className="mx-auto max-w-[1200px]">
+            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Système</p>
             <h2 className="text-center text-3xl font-bold text-primary md:text-5xl">
               Le système que les traders{" "}
               <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">disciplinés</span>{" "}
@@ -314,7 +313,7 @@ export default function HomePage() {
             </p>
 
             <div className="mt-12 grid gap-6 md:grid-cols-2">
-              <article className="card rounded p-7">
+              <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                 <Trophy className="h-8 w-8 text-blue" aria-hidden />
                 <h3 className="mt-5 text-xl font-semibold text-primary">
                   Élaboré par les traders. Optimisé pour performer
@@ -325,7 +324,7 @@ export default function HomePage() {
                   résultats.
                 </p>
               </article>
-              <article className="card rounded p-7">
+              <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                 <BarChart3 className="h-8 w-8 text-cyan" aria-hidden />
                 <h3 className="mt-5 text-xl font-semibold text-primary">Des données réelles. Des décisions précises</h3>
                 <p className="mt-3 text-sm leading-relaxed text-secondary">
@@ -334,7 +333,7 @@ export default function HomePage() {
                   et ce qui vous freine.
                 </p>
               </article>
-              <article className="card rounded p-7">
+              <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                 <BrainCircuit className="h-8 w-8 text-green" aria-hidden />
                 <h3 className="mt-5 text-xl font-semibold text-primary">
                   Maîtriser votre psychologie avant qu&apos;elle vous coûte.
@@ -345,7 +344,7 @@ export default function HomePage() {
                   impactent vos résultats.
                 </p>
               </article>
-              <article className="card rounded p-7">
+              <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                 <ShieldCheck className="h-8 w-8 text-blue" aria-hidden />
                 <h3 className="mt-5 text-xl font-semibold text-primary">
                   Votre analyse exploitable en moins d&apos;une journée.
@@ -361,6 +360,7 @@ export default function HomePage() {
 
         <RevealSection className="bg-background px-6 py-20">
           <div className="mx-auto max-w-[1200px]">
+            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Témoignages</p>
             <h2 className="text-center text-3xl font-bold text-primary md:text-5xl">
               Ce que les traders{" "}
               <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">sérieux</span> ont vu
@@ -412,35 +412,37 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection id="analyse" className="bg-[#12121A] px-6 py-20 text-center">
+        <RevealSection id="analyse" className="bg-card px-6 py-28 text-center">
+          <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Démonstration</p>
           <h2 className="text-3xl font-bold text-primary md:text-4xl">
             Ce que l&apos;IA{" "}
             <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">révèle</span> en 60
             secondes.
           </h2>
+          <div className="mx-auto mt-10 h-px w-12 bg-blue" />
           <p className="mt-2 text-secondary">Aucune inscription requise</p>
           <button
             type="button"
             onClick={() => router.push("/analysis")}
             className="mx-auto mt-8 inline-flex items-center gap-2 rounded bg-blue px-7 py-3 font-semibold text-primary transition-all duration-200 hover:bg-blue/90"
           >
-            Analyse Gratuite
+            Analyse gratuite
             <ArrowRight className="h-5 w-5" aria-hidden />
           </button>
           <p className="mx-auto mt-4 max-w-sm text-sm text-secondary">Sans carte bancaire. Démonstration immédiate.</p>
         </RevealSection>
       </main>
 
-      <RevealSection className="bg-gradient-to-b from-[#12121A] to-[#0A0A0F] px-6 py-20 text-center">
+      <RevealSection className="bg-gradient-to-b from-card to-background px-6 py-28 text-center">
         <div className="mx-auto max-w-[1200px]">
+          <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Commencer</p>
           <h2 className="text-3xl font-bold text-primary md:text-5xl">
             Rejoignez l&apos;
             <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">élite</span> des
             traders.
           </h2>
-          <p className="mx-auto mt-5 max-w-3xl text-lg text-secondary">
-            Chaque jour sans analyse est un jour où vos erreurs vont continuer de vous coûter.
-          </p>
+          <div className="mx-auto mt-10 h-px w-12 bg-blue" />
+          <p className="mx-auto mt-6 max-w-[400px] text-lg leading-relaxed text-secondary">Votre historique. 60 secondes. La vérité.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <button
               type="button"
@@ -451,7 +453,7 @@ export default function HomePage() {
               S&apos;inscrire
             </button>
           </div>
-          <p className="mt-4 text-sm text-secondary">Importez vos trades depuis MT4, MT5, Binance, Bybit, TradingView, FTMO et FundedNext.</p>
+          <p className="mt-6 text-xs text-secondary">Accès anticipé · 200 places · Prix public à venir · Sans carte bancaire</p>
         </div>
       </RevealSection>
 
@@ -473,7 +475,6 @@ export default function HomePage() {
       </div>
 
       <div className="hidden">
-        <Brain className="h-4 w-4" />
         <ShieldCheck className="h-4 w-4" />
         <Trophy className="h-4 w-4" />
       </div>
