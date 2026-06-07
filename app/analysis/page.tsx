@@ -59,7 +59,7 @@ const steps = [
     icon: Upload,
     color: "#2D6FFF",
     number: "01",
-    title: "Exportez l'historique",
+    title: "L'historique du compte",
     body: "Un fichier CSV depuis MT4, MT5, Binance, Bybit, TradingView, FTMO, FundedNext. Zéro accès au compte.",
   },
   {
