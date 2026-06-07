@@ -8,14 +8,27 @@ import Navbar from "@/components/Navbar";
 import {
   ArrowRight,
   BarChart3,
+  Bell,
   BellRing,
   BrainCircuit,
+  CalendarCheck,
   ChevronDown,
+  CreditCard,
+  Headphones,
+  History,
+  Lock,
+  Menu,
+  Radar,
+  Receipt,
+  ScanLine,
+  ScrollText,
   ShieldCheck,
+  Target,
   TrendingUp,
   Trophy,
   Upload,
   UserCircle,
+  Webhook,
 } from "lucide-react";
 
 type RevealProps = {
@@ -114,15 +127,11 @@ export default function HomePage() {
       <main className="relative overflow-x-clip">
         <RevealSection className="min-h-screen pt-16 flex items-center justify-center bg-gradient-to-b from-background to-card">
           <div className="mx-auto max-w-[1200px] px-6 pb-20 pt-4 md:pb-0 md:pt-0 text-center">
-          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-secondary">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-blue" />
-            Propulsé par <span className="text-primary">GPT-5.4</span>
-          </div>
+          <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-6">AlphaTradeX</p>
           <h1 className="mx-auto mt-8 max-w-[1200px] text-balance md:[text-wrap:normal] text-4xl font-bold leading-tight text-primary md:text-6xl xl:text-5xl">
             Les meilleurs traders n&apos;ont pas plus travaillé.
             <br />
-            Ils ont mieux{" "}
-            <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">compris</span>.
+            Ils ont mieux <span className="text-cyan">compris</span>.
           </h1>
 
           <p className="mx-auto mt-6 max-w-[600px] text-lg text-secondary">
@@ -152,55 +161,88 @@ export default function HomePage() {
         </RevealSection>
 
         <RevealSection className="bg-card">
-          <div className="mx-auto max-w-[1200px] px-6 pb-20 pt-20 [perspective:1000px]">
-            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-8 text-center">Tableau de bord</p>
-            <div className="card glow-blue rounded p-6 [transform:rotateX(5deg)]">
-              <div className="mb-5 flex items-center justify-between border-b border-border pb-4">
+          <div className="mx-auto max-w-[1200px] px-6 py-20 [perspective:1000px]">
+            <div className="text-center mb-12">
+              <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Tableau de bord</p>
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
+                Votre espace.<br />Votre analyse.
+              </h2>
+              <p className="mx-auto mt-6 max-w-[480px] text-base leading-relaxed text-secondary">
+                Un dashboard pensé pour les traders qui exigent la précision.
+              </p>
+            </div>
+            <div className="card glow-blue rounded overflow-hidden [transform:rotateX(5deg)]" style={{ height: '520px' }}>
+              {/* Topbar desktop */}
+              <div className="hidden md:flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-background text-blue">
-                    <BrainCircuit className="h-4 w-4" aria-hidden />
-                  </span>
-                  <span className="text-sm font-semibold text-primary">AlphaTradeX</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 600 600" style={{ borderRadius: '8px', flexShrink: 0 }} aria-hidden>
+                    <rect width="600" height="600" rx="125" ry="125" fill="#0A0A0F" />
+                    <svg x="75" y="75" width="450" height="450" viewBox="0 0 24 24" fill="#0A0A0F" stroke="#2D6FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                      <polyline points="16 7 22 7 22 13" />
+                    </svg>
+                  </svg>
+                  <span className="font-semibold text-primary text-sm">AlphaTradeX</span>
                 </div>
-                <div className="hidden items-center gap-1.5 sm:flex">
+                <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue" aria-hidden />
                   <span className="text-xs text-secondary">IA active</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="rounded-md border border-blue/40 bg-blue/10 px-3 py-1 text-xs font-semibold text-blue">
-                    Elite
-                  </span>
-                  <span className="rounded-md border border-border px-3 py-1.5 text-xs text-secondary">
-                    Se déconnecter
-                  </span>
+                  <span className="rounded-md border border-blue/25 bg-blue/10 px-3 py-1 text-xs font-semibold text-blue">Élite</span>
+                  <span className="text-xs text-secondary">Cycle · 01/07</span>
+                  <button type="button" className="rounded-md border border-border px-3 py-1.5 text-xs text-secondary cursor-default">Se déconnecter</button>
                 </div>
               </div>
-
-              <div className="grid gap-4 md:grid-cols-[200px_1fr]">
-                <div className="hidden rounded border border-border bg-background/50 p-3 md:block">
-                  <div className="space-y-1">
-                    {["Analyse", "Performance", "Signaux", "Aide", "Compte"].map((section) => (
-                      <div
-                        key={section}
-                        className="flex items-center justify-between rounded px-2 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-secondary"
-                      >
-                        <span>{section}</span>
+              {/* Topbar mobile */}
+              <div className="relative flex md:hidden h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 600 600" style={{ borderRadius: '8px', flexShrink: 0 }} aria-hidden>
+                  <rect width="600" height="600" rx="125" ry="125" fill="#0A0A0F" />
+                  <svg x="75" y="75" width="450" height="450" viewBox="0 0 24 24" fill="#0A0A0F" stroke="#2D6FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                    <polyline points="16 7 22 7 22 13" />
+                  </svg>
+                </svg>
+                <span className="absolute left-1/2 -translate-x-1/2 font-semibold text-primary text-sm">AlphaTradeX</span>
+                <div className="shrink-0 rounded-md border border-border p-2 text-secondary cursor-default">
+                  <Menu className="h-5 w-5" aria-hidden />
+                </div>
+              </div>
+              {/* Body */}
+              <div className="flex overflow-hidden" style={{ height: 'calc(520px - 56px)' }}>
+                {/* Sidebar desktop uniquement */}
+                <aside className="hidden md:flex h-full w-[280px] shrink-0 flex-col border-r border-border bg-card">
+                  <div className="flex-1 overflow-hidden px-4 py-5 space-y-1">
+                    {[
+                      'Analyse',
+                      'Performance',
+                      'Signaux',
+                      'Aide',
+                      'Compte',
+                    ].map((label) => (
+                      <div key={label} className="flex w-full items-center justify-between px-2 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-secondary cursor-default">
+                        <span>{label}</span>
                         <ChevronDown className="h-3.5 w-3.5" aria-hidden />
                       </div>
                     ))}
                   </div>
-                </div>
-
-                <div className="rounded border border-border bg-background/50 p-6 text-center">
-                  <div className="mx-auto max-w-sm rounded-xl border-2 border-dashed border-border p-6">
-                    <Upload className="mx-auto mb-2 h-6 w-6 text-secondary" aria-hidden />
-                    <p className="text-sm font-medium text-primary">Importez votre historique de trades</p>
-                    <p className="mt-1 text-xs text-secondary">MT4 · MT5 · Binance · Bybit · TradingView</p>
+                </aside>
+                {/* Zone principale — identique desktop et mobile */}
+                <main className="flex flex-1 flex-col items-center justify-center bg-background p-6">
+                  <div className="w-full max-w-md">
+                    <div className="text-center mb-4">
+                      <h3 className="text-xl font-bold text-primary">Analyser vos trades</h3>
+                    </div>
+                    <div className="border-2 border-dashed border-border rounded-xl p-8 text-center mb-6">
+                      <Upload className="h-6 w-6 text-secondary mx-auto mb-2" aria-hidden />
+                      <p className="text-primary text-sm font-medium">Importez votre historique de trades</p>
+                      <p className="text-secondary text-xs mt-1">MT4 · MT5 · Binance · Bybit · TradingView · FTMO · FundedNext</p>
+                    </div>
+                    <div className="flex justify-center">
+                      <button type="button" className="btn-primary py-2.5 opacity-40 cursor-default">Analyser mes trades</button>
+                    </div>
                   </div>
-                  <button type="button" className="btn-primary mt-5 py-2.5">
-                    Analyser mes trades
-                  </button>
-                </div>
+                </main>
               </div>
             </div>
           </div>
@@ -227,10 +269,10 @@ export default function HomePage() {
 
         <RevealSection id="services" className="bg-card">
           <div className="mx-auto max-w-[1200px] px-6 py-20">
-          <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Nos services</p>
+          <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Services</p>
           <h2 className="text-center text-3xl font-bold text-primary md:text-4xl">
             Tout ce qu&apos;il faut pour trader au plus haut{" "}
-            <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">niveau</span>.
+            <span className="text-cyan">niveau</span>.
           </h2>
           <p className="mt-3 text-center text-secondary">Passez de l&apos;instinct à la stratégie.</p>
 
@@ -262,7 +304,7 @@ export default function HomePage() {
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Technologie</p>
             <h2 className="mx-auto mt-8 max-w-[1200px] text-3xl font-bold leading-tight text-primary md:text-5xl">
               Propulsé par{" "}
-              <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">GPT-5.4</span>.
+              <span className="text-cyan">GPT-5.4</span>.
               <br />
               Le modèle le plus avancé d&apos;OpenAI.
             </h2>
@@ -304,7 +346,7 @@ export default function HomePage() {
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Système</p>
             <h2 className="text-center text-3xl font-bold text-primary md:text-5xl">
               Le système que les traders{" "}
-              <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">disciplinés</span>{" "}
+              <span className="text-cyan">disciplinés</span>{" "}
               vont utiliser.
             </h2>
             <p className="mx-auto mt-5 max-w-[1200px] text-center text-lg text-secondary">
@@ -363,7 +405,7 @@ export default function HomePage() {
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Témoignages</p>
             <h2 className="text-center text-3xl font-bold text-primary md:text-5xl">
               Ce que les traders{" "}
-              <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">sérieux</span> ont vu
+              <span className="text-cyan">sérieux</span> ont vu
               que les autres ont ignoré.
             </h2>
             <p className="mx-auto mt-5 max-w-[1200px] text-center text-lg text-secondary">
@@ -399,7 +441,7 @@ export default function HomePage() {
               ].map((item) => (
                 <article
                   key={item.name}
-                  className="relative rounded border border-border bg-card p-7 transition-all duration-200 hover:border-blue"
+                  className="relative rounded border border-border bg-card p-7 hover:border-blue transition-colors duration-200"
                 >
                   <span className="absolute right-4 top-3 text-5xl font-bold text-blue/20">&ldquo;</span>
                   <p className="mb-3 text-sm tracking-widest text-blue">★★★★★</p>
@@ -413,13 +455,12 @@ export default function HomePage() {
         </RevealSection>
 
         <RevealSection id="analyse" className="bg-card px-6 py-28 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Démonstration</p>
+          <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Analyse gratuite</p>
           <h2 className="text-3xl font-bold text-primary md:text-4xl">
             Ce que l&apos;IA{" "}
-            <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">révèle</span> en 60
+            <span className="text-cyan">révèle</span> en 60
             secondes.
           </h2>
-          <div className="mx-auto mt-10 h-px w-12 bg-blue" />
           <p className="mt-2 text-secondary">Aucune inscription requise</p>
           <button
             type="button"
@@ -438,10 +479,9 @@ export default function HomePage() {
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Commencer</p>
           <h2 className="text-3xl font-bold text-primary md:text-5xl">
             Rejoignez l&apos;
-            <span className="bg-gradient-to-r from-blue to-cyan bg-clip-text text-transparent">élite</span> des
+            <span className="text-cyan">élite</span> des
             traders.
           </h2>
-          <div className="mx-auto mt-10 h-px w-12 bg-blue" />
           <p className="mx-auto mt-6 max-w-[400px] text-lg leading-relaxed text-secondary">Votre historique. 60 secondes. La vérité.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <button
