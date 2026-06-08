@@ -128,7 +128,7 @@ export default function HomePage() {
         <RevealSection className="min-h-screen pt-16 flex items-center justify-center bg-gradient-to-b from-background to-card">
           <div className="mx-auto max-w-[1200px] px-6 pb-20 pt-4 md:pb-0 md:pt-0 text-center">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">AlphaTradeX</p>
-          <h1 className="mx-auto mt-6 max-w-[1200px] text-balance md:[text-wrap:normal] text-4xl font-bold leading-tight text-primary md:text-6xl xl:text-5xl">
+          <h1 className="mx-auto mt-6 max-w-[1200px] text-balance md:[text-wrap:normal] text-5xl font-bold leading-tight text-primary md:text-7xl">
             Les meilleurs traders n&apos;ont pas plus travaillé.
             <br />
             Ils ont mieux <span className="text-blue">compris</span>.
@@ -141,24 +141,6 @@ export default function HomePage() {
             mêmes erreurs.
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <button
-              type="button"
-              onClick={() => void connectGoogle()}
-              className="btn-primary inline-flex items-center gap-2"
-            >
-              <UserCircle className="h-5 w-5" aria-hidden />
-              S&apos;inscrire
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push("/analysis")}
-              className="btn-outline inline-flex items-center gap-2"
-            >
-              Analyse gratuite
-              <ArrowRight className="h-5 w-5" aria-hidden />
-            </button>
-          </div>
           </div>
         </RevealSection>
 
@@ -167,7 +149,7 @@ export default function HomePage() {
             <div className="text-center mb-12">
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Tableau de bord</p>
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
-                Votre espace.<br />Votre analyse.
+                Votre espace.<br />Notre analyse.
               </h2>
               <p className="mx-auto mt-6 max-w-[480px] text-base leading-relaxed text-secondary">
                 Un dashboard pensé pour les traders qui exigent la précision.
@@ -186,13 +168,15 @@ export default function HomePage() {
                   </svg>
                   <span className="font-semibold text-primary text-sm">AlphaTradeX</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue" aria-hidden />
-                  <span className="text-xs text-secondary">IA active</span>
+                <div className="flex min-w-0 flex-1 items-center justify-start pl-6 md:pl-10">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue" aria-hidden />
+                    <span className="text-xs text-secondary">IA active</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="rounded-md border border-blue/25 bg-blue/10 px-3 py-1 text-xs font-semibold text-blue">Élite</span>
-                  <span className="text-xs text-secondary">Cycle · 01/07</span>
+                  <span className="text-xs text-secondary">Cycle · 01/01</span>
                   <button type="button" className="rounded-md border border-border px-3 py-1.5 text-xs text-secondary cursor-default">Se déconnecter</button>
                 </div>
               </div>
@@ -235,7 +219,7 @@ export default function HomePage() {
                     <div className="text-center mb-4">
                       <h3 className="text-xl font-bold text-primary">Analyser vos trades</h3>
                     </div>
-                    <div className="border-2 border-dashed border-border rounded-xl p-8 text-center mb-6">
+                    <div className="border-2 border-dashed border-border rounded-xl p-8 text-center mb-6 w-full">
                       <Upload className="h-6 w-6 text-secondary mx-auto mb-2" aria-hidden />
                       <p className="text-primary text-sm font-medium">Importez votre historique de trades</p>
                       <p className="text-secondary text-xs mt-1">MT4 · MT5 · Binance · Bybit · TradingView · FTMO · FundedNext</p>
@@ -418,7 +402,7 @@ export default function HomePage() {
               {[
                 {
                   name: "Kilian I.",
-                  role: "Trader Forex - Prop Firm FTMO",
+                  role: "Trader Forex - FTMO",
                   quote:
                     "Mon Win rate était bon. L'IA a révélé que mon Risk/Reward détruisait toute ma performance. Corrigé en une semaine. Financé en un mois.",
                 },
@@ -483,7 +467,7 @@ export default function HomePage() {
               S&apos;inscrire
             </button>
           </div>
-          <p className="mt-6 text-xs text-secondary">Accès anticipé · 200 places · Prix public à venir · Sans carte bancaire</p>
+          <p className="mt-6 text-xs text-secondary">Sans carte bancaire. Analyse immédiate.</p>
           </div>
         </RevealSection>
       </main>
