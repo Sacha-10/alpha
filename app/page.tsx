@@ -215,17 +215,19 @@ export default function HomePage() {
                 </aside>
                 {/* Zone principale — identique desktop et mobile */}
                 <main className="flex flex-1 flex-col items-center justify-center bg-background p-6">
-                  <div className="w-full max-w-md">
-                    <div className="text-center mb-4">
-                      <h3 className="text-xl font-bold text-primary">Analyser vos trades</h3>
-                    </div>
-                    <div className="border-2 border-dashed border-border rounded-xl p-8 text-center mb-6 w-full">
-                      <Upload className="h-6 w-6 text-secondary mx-auto mb-2" aria-hidden />
-                      <p className="text-primary text-sm font-medium">Importez votre historique de trades</p>
-                      <p className="text-secondary text-xs mt-1">MT4 · MT5 · Binance · Bybit · TradingView · FTMO · FundedNext</p>
-                    </div>
-                    <div className="flex justify-center">
-                      <button type="button" className="btn-primary py-2.5 opacity-40 cursor-default">Analyser mes trades</button>
+                  <div className="flex h-full w-full items-center justify-center">
+                    <div className="w-full">
+                      <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold text-primary">Analyser vos trades</h3>
+                      </div>
+                      <div className="border-2 border-dashed rounded-xl p-8 text-center mb-6 w-full border-border opacity-40 cursor-default transition-colors">
+                        <Upload className="h-6 w-6 text-secondary mx-auto mb-2" aria-hidden />
+                        <p className="text-primary text-sm font-medium">Importez votre historique de trades</p>
+                        <p className="text-secondary text-xs mt-1">MT4 · MT5 · Binance · Bybit · TradingView · FTMO · FundedNext</p>
+                      </div>
+                      <div className="flex justify-center">
+                        <button type="button" className="btn-primary py-2.5 opacity-40 cursor-default">Analyser mes trades</button>
+                      </div>
                     </div>
                   </div>
                 </main>
