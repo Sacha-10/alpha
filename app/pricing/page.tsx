@@ -287,7 +287,7 @@ export default function PricingPage() {
 
       <main className="overflow-x-clip">
         <section className="min-h-screen pt-16 flex items-center justify-center px-6 text-center">
-          <div className="mx-auto max-w-[1200px]">
+          <div className="mx-auto max-w-[1200px] pb-20 pt-4 md:pb-0 md:pt-0">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-6">Tarifs</p>
               <h1 className="text-center text-5xl font-bold leading-tight md:text-7xl">

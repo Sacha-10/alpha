@@ -165,7 +165,7 @@ export default function DemoPage() {
       <main className="overflow-x-clip">
 
         <section className="min-h-screen pt-16 flex items-center justify-center px-6 text-center">
-          <div className="mx-auto max-w-[1200px]">
+          <div className="mx-auto max-w-[1200px] pb-20 pt-4 md:pb-0 md:pt-0">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-6">Analyse</p>
               <h1 className="mx-auto mt-6 max-w-[900px] text-5xl font-bold leading-[1.1] text-primary md:text-7xl">
