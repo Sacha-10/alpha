@@ -121,13 +121,12 @@ export default function HomePage() {
   }, []);
 
   const DASHBOARD_DESKTOP_WIDTH = 1440;
-  const DASHBOARD_DESKTOP_HEIGHT = 900;
   const DASHBOARD_MOBILE_WIDTH = 390;
-  const DASHBOARD_MOBILE_HEIGHT = 844;
 
   const dashboardContainerRef = useRef<HTMLDivElement | null>(null);
   const [dashboardScale, setDashboardScale] = useState(1);
   const [isMobileDashboard, setIsMobileDashboard] = useState(false);
+  const [dashboardHeight, setDashboardHeight] = useState(0);
 
   const updateDashboardScale = useCallback(() => {
     if (!dashboardContainerRef.current) return;
@@ -135,7 +134,9 @@ export default function HomePage() {
     const mobile = window.innerWidth < 768;
     setIsMobileDashboard(mobile);
     const referenceWidth = mobile ? DASHBOARD_MOBILE_WIDTH : DASHBOARD_DESKTOP_WIDTH;
-    setDashboardScale(containerWidth / referenceWidth);
+    const scale = containerWidth / referenceWidth;
+    setDashboardScale(scale);
+    setDashboardHeight(window.innerHeight * scale);
   }, []);
 
   useEffect(() => {
@@ -182,7 +183,7 @@ export default function HomePage() {
             <div ref={dashboardContainerRef} className="card glow-blue rounded overflow-hidden" style={{
               position: 'relative',
               overflow: 'hidden',
-              height: `${(isMobileDashboard ? DASHBOARD_MOBILE_HEIGHT : DASHBOARD_DESKTOP_HEIGHT) * dashboardScale}px`,
+              height: dashboardHeight > 0 ? `${dashboardHeight}px` : 'auto',
             }}>
               <div
                 style={{
@@ -192,7 +193,7 @@ export default function HomePage() {
                   transform: `scale(${dashboardScale})`,
                   transformOrigin: 'top left',
                   width: `${isMobileDashboard ? DASHBOARD_MOBILE_WIDTH : DASHBOARD_DESKTOP_WIDTH}px`,
-                  height: `${isMobileDashboard ? DASHBOARD_MOBILE_HEIGHT : DASHBOARD_DESKTOP_HEIGHT}px`,
+                  height: `${window.innerHeight}px`,
                 }}
               >
               {/* Topbar desktop */}
