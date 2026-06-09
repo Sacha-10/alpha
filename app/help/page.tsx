@@ -187,7 +187,7 @@ export default function AidePage() {
 
       <main className="overflow-x-clip">
         <section className="min-h-screen pt-16 flex items-center justify-center px-6 text-center">
-          <div className="max-w-[1200px] mx-auto pb-12 pt-12 md:pb-0 md:pt-0">
+          <div className="max-w-[1200px] mx-auto pb-10 pt-10 md:pb-0 md:pt-0">
             <RevealSection>
               <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase mb-6">Aide</p>
               <h1 className="text-5xl md:text-7xl font-bold leading-[1.1] text-primary mt-6 max-w-[900px] mx-auto">

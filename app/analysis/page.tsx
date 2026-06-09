@@ -165,11 +165,11 @@ export default function DemoPage() {
       <main className="overflow-x-clip">
 
         <section className="min-h-screen pt-16 flex items-center justify-center px-6 text-center">
-          <div className="mx-auto max-w-[1200px] pb-12 pt-12 md:pb-0 md:pt-0">
+          <div className="mx-auto max-w-[1200px] pb-10 pt-10 md:pb-0 md:pt-0">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-6">Analyse</p>
               <h1 className="mx-auto mt-6 max-w-[900px] text-5xl font-bold leading-[1.1] text-primary md:text-7xl">
-                Découvrez ce que l&apos;analyste IA<br />révèle sur un compte de trading.
+                Découvrez ce que l&apos;analyste IA révèle sur un compte de trading.
               </h1>
               <div className="mx-auto mt-10 h-px w-12 bg-blue" />
               <p className="mx-auto mt-8 max-w-[520px] text-lg leading-relaxed text-secondary">
