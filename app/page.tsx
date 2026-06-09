@@ -172,13 +172,21 @@ export default function HomePage() {
                 Un dashboard pensé pour les traders qui exigent la précision.
               </p>
             </div>
-            <div ref={dashboardContainerRef} className="card glow-blue rounded overflow-hidden" style={{ height: '520px' }}>
+            <div ref={dashboardContainerRef} className="card glow-blue rounded overflow-hidden" style={{
+              position: 'relative',
+              width: '100%',
+              paddingBottom: `${(520 / DASHBOARD_REFERENCE_WIDTH) * 100}%`,
+              overflow: 'hidden',
+            }}>
               <div
                 style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
                   transform: `scale(${dashboardScale})`,
                   transformOrigin: 'top left',
                   width: `${DASHBOARD_REFERENCE_WIDTH}px`,
-                  height: `${520 / dashboardScale}px`,
+                  height: '520px',
                 }}
               >
               {/* Topbar desktop */}
