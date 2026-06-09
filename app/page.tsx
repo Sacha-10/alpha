@@ -121,9 +121,9 @@ export default function HomePage() {
   }, []);
 
   const DASHBOARD_DESKTOP_WIDTH = 1440;
-  const DASHBOARD_DESKTOP_HEIGHT = 520;
+  const DASHBOARD_DESKTOP_HEIGHT = 900;
   const DASHBOARD_MOBILE_WIDTH = 390;
-  const DASHBOARD_MOBILE_HEIGHT = 370;
+  const DASHBOARD_MOBILE_HEIGHT = 844;
 
   const dashboardContainerRef = useRef<HTMLDivElement | null>(null);
   const [dashboardScale, setDashboardScale] = useState(1);
