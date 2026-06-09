@@ -145,7 +145,7 @@ export default function AboutPage() {
       <Navbar />
 
       <main>
-        <section className="px-6 pb-28 pt-40 text-center">
+        <section className="min-h-screen pt-16 flex items-center justify-center px-6 text-center">
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
               <p className="mb-6 font-mono text-xs uppercase tracking-[0.25em] text-secondary">À propos</p>

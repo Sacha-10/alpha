@@ -161,7 +161,7 @@ export default function HomePage() {
 
           <div className="mx-auto mt-10 h-px w-12 bg-blue" />
 
-          <p className="mx-auto mt-6 max-w-[520px] leading-relaxed text-lg text-secondary">
+          <p className="mx-auto mt-8 max-w-[520px] leading-relaxed text-lg text-secondary">
             Notre IA analyse chaque trade, chaque décision, chaque pattern pour que vous ne répétiez plus jamais les
             mêmes erreurs.
           </p>

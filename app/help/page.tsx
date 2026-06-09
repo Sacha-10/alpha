@@ -186,7 +186,7 @@ export default function AidePage() {
       <Navbar />
 
       <main className="overflow-x-clip">
-        <section className="px-6 pt-40 pb-28 text-center">
+        <section className="min-h-screen pt-16 flex items-center justify-center px-6 text-center">
           <div className="max-w-[1200px] mx-auto">
             <RevealSection>
               <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase mb-6">Aide</p>

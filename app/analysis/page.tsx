@@ -164,7 +164,7 @@ export default function DemoPage() {
       <Navbar />
       <main className="overflow-x-clip">
 
-        <section className="px-6 pt-40 pb-28 text-center">
+        <section className="min-h-screen pt-16 flex items-center justify-center px-6 text-center">
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-6">Analyse</p>
