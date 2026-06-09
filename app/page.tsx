@@ -120,15 +120,22 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const DASHBOARD_REFERENCE_WIDTH = 1440;
+  const DASHBOARD_DESKTOP_WIDTH = 1440;
+  const DASHBOARD_DESKTOP_HEIGHT = 520;
+  const DASHBOARD_MOBILE_WIDTH = 390;
+  const DASHBOARD_MOBILE_HEIGHT = 300;
 
   const dashboardContainerRef = useRef<HTMLDivElement | null>(null);
   const [dashboardScale, setDashboardScale] = useState(1);
+  const [isMobileDashboard, setIsMobileDashboard] = useState(false);
 
   const updateDashboardScale = useCallback(() => {
     if (!dashboardContainerRef.current) return;
     const containerWidth = dashboardContainerRef.current.offsetWidth;
-    setDashboardScale(containerWidth / DASHBOARD_REFERENCE_WIDTH);
+    const mobile = window.innerWidth < 768;
+    setIsMobileDashboard(mobile);
+    const referenceWidth = mobile ? DASHBOARD_MOBILE_WIDTH : DASHBOARD_DESKTOP_WIDTH;
+    setDashboardScale(containerWidth / referenceWidth);
   }, []);
 
   useEffect(() => {
@@ -174,9 +181,8 @@ export default function HomePage() {
             </div>
             <div ref={dashboardContainerRef} className="card glow-blue rounded overflow-hidden" style={{
               position: 'relative',
-              width: '100%',
-              paddingBottom: `${(520 / DASHBOARD_REFERENCE_WIDTH) * 100}%`,
               overflow: 'hidden',
+              height: `${(isMobileDashboard ? DASHBOARD_MOBILE_HEIGHT : DASHBOARD_DESKTOP_HEIGHT) * dashboardScale}px`,
             }}>
               <div
                 style={{
@@ -185,8 +191,8 @@ export default function HomePage() {
                   left: 0,
                   transform: `scale(${dashboardScale})`,
                   transformOrigin: 'top left',
-                  width: `${DASHBOARD_REFERENCE_WIDTH}px`,
-                  height: '520px',
+                  width: `${isMobileDashboard ? DASHBOARD_MOBILE_WIDTH : DASHBOARD_DESKTOP_WIDTH}px`,
+                  height: `${isMobileDashboard ? DASHBOARD_MOBILE_HEIGHT : DASHBOARD_DESKTOP_HEIGHT}px`,
                 }}
               >
               {/* Topbar desktop */}
