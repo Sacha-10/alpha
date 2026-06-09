@@ -151,7 +151,7 @@ export default function HomePage() {
 
       <main className="relative overflow-x-clip">
         <RevealSection className="min-h-screen pt-16 flex items-center justify-center bg-gradient-to-b from-background to-card">
-          <div className="mx-auto max-w-[1200px] px-6 pb-20 pt-4 md:pb-0 md:pt-0 text-center">
+          <div className="mx-auto max-w-[1200px] px-6 pb-12 pt-12 md:pb-0 md:pt-0 text-center">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">AlphaTradeX</p>
           <h1 className="mx-auto mt-6 max-w-[1200px] text-balance md:[text-wrap:normal] text-5xl font-bold leading-tight text-primary md:text-7xl">
             Les meilleurs traders n&apos;ont pas plus travaillé.
