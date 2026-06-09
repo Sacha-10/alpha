@@ -235,7 +235,7 @@ export default function HomePage() {
                 </div>
               </div>
               {/* Body */}
-              <div className="flex overflow-hidden" style={{ height: 'calc(520px - 56px)' }}>
+              <div className="flex overflow-hidden" style={{ height: 'calc(100% - 56px)' }}>
                 {/* Sidebar desktop uniquement */}
                 <aside className="hidden md:flex h-full w-[280px] shrink-0 flex-col border-r border-border bg-card">
                   <div className="flex-1 overflow-hidden px-4 py-5 space-y-1">
