@@ -129,7 +129,7 @@ export default function HomePage() {
   const [dashboardHeight, setDashboardHeight] = useState(0);
 
   const updateDashboardScale = useCallback(() => {
-    if (!dashboardContainerRef.current) return;
+    if (!dashboardContainerRef.current || typeof window === 'undefined') return;
     const containerWidth = dashboardContainerRef.current.offsetWidth;
     const mobile = window.innerWidth < 768;
     setIsMobileDashboard(mobile);
@@ -193,7 +193,7 @@ export default function HomePage() {
                   transform: `scale(${dashboardScale})`,
                   transformOrigin: 'top left',
                   width: `${isMobileDashboard ? DASHBOARD_MOBILE_WIDTH : DASHBOARD_DESKTOP_WIDTH}px`,
-                  height: `${window.innerHeight}px`,
+                  height: typeof window !== 'undefined' ? `${window.innerHeight}px` : '900px',
                 }}
               >
               {/* Topbar desktop */}
