@@ -166,7 +166,7 @@ export default function HomePage() {
                       <polyline points="16 7 22 7 22 13" />
                     </svg>
                   </svg>
-                  <span className="font-semibold text-primary text-sm">AlphaTradeX</span>
+                  <span className="font-semibold text-primary">AlphaTradeX</span>
                 </div>
                 <div className="flex min-w-0 flex-1 items-center justify-start pl-6 md:pl-10">
                   <div className="flex items-center gap-1.5">
@@ -175,7 +175,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="rounded-md border border-blue/25 bg-blue/10 px-3 py-1 text-xs font-semibold text-blue">Élite</span>
+                  <span className="rounded-md border border-[#2D6FFF40] bg-[#2D6FFF15] px-3 py-1 text-xs font-semibold text-blue">Élite</span>
                   <span className="text-xs text-secondary">Cycle · 01/01</span>
                   <button type="button" className="rounded-md border border-border px-3 py-1.5 text-xs text-secondary cursor-default">Se déconnecter</button>
                 </div>
@@ -189,7 +189,7 @@ export default function HomePage() {
                     <polyline points="16 7 22 7 22 13" />
                   </svg>
                 </svg>
-                <span className="absolute left-1/2 -translate-x-1/2 font-semibold text-primary text-sm">AlphaTradeX</span>
+                <span className="absolute left-1/2 -translate-x-1/2 font-semibold text-primary">AlphaTradeX</span>
                 <div className="shrink-0 rounded-md border border-border p-2 text-secondary cursor-default">
                   <Menu className="h-5 w-5" aria-hidden />
                 </div>
@@ -218,7 +218,7 @@ export default function HomePage() {
                   <div className="flex h-full w-full items-center justify-center">
                     <div className="w-full">
                       <div className="text-center mb-4">
-                        <h3 className="text-xl font-bold text-primary">Analyser vos trades</h3>
+                        <h3 className="text-2xl font-bold text-primary">Analyser vos trades</h3>
                       </div>
                       <div className="border-2 border-dashed rounded-xl p-8 text-center mb-6 w-full border-border cursor-pointer transition-colors hover:border-blue/50">
                         <Upload className="h-6 w-6 text-secondary mx-auto mb-2" aria-hidden />
