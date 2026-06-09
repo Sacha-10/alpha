@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
@@ -120,6 +120,23 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const DASHBOARD_REFERENCE_WIDTH = 1440;
+
+  const dashboardContainerRef = useRef<HTMLDivElement | null>(null);
+  const [dashboardScale, setDashboardScale] = useState(1);
+
+  const updateDashboardScale = useCallback(() => {
+    if (!dashboardContainerRef.current) return;
+    const containerWidth = dashboardContainerRef.current.offsetWidth;
+    setDashboardScale(containerWidth / DASHBOARD_REFERENCE_WIDTH);
+  }, []);
+
+  useEffect(() => {
+    updateDashboardScale();
+    window.addEventListener('resize', updateDashboardScale);
+    return () => window.removeEventListener('resize', updateDashboardScale);
+  }, [updateDashboardScale]);
+
   return (
     <div className="min-h-screen bg-background text-primary">
       <Navbar />
@@ -155,7 +172,15 @@ export default function HomePage() {
                 Un dashboard pensé pour les traders qui exigent la précision.
               </p>
             </div>
-            <div className="card glow-blue rounded overflow-hidden" style={{ height: '520px' }}>
+            <div ref={dashboardContainerRef} className="card glow-blue rounded overflow-hidden" style={{ height: '520px' }}>
+              <div
+                style={{
+                  transform: `scale(${dashboardScale})`,
+                  transformOrigin: 'top left',
+                  width: `${DASHBOARD_REFERENCE_WIDTH}px`,
+                  height: `${520 / dashboardScale}px`,
+                }}
+              >
               {/* Topbar desktop */}
               <div className="hidden md:flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
                 <div className="flex items-center gap-2">
@@ -231,6 +256,7 @@ export default function HomePage() {
                     </div>
                   </div>
                 </main>
+              </div>
               </div>
             </div>
           </div>
