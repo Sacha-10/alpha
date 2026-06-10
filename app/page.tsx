@@ -176,7 +176,7 @@ export default function HomePage() {
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
                 Votre espace.<br />Notre analyse.
               </h2>
-              <p className="mx-auto mt-4 max-w-[480px] text-base leading-relaxed text-secondary">
+              <p className="mx-auto mt-4 max-w-[520px] text-base leading-relaxed text-secondary">
                 Un dashboard pensé pour les traders qui exigent la précision.
               </p>
             </div>
@@ -283,7 +283,7 @@ export default function HomePage() {
             <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold text-primary">
               Vos plateformes.<br />Notre analyse.
             </h2>
-            <p className="mx-auto mt-4 max-w-[400px] text-base text-secondary">
+            <p className="mx-auto mt-4 max-w-[520px] text-base text-secondary">
               Votre historique importé. Vos biais exposés.
             </p>
             <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
@@ -299,11 +299,11 @@ export default function HomePage() {
         <RevealSection id="services" className="bg-card">
           <div className="mx-auto max-w-[1200px] px-6 py-20">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Services</p>
-          <h2 className="text-center text-4xl font-bold text-primary md:text-5xl">
+          <h2 className="mx-auto max-w-[700px] text-center text-4xl font-bold text-primary md:text-5xl">
             Tout ce qu&apos;il faut pour trader au plus haut{" "}
             <span className="text-primary">niveau</span>.
           </h2>
-          <p className="mt-4 max-w-[480px] mx-auto text-base leading-relaxed text-secondary text-center">Passez de l&apos;instinct à la stratégie.</p>
+          <p className="mt-4 max-w-[520px] mx-auto text-base leading-relaxed text-secondary text-center">Passez de l&apos;instinct à la stratégie.</p>
 
           <div className="mt-12 grid gap-5 md:grid-cols-3">
             <ServiceCard
@@ -335,7 +335,7 @@ export default function HomePage() {
               Propulsé par{" "}
               <span className="text-primary">GPT-5.4</span>.
             </h2>
-            <p className="mt-4 max-w-[480px] mx-auto text-base text-secondary">
+            <p className="mt-4 max-w-[520px] mx-auto text-base text-secondary">
               Pendant que les autres vont passer leur temps à deviner, vous savez. Le résultat : la précision du
               modèle IA le plus avancé d&apos;OpenAI dans chaque analyse.
             </p>
@@ -371,12 +371,12 @@ export default function HomePage() {
         <RevealSection className="bg-card">
           <div className="mx-auto max-w-[1200px] px-6 py-20">
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Système</p>
-            <h2 className="text-center text-4xl font-bold text-primary md:text-5xl">
+            <h2 className="mx-auto max-w-[700px] text-center text-4xl font-bold text-primary md:text-5xl">
               Le système que les traders{" "}
               <span className="text-primary">disciplinés</span>{" "}
               vont utiliser.
             </h2>
-            <p className="mt-4 max-w-[480px] mx-auto text-center text-base text-secondary">
+            <p className="mt-4 max-w-[520px] mx-auto text-center text-base text-secondary">
               Passez d&apos;un trading émotionnel à une exécution maîtrisée, mesurable et optimisée. Éliminer de
               manière définitive vos erreurs structurelles
             </p>
@@ -430,12 +430,12 @@ export default function HomePage() {
         <RevealSection className="bg-background">
           <div className="mx-auto max-w-[1200px] px-6 py-20">
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Témoignages</p>
-            <h2 className="text-center text-4xl font-bold text-primary md:text-5xl">
+            <h2 className="mx-auto max-w-[700px] text-center text-4xl font-bold text-primary md:text-5xl">
               Ce que les traders{" "}
               <span className="text-primary">sérieux</span> ont vu
               que les autres ont ignoré.
             </h2>
-            <p className="mt-4 max-w-[480px] mx-auto text-center text-base text-secondary">
+            <p className="mt-4 max-w-[520px] mx-auto text-center text-base text-secondary">
               Une lecture précise de leurs erreurs, de leurs forces et de leurs réels leviers de performance.
             </p>
 
@@ -484,12 +484,12 @@ export default function HomePage() {
         <RevealSection id="analyse" className="bg-card">
           <div className="mx-auto max-w-[1200px] px-6 py-28 text-center">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Analyse gratuite</p>
-          <h2 className="text-4xl font-bold text-primary md:text-5xl">
+          <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
             Ce que l&apos;IA{" "}
             <span className="text-primary">révèle</span> en 60
             secondes.
           </h2>
-          <p className="mt-4 max-w-[480px] mx-auto text-base leading-relaxed text-secondary">Aucune inscription requise</p>
+          <p className="mt-4 max-w-[520px] mx-auto text-base leading-relaxed text-secondary">Aucune inscription requise</p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <button
               type="button"
@@ -516,12 +516,12 @@ export default function HomePage() {
       <RevealSection className="bg-gradient-to-b from-card to-background px-6 py-28 text-center">
         <div className="mx-auto max-w-[1200px]">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Commencer</p>
-          <h2 className="text-4xl font-bold text-primary md:text-5xl">
+          <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
             Rejoignez l&apos;
             <span className="text-primary">élite</span> des
             traders.
           </h2>
-          <p className="mx-auto mt-4 max-w-[400px] text-base leading-relaxed text-secondary">Votre historique. 60 secondes. La vérité.</p>
+          <p className="mx-auto mt-4 max-w-[520px] text-base leading-relaxed text-secondary">Votre historique. 60 secondes. La vérité.</p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <button
               type="button"

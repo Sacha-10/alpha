@@ -212,7 +212,7 @@ export default function AidePage() {
                 <br />
                 Zéro friction.
               </h2>
-              <p className="text-base text-secondary leading-relaxed max-w-[480px] mx-auto mt-4">
+              <p className="text-base text-secondary leading-relaxed max-w-[520px] mx-auto mt-4">
                 Votre historique de trades transformé en mirror en moins de 60 secondes.
               </p>
             </RevealSection>
@@ -247,12 +247,12 @@ export default function AidePage() {
           <div className="max-w-[1200px] mx-auto text-center">
             <RevealSection>
               <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase">Compatibilité</p>
-              <h2 className="text-4xl md:text-5xl font-bold text-primary mt-4">
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold text-primary">
                 Votre plateforme.
                 <br />
                 Notre analyse.
               </h2>
-              <p className="text-base text-secondary leading-relaxed max-w-[480px] mx-auto mt-4">
+              <p className="text-base text-secondary leading-relaxed max-w-[520px] mx-auto mt-4">
                 Exportez depuis votre plateforme.
                 <br />
                 Analysez sur AlphaTradeX.
@@ -289,7 +289,7 @@ export default function AidePage() {
           <div className="max-w-[1200px] mx-auto">
             <RevealSection>
               <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase text-center">Questions fréquentes</p>
-              <h2 className="text-4xl md:text-5xl font-bold text-primary mt-4 text-center">
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold text-primary text-center">
                 Ce que les traders sérieux veulent savoir.
               </h2>
             </RevealSection>
@@ -308,12 +308,12 @@ export default function AidePage() {
           <div className="max-w-[1200px] mx-auto">
             <RevealSection>
               <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase">Support</p>
-              <h2 className="text-4xl md:text-5xl font-bold text-primary mt-4">
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold text-primary">
                 Une question sans réponse.
                 <br />
                 On intervient.
               </h2>
-              <p className="text-base text-secondary leading-relaxed max-w-[480px] mx-auto mt-4">
+              <p className="text-base text-secondary leading-relaxed max-w-[520px] mx-auto mt-4">
                 Une réponse humaine sous 24h.
               </p>
             </RevealSection>
@@ -343,12 +343,12 @@ export default function AidePage() {
           <div className="max-w-[1200px] mx-auto">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Commencer</p>
-              <h2 className="mx-auto mt-4 text-4xl font-bold text-primary md:text-5xl">
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
                 Votre mirror.
                 <br />
                 Sans filtre.
               </h2>
-              <p className="text-base text-secondary mt-4 max-w-[400px] mx-auto">
+              <p className="text-base text-secondary mt-4 max-w-[520px] mx-auto">
                 Votre historique. 60 secondes. La vérité.
               </p>
               <div className="flex flex-wrap gap-4 justify-center mt-10">

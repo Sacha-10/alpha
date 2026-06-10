@@ -186,7 +186,7 @@ export default function DemoPage() {
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
                 Trois étapes.<br />Zéro friction.
               </h2>
-              <p className="mx-auto mt-4 max-w-[480px] text-base leading-relaxed text-secondary">
+              <p className="mx-auto mt-4 max-w-[520px] text-base leading-relaxed text-secondary">
                 Un compte de trading transformé en mirror en moins de 60 secondes.
               </p>
             </RevealSection>
@@ -220,7 +220,7 @@ export default function DemoPage() {
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
                 Votre première analyse.<br />Sans inscription.
               </h2>
-              <p className="mx-auto mt-4 max-w-[480px] text-base leading-relaxed text-secondary">
+              <p className="mx-auto mt-4 max-w-[520px] text-base leading-relaxed text-secondary">
                 Analyse basée sur 120 trades.
               </p>
             </RevealSection>
@@ -285,10 +285,10 @@ export default function DemoPage() {
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Commencer</p>
-              <h2 className="mx-auto mt-4 text-4xl font-bold text-primary md:text-5xl">
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
                 Votre mirror.<br />Sans filtre.
               </h2>
-              <p className="mx-auto mt-4 max-w-[400px] text-base leading-relaxed text-secondary">
+              <p className="mx-auto mt-4 max-w-[520px] text-base leading-relaxed text-secondary">
                 Votre historique. 60 secondes. La vérité.
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-4">

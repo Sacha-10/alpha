@@ -170,7 +170,7 @@ export default function AboutPage() {
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
                 Les bons traders ont une stratégie.
               </h2>
-              <p className="mx-auto mt-4 max-w-[480px] text-base leading-relaxed text-secondary">
+              <p className="mx-auto mt-4 max-w-[520px] text-base leading-relaxed text-secondary">
                 Aucun n&apos;a de mirror. AlphaTradeX est ce mirror.
               </p>
             </RevealSection>
@@ -192,7 +192,7 @@ export default function AboutPage() {
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">En chiffres</p>
-              <h2 className="mt-4 text-4xl md:text-5xl font-bold text-primary">
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold text-primary">
                 Les métriques.
                 <br />
                 Pas de promesse.
@@ -216,7 +216,7 @@ export default function AboutPage() {
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Nos convictions</p>
-              <h2 className="mt-4 text-4xl md:text-5xl font-bold text-primary">
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold text-primary">
                 Trois principes.
                 <br />
                 Zéro compromis.
@@ -253,12 +253,12 @@ export default function AboutPage() {
           <div className="mx-auto grid max-w-[1200px] items-start gap-16 md:grid-cols-2">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Genèse</p>
-              <h2 className="mt-4 text-4xl md:text-5xl font-bold text-primary">
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold text-primary">
                 Né de la frustration.
                 <br />
                 Forgé avec rigueur.
               </h2>
-              <p className="mt-4 max-w-[400px] text-base leading-relaxed text-secondary">
+              <p className="mx-auto mt-4 max-w-[520px] text-base leading-relaxed text-secondary">
                 Pas une slide deck. Un mirror pensé par un trader pour les traders.
               </p>
             </RevealSection>
@@ -290,12 +290,12 @@ export default function AboutPage() {
           <div className="mx-auto grid max-w-[1200px] items-center gap-16 md:grid-cols-2">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Le fondateur</p>
-              <h2 className="mt-4 text-4xl md:text-5xl font-bold text-primary">
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold text-primary">
                 Un trader.
                 <br />
                 Pas un entrepreneur.
               </h2>
-              <p className="mt-4 text-base leading-relaxed text-secondary">
+              <p className="mx-auto mt-4 max-w-[520px] text-base leading-relaxed text-secondary">
                 AlphaTradeX n&apos;est pas né dans un bureau. Il est né d&apos;un compte en drawdown et de la certitude
                 qu&apos;un mirror devait exister.
               </p>
@@ -333,12 +333,12 @@ export default function AboutPage() {
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Compatibilité</p>
-              <h2 className="mt-4 text-4xl md:text-5xl font-bold text-primary">
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold text-primary">
                 Vos plateformes.
                 <br />
                 Notre analyse.
               </h2>
-              <p className="mx-auto mt-4 max-w-[400px] text-base text-secondary">
+              <p className="mx-auto mt-4 max-w-[520px] text-base text-secondary">
                 Votre historique importé. Vos biais exposés.
               </p>
             </RevealSection>
@@ -359,12 +359,12 @@ export default function AboutPage() {
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Commencer</p>
-              <h2 className="mx-auto mt-4 text-4xl font-bold text-primary md:text-5xl">
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
                 Votre mirror.
                 <br />
                 Sans filtre.
               </h2>
-              <p className="mx-auto mt-4 max-w-[400px] text-base text-secondary">
+              <p className="mx-auto mt-4 max-w-[520px] text-base text-secondary">
                 Votre historique. 60 secondes. La vérité.
               </p>
               <div className="mt-10 flex flex-wrap justify-center gap-4">
