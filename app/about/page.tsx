@@ -163,19 +163,19 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="px-6 py-24">
+        <section className="px-6 py-20">
           <div className="mx-auto max-w-[1200px] text-center">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Le problème</p>
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
                 Les bons traders ont une stratégie.
               </h2>
-              <p className="mx-auto mt-6 max-w-[480px] text-base leading-relaxed text-secondary">
+              <p className="mx-auto mt-4 max-w-[480px] text-base leading-relaxed text-secondary">
                 Aucun n&apos;a de mirror. AlphaTradeX est ce mirror.
               </p>
             </RevealSection>
 
-            <div className="mt-14 grid gap-5 md:grid-cols-2">
+            <div className="mt-12 grid gap-5 md:grid-cols-2">
               {truthCards.map((item, index) => (
                 <RevealSection key={item.title} delay={index * 80}>
                   <article className="card rounded p-7 transition-colors duration-200 hover:border-blue">
@@ -188,7 +188,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="px-6 py-24">
+        <section className="px-6 py-20">
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">En chiffres</p>
@@ -212,7 +212,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="px-6 py-24">
+        <section className="px-6 py-20">
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Nos convictions</p>
@@ -249,7 +249,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="px-6 py-24">
+        <section className="px-6 py-20">
           <div className="mx-auto grid max-w-[1200px] items-start gap-16 md:grid-cols-2">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Genèse</p>
@@ -258,7 +258,7 @@ export default function AboutPage() {
                 <br />
                 Forgé avec rigueur.
               </h2>
-              <p className="mt-6 max-w-[400px] text-base leading-relaxed text-secondary">
+              <p className="mt-4 max-w-[400px] text-base leading-relaxed text-secondary">
                 Pas une slide deck. Un mirror pensé par un trader pour les traders.
               </p>
             </RevealSection>
@@ -286,7 +286,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="px-6 py-24">
+        <section className="px-6 py-20">
           <div className="mx-auto grid max-w-[1200px] items-center gap-16 md:grid-cols-2">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Le fondateur</p>
@@ -295,7 +295,7 @@ export default function AboutPage() {
                 <br />
                 Pas un entrepreneur.
               </h2>
-              <p className="mt-6 text-base leading-relaxed text-secondary">
+              <p className="mt-4 text-base leading-relaxed text-secondary">
                 AlphaTradeX n&apos;est pas né dans un bureau. Il est né d&apos;un compte en drawdown et de la certitude
                 qu&apos;un mirror devait exister.
               </p>
@@ -329,7 +329,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="px-6 py-24 text-center">
+        <section className="px-6 py-20 text-center">
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Compatibilité</p>
@@ -364,7 +364,7 @@ export default function AboutPage() {
                 <br />
                 Sans filtre.
               </h2>
-              <p className="mx-auto mt-6 max-w-[400px] text-base text-secondary">
+              <p className="mx-auto mt-4 max-w-[400px] text-base text-secondary">
                 Votre historique. 60 secondes. La vérité.
               </p>
               <div className="mt-10 flex flex-wrap justify-center gap-4">

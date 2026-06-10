@@ -203,7 +203,7 @@ export default function AidePage() {
           </div>
         </section>
 
-        <section className="px-6 py-24">
+        <section className="px-6 py-20">
           <div className="max-w-[1200px] mx-auto text-center">
             <RevealSection>
               <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase">Comment on fonctionne</p>
@@ -212,12 +212,12 @@ export default function AidePage() {
                 <br />
                 Zéro friction.
               </h2>
-              <p className="text-base text-secondary leading-relaxed max-w-[480px] mx-auto mt-6">
+              <p className="text-base text-secondary leading-relaxed max-w-[480px] mx-auto mt-4">
                 Votre historique de trades transformé en mirror en moins de 60 secondes.
               </p>
             </RevealSection>
 
-            <div className="grid md:grid-cols-3 gap-5 mt-14 text-left">
+            <div className="grid md:grid-cols-3 gap-5 mt-12 text-left">
               {processSteps.map((step, index) => {
                 const Icon = step.icon;
                 return (
@@ -243,7 +243,7 @@ export default function AidePage() {
           </div>
         </section>
 
-        <section className="px-6 py-24">
+        <section className="px-6 py-20">
           <div className="max-w-[1200px] mx-auto text-center">
             <RevealSection>
               <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase">Compatibilité</p>
@@ -252,14 +252,14 @@ export default function AidePage() {
                 <br />
                 Notre analyse.
               </h2>
-              <p className="text-base text-secondary leading-relaxed max-w-[480px] mx-auto mt-6">
+              <p className="text-base text-secondary leading-relaxed max-w-[480px] mx-auto mt-4">
                 Exportez depuis votre plateforme.
                 <br />
                 Analysez sur AlphaTradeX.
               </p>
             </RevealSection>
 
-            <div className="grid md:grid-cols-4 gap-5 mt-14 text-left">
+            <div className="grid md:grid-cols-4 gap-5 mt-12 text-left">
               {firstPlatforms.map((platform, index) => (
                 <RevealSection key={platform.title} delay={index * 70}>
                   <article className="card rounded p-7 transition-colors duration-200 hover:border-blue">
@@ -285,7 +285,7 @@ export default function AidePage() {
           </div>
         </section>
 
-        <section className="px-6 py-24">
+        <section className="px-6 py-20">
           <div className="max-w-[1200px] mx-auto">
             <RevealSection>
               <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase text-center">Questions fréquentes</p>
@@ -304,7 +304,7 @@ export default function AidePage() {
           </div>
         </section>
 
-        <section className="px-6 py-24 text-center">
+        <section className="px-6 py-20 text-center">
           <div className="max-w-[1200px] mx-auto">
             <RevealSection>
               <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase">Support</p>
@@ -313,7 +313,7 @@ export default function AidePage() {
                 <br />
                 On intervient.
               </h2>
-              <p className="text-base text-secondary leading-relaxed max-w-[480px] mx-auto mt-6">
+              <p className="text-base text-secondary leading-relaxed max-w-[480px] mx-auto mt-4">
                 Une réponse humaine sous 24h.
               </p>
             </RevealSection>
@@ -348,7 +348,7 @@ export default function AidePage() {
                 <br />
                 Sans filtre.
               </h2>
-              <p className="text-base text-secondary mt-6 max-w-[400px] mx-auto">
+              <p className="text-base text-secondary mt-4 max-w-[400px] mx-auto">
                 Votre historique. 60 secondes. La vérité.
               </p>
               <div className="flex flex-wrap gap-4 justify-center mt-10">

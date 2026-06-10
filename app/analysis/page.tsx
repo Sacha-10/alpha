@@ -179,18 +179,18 @@ export default function DemoPage() {
           </div>
         </section>
 
-        <section className="px-6 py-24">
+        <section className="px-6 py-20">
           <div className="mx-auto max-w-[1200px] text-center">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Comment on fonctionne</p>
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
                 Trois étapes.<br />Zéro friction.
               </h2>
-              <p className="mx-auto mt-6 max-w-[480px] text-base leading-relaxed text-secondary">
+              <p className="mx-auto mt-4 max-w-[480px] text-base leading-relaxed text-secondary">
                 Un compte de trading transformé en mirror en moins de 60 secondes.
               </p>
             </RevealSection>
-            <div className="grid md:grid-cols-3 gap-5 mt-14 text-left">
+            <div className="grid md:grid-cols-3 gap-5 mt-12 text-left">
               {steps.map((step, index) => {
                 const Icon = step.icon;
                 return (
@@ -213,14 +213,14 @@ export default function DemoPage() {
           </div>
         </section>
 
-        <section className="px-6 py-24 text-center">
+        <section className="px-6 py-20 text-center">
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Analyse gratuite</p>
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
                 Votre première analyse.<br />Sans inscription.
               </h2>
-              <p className="mx-auto mt-6 max-w-[480px] text-base leading-relaxed text-secondary">
+              <p className="mx-auto mt-4 max-w-[480px] text-base leading-relaxed text-secondary">
                 Analyse basée sur 120 trades.
               </p>
             </RevealSection>
@@ -288,7 +288,7 @@ export default function DemoPage() {
               <h2 className="mx-auto mt-4 text-4xl font-bold text-primary md:text-5xl">
                 Votre mirror.<br />Sans filtre.
               </h2>
-              <p className="mx-auto mt-6 max-w-[400px] text-base leading-relaxed text-secondary">
+              <p className="mx-auto mt-4 max-w-[400px] text-base leading-relaxed text-secondary">
                 Votre historique. 60 secondes. La vérité.
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-4">

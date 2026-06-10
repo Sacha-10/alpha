@@ -176,7 +176,7 @@ export default function HomePage() {
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
                 Votre espace.<br />Notre analyse.
               </h2>
-              <p className="mx-auto mt-6 max-w-[480px] text-base leading-relaxed text-secondary">
+              <p className="mx-auto mt-4 max-w-[480px] text-base leading-relaxed text-secondary">
                 Un dashboard pensé pour les traders qui exigent la précision.
               </p>
             </div>
@@ -303,7 +303,7 @@ export default function HomePage() {
             Tout ce qu&apos;il faut pour trader au plus haut{" "}
             <span className="text-primary">niveau</span>.
           </h2>
-          <p className="mt-6 max-w-[480px] mx-auto text-base leading-relaxed text-secondary text-center">Passez de l&apos;instinct à la stratégie.</p>
+          <p className="mt-4 max-w-[480px] mx-auto text-base leading-relaxed text-secondary text-center">Passez de l&apos;instinct à la stratégie.</p>
 
           <div className="mt-12 grid gap-5 md:grid-cols-3">
             <ServiceCard
@@ -335,7 +335,7 @@ export default function HomePage() {
               Propulsé par{" "}
               <span className="text-primary">GPT-5.4</span>.
             </h2>
-            <p className="mt-6 max-w-[480px] mx-auto text-base text-secondary">
+            <p className="mt-4 max-w-[480px] mx-auto text-base text-secondary">
               Pendant que les autres vont passer leur temps à deviner, vous savez. Le résultat : la précision du
               modèle IA le plus avancé d&apos;OpenAI dans chaque analyse.
             </p>
@@ -376,7 +376,7 @@ export default function HomePage() {
               <span className="text-primary">disciplinés</span>{" "}
               vont utiliser.
             </h2>
-            <p className="mt-5 max-w-[480px] mx-auto text-center text-base text-secondary">
+            <p className="mt-4 max-w-[480px] mx-auto text-center text-base text-secondary">
               Passez d&apos;un trading émotionnel à une exécution maîtrisée, mesurable et optimisée. Éliminer de
               manière définitive vos erreurs structurelles
             </p>
@@ -435,7 +435,7 @@ export default function HomePage() {
               <span className="text-primary">sérieux</span> ont vu
               que les autres ont ignoré.
             </h2>
-            <p className="mt-5 max-w-[480px] mx-auto text-center text-base text-secondary">
+            <p className="mt-4 max-w-[480px] mx-auto text-center text-base text-secondary">
               Une lecture précise de leurs erreurs, de leurs forces et de leurs réels leviers de performance.
             </p>
 
@@ -489,7 +489,7 @@ export default function HomePage() {
             <span className="text-primary">révèle</span> en 60
             secondes.
           </h2>
-          <p className="mt-6 max-w-[480px] mx-auto text-base leading-relaxed text-secondary">Aucune inscription requise</p>
+          <p className="mt-4 max-w-[480px] mx-auto text-base leading-relaxed text-secondary">Aucune inscription requise</p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <button
               type="button"
@@ -521,7 +521,7 @@ export default function HomePage() {
             <span className="text-primary">élite</span> des
             traders.
           </h2>
-          <p className="mx-auto mt-6 max-w-[400px] text-base leading-relaxed text-secondary">Votre historique. 60 secondes. La vérité.</p>
+          <p className="mx-auto mt-4 max-w-[400px] text-base leading-relaxed text-secondary">Votre historique. 60 secondes. La vérité.</p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <button
               type="button"
