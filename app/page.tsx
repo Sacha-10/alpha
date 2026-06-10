@@ -169,8 +169,8 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <section className="bg-card">
-          <div className="mx-auto max-w-[1200px] px-6 py-20">
+        <section className="bg-card px-6">
+          <div className="mx-auto max-w-[1200px] py-20">
             <RevealSection className="text-center mb-12">
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Tableau de bord</p>
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
@@ -279,8 +279,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="bg-background">
-          <div className="mx-auto max-w-[1200px] px-6 py-20 text-center">
+        <section className="bg-background px-6">
+          <div className="mx-auto max-w-[1200px] py-20 text-center">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Compatibilité</p>
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold text-primary">
@@ -302,8 +302,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="services" className="bg-card">
-          <div className="mx-auto max-w-[1200px] px-6 py-20">
+        <section id="services" className="bg-card px-6">
+          <div className="mx-auto max-w-[1200px] py-20">
           <RevealSection className="text-center">
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Services</p>
             <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
@@ -339,8 +339,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="bg-background">
-          <div className="mx-auto max-w-[1200px] px-6 py-20 text-center">
+        <section className="bg-background px-6">
+          <div className="mx-auto max-w-[1200px] py-20 text-center">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Technologie</p>
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold leading-tight text-primary">
@@ -387,8 +387,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="bg-card">
-          <div className="mx-auto max-w-[1200px] px-6 py-20">
+        <section className="bg-card px-6">
+          <div className="mx-auto max-w-[1200px] py-20">
             <RevealSection className="text-center">
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Système</p>
               <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
@@ -456,8 +456,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="bg-background">
-          <div className="mx-auto max-w-[1200px] px-6 py-20">
+        <section className="bg-background px-6">
+          <div className="mx-auto max-w-[1200px] py-20">
             <RevealSection className="text-center">
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Témoignages</p>
               <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
@@ -511,8 +511,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="analyse" className="bg-card">
-          <div className="mx-auto max-w-[1200px] px-6 py-28 text-center">
+        <section id="analyse" className="bg-card px-6">
+          <div className="mx-auto max-w-[1200px] py-28 text-center">
           <RevealSection>
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Analyse gratuite</p>
             <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
@@ -545,8 +545,8 @@ export default function HomePage() {
         </section>
       </main>
 
-      <section className="bg-gradient-to-b from-card to-background py-28 text-center">
-        <div className="mx-auto max-w-[1200px] px-6">
+      <section className="bg-gradient-to-b from-card to-background px-6 py-28 text-center">
+        <div className="mx-auto max-w-[1200px]">
           <RevealSection>
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Commencer</p>
             <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">

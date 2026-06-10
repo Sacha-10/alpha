@@ -53,7 +53,9 @@
       "Bash(Select-String *)",
       "Skill(run)",
       "Bash(chromium-cli *)",
-      "Bash(npx playwright *)"
+      "Bash(npx playwright *)",
+      "Bash(ls app/about app/pricing)",
+      "Bash(dir app *)"
     ]
   }
 }
