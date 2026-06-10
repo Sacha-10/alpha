@@ -294,7 +294,7 @@ export default function AidePage() {
               </h2>
             </RevealSection>
 
-            <div className="mt-12 max-w-[800px] mx-auto space-y-4">
+            <div className="mt-12 max-w-[800px] mx-auto space-y-5">
               {faqItems.map((item, index) => (
                 <RevealSection key={item.question} delay={index * 40}>
                   <AccordionItem question={item.question} answer={item.answer} />

@@ -341,7 +341,7 @@ export default function PricingPage() {
               </div>
             </RevealSection>
 
-            <div className="w-full flex flex-col gap-6 md:flex-row md:items-end mt-10">
+            <div className="w-full flex flex-col gap-5 md:flex-row md:items-end mt-10">
               {plans.map((plan, index) => {
                 const currentPrices = billingMode === "monthly" ? plan.prices.monthly : plan.prices.yearly;
                 return (
@@ -445,7 +445,7 @@ export default function PricingPage() {
               </h2>
             </RevealSection>
 
-            <div className="mt-12 max-w-[800px] mx-auto space-y-4">
+            <div className="mt-12 max-w-[800px] mx-auto space-y-5">
               {faqItems.map((item, index) => (
                 <RevealSection key={item.question} delay={index * 40}>
                   <AccordionItem question={item.question} answer={item.answer} />

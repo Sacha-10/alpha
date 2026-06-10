@@ -290,7 +290,7 @@ export default function HomePage() {
                 Votre historique importé. Vos biais exposés.
               </p>
             </RevealSection>
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-5">
               {["MT4", "MT5", "Binance", "Bybit", "TradingView", "FTMO", "FundedNext"].map((platform, index) => (
                 <RevealSection key={platform} delay={index * 60}>
                   <div className="card cursor-default rounded px-7 py-3 font-mono text-sm font-semibold text-primary transition-colors duration-200 hover:border-blue">
@@ -353,7 +353,7 @@ export default function HomePage() {
               </p>
             </RevealSection>
 
-            <div className="mt-12 grid gap-6 lg:grid-cols-3">
+            <div className="mt-12 grid gap-5 lg:grid-cols-3">
               <RevealSection delay={0}>
                 <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                   <BrainCircuit className="h-8 w-8 text-blue" aria-hidden />
@@ -402,7 +402,7 @@ export default function HomePage() {
               </p>
             </RevealSection>
 
-            <div className="mt-12 grid gap-6 md:grid-cols-2">
+            <div className="mt-12 grid gap-5 md:grid-cols-2">
               <RevealSection delay={0}>
                 <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                   <Trophy className="h-8 w-8 text-blue" aria-hidden />
@@ -470,7 +470,7 @@ export default function HomePage() {
               </p>
             </RevealSection>
 
-            <div className="mt-12 grid gap-6 lg:grid-cols-4">
+            <div className="mt-12 grid gap-5 lg:grid-cols-4">
               {[
                 {
                   name: "Kilian I.",

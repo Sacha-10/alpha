@@ -199,7 +199,7 @@ export default function AboutPage() {
               </h2>
             </RevealSection>
 
-            <div className="mt-12 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="mt-12 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-5">
               {stats.map((item, index) => (
                 <RevealSection key={item.label} delay={index * 70}>
                   <article className="card rounded p-4 sm:p-8 text-center transition-colors duration-200 hover:border-blue">
@@ -343,7 +343,7 @@ export default function AboutPage() {
               </p>
             </RevealSection>
 
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-5">
               {platforms.map((platform, index) => (
                 <RevealSection key={platform} delay={index * 60}>
                   <div className="card cursor-default rounded px-7 py-3 font-mono text-sm font-semibold text-primary transition-colors duration-200 hover:border-blue">
