@@ -440,7 +440,7 @@ export default function PricingPage() {
           <div className="mx-auto max-w-[1200px]">
             <RevealSection className="text-center">
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Questions fréquentes</p>
-              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary">
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold text-primary">
                 Ce que les traders sérieux veulent savoir.
               </h2>
             </RevealSection>
@@ -462,7 +462,7 @@ export default function PricingPage() {
               <h2 className="mx-auto mt-4 text-4xl font-bold text-primary md:text-5xl">
                 Votre mirror.<br />Sans filtre.
               </h2>
-              <p className="mx-auto mt-6 max-w-[400px] text-lg leading-relaxed text-secondary">
+              <p className="mx-auto mt-6 max-w-[400px] text-base leading-relaxed text-secondary">
                 Votre historique. 60 secondes. La vérité.
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-4">

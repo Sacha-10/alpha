@@ -192,7 +192,7 @@ export default function AboutPage() {
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">En chiffres</p>
-              <h2 className="mt-4 text-4xl font-bold text-primary">
+              <h2 className="mt-4 text-4xl md:text-5xl font-bold text-primary">
                 Les métriques.
                 <br />
                 Pas de promesse.
@@ -216,7 +216,7 @@ export default function AboutPage() {
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Nos convictions</p>
-              <h2 className="mt-4 text-4xl font-bold text-primary">
+              <h2 className="mt-4 text-4xl md:text-5xl font-bold text-primary">
                 Trois principes.
                 <br />
                 Zéro compromis.
@@ -253,7 +253,7 @@ export default function AboutPage() {
           <div className="mx-auto grid max-w-[1200px] items-start gap-16 md:grid-cols-2">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Genèse</p>
-              <h2 className="mt-4 text-4xl font-bold text-primary">
+              <h2 className="mt-4 text-4xl md:text-5xl font-bold text-primary">
                 Né de la frustration.
                 <br />
                 Forgé avec rigueur.
@@ -290,7 +290,7 @@ export default function AboutPage() {
           <div className="mx-auto grid max-w-[1200px] items-center gap-16 md:grid-cols-2">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Le fondateur</p>
-              <h2 className="mt-4 text-4xl font-bold text-primary">
+              <h2 className="mt-4 text-4xl md:text-5xl font-bold text-primary">
                 Un trader.
                 <br />
                 Pas un entrepreneur.
@@ -333,12 +333,12 @@ export default function AboutPage() {
           <div className="mx-auto max-w-[1200px]">
             <RevealSection>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Compatibilité</p>
-              <h2 className="mt-4 text-4xl font-bold text-primary">
+              <h2 className="mt-4 text-4xl md:text-5xl font-bold text-primary">
                 Vos plateformes.
                 <br />
                 Notre analyse.
               </h2>
-              <p className="mx-auto mt-4 max-w-[400px] text-sm text-secondary">
+              <p className="mx-auto mt-4 max-w-[400px] text-base text-secondary">
                 Votre historique importé. Vos biais exposés.
               </p>
             </RevealSection>
@@ -364,7 +364,7 @@ export default function AboutPage() {
                 <br />
                 Sans filtre.
               </h2>
-              <p className="mx-auto mt-6 max-w-[400px] text-lg text-secondary">
+              <p className="mx-auto mt-6 max-w-[400px] text-base text-secondary">
                 Votre historique. 60 secondes. La vérité.
               </p>
               <div className="mt-10 flex flex-wrap justify-center gap-4">

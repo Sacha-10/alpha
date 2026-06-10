@@ -247,7 +247,7 @@ export default function AidePage() {
           <div className="max-w-[1200px] mx-auto text-center">
             <RevealSection>
               <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase">Compatibilité</p>
-              <h2 className="text-4xl font-bold text-primary mt-4">
+              <h2 className="text-4xl md:text-5xl font-bold text-primary mt-4">
                 Votre plateforme.
                 <br />
                 Notre analyse.
@@ -289,7 +289,7 @@ export default function AidePage() {
           <div className="max-w-[1200px] mx-auto">
             <RevealSection>
               <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase text-center">Questions fréquentes</p>
-              <h2 className="text-4xl font-bold text-primary mt-4 text-center">
+              <h2 className="text-4xl md:text-5xl font-bold text-primary mt-4 text-center">
                 Ce que les traders sérieux veulent savoir.
               </h2>
             </RevealSection>
@@ -308,7 +308,7 @@ export default function AidePage() {
           <div className="max-w-[1200px] mx-auto">
             <RevealSection>
               <p className="font-mono text-xs tracking-[0.25em] text-secondary uppercase">Support</p>
-              <h2 className="text-4xl font-bold text-primary mt-4">
+              <h2 className="text-4xl md:text-5xl font-bold text-primary mt-4">
                 Une question sans réponse.
                 <br />
                 On intervient.
@@ -348,7 +348,7 @@ export default function AidePage() {
                 <br />
                 Sans filtre.
               </h2>
-              <p className="text-lg text-secondary mt-6 max-w-[400px] mx-auto">
+              <p className="text-base text-secondary mt-6 max-w-[400px] mx-auto">
                 Votre historique. 60 secondes. La vérité.
               </p>
               <div className="flex flex-wrap gap-4 justify-center mt-10">

@@ -280,10 +280,10 @@ export default function HomePage() {
         <RevealSection className="bg-background">
           <div className="mx-auto max-w-[1200px] px-6 py-20 text-center">
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Compatibilité</p>
-            <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary">
+            <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold text-primary">
               Vos plateformes.<br />Notre analyse.
             </h2>
-            <p className="mx-auto mt-4 max-w-[400px] text-sm text-secondary">
+            <p className="mx-auto mt-4 max-w-[400px] text-base text-secondary">
               Votre historique importé. Vos biais exposés.
             </p>
             <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
@@ -331,15 +331,13 @@ export default function HomePage() {
         <RevealSection className="bg-background">
           <div className="mx-auto max-w-[1200px] px-6 py-20 text-center">
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Technologie</p>
-            <h2 className="mx-auto mt-4 max-w-[700px] text-3xl font-bold leading-tight text-primary md:text-5xl">
+            <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold leading-tight text-primary">
               Propulsé par{" "}
               <span className="text-primary">GPT-5.4</span>.
-              <br />
-              Le modèle le plus avancé d&apos;OpenAI.
             </h2>
-            <p className="mt-6 max-w-[480px] mx-auto text-lg text-secondary">
+            <p className="mt-6 max-w-[480px] mx-auto text-base text-secondary">
               Pendant que les autres vont passer leur temps à deviner, vous savez. Le résultat : la précision du
-              modèle IA le plus avancé au monde dans chaque analyse.
+              modèle IA le plus avancé d&apos;OpenAI dans chaque analyse.
             </p>
 
             <div className="mt-12 grid gap-6 lg:grid-cols-3">
@@ -378,7 +376,7 @@ export default function HomePage() {
               <span className="text-primary">disciplinés</span>{" "}
               vont utiliser.
             </h2>
-            <p className="mt-5 max-w-[480px] mx-auto text-center text-lg text-secondary">
+            <p className="mt-5 max-w-[480px] mx-auto text-center text-base text-secondary">
               Passez d&apos;un trading émotionnel à une exécution maîtrisée, mesurable et optimisée. Éliminer de
               manière définitive vos erreurs structurelles
             </p>
@@ -437,7 +435,7 @@ export default function HomePage() {
               <span className="text-primary">sérieux</span> ont vu
               que les autres ont ignoré.
             </h2>
-            <p className="mt-5 max-w-[480px] mx-auto text-center text-lg text-secondary">
+            <p className="mt-5 max-w-[480px] mx-auto text-center text-base text-secondary">
               Une lecture précise de leurs erreurs, de leurs forces et de leurs réels leviers de performance.
             </p>
 
@@ -518,12 +516,12 @@ export default function HomePage() {
       <RevealSection className="bg-gradient-to-b from-card to-background px-6 py-28 text-center">
         <div className="mx-auto max-w-[1200px]">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Commencer</p>
-          <h2 className="text-3xl font-bold text-primary md:text-5xl">
+          <h2 className="text-4xl font-bold text-primary md:text-5xl">
             Rejoignez l&apos;
             <span className="text-primary">élite</span> des
             traders.
           </h2>
-          <p className="mx-auto mt-6 max-w-[400px] text-lg leading-relaxed text-secondary">Votre historique. 60 secondes. La vérité.</p>
+          <p className="mx-auto mt-6 max-w-[400px] text-base leading-relaxed text-secondary">Votre historique. 60 secondes. La vérité.</p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <button
               type="button"

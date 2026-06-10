@@ -288,7 +288,7 @@ export default function DemoPage() {
               <h2 className="mx-auto mt-4 text-4xl font-bold text-primary md:text-5xl">
                 Votre mirror.<br />Sans filtre.
               </h2>
-              <p className="mx-auto mt-6 max-w-[400px] text-lg leading-relaxed text-secondary">
+              <p className="mx-auto mt-6 max-w-[400px] text-base leading-relaxed text-secondary">
                 Votre historique. 60 secondes. La vérité.
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
