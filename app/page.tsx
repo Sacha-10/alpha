@@ -31,19 +31,14 @@ import {
   Webhook,
 } from "lucide-react";
 
-type RevealProps = {
-  id?: string;
-  className?: string;
-  children: React.ReactNode;
-};
-
-function RevealSection({ id, className = "", children }: RevealProps) {
+function useReveal() {
   const ref = useRef<HTMLDivElement | null>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -55,19 +50,29 @@ function RevealSection({ id, className = "", children }: RevealProps) {
       },
       { threshold: 0.15 }
     );
+
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
 
+  return { ref, visible };
+}
+
+function RevealSection({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const { ref, visible } = useReveal();
+
   return (
     <div
-      id={id}
       ref={ref}
-      className={`relative ${className} transition-all duration-700 ease-out ${
-        visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-      }`}
+      className={`transition-all ease-out ${className}`}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(28px)",
+        transitionDuration: "700ms",
+        transitionDelay: `${delay}ms`,
+      }}
     >
-      <div>{children}</div>
+      {children}
     </div>
   );
 }
@@ -76,18 +81,13 @@ function ServiceCard({
   icon,
   title,
   body,
-  delayMs,
 }: {
   icon: React.ReactNode;
   title: string;
   body: string;
-  delayMs: number;
 }) {
   return (
-    <article
-      className="card rounded p-7 transition-all duration-200 hover:border-blue"
-      style={{ transitionDelay: `${delayMs}ms` }}
-    >
+    <article className="card rounded p-7 transition-colors duration-200 hover:border-blue">
       <div className="mb-5">{icon}</div>
       <h3 className="text-xl font-semibold text-primary">{title}</h3>
       <p className="mt-3 text-sm leading-relaxed text-secondary">{body}</p>
@@ -169,9 +169,9 @@ export default function HomePage() {
           </div>
         </RevealSection>
 
-        <RevealSection className="bg-card">
+        <section className="bg-card">
           <div className="mx-auto max-w-[1200px] px-6 py-20">
-            <div className="text-center mb-12">
+            <RevealSection className="text-center mb-12">
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Tableau de bord</p>
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
                 Votre espace.<br />Notre analyse.
@@ -179,7 +179,8 @@ export default function HomePage() {
               <p className="mx-auto mt-4 max-w-[520px] text-base leading-relaxed text-secondary">
                 Un dashboard pensé pour les traders qui exigent la précision.
               </p>
-            </div>
+            </RevealSection>
+            <RevealSection delay={120}>
             <div ref={dashboardContainerRef} className="card glow-blue rounded overflow-hidden" style={{
               position: 'relative',
               overflow: 'hidden',
@@ -274,170 +275,200 @@ export default function HomePage() {
               </div>
               </div>
             </div>
+            </RevealSection>
           </div>
-        </RevealSection>
+        </section>
 
-        <RevealSection className="bg-background">
+        <section className="bg-background">
           <div className="mx-auto max-w-[1200px] px-6 py-20 text-center">
-            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Compatibilité</p>
-            <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold text-primary">
-              Vos plateformes.<br />Notre analyse.
-            </h2>
-            <p className="mx-auto mt-4 max-w-[520px] text-base text-secondary">
-              Votre historique importé. Vos biais exposés.
-            </p>
+            <RevealSection>
+              <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary">Compatibilité</p>
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold text-primary">
+                Vos plateformes.<br />Notre analyse.
+              </h2>
+              <p className="mx-auto mt-4 max-w-[520px] text-base text-secondary">
+                Votre historique importé. Vos biais exposés.
+              </p>
+            </RevealSection>
             <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
-              {["MT4", "MT5", "Binance", "Bybit", "TradingView", "FTMO", "FundedNext"].map((platform) => (
-                <div key={platform} className="card cursor-default rounded px-7 py-3 font-mono text-sm font-semibold text-primary transition-colors duration-200 hover:border-blue">
-                  {platform}
-                </div>
+              {["MT4", "MT5", "Binance", "Bybit", "TradingView", "FTMO", "FundedNext"].map((platform, index) => (
+                <RevealSection key={platform} delay={index * 60}>
+                  <div className="card cursor-default rounded px-7 py-3 font-mono text-sm font-semibold text-primary transition-colors duration-200 hover:border-blue">
+                    {platform}
+                  </div>
+                </RevealSection>
               ))}
             </div>
           </div>
-        </RevealSection>
+        </section>
 
-        <RevealSection id="services" className="bg-card">
+        <section id="services" className="bg-card">
           <div className="mx-auto max-w-[1200px] px-6 py-20">
-          <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Services</p>
-          <h2 className="mx-auto max-w-[700px] text-center text-4xl font-bold text-primary md:text-5xl">
-            Tout ce qu&apos;il faut pour trader au plus haut{" "}
-            <span className="text-primary">niveau</span>.
-          </h2>
-          <p className="mt-4 max-w-[520px] mx-auto text-base leading-relaxed text-secondary text-center">Passez de l&apos;instinct à la stratégie.</p>
+          <RevealSection className="text-center">
+            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Services</p>
+            <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
+              Tout ce qu&apos;il faut pour trader au plus haut{" "}
+              <span className="text-primary">niveau</span>.
+            </h2>
+            <p className="mt-4 max-w-[520px] mx-auto text-base leading-relaxed text-secondary">Passez de l&apos;instinct à la stratégie.</p>
+          </RevealSection>
 
           <div className="mt-12 grid gap-5 md:grid-cols-3">
-            <ServiceCard
-              icon={<BrainCircuit className="h-8 w-8 text-blue" aria-hidden />}
-              title="Avantage psychologique"
-              body="L&apos;IA détecte le Revenge trading, l&apos;overtrading et vos schémas émotionnels sur tout votre historique"
-              delayMs={0}
-            />
-            <ServiceCard
-              icon={<BarChart3 className="h-8 w-8 text-cyan" aria-hidden />}
-              title="Statistiques approfondies"
-              body="Win rate, Sharpe ratio, Drawdown, Profit factor : chaque métrique qui compte vraiment, dans une vue claire"
-              delayMs={100}
-            />
-            <ServiceCard
-              icon={<BellRing className="h-8 w-8 text-green" aria-hidden />}
-              title="Alertes sur les schémas"
-              body="Soyez averti lorsque vous êtes sur le point de répéter votre erreur la plus coûteuse, avant d&apos;entrer en position"
-              delayMs={200}
-            />
+            <RevealSection delay={0}>
+              <ServiceCard
+                icon={<BrainCircuit className="h-8 w-8 text-blue" aria-hidden />}
+                title="Avantage psychologique"
+                body="L&apos;IA détecte le Revenge trading, l&apos;overtrading et vos schémas émotionnels sur tout votre historique"
+              />
+            </RevealSection>
+            <RevealSection delay={100}>
+              <ServiceCard
+                icon={<BarChart3 className="h-8 w-8 text-cyan" aria-hidden />}
+                title="Statistiques approfondies"
+                body="Win rate, Sharpe ratio, Drawdown, Profit factor : chaque métrique qui compte vraiment, dans une vue claire"
+              />
+            </RevealSection>
+            <RevealSection delay={200}>
+              <ServiceCard
+                icon={<BellRing className="h-8 w-8 text-green" aria-hidden />}
+                title="Alertes sur les schémas"
+                body="Soyez averti lorsque vous êtes sur le point de répéter votre erreur la plus coûteuse, avant d&apos;entrer en position"
+              />
+            </RevealSection>
           </div>
           </div>
-        </RevealSection>
+        </section>
 
-        <RevealSection className="bg-background">
+        <section className="bg-background">
           <div className="mx-auto max-w-[1200px] px-6 py-20 text-center">
-            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Technologie</p>
-            <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold leading-tight text-primary">
-              Propulsé par{" "}
-              <span className="text-primary">GPT-5.4</span>.
-            </h2>
-            <p className="mt-4 max-w-[520px] mx-auto text-base text-secondary">
-              Pendant que les autres vont passer leur temps à deviner, vous savez. Le résultat : la précision du
-              modèle IA le plus avancé d&apos;OpenAI dans chaque analyse.
-            </p>
+            <RevealSection>
+              <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Technologie</p>
+              <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold leading-tight text-primary">
+                Propulsé par{" "}
+                <span className="text-primary">GPT-5.4</span>.
+              </h2>
+              <p className="mt-4 max-w-[520px] mx-auto text-base text-secondary">
+                Pendant que les autres vont passer leur temps à deviner, vous savez. Le résultat : la précision du
+                modèle IA le plus avancé d&apos;OpenAI dans chaque analyse.
+              </p>
+            </RevealSection>
 
             <div className="mt-12 grid gap-6 lg:grid-cols-3">
-              <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
-                <BrainCircuit className="h-8 w-8 text-blue" aria-hidden />
-                <h3 className="mt-5 text-xl font-semibold text-primary">Précision Chirurgicale</h3>
-                <p className="mt-3 text-sm leading-relaxed text-secondary">
-                  GPT-5.4 raisonne comme un analyste senior. Il voit ce que les autres modèles ne peuvent pas voir.
-                </p>
-              </article>
-              <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
-                <ShieldCheck className="h-8 w-8 text-cyan" aria-hidden />
-                <h3 className="mt-5 text-xl font-semibold text-primary">Fiabilité Inégalée</h3>
-                <p className="mt-3 text-sm leading-relaxed text-secondary">
-                  Au moins 33% moins d&apos;erreurs que les versions précédentes. Chaque analyse est vérifiée, chaque
-                  décision est fondée.
-                </p>
-              </article>
-              <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
-                <TrendingUp className="h-8 w-8 text-green" aria-hidden />
-                <h3 className="mt-5 text-xl font-semibold text-primary">Exécution immédiate</h3>
-                <p className="mt-3 text-sm leading-relaxed text-secondary">
-                  Analyse complète générée en moins de 60 secondes. Vous pouvez l&apos;utiliser lorsque vous en avez
-                  besoin.
-                </p>
-              </article>
+              <RevealSection delay={0}>
+                <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
+                  <BrainCircuit className="h-8 w-8 text-blue" aria-hidden />
+                  <h3 className="mt-5 text-xl font-semibold text-primary">Précision Chirurgicale</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-secondary">
+                    GPT-5.4 raisonne comme un analyste senior. Il voit ce que les autres modèles ne peuvent pas voir.
+                  </p>
+                </article>
+              </RevealSection>
+              <RevealSection delay={100}>
+                <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
+                  <ShieldCheck className="h-8 w-8 text-cyan" aria-hidden />
+                  <h3 className="mt-5 text-xl font-semibold text-primary">Fiabilité Inégalée</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-secondary">
+                    Au moins 33% moins d&apos;erreurs que les versions précédentes. Chaque analyse est vérifiée, chaque
+                    décision est fondée.
+                  </p>
+                </article>
+              </RevealSection>
+              <RevealSection delay={200}>
+                <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
+                  <TrendingUp className="h-8 w-8 text-green" aria-hidden />
+                  <h3 className="mt-5 text-xl font-semibold text-primary">Exécution immédiate</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-secondary">
+                    Analyse complète générée en moins de 60 secondes. Vous pouvez l&apos;utiliser lorsque vous en avez
+                    besoin.
+                  </p>
+                </article>
+              </RevealSection>
             </div>
           </div>
-        </RevealSection>
+        </section>
 
-        <RevealSection className="bg-card">
+        <section className="bg-card">
           <div className="mx-auto max-w-[1200px] px-6 py-20">
-            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Système</p>
-            <h2 className="mx-auto max-w-[700px] text-center text-4xl font-bold text-primary md:text-5xl">
-              Le système que les traders{" "}
-              <span className="text-primary">disciplinés</span>{" "}
-              vont utiliser.
-            </h2>
-            <p className="mt-4 max-w-[520px] mx-auto text-center text-base text-secondary">
-              Passez d&apos;un trading émotionnel à une exécution maîtrisée, mesurable et optimisée. Éliminer de
-              manière définitive vos erreurs structurelles
-            </p>
+            <RevealSection className="text-center">
+              <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Système</p>
+              <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
+                Le système que les traders{" "}
+                <span className="text-primary">disciplinés</span>{" "}
+                vont utiliser.
+              </h2>
+              <p className="mt-4 max-w-[520px] mx-auto text-base text-secondary">
+                Passez d&apos;un trading émotionnel à une exécution maîtrisée, mesurable et optimisée. Éliminer de
+                manière définitive vos erreurs structurelles
+              </p>
+            </RevealSection>
 
             <div className="mt-12 grid gap-6 md:grid-cols-2">
-              <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
-                <Trophy className="h-8 w-8 text-blue" aria-hidden />
-                <h3 className="mt-5 text-xl font-semibold text-primary">
-                  Élaboré par les traders. Optimisé pour performer
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-secondary">
-                  Nous avons affronté les mêmes erreurs, les mêmes doutes, les mêmes pertes. Chaque fonctionnalité a
-                  été mise en place afin de résoudre un problème précis. Notre seule finalité : améliorer vos
-                  résultats.
-                </p>
-              </article>
-              <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
-                <BarChart3 className="h-8 w-8 text-cyan" aria-hidden />
-                <h3 className="mt-5 text-xl font-semibold text-primary">Des données réelles. Des décisions précises</h3>
-                <p className="mt-3 text-sm leading-relaxed text-secondary">
-                  Votre analyse repose sur vos propres trades, pas sur des données génériques.
-                  Chaque analyse est personnalisée afin de révéler ce qui fonctionne vraiment
-                  et ce qui vous freine.
-                </p>
-              </article>
-              <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
-                <BrainCircuit className="h-8 w-8 text-green" aria-hidden />
-                <h3 className="mt-5 text-xl font-semibold text-primary">
-                  Maîtriser votre psychologie avant qu&apos;elle vous coûte.
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-secondary">
-                  La majorité de vos pertes viennent de décisions émotionnelles. Notre IA identifie vos biais
-                  psychologiques en temps réel, pour vous permettre une reprise totale du contrôle avant qu&apos;ils
-                  impactent vos résultats.
-                </p>
-              </article>
-              <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
-                <ShieldCheck className="h-8 w-8 text-blue" aria-hidden />
-                <h3 className="mt-5 text-xl font-semibold text-primary">
-                  Votre analyse exploitable en moins d&apos;une journée.
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-secondary">
-                  Importez votre historique dans la journée. Identifiez vos patterns sur votre première analyse.
-                  Tradez avec une vision solide demain.
-                </p>
-              </article>
+              <RevealSection delay={0}>
+                <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
+                  <Trophy className="h-8 w-8 text-blue" aria-hidden />
+                  <h3 className="mt-5 text-xl font-semibold text-primary">
+                    Élaboré par les traders. Optimisé pour performer
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-secondary">
+                    Nous avons affronté les mêmes erreurs, les mêmes doutes, les mêmes pertes. Chaque fonctionnalité a
+                    été mise en place afin de résoudre un problème précis. Notre seule finalité : améliorer vos
+                    résultats.
+                  </p>
+                </article>
+              </RevealSection>
+              <RevealSection delay={70}>
+                <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
+                  <BarChart3 className="h-8 w-8 text-cyan" aria-hidden />
+                  <h3 className="mt-5 text-xl font-semibold text-primary">Des données réelles. Des décisions précises</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-secondary">
+                    Votre analyse repose sur vos propres trades, pas sur des données génériques.
+                    Chaque analyse est personnalisée afin de révéler ce qui fonctionne vraiment
+                    et ce qui vous freine.
+                  </p>
+                </article>
+              </RevealSection>
+              <RevealSection delay={140}>
+                <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
+                  <BrainCircuit className="h-8 w-8 text-green" aria-hidden />
+                  <h3 className="mt-5 text-xl font-semibold text-primary">
+                    Maîtriser votre psychologie avant qu&apos;elle vous coûte.
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-secondary">
+                    La majorité de vos pertes viennent de décisions émotionnelles. Notre IA identifie vos biais
+                    psychologiques en temps réel, pour vous permettre une reprise totale du contrôle avant qu&apos;ils
+                    impactent vos résultats.
+                  </p>
+                </article>
+              </RevealSection>
+              <RevealSection delay={210}>
+                <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
+                  <ShieldCheck className="h-8 w-8 text-blue" aria-hidden />
+                  <h3 className="mt-5 text-xl font-semibold text-primary">
+                    Votre analyse exploitable en moins d&apos;une journée.
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-secondary">
+                    Importez votre historique dans la journée. Identifiez vos patterns sur votre première analyse.
+                    Tradez avec une vision solide demain.
+                  </p>
+                </article>
+              </RevealSection>
             </div>
           </div>
-        </RevealSection>
+        </section>
 
-        <RevealSection className="bg-background">
+        <section className="bg-background">
           <div className="mx-auto max-w-[1200px] px-6 py-20">
-            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4 text-center">Témoignages</p>
-            <h2 className="mx-auto max-w-[700px] text-center text-4xl font-bold text-primary md:text-5xl">
-              Ce que les traders{" "}
-              <span className="text-primary">sérieux</span> ont vu
-              que les autres ont ignoré.
-            </h2>
-            <p className="mt-4 max-w-[520px] mx-auto text-center text-base text-secondary">
-              Une lecture précise de leurs erreurs, de leurs forces et de leurs réels leviers de performance.
-            </p>
+            <RevealSection className="text-center">
+              <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Témoignages</p>
+              <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
+                Ce que les traders{" "}
+                <span className="text-primary">sérieux</span> ont vu
+                que les autres ont ignoré.
+              </h2>
+              <p className="mt-4 max-w-[520px] mx-auto text-base text-secondary">
+                Une lecture précise de leurs erreurs, de leurs forces et de leurs réels leviers de performance.
+              </p>
+            </RevealSection>
 
             <div className="mt-12 grid gap-6 lg:grid-cols-4">
               {[
@@ -465,84 +496,87 @@ export default function HomePage() {
                   quote:
                     "Je scalpe depuis 2 ans. L'IA a révélé que je perdais 80% de mes trades hors session London. Depuis je ne trade plus qu'aux bonnes heures.",
                 },
-              ].map((item) => (
-                <article
-                  key={item.name}
-                  className="relative rounded border border-border bg-card p-7 hover:border-blue transition-colors duration-200"
-                >
-                  <span className="absolute right-4 top-3 text-5xl font-bold text-blue/20">&ldquo;</span>
-                  <p className="mb-3 text-sm tracking-widest text-blue">★★★★★</p>
-                  <p className="text-sm leading-relaxed text-secondary">{item.quote}</p>
-                  <p className="mt-5 text-sm font-semibold text-primary">{item.name}</p>
-                  <p className="text-xs text-secondary">{item.role}</p>
-                </article>
+              ].map((item, index) => (
+                <RevealSection key={item.name} delay={index * 70}>
+                  <article className="relative rounded border border-border bg-card p-7 hover:border-blue transition-colors duration-200">
+                    <span className="absolute right-4 top-3 text-5xl font-bold text-blue/20">&ldquo;</span>
+                    <p className="mb-3 text-sm tracking-widest text-blue">★★★★★</p>
+                    <p className="text-sm leading-relaxed text-secondary">{item.quote}</p>
+                    <p className="mt-5 text-sm font-semibold text-primary">{item.name}</p>
+                    <p className="text-xs text-secondary">{item.role}</p>
+                  </article>
+                </RevealSection>
               ))}
             </div>
           </div>
-        </RevealSection>
+        </section>
 
-        <RevealSection id="analyse" className="bg-card">
+        <section id="analyse" className="bg-card">
           <div className="mx-auto max-w-[1200px] px-6 py-28 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Analyse gratuite</p>
-          <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
-            Ce que l&apos;IA{" "}
-            <span className="text-primary">révèle</span> en 60
-            secondes.
-          </h2>
-          <p className="mt-4 max-w-[520px] mx-auto text-base leading-relaxed text-secondary">Aucune inscription requise</p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <button
-              type="button"
-              onClick={() => router.push("/analysis")}
-              className="btn-primary inline-flex items-center gap-2"
-            >
-              Analyse gratuite
-              <ArrowRight className="h-5 w-5" aria-hidden />
-            </button>
-            <button
-              type="button"
-              onClick={() => void connectGoogle()}
-              className="btn-outline inline-flex items-center gap-2"
-            >
-              <UserCircle className="h-5 w-5" aria-hidden />
-              S&apos;inscrire
-            </button>
+          <RevealSection>
+            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Analyse gratuite</p>
+            <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
+              Ce que l&apos;IA{" "}
+              <span className="text-primary">révèle</span> en 60
+              secondes.
+            </h2>
+            <p className="mt-4 max-w-[520px] mx-auto text-base leading-relaxed text-secondary">Aucune inscription requise</p>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={() => router.push("/analysis")}
+                className="btn-primary inline-flex items-center gap-2"
+              >
+                Analyse gratuite
+                <ArrowRight className="h-5 w-5" aria-hidden />
+              </button>
+              <button
+                type="button"
+                onClick={() => void connectGoogle()}
+                className="btn-outline inline-flex items-center gap-2"
+              >
+                <UserCircle className="h-5 w-5" aria-hidden />
+                S&apos;inscrire
+              </button>
+            </div>
+            <p className="mt-6 text-xs text-secondary">Sans carte bancaire. Analyse immédiate.</p>
+          </RevealSection>
           </div>
-          <p className="mt-6 text-xs text-secondary">Sans carte bancaire. Analyse immédiate.</p>
-          </div>
-        </RevealSection>
+        </section>
       </main>
 
-      <RevealSection className="bg-gradient-to-b from-card to-background py-28 text-center">
+      <section className="bg-gradient-to-b from-card to-background py-28 text-center">
         <div className="mx-auto max-w-[1200px] px-6">
-          <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Commencer</p>
-          <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
-            Rejoignez l&apos;
-            <span className="text-primary">élite</span> des
-            traders.
-          </h2>
-          <p className="mx-auto mt-4 max-w-[520px] text-base leading-relaxed text-secondary">Votre historique. 60 secondes. La vérité.</p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <button
-              type="button"
-              onClick={() => void connectGoogle()}
-              className="btn-primary inline-flex items-center gap-2"
-            >
-              <UserCircle className="h-5 w-5" aria-hidden />
-              S&apos;inscrire
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push("/analysis")}
-              className="btn-outline inline-flex items-center gap-2"
-            >
-              Analyse gratuite
-              <ArrowRight className="h-5 w-5" aria-hidden />
-            </button>
-          </div>
-          <p className="mt-6 text-xs text-secondary">Accès anticipé · 200 places · Prix public à venir · Sans carte bancaire</p>
+          <RevealSection>
+            <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Commencer</p>
+            <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
+              Rejoignez l&apos;
+              <span className="text-primary">élite</span> des
+              traders.
+            </h2>
+            <p className="mx-auto mt-4 max-w-[520px] text-base leading-relaxed text-secondary">Votre historique. 60 secondes. La vérité.</p>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={() => void connectGoogle()}
+                className="btn-primary inline-flex items-center gap-2"
+              >
+                <UserCircle className="h-5 w-5" aria-hidden />
+                S&apos;inscrire
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/analysis")}
+                className="btn-outline inline-flex items-center gap-2"
+              >
+                Analyse gratuite
+                <ArrowRight className="h-5 w-5" aria-hidden />
+              </button>
+            </div>
+            <p className="mt-6 text-xs text-secondary">Accès anticipé · 200 places · Prix public à venir · Sans carte bancaire</p>
+          </RevealSection>
         </div>
-      </RevealSection>
+      </section>
 
       <RevealSection className="border-t border-border bg-background/80 px-6 py-10 backdrop-blur-md">
         <Footer />

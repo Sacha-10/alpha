@@ -50,7 +50,10 @@
       "Bash(cat eslint.config.js)",
       "Bash(echo \"EXIT: $?\")",
       "Bash(git log *)",
-      "Bash(Select-String *)"
+      "Bash(Select-String *)",
+      "Skill(run)",
+      "Bash(chromium-cli *)",
+      "Bash(npx playwright *)"
     ]
   }
 }
