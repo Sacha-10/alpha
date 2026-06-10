@@ -274,7 +274,7 @@ export default function PricingPage() {
       <button
         type="button"
         onClick={() => handleCheckout(p.name)}
-        className="mt-6 bg-card text-secondary hover:text-primary rounded-lg px-4 py-3 text-sm font-medium w-full text-center"
+        className="mt-6 bg-card text-secondary hover:text-primary rounded-lg px-4 py-3 font-medium w-full text-center"
       >
         Downgrader
       </button>
