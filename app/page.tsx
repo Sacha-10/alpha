@@ -38,7 +38,7 @@ type RevealProps = {
 };
 
 function RevealSection({ id, className = "", children }: RevealProps) {
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useRef<HTMLDivElement | null>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ function RevealSection({ id, className = "", children }: RevealProps) {
   }, []);
 
   return (
-    <section
+    <div
       id={id}
       ref={ref}
       className={`relative ${className} transition-all duration-700 ease-out ${
@@ -68,7 +68,7 @@ function RevealSection({ id, className = "", children }: RevealProps) {
       }`}
     >
       <div>{children}</div>
-    </section>
+    </div>
   );
 }
 
@@ -150,8 +150,8 @@ export default function HomePage() {
       <Navbar />
 
       <main className="relative overflow-x-clip">
-        <RevealSection className="min-h-screen pt-16 flex items-center justify-center bg-gradient-to-b from-background to-card">
-          <div className="mx-auto max-w-[1200px] px-6 pb-10 pt-10 md:pb-0 md:pt-0 text-center">
+        <RevealSection className="min-h-screen pt-16 flex items-center justify-center px-6 bg-gradient-to-b from-background to-card">
+          <div className="mx-auto max-w-[1200px] pb-10 pt-10 md:pb-0 md:pt-0 text-center">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">AlphaTradeX</p>
           <h1 className="mx-auto mt-6 max-w-[1200px] text-balance md:[text-wrap:normal] text-5xl font-bold leading-tight text-primary md:text-7xl">
             Les meilleurs traders n&apos;ont pas plus travaillé.
@@ -513,8 +513,8 @@ export default function HomePage() {
         </RevealSection>
       </main>
 
-      <RevealSection className="bg-gradient-to-b from-card to-background px-6 py-28 text-center">
-        <div className="mx-auto max-w-[1200px]">
+      <RevealSection className="bg-gradient-to-b from-card to-background py-28 text-center">
+        <div className="mx-auto max-w-[1200px] px-6">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Commencer</p>
           <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
             Rejoignez l&apos;

@@ -477,9 +477,9 @@ export default function PricingPage() {
         </section>
       </main>
 
-      <section className="border-t border-border bg-background/80 px-6 py-10 backdrop-blur-md">
+      <RevealSection className="border-t border-border bg-background/80 px-6 py-10 backdrop-blur-md">
         <Footer />
-      </section>
+      </RevealSection>
 
       <style>{`
         details[open] summary svg {
