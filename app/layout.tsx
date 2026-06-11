@@ -22,11 +22,6 @@ export const metadata: Metadata = {
   title: "AlphaTradeX - Votre analyste IA personnel sur les marchés",
   description:
     "Analyze your trades with AI. Find out exactly why you're losing money and fix it before your next session.",
-  icons: {
-    icon: "/logo.svg",
-    apple: "/logo.svg",
-    shortcut: "/logo.svg",
-  },
   openGraph: {
     title: "AlphaTradeX — Votre analyste IA personnel sur les marchés",
     description:
