@@ -12,7 +12,6 @@
 | `react-dom` | ^18.3.1 |
 | `@supabase/supabase-js` | ^2.47.10 |
 | `@supabase/ssr` | ^0.10.2 |
-| `@supabase/auth-helpers-nextjs` | ^0.10.0 |
 | `@stripe/stripe-js` | ^5.5.0 |
 | `stripe` | ^17.5.0 |
 | `openai` | ^4.77.3 |
@@ -52,8 +51,8 @@
 ```
 alpha/
 ├── app/
-│   ├── favicon.ico
-│   ├── icon.svg
+│   ├── icon.svg                        ← favicon (logo AlphaTradeX, identique à public/logo.svg)
+│   ├── apple-icon.svg                  ← icône Apple Touch (identique à public/logo.svg)
 │   ├── globals.css
 │   ├── layout.tsx                      ← Root layout global
 │   ├── page.tsx                        ← Page d'accueil /
@@ -99,9 +98,7 @@ alpha/
 │   ├── TradeReportBody.tsx             ← contenu pur du rapport (partagé UI)
 │   ├── TradeJournal.tsx                ← journal de trades (calendrier, import/export)
 │   ├── AnalysisHistory.tsx             ← historique des analyses (accordéon)
-│   ├── UploadZone.tsx
-│   ├── ExportGuide.tsx
-│   └── GoogleAuthButton.tsx
+│   └── ExportGuide.tsx
 ├── lib/
 │   ├── supabase.ts
 │   ├── openai.ts                       ← analyzeTradesDemo + analyzeTradesMember + computeStats
@@ -130,7 +127,8 @@ alpha/
 ├── CLAUDE.md / AGENTS.md
 └── public/
     ├── manifest.json                   ← PWA manifest
-    └── file.svg, globe.svg, logo.svg, next.svg, vercel.svg, window.svg
+    ├── logo.svg
+    └── logo.png                        ← utilisé dans l'email de confirmation paiement (lib/emails/confirmationPaiement.ts)
 ```
 
 ---
@@ -255,7 +253,6 @@ blue: "0 0 20px rgba(45, 111, 255, 0.3)"
 **Framer Motion** :
 - `TradeReport.tsx` : `initial={{ opacity:0, y:20 }}` → `animate={{ opacity:1, y:0 }}` delays 0 / 0.1 / 0.2 / 0.3 / 0.35 / 0.4 / 0.45 / 0.5s
 - `analysis/page.tsx` : même pattern + barre `width:['0%','90%']` duration 8s
-- `UploadZone.tsx` : `whileHover={{ scale:1.01 }}` + AnimatePresence + barre `width:['0%','85%']` duration 10s
 
 **RevealSection** (IntersectionObserver threshold 0.15) :
 ```
@@ -1076,7 +1073,7 @@ Référencé dans `/analysis` via `PLANS.pro.monthly` pour le CTA post-rapport (
 
 ### @supabase/ssr — Migration terminée
 
-Tous les fichiers utilisent `@supabase/ssr`. `@supabase/auth-helpers-nextjs` reste dans `package.json` mais n'est plus utilisé dans le code applicatif.
+Tous les fichiers utilisent `@supabase/ssr`. `@supabase/auth-helpers-nextjs` a été retiré de `package.json` (n'était plus utilisé dans le code applicatif).
 
 | Fichier | Fonction exportée | Client utilisé |
 |---|---|---|
@@ -1150,8 +1147,11 @@ JetBrains_Mono({ subsets:["latin"], weight:["400","500"], variable:"--font-jetbr
 // Metadata :
 metadataBase: 'https://alphatradex.ai'
 title: "AlphaTradeX - Votre analyste IA personnel sur les marchés"
-icons: { icon:"/logo.svg", apple:"/logo.svg", shortcut:"/logo.svg" }
-openGraph.title: "AlphaTradeX — Votre analyste IA personnel sur les marchés"  (bug corrigé)
+description: "Analyze your trades with AI. Find out exactly why you're losing money and fix it before your next session."
+openGraph: { title, description, type:"website", images:["/logo.svg"] }
+twitter: { images:["/logo.svg"] }
+// icons : plus de propriété explicite — détection automatique Next.js
+// via convention de fichiers (app/icon.svg, app/apple-icon.svg)
 
 // Arbre :
 <html lang="fr" data-scroll-behavior="smooth" className={fontVars} style={{ backgroundColor:'#0A0A0F', colorScheme:'dark' }}>
@@ -1245,18 +1245,25 @@ GET /api/customer-portal
 ## 8. CE QUI RESTE À FAIRE
 
 ### Fait depuis la dernière mise à jour
+- ✅ **Nettoyage composants morts** : `components/GoogleAuthButton.tsx` et `components/UploadZone.tsx` supprimés (non utilisés)
+- ✅ **`@supabase/auth-helpers-nextjs`** retiré de `package.json` (migration `@supabase/ssr` terminée, dépendance inutile)
+- ✅ **Branding favicon/icônes** : `app/favicon.ico` supprimé, `app/icon.svg` remplacé par le vrai logo AlphaTradeX (identique à `public/logo.svg`), `app/apple-icon.svg` créé (même contenu que `public/logo.svg`) — détection automatique Next.js via convention de fichiers
+- ✅ **Metadata `app/layout.tsx`** : propriété `icons` retirée (gérée par convention de fichiers)
+- ✅ **Nettoyage `public/`** : `file.svg`, `globe.svg`, `next.svg`, `vercel.svg`, `window.svg` supprimés (assets par défaut Next.js inutilisés)
+- ✅ **`package-lock.json`** resynchronisé via `npm install`
+- ✅ **Paiement live testé + remboursement immédiat validé**
+- ✅ **Redirections email Google Workspace configurées**
+- ✅ **Menu mobile navbar largeur corrigée**
+- ✅ **Redesign complet pages marketing aligné design system**
+
+### Précédemment
 - ✅ **Export PDF réel** : remplacé par `app/api/generate-pdf/route.tsx` (Puppeteer-core + `@sparticuz/chromium`, HTML auto-suffisant, PDF 1 page à la taille du contenu)
 - ✅ **Historique des analyses** : `<AnalysisHistory />` (vue `historique` du dashboard) consomme `GET /api/analyses`, rétention par plan (`PLAN_MONTHS`)
 - ✅ **Journal de trades** : `<TradeJournal />` (vues calendrier jour/mois, import/export CSV, date range picker)
 - ✅ **Synchronisation cross-device** : Supabase Realtime (`analyses-insert:${userId}`)
 - ✅ **Email de confirmation de paiement** : Resend, déclenché sur `checkout.session.completed`
 
-### Priorité 1 — UX et complétude
-- **Page 404 personnalisée** : toujours absente (`app/not-found.tsx`)
-- **`GoogleAuthButton.tsx`** : composant existant mais toujours non utilisé
-- **`UploadZone.tsx`** : composant désormais mort/non utilisé — le dashboard a sa propre drop zone inline (vue `nouvelle-analyse`). Seul le nom de variable `uploadZoneKey` (state, `DashboardClient.tsx`) subsiste comme remnant.
-
-### Priorité 3 — Features Élite/Premium manquantes (backend absent)
+### Priorité 2 — Features core manquantes (backend absent)
 Présentes dans la sidebar du dashboard sous forme de `<EmptyFeaturePage>` (placeholders verrouillés selon le plan), mais sans implémentation backend :
 - **Alertes Telegram** (Élite)
 - **Détection prédictive de setups** (Élite)
@@ -1265,6 +1272,9 @@ Présentes dans la sidebar du dashboard sous forme de `<EmptyFeaturePage>` (plac
 - **Prop Firm Score** (Élite — distinct du `propFirmScore` déjà calculé dans le rapport d'analyse)
 - **Support prioritaire** (Premium — redirige actuellement vers `/help`)
 
-### Notes
-- `app/icon.svg` (dans `app/`) vs `public/logo.svg` : deux assets distincts — vérifier cohérence favicon
-- `@supabase/auth-helpers-nextjs` reste dans `package.json` mais inutilisé — peut être retiré
+### Priorité 3 — Finitions
+- **Page 404 personnalisée** (`app/not-found.tsx`)
+- **SEO** : sitemap, robots.txt, balises meta OpenGraph et Twitter Card
+- ✅ résolu — `app/icon.svg` vs `public/logo.svg` : cohérence favicon
+- ✅ résolu — `@supabase/auth-helpers-nextjs` : retiré de `package.json`
+
