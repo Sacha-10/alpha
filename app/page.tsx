@@ -127,6 +127,7 @@ export default function HomePage() {
   const [dashboardScale, setDashboardScale] = useState(1);
   const [isMobileDashboard, setIsMobileDashboard] = useState(false);
   const [dashboardHeight, setDashboardHeight] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(900);
 
   const updateDashboardScale = useCallback(() => {
     if (!dashboardContainerRef.current || typeof window === 'undefined') return;
@@ -136,6 +137,7 @@ export default function HomePage() {
     const referenceWidth = mobile ? DASHBOARD_MOBILE_WIDTH : DASHBOARD_DESKTOP_WIDTH;
     const scale = containerWidth / referenceWidth;
     setDashboardScale(scale);
+    setViewportHeight(window.innerHeight);
     setDashboardHeight(window.innerHeight * scale);
   }, []);
 
@@ -194,7 +196,7 @@ export default function HomePage() {
                   transform: `scale(${dashboardScale})`,
                   transformOrigin: 'top left',
                   width: `${isMobileDashboard ? DASHBOARD_MOBILE_WIDTH : DASHBOARD_DESKTOP_WIDTH}px`,
-                  height: typeof window !== 'undefined' ? `${window.innerHeight}px` : '900px',
+                  height: `${viewportHeight}px`,
                 }}
               >
               {/* Topbar desktop */}
@@ -353,7 +355,7 @@ export default function HomePage() {
               </p>
             </RevealSection>
 
-            <div className="mt-12 grid gap-5 lg:grid-cols-3">
+            <div className="mt-12 grid gap-5 md:grid-cols-3">
               <RevealSection delay={0}>
                 <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                   <BrainCircuit className="h-8 w-8 text-blue" aria-hidden />
@@ -470,7 +472,7 @@ export default function HomePage() {
               </p>
             </RevealSection>
 
-            <div className="mt-12 grid gap-5 lg:grid-cols-4">
+            <div className="mt-12 grid gap-5 md:grid-cols-4">
               {[
                 {
                   name: "Kilian I.",

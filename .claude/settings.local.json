@@ -55,7 +55,12 @@
       "Bash(chromium-cli *)",
       "Bash(npx playwright *)",
       "Bash(ls app/about app/pricing)",
-      "Bash(dir app *)"
+      "Bash(dir app *)",
+      "Bash(xargs -I{} sh -c 'echo \"== {} ==\"; head -5 \"{}\"')",
+      "Read(//c/Program Files/Google/Chrome/Application//**)",
+      "Read(//c/Program Files \\(x86\\)/Google/Chrome/**)",
+      "Read(//c/Program Files/Microsoft/Edge/**)",
+      "Bash(powershell -Command 'Get-Process -Name node -ErrorAction SilentlyContinue | Where-Object {\\(Get-NetTCPConnection -OwningProcess $_.Id -ErrorAction SilentlyContinue\\).LocalPort -contains 3000} | Stop-Process -Force')"
     ]
   }
 }
