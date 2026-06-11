@@ -200,7 +200,7 @@ export default function Navbar() {
 
       <div
         ref={mobileMenuRef}
-        className={`mx-4 overflow-hidden rounded border border-border bg-card transition-all duration-200 ease-out md:hidden ${
+        className={`overflow-hidden rounded border border-border bg-card transition-all duration-200 ease-out md:hidden ${
           mobileOpen ? "max-h-[360px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
