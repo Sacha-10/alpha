@@ -21,6 +21,15 @@ function displayRate(v: unknown): string {
   return n <= 1 ? (n * 100).toFixed(1) : n.toFixed(1);
 }
 
+// Ratios sans dénominateur mesurable (profitFactor, riskReward, sharpeRatio)
+// utilisent le sentinel 99 / -99 pour signaler "infini" / "-infini" — jamais
+// affiché en chiffre brut.
+function formatSentinelRatio(v: number): { value: string; color: string } {
+  if (v === 99) return { value: '∞', color: 'var(--cyan)' };
+  if (v === -99) return { value: '−∞', color: 'var(--red)' };
+  return { value: v.toFixed(2), color: v >= 1 ? 'var(--cyan)' : 'var(--red)' };
+}
+
 function esc(s: unknown): string {
   return String(s ?? '')
     .replace(/&/g, '&amp;')
@@ -98,12 +107,12 @@ function buildBody(report: AiAnalysisResult): string {
 
   const keyStats = [
     { label: 'Win Rate',       value: `${displayRate(s.winRate)}%`,            color: winRateNum >= 50              ? 'var(--cyan)' : 'var(--red)' },
-    { label: 'Profit Factor',  value: safeNum(s.profitFactor).toFixed(2),      color: safeNum(s.profitFactor) >= 1  ? 'var(--cyan)' : 'var(--red)' },
-    { label: 'Max Drawdown',   value: `${displayRate(s.maxDrawdownPercent)}%`, color: ddNum > 10                    ? 'var(--red)'  : 'var(--cyan)' },
+    { label: 'Profit Factor',  ...formatSentinelRatio(safeNum(s.profitFactor)) },
+    { label: 'Max Drawdown',   value: s.maxDrawdownPercent === null ? '—' : `${displayRate(s.maxDrawdownPercent)}%`, color: s.maxDrawdownPercent === null ? 'var(--secondary)' : ddNum > 10 ? 'var(--red)' : 'var(--cyan)' },
     { label: 'PnL Total',      value: pnlStr,                                  color: pnl < 0                       ? 'var(--red)'  : 'var(--cyan)' },
     { label: 'Trades Total',   value: String(s.totalTrades ?? 0),              color: 'var(--primary)'              },
-    { label: 'Sharpe Ratio',   value: safeNum(s.sharpeRatio).toFixed(2),       color: safeNum(s.sharpeRatio) >= 1   ? 'var(--cyan)' : 'var(--red)' },
-    { label: 'Risk/Reward',    value: safeNum(s.avgRiskReward).toFixed(2),     color: safeNum(s.avgRiskReward) >= 1 ? 'var(--cyan)' : 'var(--red)' },
+    { label: 'Sharpe Ratio',   ...formatSentinelRatio(safeNum(s.sharpeRatio)) },
+    { label: 'Risk/Reward',    ...formatSentinelRatio(safeNum(s.avgRiskReward)) },
     { label: 'Durée moyenne',  value: safeStr(s.avgTradeDuration),             color: 'var(--primary)'              },
   ];
 

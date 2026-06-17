@@ -31,7 +31,7 @@ export interface AiAnalysisResult {
     profitFactor: number
     sharpeRatio: number
     maxDrawdown: number
-    maxDrawdownPercent: number
+    maxDrawdownPercent: number | null
     avgRiskReward: number
     totalPnL: number
     bestTrade: { symbol: string; pnl: number; date: string }

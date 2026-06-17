@@ -77,6 +77,15 @@ export function displayRate(v: unknown): string {
   return n <= 1 ? (n * 100).toFixed(1) : n.toFixed(1);
 }
 
+// Ratios sans dénominateur mesurable (profitFactor, riskReward, sharpeRatio)
+// utilisent le sentinel 99 / -99 pour signaler "infini" / "-infini" — jamais
+// affiché en chiffre brut.
+function formatSentinelRatio(v: number): { value: string; className: string } {
+  if (v === 99) return { value: "∞", className: "text-cyan" };
+  if (v === -99) return { value: "−∞", className: "text-red" };
+  return { value: v.toFixed(2), className: v >= 1 ? "text-cyan" : "text-red" };
+}
+
 function sessionPctColorClasses(pct: number): { bar: string; text: string } {
   if (pct < 40) return { bar: "var(--red)", text: "text-red" };
   if (pct <= 60) return { bar: "var(--orange)", text: "text-orange" };
@@ -118,14 +127,15 @@ export function TradeReportBody({ report }: { report: AiAnalysisResult }) {
     },
     {
       label: "Profit Factor",
-      value: safeNum(s.profitFactor).toFixed(2),
+      value: formatSentinelRatio(safeNum(s.profitFactor)).value,
       positive: safeNum(s.profitFactor) >= 1,
+      valueClass: formatSentinelRatio(safeNum(s.profitFactor)).className,
     },
     {
       label: "Max Drawdown",
-      value: `${displayRate(s.maxDrawdownPercent)}%`,
+      value: s.maxDrawdownPercent === null ? "—" : `${displayRate(s.maxDrawdownPercent)}%`,
       positive: false,
-      valueClass: ddNum > 10 ? "text-red" : "text-cyan",
+      valueClass: s.maxDrawdownPercent === null ? "text-secondary" : ddNum > 10 ? "text-red" : "text-cyan",
     },
     {
       label: "PnL Total",
@@ -144,13 +154,15 @@ export function TradeReportBody({ report }: { report: AiAnalysisResult }) {
     },
     {
       label: "Sharpe Ratio",
-      value: safeNum(s.sharpeRatio).toFixed(2),
+      value: formatSentinelRatio(safeNum(s.sharpeRatio)).value,
       positive: safeNum(s.sharpeRatio) >= 1,
+      valueClass: formatSentinelRatio(safeNum(s.sharpeRatio)).className,
     },
     {
       label: "Risk/Reward",
-      value: safeNum(s.avgRiskReward).toFixed(2),
+      value: formatSentinelRatio(safeNum(s.avgRiskReward)).value,
       positive: safeNum(s.avgRiskReward) >= 1,
+      valueClass: formatSentinelRatio(safeNum(s.avgRiskReward)).className,
     },
     {
       label: "Durée moyenne",

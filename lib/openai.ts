@@ -361,20 +361,20 @@ dans le JSON retourné.`
 
 type BiasSeverity = 'FAIBLE' | 'MOYEN' | 'ÉLEVÉ' | 'CRITIQUE'
 
-interface BiasPattern {
+export interface BiasPattern {
   patternKey: string
   frequency: number
   severity: BiasSeverity
   relatedData: Record<string, unknown>
 }
 
-interface ComputedStats {
+export interface ComputedStats {
   totalTrades: number
   winRate: number
   totalPnL: number
   profitFactor: number
   maxDrawdownAbs: number
-  maxDrawdownPct: number
+  maxDrawdownPct: number | null
   sharpeRatio: number
   riskReward: number
   avgTradeDuration: string
@@ -451,7 +451,7 @@ function severityOf(freq: number): BiasSeverity {
   return 'FAIBLE'
 }
 
-function computeStats(rawTrades: Trade[]): ComputedStats {
+export function computeStats(rawTrades: Trade[]): ComputedStats {
   const trades = rawTrades.map(t => ({
     ...t,
     openTime: toDate(t.openTime),
@@ -470,12 +470,14 @@ function computeStats(rawTrades: Trade[]): ComputedStats {
   const profitFactor = grossLoss === 0 ? 99 : r2(grossWin / grossLoss)
   const avgWin = winners.length > 0 ? r2(grossWin / winners.length) : 0
   const avgLoss = losers.length > 0 ? r2(grossLoss / losers.length) : 0
-  const riskReward = avgLoss === 0 ? 0 : r2(avgWin / avgLoss)
+  const riskReward = avgLoss === 0 ? 99 : r2(avgWin / avgLoss)
 
   const avgPnl = totalPnL / n
   const variance = pnls.reduce((s, p) => s + (p - avgPnl) ** 2, 0) / n
   const stdDev = Math.sqrt(variance)
-  const sharpeRatio = stdDev === 0 ? 0 : r2((avgPnl / stdDev) * Math.sqrt(n))
+  const sharpeRatio = stdDev === 0
+    ? (avgPnl > 0 ? 99 : avgPnl < 0 ? -99 : 0)
+    : r2((avgPnl / stdDev) * Math.sqrt(n))
 
   const validTimeCount = trades.filter(t => !isNaN(t.openTime.getTime())).length
   const sortedTrades = validTimeCount >= 2
@@ -501,7 +503,9 @@ function computeStats(rawTrades: Trade[]): ComputedStats {
     }
   }
   const maxDrawdownAbs = r2(maxDDAbs)
-  const maxDrawdownPct = r2(maxDDRatio * 100)
+  // null si pas de pic positif de référence (peak≤0) OU si le ratio dépasse 100%
+  // (equity negative après un pic → base insuffisante pour exprimer un %).
+  const maxDrawdownPct = (peak <= 0 && maxDDAbs > 0) || maxDDRatio > 1.0 ? null : r2(maxDDRatio * 100)
   const avgDurMin = Math.round(
     trades.reduce((s, t) => s + t.durationMinutes, 0) / n
   )
@@ -640,19 +644,24 @@ function computeStats(rawTrades: Trade[]): ComputedStats {
     : Math.max(0, 100 - (dailyStdDev / Math.max(Math.abs(avgDailyPnL), 0.01)) * 50)
 
   // Scores (formules déterministes)
+  // Drawdown % indéfini (équity jamais positive) = cas de risque maximal pour
+  // le calcul des scores — ne doit jamais compter comme "0% drawdown".
+  // Valeur de calcul uniquement, jamais utilisée pour l'affichage.
+  const ddForScore = maxDrawdownPct ?? 100
+
   const psychoScore = Math.round(Math.min(100, Math.max(0,
     (winRate / 100) * 40 +
     Math.min(profitFactor / 3, 1) * 20 +
-    Math.max(0, 1 - maxDrawdownPct / 25) * 20 +
+    Math.max(0, 1 - ddForScore / 25) * 20 +
     (regularityScore / 100) * 20
   )))
   const riskScore = Math.round(Math.min(100, Math.max(0,
-    Math.max(0, 1 - maxDrawdownPct / 15) * 40 +
+    Math.max(0, 1 - ddForScore / 15) * 40 +
     Math.min(Math.max(sharpeRatio, 0) / 2.5, 1) * 30 +
     Math.min(riskReward / 3, 1) * 30
   )))
   const propFirmScore = Math.round(Math.min(100, Math.max(0,
-    Math.max(0, 1 - maxDrawdownPct / 10) * 40 +
+    Math.max(0, 1 - ddForScore / 10) * 40 +
     Math.min(winRate / 70, 1) * 30 +
     Math.min(profitFactor / 2, 1) * 30
   )))
@@ -665,7 +674,7 @@ function computeStats(rawTrades: Trade[]): ComputedStats {
     : r2(Math.abs(Math.min(worstDayPnL, 0)) / totalGross * 100)
 
   const wouldPassFTMO =
-    maxDrawdownPct < 10 &&
+    ddForScore < 10 &&
     winRate > 50 &&
     profitFactor > 1 &&
     worstDayLossPct < 5 &&
@@ -710,7 +719,7 @@ function computeStats(rawTrades: Trade[]): ComputedStats {
     ? buyTs.filter(t => t.profitLoss > 0).length / buyTs.length * 100 : 50
   const sellWR = sellTs.length > 0
     ? sellTs.filter(t => t.profitLoss > 0).length / sellTs.length * 100 : 50
-  if (Math.abs(buyWR - sellWR) > 15) {
+  if (buyTs.length > 0 && sellTs.length > 0 && Math.abs(buyWR - sellWR) > 15) {
     const worseDir = buyWR < sellWR ? 'BUY' : 'SELL'
     const worseDirTs = worseDir === 'BUY' ? buyTs : sellTs
     const freq = clampFreq((worseDirTs.length / n) * 100)

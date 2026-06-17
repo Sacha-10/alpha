@@ -62,7 +62,9 @@
       "Read(//c/Program Files/Microsoft/Edge/**)",
       "Bash(powershell -Command 'Get-Process -Name node -ErrorAction SilentlyContinue | Where-Object {\\(Get-NetTCPConnection -OwningProcess $_.Id -ErrorAction SilentlyContinue\\).LocalPort -contains 3000} | Stop-Process -Force')",
       "Bash(grep -n \"^## 6\\\\|^## 7\\\\|^## 8\\\\|^---$\" \"C:\\\\Users\\\\sacha\\\\dev\\\\SaasAi\\\\Alpha\\\\alpha\\\\project_summary.md\")",
-      "Bash(cd public *)"
+      "Bash(cd public *)",
+      "Bash(npx tsx *)",
+      "PowerShell(npm run *)"
     ]
   }
 }

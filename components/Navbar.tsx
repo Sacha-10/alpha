@@ -46,7 +46,8 @@ export default function Navbar() {
   const redirectingRef = useRef(false);
 
   const connectGoogle = async () => {
-    const origin = "https://alphatradex.ai";
+    const rawOrigin = window.location.origin;
+    const origin = rawOrigin === "https://www.alphatradex.ai" ? "https://alphatradex.ai" : rawOrigin;
     sessionStorage.setItem("oauth_login_pending", "1");
     await supabase.auth.signInWithOAuth({
       provider: "google",
