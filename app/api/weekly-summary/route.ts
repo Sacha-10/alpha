@@ -2,12 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
-import { buildWeeklyData, type TradeRow } from '@/lib/weeklyData'
+import { buildSummaryFromRows } from '@/lib/weeklySummary'
+import type { TradeRow } from '@/lib/weeklyData'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
-
-// ── Route ─────────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
   try {
@@ -61,9 +60,9 @@ export async function GET(req: NextRequest) {
 
     const rows: TradeRow[] = data ?? []
 
-    return NextResponse.json(buildWeeklyData(rows))
+    return NextResponse.json(buildSummaryFromRows(rows, new Date()))
   } catch (error: any) {
-    console.error('[/api/weekly-evolution] Erreur:', error?.message)
+    console.error('[/api/weekly-summary] Erreur:', error?.message)
     return NextResponse.json({ error: 'Erreur interne' }, { status: 500 })
   }
 }

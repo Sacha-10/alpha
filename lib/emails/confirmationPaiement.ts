@@ -27,7 +27,7 @@ export function getConfirmationPaiementHTML({
 
           <!-- LOGO -->
           <tr>
-            <td style="padding-top:40px;padding-bottom:40px;">
+            <td style="padding-top:0;padding-bottom:40px;">
               <img src="https://alphatradex.ai/logo.png" width="44" height="44" alt="AlphaTradeX" style="border-radius:8px;"/>
             </td>
           </tr>
@@ -57,8 +57,8 @@ export function getConfirmationPaiementHTML({
           <!-- PHRASES -->
           <tr>
             <td style="padding-bottom:40px;">
-              <div style="color:#8892AA;font-size:15px;line-height:1.7;">Vous avez accès à ce que peu de traders verront.</div>
-              <div style="color:#8892AA;font-size:15px;line-height:1.7;margin-top:12px;">Ce que vous en faites vous appartient.</div>
+              <div style="color:#8892AA;font-size:16px;line-height:1.7;">Vous avez accès à ce que peu de traders verront.</div>
+              <div style="color:#8892AA;font-size:16px;line-height:1.7;margin-top:8px;">Ce que vous en faites vous appartient.</div>
             </td>
           </tr>
 
@@ -69,19 +69,19 @@ export function getConfirmationPaiementHTML({
                 <tr>
                   <td style="padding-bottom:20px;border-bottom:1px solid #1E2035;">
                     <div style="color:#8892AA;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;">Plan</div>
-                    <div style="color:#F0F4FF;font-size:15px;font-weight:600;">${planLabel}</div>
+                    <div style="color:#F0F4FF;font-size:16px;font-weight:600;">${planLabel}</div>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding-top:20px;padding-bottom:20px;border-bottom:1px solid #1E2035;">
                     <div style="color:#8892AA;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;">Analyses disponibles</div>
-                    <div style="color:#F0F4FF;font-size:15px;font-weight:600;">${analysesText}</div>
+                    <div style="color:#F0F4FF;font-size:16px;font-weight:600;">${analysesText}</div>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding-top:20px;">
                     <div style="color:#8892AA;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;">Prochain cycle</div>
-                    <div style="color:#F0F4FF;font-size:15px;font-weight:600;">${renewalDate}</div>
+                    <div style="color:#F0F4FF;font-size:16px;font-weight:600;">${renewalDate}</div>
                   </td>
                 </tr>
               </table>

@@ -64,7 +64,9 @@
       "Bash(grep -n \"^## 6\\\\|^## 7\\\\|^## 8\\\\|^---$\" \"C:\\\\Users\\\\sacha\\\\dev\\\\SaasAi\\\\Alpha\\\\alpha\\\\project_summary.md\")",
       "Bash(cd public *)",
       "Bash(npx tsx *)",
-      "PowerShell(npm run *)"
+      "PowerShell(npm run *)",
+      "PowerShell(npx tsc --noEmit)",
+      "PowerShell(npx next build)"
     ]
   }
 }

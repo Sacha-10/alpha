@@ -1,6 +1,22 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import {
+  BIAS_LABELS,
+  type Direction,
+  scoreClass,
+  winRateClass,
+  profitFactorClass,
+  riskRewardClass,
+  drawdownClass,
+  deltaClass,
+  fmtDelta,
+  fmtPct,
+  fmtRatio,
+  fmtScore,
+  fmtPnl,
+  diff,
+} from "@/lib/weeklyFormat"
 
 // ── Types (miroir de la réponse /api/weekly-evolution) ──────────────────────
 
@@ -33,15 +49,6 @@ type Props = {
 
 // ── Constantes ───────────────────────────────────────────────────────────
 
-const BIAS_LABELS: Record<string, string> = {
-  revenge_trading: "Revenge trading",
-  direction_bias: "Biais directionnel",
-  session_bias: "Surexposition session",
-  overtrading: "Overtrading",
-  loss_extension: "Extension des pertes",
-  confirmation_bias: "Biais de confirmation",
-  position_sizing_bias: "Biais de taille de position",
-}
 const BIAS_KEYS = Object.keys(BIAS_LABELS)
 
 const SERIES = [
@@ -49,82 +56,6 @@ const SERIES = [
   { key: "risk" as const, color: "var(--blue)", label: "Risque" },
   { key: "propFirm" as const, color: "#9D7BFF", label: "Prop Firm" },
 ]
-
-// ── Couleurs / formats (seuils EXACTS de l'analyse membre) ──────────────────
-
-function scoreClass(score: number): string {
-  if (score > 60) return "text-cyan"
-  if (score >= 40) return "text-orange"
-  return "text-red"
-}
-
-function scoreVar(score: number): string {
-  if (score > 60) return "var(--cyan)"
-  if (score >= 40) return "var(--orange)"
-  return "var(--red)"
-}
-
-function winRateClass(v: number | null): string {
-  if (v === null) return "text-secondary"
-  return v >= 50 ? "text-cyan" : "text-red"
-}
-
-function profitFactorClass(v: number | null): string {
-  if (v === null) return "text-secondary"
-  return v >= 1 ? "text-cyan" : "text-red"
-}
-
-function riskRewardClass(v: number | null): string {
-  if (v === null) return "text-secondary"
-  return v >= 1 ? "text-cyan" : "text-red"
-}
-
-function drawdownClass(v: number | null): string {
-  if (v === null) return "text-secondary"
-  return v > 10 ? "text-red" : "text-cyan"
-}
-
-type Direction = "up" | "down"
-
-function deltaClass(delta: number | null, direction: Direction): string {
-  if (delta === null || delta === 0) return "text-secondary"
-  const good = direction === "up" ? delta > 0 : delta < 0
-  return good ? "text-cyan" : "text-red"
-}
-
-function fmtDelta(delta: number | null, decimals = 1, suffix = ""): string {
-  if (delta === null) return "—"
-  if (delta === 0) return `0${suffix}`
-  const sign = delta > 0 ? "+" : ""
-  return `${sign}${delta.toFixed(decimals)}${suffix}`
-}
-
-function fmtPct(v: number | null, decimals = 1): string {
-  return v === null ? "—" : `${v.toFixed(decimals)}%`
-}
-
-function fmtRatio(v: number | null, decimals = 2): string {
-  if (v === null) return "—"
-  if (v === 99) return "∞"
-  if (v === -99) return "−∞"
-  return v.toFixed(decimals)
-}
-
-function fmtScore(v: number): string {
-  return `${Math.round(v)}`
-}
-
-function fmtPnl(v: number): string {
-  const abs = Math.abs(v).toFixed(0)
-  return v < 0 ? `-${abs} €` : `+${abs} €`
-}
-
-function diff(a: number | null, b: number | null): number | null {
-  if (a === null || b === null) return null
-  // Un écart impliquant un sentinel (∞ / −∞) n'a pas de delta numérique sensé
-  if (Math.abs(a) === 99 || Math.abs(b) === 99) return null
-  return a - b
-}
 
 // ── Spinner ──────────────────────────────────────────────────────────────
 
@@ -221,6 +152,7 @@ export default function WeeklyEvolution({ plan }: Props) {
           actual={actual}
           previous={previous!}
           gapWeeks={gapWeeks}
+          hasCurrent={current != null}
         />
       )}
 
@@ -350,7 +282,7 @@ function VerdictCard({
         <h2 className={`text-xl font-bold ${verdictClass}`}>
           {verdictLabel}
           <span className="text-sm font-normal text-secondary">
-            {" "}sur tes {weeksActiveCount} dernières semaines
+            {" "}sur tes {trajectory.length} dernières semaines
           </span>
         </h2>
       )}
@@ -591,10 +523,12 @@ function FaceAFaceCard({
   actual,
   previous,
   gapWeeks,
+  hasCurrent,
 }: {
   actual: WeekPoint
   previous: WeekPoint
   gapWeeks: number
+  hasCurrent: boolean
 }) {
   type Row = {
     label: string
@@ -709,10 +643,14 @@ function FaceAFaceCard({
         <div className="mb-3 grid items-end gap-x-4" style={{ gridTemplateColumns: COL }}>
           <span />
           <div className="text-right">
-            <p className="text-sm text-secondary">{previous.label} · dernière</p>
+            <p className="text-sm text-secondary">
+              {hasCurrent ? `${previous.label} · dernière` : `${previous.label} · précédente`}
+            </p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-secondary">{actual.label} · actuelle</p>
+            <p className="text-sm text-secondary">
+              {hasCurrent ? `${actual.label} · actuelle` : `${actual.label} · clôturée`}
+            </p>
           </div>
           <span className="text-right text-sm text-secondary">Δ</span>
         </div>

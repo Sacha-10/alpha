@@ -16,6 +16,7 @@ import TradeReport from "@/components/TradeReport";
 import TradeJournal from "@/components/TradeJournal";
 import AnalysisHistory from "@/components/AnalysisHistory";
 import WeeklyEvolution from "@/components/WeeklyEvolution";
+import WeeklySummary from "@/components/WeeklySummary";
 import type { AiAnalysisResult } from "@/lib/tradingAnalysisTypes";
 import {
   Bell,
@@ -247,6 +248,20 @@ export default function DashboardClient() {
   useEffect(() => {
     void fetchUserData();
   }, [fetchUserData]);
+
+  // Deep-link : ?view=<DashboardView> ouvre directement la vue (ex. bouton
+  // « Voir mon espace » de l'email Résumé semaine).
+  useEffect(() => {
+    const view = searchParams.get("view");
+    const valid: DashboardView[] = [
+      "nouvelle-analyse", "mon-analyse", "historique", "journal-analyses",
+      "evolution", "resume-hebdomadaire", "prop-firm-score",
+      "detection-predictive", "alertes-telegram", "acces-api", "support",
+    ];
+    if (view && (valid as string[]).includes(view)) {
+      setMainView(view as DashboardView);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
@@ -607,7 +622,7 @@ export default function DashboardClient() {
       return <WeeklyEvolution plan={subscriptionPlan} />;
     }
     if (mainView === "resume-hebdomadaire") {
-      return <EmptyFeaturePage icon={CalendarCheck} title="Résumé semaine" />;
+      return <WeeklySummary plan={subscriptionPlan} />;
     }
     if (mainView === "prop-firm-score") {
       return <EmptyFeaturePage icon={Target} title="Prop Firm Score" />;
@@ -861,7 +876,7 @@ export default function DashboardClient() {
 
         <main
           className={`flex min-h-0 flex-1 flex-col bg-[#0A0A0F] p-6 ${
-            mainView === "nouvelle-analyse" || mainView === "mon-analyse" || mainView === "journal-analyses" || mainView === "historique" || mainView === "evolution" ? "overflow-y-auto" : "overflow-hidden"
+            mainView === "nouvelle-analyse" || mainView === "mon-analyse" || mainView === "journal-analyses" || mainView === "historique" || mainView === "evolution" || mainView === "resume-hebdomadaire" ? "overflow-y-auto" : "overflow-hidden"
           }`}
         >
           <div className="flex shrink-0 flex-col gap-4">
@@ -896,7 +911,7 @@ export default function DashboardClient() {
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col">
-            {mainView !== "nouvelle-analyse" && mainView !== "mon-analyse" && mainView !== "journal-analyses" && mainView !== "historique" && mainView !== "evolution" ? (
+            {mainView !== "nouvelle-analyse" && mainView !== "mon-analyse" && mainView !== "journal-analyses" && mainView !== "historique" && mainView !== "evolution" && mainView !== "resume-hebdomadaire" ? (
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
                 {renderMainContent()}
               </div>

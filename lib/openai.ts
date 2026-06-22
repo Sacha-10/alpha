@@ -444,7 +444,7 @@ function sessionOf(d: Date): 'London' | 'New York' | 'Tokyo' {
   return 'Tokyo'
 }
 
-function severityOf(freq: number): BiasSeverity {
+export function severityOf(freq: number): BiasSeverity {
   if (freq >= 75) return 'CRITIQUE'
   if (freq >= 50) return 'ÉLEVÉ'
   if (freq >= 25) return 'MOYEN'
