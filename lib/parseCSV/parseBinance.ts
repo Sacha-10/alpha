@@ -43,6 +43,7 @@ export function parseBinance(csvText: string): Trade[] {
 
       trades.push({
         ticket: `${symbol}-${time.getTime()}`,
+        source: 'binance',
         symbol,
         direction,
         lotSize: totalQty,

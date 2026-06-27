@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { buildWeeklyData, type TradeRow } from '@/lib/weeklyData'
+import { requirePlanFor } from '@/lib/plans'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
@@ -49,6 +50,20 @@ export async function GET(req: NextRequest) {
     }
 
     if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+
+    // Palier : Évolution semaine réservée à Premium et au-dessus.
+    const { data: userData } = await supabase
+      .from('users')
+      .select('subscription_plan')
+      .eq('id', user.id)
+      .single()
+
+    if (!requirePlanFor('weeklyEvolution', userData?.subscription_plan)) {
+      return NextResponse.json(
+        { error: 'Réservé au plan Premium et supérieur.', upgrade: true },
+        { status: 403 }
+      )
+    }
 
     const { data, error } = await supabase
       .from('trades')

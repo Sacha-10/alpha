@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { detectAndParse } from '@/lib/parseCSV'
+import { APP_LAUNCH } from '@/lib/plans'
 import { Upload, ChevronLeft, ChevronRight, Download, X } from 'lucide-react'
 import * as Popover from '@radix-ui/react-popover'
 
@@ -17,12 +18,34 @@ type TradeRow = {
   profit: number | null
 }
 
-type Props = {
-  plan: string | null
-}
-
 const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
 const DAYS_FR = ['Lu','Ma','Me','Je','Ve','Sa','Di']
+
+// Message d'import (affichage pur) : une seule phrase par import, choisie par
+// dominance count > skipped > duplicates. Accord singulier/pluriel sur X.
+type ImportKind = 'imported' | 'retention' | 'duplicates'
+const IMPORT_MS: Record<ImportKind, number> = {
+  imported: 5000,
+  retention: 10000,
+  duplicates: 7000,
+}
+function importMessage(kind: ImportKind, x: number): string {
+  const one = x === 1
+  if (kind === 'imported') {
+    return one
+      ? 'Votre trade a été importé.'
+      : `Vos ${x} trades ont été importés.`
+  }
+  if (kind === 'duplicates') {
+    return one
+      ? "Le trade présent sur votre journal n'a pas été importé."
+      : `Les ${x} trades présents sur votre journal n'ont pas été importés.`
+  }
+  // retention
+  return one
+    ? "Le trade qui a précédé votre inscription n'a pas été importé (votre historique débute à votre date d'inscription)."
+    : `Les ${x} trades qui ont précédé votre inscription n'ont pas été importés (votre historique débute à votre date d'inscription).`
+}
 
 type DateRangePickerProps = {
   dateFrom: string
@@ -178,42 +201,39 @@ function formatTime(dateStr: string | null): string {
   return new Date(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
 
-export default function TradeJournal({ plan }: Props) {
-  const getDateMin = () => {
-    if (plan === 'pro') return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-    if (plan === 'premium') return new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
-    return new Date('2026-01-01')
-  }
-
+export default function TradeJournal() {
+  // La rétention (fenêtre de données accessibles) est désormais appliquée
+  // CÔTÉ SERVEUR (/api/trades) depuis le plan réel + la date d'inscription.
+  // Le composant ne fait que filtrer l'affichage via le sélecteur de dates.
   const today = new Date()
   const todayStr = today.toISOString().split('T')[0]
-  const sevenDaysAgo = new Date(today)
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-  const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0]
+  // Défaut du sélecteur : du 1er jour du mois en cours jusqu'à aujourd'hui.
+  const firstOfMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`
 
   const [trades, setTrades] = useState<TradeRow[]>([])
   const [loading, setLoading] = useState(true)
   const [importing, setImporting] = useState(false)
   const [importError, setImportError] = useState<string | null>(null)
   const [importSuccess, setImportSuccess] = useState<string | null>(null)
+  const [importSuccessMs, setImportSuccessMs] = useState(5000)
   const [currentMonth, setCurrentMonth] = useState({ year: today.getFullYear(), month: today.getMonth() })
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [selectedWeek, setSelectedWeek] = useState<string | null>(null)
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null)
   const [view, setView] = useState<'day' | 'month'>('day')
-  const [dateFrom, setDateFrom] = useState(sevenDaysAgoStr)
+  const [dateFrom, setDateFrom] = useState(firstOfMonthStr)
   const [dateTo, setDateTo] = useState(todayStr)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false)
   const mobileDropdownRef = useRef<HTMLDivElement>(null)
 
-  const minNav = { year: 2026, month: 0 }
+  // Plancher de navigation du calendrier : unique source = APP_LAUNCH (01/2026).
+  const minNav = { year: APP_LAUNCH.getUTCFullYear(), month: APP_LAUNCH.getUTCMonth() }
   const maxNav = { year: new Date().getFullYear(), month: 11 }
 
   const loadTrades = useCallback(async () => {
     setLoading(true)
-    const dateMin = getDateMin()
     const { createBrowserClient } = await import('@supabase/ssr')
     const supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -221,7 +241,8 @@ export default function TradeJournal({ plan }: Props) {
     )
     const { data: { session } } = await supabase.auth.getSession()
     const token = session?.access_token
-    const res = await fetch(`/api/trades?dateMin=${dateMin.toISOString()}&token=${token}`)
+    // Pas de dateMin : la fenêtre de rétention est plafonnée côté serveur.
+    const res = await fetch(`/api/trades?token=${token}`)
     const json = await res.json()
     if (!res.ok) {
       setTrades([])
@@ -229,15 +250,15 @@ export default function TradeJournal({ plan }: Props) {
       setTrades(json.trades ?? [])
     }
     setLoading(false)
-  }, [plan])
+  }, [])
 
   useEffect(() => { loadTrades() }, [loadTrades])
 
   useEffect(() => {
     if (!importSuccess) return
-    const t = setTimeout(() => setImportSuccess(null), 10000)
+    const t = setTimeout(() => setImportSuccess(null), importSuccessMs)
     return () => clearTimeout(t)
-  }, [importSuccess])
+  }, [importSuccess, importSuccessMs])
 
   useEffect(() => {
     if (!importError) return
@@ -273,7 +294,22 @@ export default function TradeJournal({ plan }: Props) {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Erreur lors de l\'import.')
-      setImportSuccess(`${data.count} trades importés avec succès.`)
+      // Dominance : ce qui a été ajouté prime ; sinon la rétention prime sur les
+      // doublons. Une seule phrase, X = le nombre de la catégorie concernée.
+      const count = data.count ?? 0
+      const skipped = data.skipped ?? 0
+      const duplicates = data.duplicates ?? 0
+      let kind: ImportKind | null = null
+      let x = 0
+      if (count > 0) { kind = 'imported'; x = count }
+      else if (skipped > 0) { kind = 'retention'; x = skipped }
+      else if (duplicates > 0) { kind = 'duplicates'; x = duplicates }
+      // count = skipped = duplicates = 0 : aucun message (cas inatteignable sur
+      // une réponse 200 — un fichier vide est déjà rejeté en amont par la route).
+      if (kind) {
+        setImportSuccessMs(IMPORT_MS[kind])
+        setImportSuccess(importMessage(kind, x))
+      }
       await loadTrades()
     } catch (err: any) {
       setImportError(err.message || 'Erreur lors de l\'import.')

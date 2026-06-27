@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { getRetentionFloor } from '@/lib/plans'
 
 export async function GET(req: NextRequest) {
   try {
@@ -27,19 +28,29 @@ export async function GET(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     if (!user || authError) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
-    const dateMin = searchParams.get('dateMin')
+    // Fenêtre de rétention calculée CÔTÉ SERVEUR depuis le plan réel + la date
+    // d'inscription (jamais à partir du dateMin client). Accessible à tous les
+    // plans actifs (pas de palier — statut garanti par le proxy).
+    const { data: userData } = await supabase
+      .from('users')
+      .select('subscription_plan, created_at')
+      .eq('id', user.id)
+      .single()
 
-    let query = supabase
+    const floor = getRetentionFloor(userData?.subscription_plan, userData?.created_at)
+
+    // Le client peut demander PLUS restreint (dateMin), jamais plus large.
+    const clientMin = searchParams.get('dateMin')
+    const effectiveMin =
+      clientMin && new Date(clientMin) > floor ? new Date(clientMin) : floor
+
+    const { data, error } = await supabase
       .from('trades')
       .select('*')
       .eq('user_id', user.id)
+      .gte('opened_at', effectiveMin.toISOString())
       .order('opened_at', { ascending: true })
 
-    if (dateMin) {
-      query = query.gte('opened_at', dateMin)
-    }
-
-    const { data, error } = await query
     if (error) {
       return NextResponse.json({ error: 'Erreur lors du chargement.' }, { status: 500 })
     }

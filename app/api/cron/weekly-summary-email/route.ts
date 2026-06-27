@@ -5,6 +5,7 @@ import { buildSummaryFromRows } from '@/lib/weeklySummary'
 import { isoWeekKey, mondayFromKey, type TradeRow } from '@/lib/weeklyData'
 import { getWeeklySummaryEmail } from '@/lib/emails/weeklySummaryEmail'
 import { makeUnsubToken } from '@/lib/emailToken'
+import { isWeeklyEmailEligible } from '@/lib/plans'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -45,10 +46,8 @@ export async function GET(req: NextRequest) {
   }
 
   const eligible = (members ?? []).filter(m => {
-    const plan = (m.subscription_plan ?? '').toLowerCase()
-    if (plan !== 'premium' && plan !== 'elite') return false
+    if (!isWeeklyEmailEligible(m.subscription_plan, m.subscription_status)) return false
     if (m.weekly_email_opt_out === true) return false
-    if (m.subscription_status && m.subscription_status !== 'active') return false
     if (!m.email) return false
     return true
   })

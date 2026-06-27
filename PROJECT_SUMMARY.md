@@ -1013,15 +1013,33 @@ Le générateur d'analyse est désormais scindé en deux chemins :
 
 ### Historique des analyses — table `analyses` + rétention par plan
 
-`app/api/analyses/route.ts` (`GET`, `dynamic = 'force-dynamic'`) — accepte soit un cookie de session (`@supabase/ssr`), soit un `?token=` (Bearer, pour les appels cross-tab/Realtime). Filtre par `PLAN_MONTHS` :
+`app/api/analyses/route.ts` (`GET`, `dynamic = 'force-dynamic'`) — accepte soit un cookie de session (`@supabase/ssr`), soit un `?token=` (Bearer, pour les appels cross-tab/Realtime). **Palier Premium+** vérifié via `requirePlanFor('analysesHistory', plan)`. Borne de rétention serveur via `getRetentionFloor(plan, users.created_at)` (`lib/plans.ts`) = la plus récente de `(aujourd'hui − rétention du plan)` et `(date d'inscription)` :
 
-| Plan | Rétention |
-|---|---|
-| `pro` | 1 mois |
-| `premium` | 6 mois |
-| `elite` | illimité (`null` → pas de filtre `created_at`) |
+| Plan | Rétention | Accès historique |
+|---|---|---|
+| `pro` | 1 mois | ❌ refusé (palier Premium+) |
+| `premium` | 12 mois (1 an) | ✅ |
+| `elite` | illimité (depuis l'inscription) | ✅ |
+| sans abonnement / inconnu | 0 | ❌ (statut bloqué par le proxy) |
 
 Retourne `{ analyses: [{ id, created_at, plan, report }] }`, triées par `created_at desc`.
+
+### Rétention & protection serveur — règles centralisées (`lib/plans.ts`)
+
+**Date d'inscription** = `users.created_at` (Postgres `DEFAULT now()`, posée à la création de la ligne dans `auth/callback`, jamais ré-écrite). Source unique de la borne de rétention ; repli `APP_LAUNCH` (2026-01-01) si absente.
+
+**Rétention glissante** (`getRetentionFloor`) — appliquée UNIQUEMENT au **Journal de trades** (`/api/trades`) et à l'**Historique des analyses** (`/api/analyses`), toujours sur le plan ACTUEL. Aucune donnée n'est jamais supprimée à un changement de plan : seule la fenêtre d'affichage change (Pro→Premium ré-élargit immédiatement, Premium→Pro rétrécit sans perte). « Analyser vos trades », « Évolution semaine » et « Résumé semaine » n'appliquent PAS de fenêtre (logiques indépendantes).
+
+**Contrôle de STATUT centralisé** (`proxy.ts`) — `subscription_status === 'active'` est vérifié en amont sur `/dashboard/*` (redirection) et sur toutes les routes `/api/*` (401/403 JSON), SAUF la liste publique (`webhook`, `cron`, `auth`, `create-checkout`, `customer-portal`, `analyze-demo`, `email`, `generate-pdf`). Deny-by-default : toute nouvelle route `/api/*` est gardée automatiquement.
+
+**Contrôle de PALIER par feature** (`FEATURE_MIN_PLAN` + `requirePlanFor`) — table centralisée feature→palier minimum, vérifiée dans chaque route concernée. **FAIL-SAFE** : une feature non déclarée est REFUSÉE par défaut.
+
+> **Pour toute NOUVELLE feature avec route API :**
+> 1. Déclarer son palier dans `FEATURE_MIN_PLAN` (`lib/plans.ts`).
+> 2. Appeler `requirePlanFor(featureKey, plan)` dans la route.
+> 3. Le contrôle de statut est automatique via le proxy étendu.
+>
+> Oublier (1) **bloque l'accès par sécurité** (fail-safe), ce n'est jamais une faille silencieuse. Si la nouvelle route doit être publique (sans utilisateur actif), l'ajouter à `PUBLIC_API_PREFIXES` dans `proxy.ts`.
 
 ### Synchronisation cross-device des analyses — Supabase Realtime
 
@@ -1215,7 +1233,20 @@ cancel_url  : NEXT_PUBLIC_APP_URL/pricing
 |---|---|
 | `checkout.session.completed` | Met à jour `users` : `subscription_status=active`, `subscription_plan`, `analyses_limit`, `analyses_used=0`, `analyses_reset_date` (1er du mois suivant), `stripe_customer_id`, `stripe_subscription_id`. Met aussi à jour `sub.metadata` pour les handlers suivants. |
 | `customer.subscription.updated` | Upgrade (`newLimit > dbLimit`) : met à jour plan et limit immédiatement. Downgrade : différé au renouvellement de période. `cancel_at_period_end → true` : garde `status=active`, attend `.deleted`. |
-| `customer.subscription.deleted` | `status=canceled`, `plan=starter`, `analyses_limit=4`. Résolution user via `customer.metadata.userId` ou `customer.email`. |
+| `customer.subscription.deleted` | `status=canceled`, `subscription_plan=null`, `analyses_limit=0` (compte sans abonnement = 0 analyse, accès coupé). Résolution user via `customer.metadata.userId` ou `customer.email`. |
+
+> **Échec de paiement (approche « Stripe pilote »).** Aucun handler dédié : Stripe gère ses relances (`past_due`), l'utilisateur conserve l'accès pendant cette période de grâce, puis l'accès est coupé à la résiliation effective (`customer.subscription.deleted`). **Prérequis Dashboard Stripe** : *Settings → Billing → Subscriptions → « If all retries fail » = « Cancel subscription »*, sinon l'abonnement ne sera jamais supprimé et l'accès jamais coupé.
+
+> **Source de vérité des plans : `lib/plans.ts`.** Toutes les valeurs (limites, fenêtres d'historique, seuil illimité `UNLIMITED`, libellés, éligibilité) y sont définies une seule fois et exposées via des helpers (`getPlanLimit`, `getPlanMonths`, `isUnlimited`, `hasActiveAccess`, `isWeeklyEmailEligible`, `getPlanLabel`). Fenêtres d'historique glissantes : Pro = 1 mois, Premium = 12 mois (1 an), Élite = illimité. La valeur `'starter'` a été éliminée.
+
+### Garde d'accès — `proxy.ts` (ex-`middleware.ts`)
+
+Next.js 16 : la convention `middleware` est dépréciée et renommée `proxy`. Le fichier `proxy.ts` (export nommé `proxy`, `config.matcher = ['/dashboard/:path*', '/api/:path*']`) centralise le **contrôle de STATUT** (`subscription_status === 'active'`, via `hasActiveAccess`) :
+- **Pages** `/dashboard/*` : non connecté → redirection `/` ; connecté sans abonnement actif (résilié / impayé / jamais abonné) → redirection `/pricing` ; actif → accès.
+- **Routes** `/api/*` : non connecté → `401` JSON ; sans abonnement actif → `403` JSON (`upgrade: true`) ; actif → accès. **Deny-by-default** — toute nouvelle route `/api/*` est gardée automatiquement.
+- **Exclusions publiques** (`PUBLIC_API_PREFIXES`) : `webhook`, `cron`, `auth`, `create-checkout`, `customer-portal`, `analyze-demo`, `email`, `generate-pdf` (auth propre ou aucune donnée membre lue). Le webhook Stripe et le cron ne sont jamais bloqués.
+
+Le **contrôle de PALIER** (Premium/Élite) n'est PAS fait ici : chaque route le vérifie via `requirePlanFor` (cf. « Rétention & protection serveur — règles centralisées »).
 
 ### Stripe — `app/api/customer-portal/route.ts`
 ```
@@ -1258,7 +1289,7 @@ GET /api/customer-portal
 
 ### Précédemment
 - ✅ **Export PDF réel** : remplacé par `app/api/generate-pdf/route.tsx` (Puppeteer-core + `@sparticuz/chromium`, HTML auto-suffisant, PDF 1 page à la taille du contenu)
-- ✅ **Historique des analyses** : `<AnalysisHistory />` (vue `historique` du dashboard) consomme `GET /api/analyses`, rétention par plan (`PLAN_MONTHS`)
+- ✅ **Historique des analyses** : `<AnalysisHistory />` (vue `historique` du dashboard) consomme `GET /api/analyses`, rétention par plan (`getPlanMonths`, `lib/plans.ts`)
 - ✅ **Journal de trades** : `<TradeJournal />` (vues calendrier jour/mois, import/export CSV, date range picker)
 - ✅ **Synchronisation cross-device** : Supabase Realtime (`analyses-insert:${userId}`)
 - ✅ **Email de confirmation de paiement** : Resend, déclenché sur `checkout.session.completed`

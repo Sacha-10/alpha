@@ -18,6 +18,7 @@ import AnalysisHistory from "@/components/AnalysisHistory";
 import WeeklyEvolution from "@/components/WeeklyEvolution";
 import WeeklySummary from "@/components/WeeklySummary";
 import type { AiAnalysisResult } from "@/lib/tradingAnalysisTypes";
+import { isUnlimited, hasActiveAccess, isPremiumOrAbove, normalizePlan, getPlanLabel } from "@/lib/plans";
 import {
   Bell,
   CalendarCheck,
@@ -115,6 +116,7 @@ export default function DashboardClient() {
   const [error, setError] = useState<string | null>(null);
 
   const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
   const [userId, setUserId] = useState<string>('');
   const [analysesResetDate, setAnalysesResetDate] = useState<string | null>(null);
 
@@ -232,11 +234,12 @@ export default function DashboardClient() {
     setUserId(user.id);
     const { data } = await supabase
       .from("users")
-      .select("subscription_plan, analyses_used, analyses_limit, analyses_reset_date")
+      .select("subscription_plan, subscription_status, analyses_used, analyses_limit, analyses_reset_date")
       .eq("id", user.id)
       .single();
     if (data) {
       setSubscriptionPlan(data.subscription_plan ?? null);
+      setSubscriptionStatus(data.subscription_status ?? null);
       setAnalysesResetDate(data.analyses_reset_date ?? null);
       if (data.analyses_limit != null && data.analyses_used != null) {
         setAnalysesUsed(data.analyses_used);
@@ -330,12 +333,10 @@ export default function DashboardClient() {
     return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
   }
 
-  const normalizedPlan = (subscriptionPlan ?? "").toLowerCase();
-  const isPro = normalizedPlan === "pro";
+  const normalizedPlan = normalizePlan(subscriptionPlan) ?? "";
   const isElite = normalizedPlan === "elite";
-  const planLabel = subscriptionPlan
-    ? subscriptionPlan.charAt(0).toUpperCase() + subscriptionPlan.slice(1)
-    : "Pro";
+  const premiumOrAbove = isPremiumOrAbove(normalizedPlan);
+  const planLabel = getPlanLabel(subscriptionPlan);
   const cycleLabel = analysesResetDate
     ? `Cycle · ${formatResetDate(analysesResetDate)}`
     : "Cycle · --/--";
@@ -345,9 +346,10 @@ export default function DashboardClient() {
       : 0;
 
   const showQuotaCard =
+    hasActiveAccess(subscriptionStatus) &&
     analysesUsed !== undefined &&
     analysesLimit !== undefined &&
-    analysesLimit < 999999;
+    !isUnlimited(analysesLimit);
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -431,9 +433,9 @@ export default function DashboardClient() {
     );
   }
 
-  const historiqueLocked = isPro;
-  const evolutionLocked = isPro;
-  const resumeLocked = isPro;
+  const historiqueLocked = !premiumOrAbove;
+  const evolutionLocked = !premiumOrAbove;
+  const resumeLocked = !premiumOrAbove;
   const propFirmLocked = !isElite;
   const signauxLocked = !isElite;
 
@@ -563,7 +565,7 @@ export default function DashboardClient() {
             icon={Headphones}
             label="Support prioritaire"
             active={mainView === "support"}
-            locked={isPro}
+            locked={!premiumOrAbove}
             lockPlanLabel="Premium"
             lockedPath="/help"
             onSelect={() => setMainView("support")}
@@ -616,7 +618,7 @@ export default function DashboardClient() {
       return <AnalysisHistory />;
     }
     if (mainView === "journal-analyses") {
-      return <TradeJournal plan={subscriptionPlan} />;
+      return <TradeJournal />;
     }
     if (mainView === "evolution") {
       return <WeeklyEvolution plan={subscriptionPlan} />;
@@ -886,7 +888,7 @@ export default function DashboardClient() {
               >
                 <span>
                   {subscriptionPlan
-                    ? `Plan ${subscriptionPlan.charAt(0).toUpperCase() + subscriptionPlan.slice(1)} activé.`
+                    ? `Plan ${getPlanLabel(subscriptionPlan)} activé.`
                     : "Plan activé."}
                 </span>
                 <button

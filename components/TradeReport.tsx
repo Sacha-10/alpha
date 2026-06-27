@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Download } from "lucide-react";
 import type { AiAnalysisResult } from "@/lib/tradingAnalysisTypes";
+import { isUnlimited } from "@/lib/plans";
 import { TradeReportBody } from "./TradeReportBody";
 
 interface Props {
@@ -62,7 +63,7 @@ export default function TradeReport({
 
   return (
     <div className="space-y-6">
-      {analysesUsed !== undefined && limit < 999999 && (
+      {analysesUsed !== undefined && !isUnlimited(limit) && (
         <div className="card flex items-center justify-between p-6">
           <span className="text-secondary">Analyses utilisées</span>
           <div className="flex items-center gap-3">

@@ -26,6 +26,7 @@ export function parseTradingView(csvText: string): Trade[] {
 
     return {
       ticket: cols[0],
+      source: 'tradingview',
       symbol: cleanSymbol(cols[2]) || 'UNKNOWN',
       direction,
       lotSize,
@@ -45,6 +46,6 @@ export function parseTradingView(csvText: string): Trade[] {
         hour >= 13 && hour < 22 ? 'New York' :
         hour >= 0 && hour < 8 ? 'Asian' : 'Other'
       ) as Trade['session'],
-    }
+    } as Trade
   }).filter(t => t.entryPrice > 0)
 }

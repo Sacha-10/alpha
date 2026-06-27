@@ -45,6 +45,7 @@ export function parseFTMO(csvText: string): Trade[] {
 
     return {
       ticket: cols[0],
+      source: 'ftmo',
       symbol: sym,
       direction,
       lotSize: parseNum(cols[3]),

@@ -1,3 +1,5 @@
+import { isUnlimited, getPlanLabel } from '@/lib/plans';
+
 export function getConfirmationPaiementHTML({
   prenom,
   plan,
@@ -9,8 +11,11 @@ export function getConfirmationPaiementHTML({
   analysesLimit: number;
   renewalDate: string;
 }) {
-  const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
-  const analysesText = analysesLimit >= 999999 ? 'Illimitées' : `${analysesLimit}/mois`;
+  const planLabel = getPlanLabel(plan);
+  const analysesText = isUnlimited(analysesLimit) ? 'Illimitées' : `${analysesLimit}/mois`;
+  // Aperçu boîte mail : titre uniquement, puis barrière de &nbsp; pour empêcher
+  // tout déversement du corps dans la zone d'aperçu.
+  const preheader = `${prenom} - votre accès ${planLabel} a été activé`;
 
   return `<!DOCTYPE html>
 <html lang="fr">
@@ -20,6 +25,7 @@ export function getConfirmationPaiementHTML({
   <title>AlphaTradeX</title>
 </head>
 <body style="margin:0;padding:0;background-color:#0A0A0F;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;color:#0A0A0F;">${preheader}${'&nbsp;&zwnj;'.repeat(200)}</div>
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0A0A0F;padding:48px 16px;">
     <tr>
       <td align="center">
@@ -50,7 +56,7 @@ export function getConfirmationPaiementHTML({
           <tr>
             <td style="padding-bottom:32px;">
               <div style="color:#F0F4FF;font-size:28px;font-weight:700;line-height:1.25;letter-spacing:-0.01em;">${prenom}</div>
-              <div style="color:#F0F4FF;font-size:28px;font-weight:700;line-height:1.25;letter-spacing:-0.01em;margin-top:8px;">Votre statut <span style="color:#2D6FFF;">${planLabel}</span> est activé.</div>
+              <div style="color:#F0F4FF;font-size:28px;font-weight:700;line-height:1.25;letter-spacing:-0.01em;margin-top:8px;">Votre accès <span style="color:#2D6FFF;">${planLabel}</span> a été activé</div>
             </td>
           </tr>
 

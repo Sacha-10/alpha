@@ -114,6 +114,8 @@ export function toComputeTrade(row: TradeRow): Trade | null {
 
   return {
     ticket: row.id,
+    // Non lu par computeStats — placeholder pour conformer au type Trade.
+    source: 'mt5',
     symbol: row.symbol ?? '',
     direction: row.side === 'SELL' ? 'SELL' : 'BUY',
     lotSize: row.volume ?? 0,

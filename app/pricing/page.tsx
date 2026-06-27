@@ -7,6 +7,22 @@ import Navbar from "@/components/Navbar";
 import { Check, Flame, X, ArrowRight, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getSupabaseClient } from '@/lib/supabase';
+import { PLANS, isUnlimited, getPlanMonths, planRank, type PlanKey } from '@/lib/plans';
+
+// Prix « accès anticipé » et nombre d'analyses dérivés de la source de vérité.
+// Les prix barrés / publics restent du contenu marketing (non vendable).
+const perMonth = (n: number) => `${n}€/mois`;
+const analysesLabel = (limit: number) =>
+  isUnlimited(limit) ? "Analyses illimitées" : `${limit} analyses/mois`;
+
+// Fenêtre d'historique des analyses, formatée depuis getPlanMonths
+// (aucune durée en dur ici).
+const historyLabel = (plan: PlanKey) => {
+  const months = getPlanMonths(plan);
+  if (months === null) return "Historique de vos analyses (illimité)";
+  const window = months % 12 === 0 ? `${months / 12} an` : `${months} mois`;
+  return `Historique de vos analyses (${window})`;
+};
 
 type BillingMode = "monthly" | "yearly";
 
@@ -105,11 +121,11 @@ const plans: Plan[] = [
     yearlySavings: "Économisez 60€",
     ctaBg: "bg-[#1E2035]",
     prices: {
-      monthly: { opening: "24.5€/mois", openingStriked: "49.5€/mois", normal: "49.5€/mois" },
-      yearly: { opening: "19.5€/mois", openingStriked: "474€/an", normal: "39.5€/mois" },
+      monthly: { opening: perMonth(PLANS.pro.monthly), openingStriked: "49.5€/mois", normal: "49.5€/mois" },
+      yearly: { opening: perMonth(PLANS.pro.annual / 12), openingStriked: "474€/an", normal: "39.5€/mois" },
     },
     features: [
-      { label: "4 analyses/mois", included: true },
+      { label: analysesLabel(PLANS.pro.limit), included: true },
       { label: "Analyses IA GPT-5.4", included: true },
       { label: "Export PDF", included: true },
       { label: "Journal de vos trades (1 mois)", included: true },
@@ -131,15 +147,15 @@ const plans: Plan[] = [
     highlighted: true,
     ctaBg: "bg-[#2D6FFF]",
     prices: {
-      monthly: { opening: "49.5€/mois", openingStriked: "99.5€/mois", normal: "99.5€/mois" },
-      yearly: { opening: "39.5€/mois", openingStriked: "954€/an", normal: "79.5€/mois" },
+      monthly: { opening: perMonth(PLANS.premium.monthly), openingStriked: "99.5€/mois", normal: "99.5€/mois" },
+      yearly: { opening: perMonth(PLANS.premium.annual / 12), openingStriked: "954€/an", normal: "79.5€/mois" },
     },
     features: [
-      { label: "24 analyses/mois", included: true },
+      { label: analysesLabel(PLANS.premium.limit), included: true },
       { label: "Analyses IA GPT-5.4", included: true },
       { label: "Export PDF", included: true },
       { label: "Journal de vos trades (1 an)", included: true },
-      { label: "Historique de vos analyses (1 an)", included: true },
+      { label: historyLabel("premium"), included: true },
       { label: "Évolution hebdomadaire", included: true },
       { label: "Résumé hebdomadaire", included: true },
       { label: "Support prioritaire", included: true },
@@ -156,15 +172,15 @@ const plans: Plan[] = [
     yearlySavings: "Économisez 240€",
     ctaBg: "bg-[#1E2035]",
     prices: {
-      monthly: { opening: "99.5€/mois", openingStriked: "199.5€/mois", normal: "199.5€/mois" },
-      yearly: { opening: "79.5€/mois", openingStriked: "1914€/an", normal: "159.5€/mois" },
+      monthly: { opening: perMonth(PLANS.elite.monthly), openingStriked: "199.5€/mois", normal: "199.5€/mois" },
+      yearly: { opening: perMonth(PLANS.elite.annual / 12), openingStriked: "1914€/an", normal: "159.5€/mois" },
     },
     features: [
-      { label: "Analyses illimitées", included: true },
+      { label: analysesLabel(PLANS.elite.limit), included: true },
       { label: "Analyses IA GPT-5.4", included: true },
       { label: "Export PDF", included: true },
       { label: "Journal de vos trades (illimité)", included: true },
-      { label: "Historique de vos analyses (illimité)", included: true },
+      { label: historyLabel("elite"), included: true },
       { label: "Évolution hebdomadaire", included: true },
       { label: "Résumé hebdomadaire", included: true },
       { label: "Support prioritaire", included: true },
@@ -229,7 +245,7 @@ export default function PricingPage() {
   }, [supabase]);
 
   const handleCheckout = async (planName: string) => {
-    const planKey = planName === "PRO" ? "pro" : planName === "PREMIUM" ? "premium" : "elite";
+    const planKey = toPlanKey(planName);
     const billing = billingMode === "yearly" ? "annual" : "monthly";
 
     const { data: { session } } = await supabase.auth.getSession();
@@ -242,7 +258,8 @@ export default function PricingPage() {
     router.push(`/api/create-checkout?plan=${planKey}&billing=${billing}&token=${session.access_token}`);
   };
 
-  const planRank: Record<string, number> = { pro: 0, premium: 1, elite: 2 };
+  // Mapping libellé d'affichage → clé de plan (l'« ÉLITE » accentué n'est pas
+  // normalisable par normalizePlan, d'où ce mapping dédié côté présentation).
   const toPlanKey = (name: string) =>
     name === "PRO" ? "pro" : name === "PREMIUM" ? "premium" : "elite";
 
@@ -263,7 +280,7 @@ export default function PricingPage() {
         </button>
       );
     }
-    if (planRank[key] > (planRank[currentPlan] ?? -1)) {
+    if (planRank(key) > planRank(currentPlan)) {
       return (
         <button type="button" onClick={() => handleCheckout(p.name)} className={ctaClass}>
           Upgrader

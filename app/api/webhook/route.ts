@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { resend } from '@/lib/resend';
 import { getConfirmationPaiementHTML } from '@/lib/emails/confirmationPaiement';
+import { getPlanLabel } from '@/lib/plans';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -87,11 +88,15 @@ export async function POST(req: NextRequest) {
       // Envoi email confirmation
       const prenom = session.customer_details?.name?.split(' ')[0] || 'Trader';
       const renewalDate = new Date(subscription.current_period_end * 1000).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+      // Libellé propre (Pro/Premium/Élite), jamais la clé brute. Repli sur la
+      // marque si le plan est inconnu (getPlanLabel renvoie '—').
+      const planLabelRaw = getPlanLabel(planName);
+      const planLabel = planLabelRaw === '—' ? 'AlphaTradeX' : planLabelRaw;
 
       await resend.emails.send({
         from: 'AlphaTradeX <contact@alphatradex.ai>',
         to: session.customer_details?.email || '',
-        subject: `${prenom}, votre accès AlphaTradeX est activé.`,
+        subject: `${prenom} - votre accès ${planLabel} a été activé`,
         html: getConfirmationPaiementHTML({
           prenom,
           plan: planName,
@@ -181,10 +186,12 @@ export async function POST(req: NextRequest) {
       ) as Stripe.Customer
 
       const userId = customer.metadata?.userId
+      // Résiliation effective (fin des relances Stripe incluses) :
+      // plus aucun plan ni quota, accès coupé via subscription_status.
       const update = {
         subscription_status: 'canceled',
-        subscription_plan: 'starter',
-        analyses_limit: 4,
+        subscription_plan: null,
+        analyses_limit: 0,
       }
 
       if (userId) {

@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { hasActiveAccess } from '@/lib/plans'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
@@ -37,17 +38,38 @@ export async function GET(request: NextRequest) {
     let redirectUrl = process.env.NEXT_PUBLIC_APP_URL!
 
     if (user) {
-      const { data: upsertData, error: upsertError } = await supabase.from('users').upsert(
-        {
+      const profile = {
+        email: user.email,
+        name: user.user_metadata?.full_name ?? user.user_metadata?.name,
+        avatar_url: user.user_metadata?.avatar_url,
+      }
+
+      // On distingue création et mise à jour : les champs d'abonnement ne sont
+      // initialisés qu'à la création d'un nouvel utilisateur. Sur un compte
+      // existant, on ne rafraîchit que le profil — jamais subscription_*,
+      // sous peine d'écraser un abonnement actif à chaque connexion.
+      const { data: existing } = await supabase
+        .from('users')
+        .select('subscription_status')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      let subscriptionStatus: string | null
+      if (existing) {
+        await supabase.from('users').update(profile).eq('id', user.id)
+        subscriptionStatus = existing.subscription_status ?? null
+      } else {
+        await supabase.from('users').insert({
           id: user.id,
-          email: user.email,
-          name: user.user_metadata?.full_name ?? user.user_metadata?.name,
-          avatar_url: user.user_metadata?.avatar_url,
-        },
-        { onConflict: 'id', ignoreDuplicates: false }
-      )
-      const { data: userData } = await supabase.from('users').select('subscription_status').eq('id', user.id).single()
-      redirectUrl = userData?.subscription_status === 'active'
+          ...profile,
+          subscription_plan: null,
+          analyses_limit: 0,
+          subscription_status: 'inactive',
+        })
+        subscriptionStatus = 'inactive'
+      }
+
+      redirectUrl = hasActiveAccess(subscriptionStatus)
         ? `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`
         : `${process.env.NEXT_PUBLIC_APP_URL}/pricing`
     }

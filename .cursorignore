@@ -1,0 +1,6 @@
+# Secrets — ne jamais indexer ni lire
+.env
+.env.*
+.env.local
+*.pem
+*.key

@@ -66,7 +66,12 @@
       "Bash(npx tsx *)",
       "PowerShell(npm run *)",
       "PowerShell(npx tsc --noEmit)",
-      "PowerShell(npx next build)"
+      "PowerShell(npx next build)",
+      "PowerShell(npx eslint lib/plans.ts app/api/webhook/route.ts app/api/analyze/route.ts app/api/analyses/route.ts app/api/cron/weekly-summary-email/route.ts app/api/auth/callback/route.ts app/dashboard/DashboardClient.tsx components/TradeReport.tsx components/TradeJournal.tsx lib/emails/confirmationPaiement.ts app/pricing/page.tsx proxy.ts 2>&1 | Select-Object -Last 40)",
+      "Bash(git --no-pager diff --stat -- lib/ app/ components/)",
+      "Bash(git --no-pager diff -- lib/demoTrades.ts lib/weeklyData.ts lib/parseCSV/parseMT4.ts lib/parseCSV/parseFTMO.ts lib/parseCSV/parseBinance.ts lib/parseCSV/parseBybit.ts lib/parseCSV/parseTradingView.ts)",
+      "Bash(git check-ignore *)",
+      "Bash(echo \"exit=$?\")"
     ]
   }
 }

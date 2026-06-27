@@ -470,6 +470,7 @@ function buildTrade(row: Row, index: number, profitLoss: number): Trade {
     (dir === 'BUY' ? exitPrice - entryPrice : entryPrice - exitPrice) * pipScale(row.symbol)
   return {
     ticket: String(index + 1).padStart(3, '0'),
+    source: 'mt5',
     symbol: row.symbol,
     direction: dir,
     lotSize: Number(row.lotSize.toFixed(2)),

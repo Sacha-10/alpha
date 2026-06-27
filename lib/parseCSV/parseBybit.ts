@@ -23,6 +23,7 @@ export function parseBybit(csvText: string): Trade[] {
 
     return {
       ticket: orderId || `bybit-${time.getTime()}`,
+      source: 'bybit',
       symbol,
       direction,
       lotSize: qty,

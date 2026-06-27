@@ -2,15 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { analyzeTradesMember } from '@/lib/openai'
+import { getPlanLimit } from '@/lib/plans'
 import Stripe from 'stripe'
 
 export const maxDuration = 60
-
-const PLAN_LIMITS: Record<string, number> = {
-  pro: 4,
-  premium: 24,
-  elite: 999999,
-}
 
 // Rate limiting en mémoire — 1 requête toutes les 15 secondes par utilisateur
 const rateLimitMap = new Map<string, number>()
@@ -66,29 +61,23 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (userData.subscription_status !== 'active') {
-      return NextResponse.json(
-        { error: 'Un abonnement actif est requis pour accéder aux analyses.', upgrade: true },
-        { status: 403 }
-      )
-    }
+    // Statut actif garanti en amont par le proxy (garde centralisée). Ici on ne
+    // vérifie que la LIMITE d'analyses du plan, spécifique à cette route.
 
-    // Reset basé sur la période de facturation Stripe (current_period_start)
+    // Reset basé sur la période de facturation Stripe (current_period_start).
     const resetDate = new Date(userData.analyses_reset_date)
     let periodStart: Date | null = null
 
-    if (userData.subscription_status === 'active') {
-      const customers = await stripe.customers.search({
-        query: `metadata['userId']:'${user.id}'`,
-        expand: ['data.subscriptions'],
-      })
-      const customer = customers.data[0]
-      const activeSub = customer?.subscriptions?.data.find(
-        (s) => s.status === 'active'
-      )
-      if (activeSub) {
-        periodStart = new Date(activeSub.current_period_start * 1000)
-      }
+    const customers = await stripe.customers.search({
+      query: `metadata['userId']:'${user.id}'`,
+      expand: ['data.subscriptions'],
+    })
+    const customer = customers.data[0]
+    const activeSub = customer?.subscriptions?.data.find(
+      (s) => s.status === 'active'
+    )
+    if (activeSub) {
+      periodStart = new Date(activeSub.current_period_start * 1000)
     }
 
     if (periodStart !== null && resetDate < periodStart) {
@@ -101,9 +90,7 @@ export async function POST(req: NextRequest) {
       userData.analyses_used = 0
     }
 
-    const limit = PLAN_LIMITS[
-      userData.subscription_plan || 'starter'
-    ]
+    const limit = getPlanLimit(userData.subscription_plan)
 
     if (userData.analyses_used >= limit) {
       return NextResponse.json(

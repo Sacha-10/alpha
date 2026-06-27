@@ -1,7 +1,18 @@
 import { detectDelimiter, makeCSVParser, cleanSymbol } from './utils'
 
+export type TradeSource =
+  | 'mt4'
+  | 'mt5'
+  | 'ftmo'
+  | 'binance'
+  | 'bybit'
+  | 'tradingview'
+
 export interface Trade {
   ticket: string
+  // Format d'origine détecté — porté jusqu'à l'import pour la clé de dédup
+  // (user_id, source, source_id). Renseigné par chaque parser.
+  source: TradeSource
   symbol: string
   direction: 'BUY' | 'SELL'
   lotSize: number
@@ -63,6 +74,7 @@ export function parseMT4(csvText: string): Trade[] {
       const sym = cleanSymbol(cols[1])
       return {
         ticket: cols[0],
+        source: 'mt5',
         symbol: sym,
         direction,
         lotSize: parseNum(cols[3]),
@@ -94,6 +106,7 @@ export function parseMT4(csvText: string): Trade[] {
 
     return {
       ticket: cols[0],
+      source: 'mt4',
       symbol: sym,
       direction,
       lotSize: parseNum(cols[3]),

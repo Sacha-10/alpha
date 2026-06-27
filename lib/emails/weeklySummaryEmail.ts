@@ -68,8 +68,8 @@ export function getWeeklySummaryEmail(params: {
   const { summary, appUrl, unsubscribeUrl } = params
   const { verdict, movements, regularityFlag, scores, values, bias, hasBaseline } = summary
 
-  const subject = `Ton résumé · ${summary.weekRangeLabel}`
-  const preheader = `${verdict.label} — PnL ${fmtPnl(values.pnl.value ?? 0)}`
+  const subject = `Résumé semaine · ${summary.weekRangeLabel}`
+  const preheader = `Résumé semaine · ${summary.weekRangeLabel}`
 
   // Verdict + ligne de mouvements
   let verdictBlock = `<div style="color:${toneHex(verdict.tone)};font-size:16px;font-weight:600;">${verdict.label}</div>`
@@ -153,7 +153,7 @@ export function getWeeklySummaryEmail(params: {
   <title>AlphaTradeX</title>
 </head>
 <body style="margin:0;padding:0;background-color:#0A0A0F;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#0A0A0F;">${preheader}</div>
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;color:#0A0A0F;">${preheader}${'&nbsp;&zwnj;'.repeat(200)}</div>
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0A0A0F;padding:40px 16px;">
     <tr>
       <td align="center">

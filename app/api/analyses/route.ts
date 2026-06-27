@@ -2,14 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
+import { getRetentionFloor, requirePlanFor } from '@/lib/plans'
 
 export const dynamic = 'force-dynamic'
-
-const PLAN_MONTHS: Record<string, number | null> = {
-  pro: 1,
-  premium: 6,
-  elite: null,
-}
 
 export async function GET(req: NextRequest) {
   try {
@@ -54,26 +49,28 @@ export async function GET(req: NextRequest) {
 
     const { data: userData } = await supabase
       .from('users')
-      .select('subscription_plan')
+      .select('subscription_plan, created_at')
       .eq('id', user.id)
       .single()
 
-    const plan = userData?.subscription_plan ?? 'pro'
-    const months = PLAN_MONTHS[plan] ?? 1
+    // Palier : Historique des analyses réservé à Premium et au-dessus.
+    if (!requirePlanFor('analysesHistory', userData?.subscription_plan)) {
+      return NextResponse.json(
+        { error: 'Historique réservé au plan Premium et supérieur.', upgrade: true },
+        { status: 403 }
+      )
+    }
 
-    let query = supabase
+    // Fenêtre de rétention serveur : la plus récente de (aujourd'hui − rétention
+    // du plan) et (date d'inscription). Élite → depuis l'inscription.
+    const floor = getRetentionFloor(userData?.subscription_plan, userData?.created_at)
+
+    const { data, error } = await supabase
       .from('analyses')
       .select('id, created_at, plan, report')
       .eq('user_id', user.id)
+      .gte('created_at', floor.toISOString())
       .order('created_at', { ascending: false })
-
-    if (months !== null) {
-      const since = new Date()
-      since.setMonth(since.getMonth() - months)
-      query = query.gte('created_at', since.toISOString())
-    }
-
-    const { data, error } = await query
 
     if (error) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
