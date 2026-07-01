@@ -12,6 +12,7 @@ import { PLANS, isUnlimited, getPlanMonths, planRank, type PlanKey } from '@/lib
 // Prix « accès anticipé » et nombre d'analyses dérivés de la source de vérité.
 // Les prix barrés / publics restent du contenu marketing (non vendable).
 const perMonth = (n: number) => `${n}€/mois`;
+const perYear = (n: number) => `${n}€/an`;
 const analysesLabel = (limit: number) =>
   isUnlimited(limit) ? "Analyses illimitées" : `${limit} analyses/mois`;
 
@@ -34,8 +35,11 @@ type Plan = {
   highlighted?: boolean;
   ctaBg: string;
   prices: {
-    monthly: { opening: string; openingStriked: string; normal: string };
-    yearly: { opening: string; openingStriked: string; normal: string };
+    // Vue mensuelle : prix early access mensuel + prix public mensuel.
+    monthly: { opening: string; public: string };
+    // Vue annuelle : prix early mensualisé, total annuel plein (barré),
+    // total annuel réduit, prix public mensualisé.
+    yearly: { opening: string; annualFull: string; annualTotal: string; public: string };
   };
   features: Array<{ label: string; included: boolean }>;
 };
@@ -118,11 +122,16 @@ const plans: Plan[] = [
     name: "PRO",
     hook: "Structurer ses décisions.",
     subhook: "Analyser ses trades avec méthode.",
-    yearlySavings: "Économisez 60€",
+    yearlySavings: "-20%",
     ctaBg: "bg-[#1E2035]",
     prices: {
-      monthly: { opening: perMonth(PLANS.pro.monthly), openingStriked: "49.5€/mois", normal: "49.5€/mois" },
-      yearly: { opening: perMonth(PLANS.pro.annual / 12), openingStriked: "474€/an", normal: "39.5€/mois" },
+      monthly: { opening: perMonth(PLANS.pro.monthly), public: perMonth(PLANS.pro.publicMonthly) },
+      yearly: {
+        opening: perMonth(PLANS.pro.annualPerMonth),
+        annualFull: perYear(PLANS.pro.annualFull),
+        annualTotal: perYear(PLANS.pro.annual),
+        public: perMonth(PLANS.pro.publicAnnualPerMonth),
+      },
     },
     features: [
       { label: analysesLabel(PLANS.pro.limit), included: true },
@@ -143,12 +152,17 @@ const plans: Plan[] = [
     name: "PREMIUM",
     hook: "Optimiser sa régularité.",
     subhook: "Améliorer ses performances avec régularité.",
-    yearlySavings: "Économisez 120€",
+    yearlySavings: "-20%",
     highlighted: true,
     ctaBg: "bg-[#2D6FFF]",
     prices: {
-      monthly: { opening: perMonth(PLANS.premium.monthly), openingStriked: "99.5€/mois", normal: "99.5€/mois" },
-      yearly: { opening: perMonth(PLANS.premium.annual / 12), openingStriked: "954€/an", normal: "79.5€/mois" },
+      monthly: { opening: perMonth(PLANS.premium.monthly), public: perMonth(PLANS.premium.publicMonthly) },
+      yearly: {
+        opening: perMonth(PLANS.premium.annualPerMonth),
+        annualFull: perYear(PLANS.premium.annualFull),
+        annualTotal: perYear(PLANS.premium.annual),
+        public: perMonth(PLANS.premium.publicAnnualPerMonth),
+      },
     },
     features: [
       { label: analysesLabel(PLANS.premium.limit), included: true },
@@ -169,11 +183,16 @@ const plans: Plan[] = [
     name: "ÉLITE",
     hook: "Maîtriser son exécution.",
     subhook: "Exécuter ses décisions avec précision.",
-    yearlySavings: "Économisez 240€",
+    yearlySavings: "-20%",
     ctaBg: "bg-[#1E2035]",
     prices: {
-      monthly: { opening: perMonth(PLANS.elite.monthly), openingStriked: "199.5€/mois", normal: "199.5€/mois" },
-      yearly: { opening: perMonth(PLANS.elite.annual / 12), openingStriked: "1914€/an", normal: "159.5€/mois" },
+      monthly: { opening: perMonth(PLANS.elite.monthly), public: perMonth(PLANS.elite.publicMonthly) },
+      yearly: {
+        opening: perMonth(PLANS.elite.annualPerMonth),
+        annualFull: perYear(PLANS.elite.annualFull),
+        annualTotal: perYear(PLANS.elite.annual),
+        public: perMonth(PLANS.elite.publicAnnualPerMonth),
+      },
     },
     features: [
       { label: analysesLabel(PLANS.elite.limit), included: true },
@@ -298,6 +317,53 @@ export default function PricingPage() {
     );
   };
 
+  // Rend un prix "{montant}€/mois" à la façon TraderSync : montant en gros
+  // (taille héritée du parent), suffixe d'unité "/mois" discret (text-lg =
+  // taille qu'avait le total annuel réduit). Gain de largeur → le prix
+  // mensualisé et le total annuel barré tiennent sur une seule ligne (mobile).
+  const renderMonthlyPrice = (value: string) => {
+    const idx = value.indexOf("/");
+    const amount = idx === -1 ? value : value.slice(0, idx); // ex. "19.6€"
+    const unit = idx === -1 ? "" : value.slice(idx); // ex. "/mois"
+    return (
+      <>
+        {amount}
+        {unit && <span className="text-lg">{unit}</span>}
+      </>
+    );
+  };
+
+  // Bloc prix — structure distincte par mode de facturation.
+  //  · Mensuel : prix early mensuel + prix public mensuel.
+  //  · Annuel  : prix early mensualisé (avec le total annuel plein barré à
+  //    droite de la même ligne) + total annuel réduit + prix public mensualisé.
+  const renderPriceBox = (p: Plan) => (
+    <div className="mt-6 rounded-lg border border-border bg-background p-4">
+      <p className="text-xs uppercase tracking-wide text-secondary">Accès anticipé (à vie)</p>
+      {billingMode === "monthly" ? (
+        <>
+          <p className="mt-2 text-4xl font-bold text-primary">{renderMonthlyPrice(p.prices.monthly.opening)}</p>
+          <p className="mt-4 text-sm text-secondary">
+            Prix public (à venir) :{" "}
+            <span className="font-semibold text-primary">{p.prices.monthly.public}</span>
+          </p>
+        </>
+      ) : (
+        <>
+          <div className="mt-2 flex items-baseline justify-between gap-2">
+            <p className="text-4xl font-bold text-primary">{renderMonthlyPrice(p.prices.yearly.opening)}</p>
+            <p className="text-sm text-secondary line-through">{p.prices.yearly.annualFull}</p>
+          </div>
+          <p className="mt-1 text-sm font-semibold text-primary">{p.prices.yearly.annualTotal}</p>
+          <p className="mt-4 text-sm text-secondary">
+            Prix public (à venir) :{" "}
+            <span className="font-semibold text-primary">{p.prices.yearly.public}</span>
+          </p>
+        </>
+      )}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background text-primary">
       <Navbar />
@@ -352,7 +418,7 @@ export default function PricingPage() {
                 >
                   Annuel
                   <span className="rounded-full bg-blue text-primary px-2 py-0.5 text-xs font-semibold">
-                    Économisez 20%
+                    -20%
                   </span>
                 </button>
               </div>
@@ -360,7 +426,6 @@ export default function PricingPage() {
 
             <div className="w-full flex flex-col gap-5 md:flex-row md:items-end mt-10">
               {plans.map((plan, index) => {
-                const currentPrices = billingMode === "monthly" ? plan.prices.monthly : plan.prices.yearly;
                 return (
                   <RevealSection key={plan.name} delay={index * 80} className="w-full md:flex-1">
                     <div style={plan.highlighted ? { marginBottom: '-4px' } : undefined}>
@@ -381,15 +446,7 @@ export default function PricingPage() {
                             <h2 className="text-2xl font-bold">{plan.name}</h2>
                             <p className="mt-2 text-primary">{plan.hook}</p>
                             <p className="text-sm text-secondary">{plan.subhook}</p>
-                            <div className="mt-6 rounded-lg border border-border bg-background p-4">
-                              <p className="text-xs uppercase tracking-wide text-secondary">Accès anticipé (à vie)</p>
-                              <p className="mt-2 text-3xl font-bold text-primary">{currentPrices.opening}</p>
-                              <p className="mt-1 text-sm text-secondary line-through">{currentPrices.openingStriked}</p>
-                              <p className="mt-4 text-sm text-secondary">
-                                Prix public (à venir) :{" "}
-                                <span className="font-semibold text-primary">{currentPrices.normal}</span>
-                              </p>
-                            </div>
+                            {renderPriceBox(plan)}
                             {renderCTA(plan)}
                             <ul className="mt-6 space-y-3">
                               {plan.features.map((feature) => (
@@ -419,15 +476,7 @@ export default function PricingPage() {
                           <p className="mt-2 text-primary">{plan.hook}</p>
                           <p className="text-sm text-secondary">{plan.subhook}</p>
 
-                          <div className="mt-6 rounded-lg border border-border bg-background p-4">
-                            <p className="text-xs uppercase tracking-wide text-secondary">Accès anticipé (à vie)</p>
-                            <p className="mt-2 text-3xl font-bold text-primary">{currentPrices.opening}</p>
-                            <p className="mt-1 text-sm text-secondary line-through">{currentPrices.openingStriked}</p>
-                            <p className="mt-4 text-sm text-secondary">
-                              Prix public (à venir) :{" "}
-                              <span className="font-semibold text-primary">{currentPrices.normal}</span>
-                            </p>
-                          </div>
+                          {renderPriceBox(plan)}
 
                           {renderCTA(plan)}
 

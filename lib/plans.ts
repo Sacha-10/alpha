@@ -16,9 +16,15 @@ export const PLANS = {
     limit: 4,
     historyMonths: 1,
     monthly: 24.5,
-    annual: 234,
-    stripePriceMonthly: 'price_1TTQM6CfiBqZlYaUIHzEg8mE',
-    stripePriceAnnual: 'price_1TTQMUCfiBqZlYaUBGMvBO8M',
+    annual: 235.2,
+    annualPerMonth: 19.6,
+    // Valeurs marketing d'affichage (non facturées) — stockées exactes pour
+    // éviter tout flottant imprécis à l'affichage (cf. TÂCHE prix cartes).
+    annualFull: 470.4, // total annuel plein (barré)
+    publicMonthly: 49, // prix public mensuel
+    publicAnnualPerMonth: 39.2, // prix public mensualisé (vue annuelle)
+    stripePriceMonthly: 'price_1To2awCfiBqZlYaUVDueCu2W',
+    stripePriceAnnual: 'price_1To2crCfiBqZlYaUuRzJNJam',
     stripeProductId: 'prod_USL2OMHSRxPwPE',
   },
   premium: {
@@ -26,9 +32,13 @@ export const PLANS = {
     limit: 24,
     historyMonths: 12,
     monthly: 49.5,
-    annual: 474,
-    stripePriceMonthly: 'price_1TTQNkCfiBqZlYaUz2FyNlFi',
-    stripePriceAnnual: 'price_1TTQOBCfiBqZlYaUu2bZWfBQ',
+    annual: 475.2,
+    annualPerMonth: 39.6,
+    annualFull: 950.4, // total annuel plein (barré)
+    publicMonthly: 99, // prix public mensuel
+    publicAnnualPerMonth: 79.2, // prix public mensualisé (vue annuelle)
+    stripePriceMonthly: 'price_1To2flCfiBqZlYaUIVaGGRUJ',
+    stripePriceAnnual: 'price_1To2hhCfiBqZlYaUR2QPNhOI',
     stripeProductId: 'prod_USL3p21C1Kc8Rc',
   },
   elite: {
@@ -36,9 +46,13 @@ export const PLANS = {
     limit: UNLIMITED,
     historyMonths: null, // null = historique illimité
     monthly: 99.5,
-    annual: 954,
-    stripePriceMonthly: 'price_1TTQPXCfiBqZlYaU11kT9Yoc',
-    stripePriceAnnual: 'price_1TTQQ2CfiBqZlYaUvCndD4Xz',
+    annual: 955.2,
+    annualPerMonth: 79.6,
+    annualFull: 1910.4, // total annuel plein (barré)
+    publicMonthly: 199, // prix public mensuel
+    publicAnnualPerMonth: 159.2, // prix public mensualisé (vue annuelle)
+    stripePriceMonthly: 'price_1To2kbCfiBqZlYaUqTh42IQJ',
+    stripePriceAnnual: 'price_1To2mXCfiBqZlYaUflkYYQVz',
     stripeProductId: 'prod_USL53dmtaWpiDq',
   },
 } as const

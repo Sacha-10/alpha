@@ -640,7 +640,7 @@ Sous-texte : `text-sm text-[#8892AA]` — "Réservé aux 200 premiers membres."
 - Wrapper : `mt-8 inline-flex items-center rounded-full border border-[#1E2035] bg-[#12121A] p-1 text-sm`
 - Actif : `rounded-full px-4 py-2 bg-[#1E2035] text-[#F0F4FF]`
 - Inactif : `text-[#8892AA]`
-- Badge économie : `rounded-full bg-[#2D6FFF] px-2 py-0.5 text-xs font-semibold text-[#F0F4FF]` — "Économisez 20%"
+- Badge économie : `rounded-full bg-[#2D6FFF] px-2 py-0.5 text-xs font-semibold text-[#F0F4FF]` — "-20%"
 
 #### Checkout — `handleCheckout(planName)` (fonctionnel)
 ```ts
@@ -659,10 +659,10 @@ async function handleCheckout(planName: string) {
 |---|---|---|---|
 | Hook | "Structurer ses décisions." | "Optimiser sa régularité." | "Maîtriser son exécution." |
 | Mensuel opening | 24.5€/mois | 49.5€/mois | 99.5€/mois |
-| Mensuel barré | 49.5€/mois | 99.5€/mois | 199.5€/mois |
-| Annuel opening | 19.5€/mois | 39.5€/mois | 79.5€/mois |
-| Annuel barré | 474€/an | 954€/an | 1914€/an |
-| Économies annuel | 60€ | 120€ | 240€ |
+| Mensuel barré | 49€/mois | 99€/mois | 199€/mois |
+| Annuel opening | 19.6€/mois | 39.6€/mois | 79.6€/mois |
+| Annuel barré | 49€/mois | 99€/mois | 199€/mois |
+| Badge annuel | -20% | -20% | -20% |
 | CTA bg | `bg-[#1E2035]` | `bg-[#2D6FFF]` | `bg-[#1E2035]` |
 | Highlighted | non | **oui** | non |
 
@@ -1067,16 +1067,16 @@ Plans identiques à ceux affichés sur `/pricing` (aucune incohérence) :
 
 | Clé | Nom | Limit | Mensuel | Annuel |
 |---|---|---|---|---|
-| `pro` | Pro | 4 | 24.5€ | 234€ |
-| `premium` | Premium | 24 | 49.5€ | 474€ |
-| `elite` | Élite | 999999 | 99.5€ | 954€ |
+| `pro` | Pro | 4 | 24.5€ | 235.2€ |
+| `premium` | Premium | 24 | 49.5€ | 475.2€ |
+| `elite` | Élite | 999999 | 99.5€ | 955.2€ |
 
 **Price IDs et Product IDs Stripe live :**
 | Plan | stripePriceMonthly | stripePriceAnnual | stripeProductId |
 |---|---|---|---|
-| pro | `price_1TTQM6CfiBqZlYaUIHzEg8mE` | `price_1TTQMUCfiBqZlYaUBGMvBO8M` | `prod_USL2OMHSRxPwPE` |
-| premium | `price_1TTQNkCfiBqZlYaUz2FyNlFi` | `price_1TTQOBCfiBqZlYaUu2bZWfBQ` | `prod_USL3p21C1Kc8Rc` |
-| elite | `price_1TTQPXCfiBqZlYaU11kT9Yoc` | `price_1TTQQ2CfiBqZlYaUvCndD4Xz` | `prod_USL53dmtaWpiDq` |
+| pro | `price_1To2awCfiBqZlYaUVDueCu2W` | `price_1To2crCfiBqZlYaUuRzJNJam` | `prod_USL2OMHSRxPwPE` |
+| premium | `price_1To2flCfiBqZlYaUIVaGGRUJ` | `price_1To2hhCfiBqZlYaUR2QPNhOI` | `prod_USL3p21C1Kc8Rc` |
+| elite | `price_1To2kbCfiBqZlYaUqTh42IQJ` | `price_1To2mXCfiBqZlYaUflkYYQVz` | `prod_USL53dmtaWpiDq` |
 
 Référencé dans `/analysis` via `PLANS.pro.monthly` pour le CTA post-rapport (24.5€/mois).
 
