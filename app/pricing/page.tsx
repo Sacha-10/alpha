@@ -7,7 +7,7 @@ import Navbar from "@/components/Navbar";
 import { Check, Flame, X, ArrowRight, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getSupabaseClient } from '@/lib/supabase';
-import { PLANS, isUnlimited, getPlanMonths, planRank, type PlanKey } from '@/lib/plans';
+import { PLANS, DISABLED_PLANS, isUnlimited, getPlanMonths, planRank, type PlanKey } from '@/lib/plans';
 
 // Prix « accès anticipé » et nombre d'analyses dérivés de la source de vérité.
 // Les prix barrés / publics restent du contenu marketing (non vendable).
@@ -285,6 +285,18 @@ export default function PricingPage() {
   const renderCTA = (p: Plan) => {
     const key = toPlanKey(p.name);
     const ctaClass = `mt-6 w-full rounded-lg px-4 py-3 font-semibold text-primary transition-opacity hover:opacity-90 ${p.ctaBg}`;
+    // Plan désactivé à la vente (cf. DISABLED_PLANS) : bouton neutralisé, SANS
+    // onClick → aucune redirection Stripe. Apparence STRICTEMENT identique à un
+    // bouton actif (même fond ctaBg, même opacité, même curseur) : seul le texte
+    // change. disabled:opacity-100 neutralise tout grisage auto lié à `disabled`.
+    // Réactivation = retirer le plan de DISABLED_PLANS (aucune autre modif ici).
+    if (DISABLED_PLANS.includes(key)) {
+      return (
+        <button type="button" disabled className={`${ctaClass} disabled:opacity-100`}>
+          En cours de mise à niveau
+        </button>
+      );
+    }
     if (subscriptionStatus !== 'active' || !currentPlan) {
       return (
         <button type="button" onClick={() => handleCheckout(p.name)} className={ctaClass}>

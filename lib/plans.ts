@@ -60,6 +60,17 @@ export const PLANS = {
 export type PlanKey = keyof typeof PLANS
 
 /**
+ * Interrupteur unique des plans désactivés à la vente. Un plan listé ici est
+ * bloqué à la fois côté page (bouton neutralisé, cf. renderCTA dans
+ * app/pricing/page.tsx) et côté serveur (refus du checkout dans
+ * app/api/create-checkout/route.ts). Source unique — aucune constante dupliquée.
+ *
+ * Pour REMETTRE un plan en vente : le retirer de ce tableau (ou vider le
+ * tableau). Aucun autre changement requis.
+ */
+export const DISABLED_PLANS: PlanKey[] = ['elite']
+
+/**
  * Plancher calendaire de l'app : aucune donnée (trade / analyse) n'existe avant
  * cette date. Sert (1) de repli pour la borne de rétention quand la date
  * d'inscription est absente, (2) de plancher de navigation du calendrier

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { PLANS } from '@/lib/plans'
+import { PLANS, DISABLED_PLANS } from '@/lib/plans'
 import { getSupabase } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -28,6 +28,13 @@ export async function GET(req: NextRequest) {
 
   if (!plan) {
     return NextResponse.json({ error: 'Plan invalide' }, { status: 400 })
+  }
+
+  // Plan désactivé à la vente (cf. DISABLED_PLANS, source unique). Bloque en
+  // amont les DEUX chemins (nouvel abonnement ET modification d'abo existant),
+  // avant tout appel Stripe. Réactivation = retirer le plan de DISABLED_PLANS.
+  if (DISABLED_PLANS.includes(planKey)) {
+    return NextResponse.json({ error: 'Plan indisponible' }, { status: 403 })
   }
 
   const priceId = annual ? plan.stripePriceAnnual : plan.stripePriceMonthly
