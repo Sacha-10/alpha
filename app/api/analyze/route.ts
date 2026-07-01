@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
       })
       .eq('id', user.id)
 
-    await supabase.from('analyses')
+    await supabase.from('member_analyses')
       .insert({
         user_id: user.id,
         report,

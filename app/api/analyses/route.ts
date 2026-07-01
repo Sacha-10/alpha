@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
     const floor = getRetentionFloor(userData?.subscription_plan, userData?.created_at)
 
     const { data, error } = await supabase
-      .from('analyses')
+      .from('member_analyses')
       .select('id, created_at, plan, report')
       .eq('user_id', user.id)
       .gte('created_at', floor.toISOString())

@@ -197,7 +197,7 @@ export default function DashboardClient() {
       .channel(`analyses-insert:${userId}`)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'analyses', filter: `user_id=eq.${userId}` },
+        { event: 'INSERT', schema: 'public', table: 'member_analyses', filter: `user_id=eq.${userId}` },
         (payload) => {
           const report = (payload.new as { report: AiAnalysisResult }).report;
           if (report) {

@@ -83,14 +83,14 @@ export async function POST(req: NextRequest) {
   let existing: { ip_address: string } | null
   try {
     const { data, error: selectError } = await supabase
-      .from('demo')
+      .from('visitor_analyses')
       .select('ip_address')
       .eq('ip_address', ip)
       .maybeSingle()
 
     if (selectError) {
       console.error(
-        '[analyze-demo] Échec étape: supabase select demo (erreur API)',
+        '[analyze-demo] Échec étape: supabase select visitor_analyses (erreur API)',
         {
           code: selectError.code,
           message: selectError.message,
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
     }
     existing = data
   } catch (err) {
-    console.error('[analyze-demo] Échec étape: supabase select demo (exception)', err)
+    console.error('[analyze-demo] Échec étape: supabase select visitor_analyses (exception)', err)
     return NextResponse.json(
       { error: 'Erreur lors de la vérification démo.' },
       { status: 500 }
@@ -127,12 +127,12 @@ export async function POST(req: NextRequest) {
 
   try {
     const { error: insertError } = await supabase
-      .from('demo')
+      .from('visitor_analyses')
       .insert({ ip_address: ip, used_at: new Date().toISOString() })
 
     if (insertError) {
       console.error(
-        '[analyze-demo] Échec étape: supabase insert demo (erreur API)',
+        '[analyze-demo] Échec étape: supabase insert visitor_analyses (erreur API)',
         {
           code: insertError.code,
           message: insertError.message,
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
       )
     }
   } catch (err) {
-    console.error('[analyze-demo] Échec étape: supabase insert demo (exception)', err)
+    console.error('[analyze-demo] Échec étape: supabase insert visitor_analyses (exception)', err)
     return NextResponse.json(
       { error: 'Erreur lors de l’enregistrement démo.' },
       { status: 500 }
