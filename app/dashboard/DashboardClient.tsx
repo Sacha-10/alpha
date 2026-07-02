@@ -20,6 +20,7 @@ import WeeklySummary from "@/components/WeeklySummary";
 import type { AiAnalysisResult } from "@/lib/tradingAnalysisTypes";
 import { isUnlimited, hasActiveAccess, isPremiumOrAbove, normalizePlan, getPlanLabel } from "@/lib/plans";
 import {
+  ArrowRight,
   Bell,
   CalendarCheck,
   ChevronDown,
@@ -639,7 +640,31 @@ export default function DashboardClient() {
       return <EmptyFeaturePage icon={Webhook} title="Accès API" />;
     }
     if (mainView === "support") {
-      return <EmptyFeaturePage icon={Headphones} title="Support prioritaire" />;
+      return (
+        <div className="flex h-full w-full items-center justify-center">
+          <div className="w-full">
+            <div className="text-center mb-4">
+              <h1 className="text-2xl font-bold text-primary">Support prioritaire</h1>
+            </div>
+            <div className="border border-border rounded-xl p-8 text-center mb-6">
+              <Headphones className="h-6 w-6 text-secondary mx-auto mb-2" />
+              <p className="font-mono text-primary text-sm font-medium">support@alphatradex.ai</p>
+              <p className="text-secondary text-xs mt-1">Réservé aux membres Premium et Élite</p>
+            </div>
+            <div className="mt-4 w-full max-w-md mx-auto">
+              <div className="flex justify-center">
+                <a
+                  href="mailto:support@alphatradex.ai"
+                  className="btn-primary py-2.5 inline-flex items-center justify-center gap-2"
+                >
+                  Écrire au support prioritaire
+                  <ArrowRight size={16} aria-hidden />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
     }
 
     // nouvelle-analyse
@@ -878,7 +903,7 @@ export default function DashboardClient() {
 
         <main
           className={`flex min-h-0 flex-1 flex-col bg-[#0A0A0F] p-6 ${
-            mainView === "nouvelle-analyse" || mainView === "mon-analyse" || mainView === "journal-analyses" || mainView === "historique" || mainView === "evolution" || mainView === "resume-hebdomadaire" ? "overflow-y-auto" : "overflow-hidden"
+            mainView === "nouvelle-analyse" || mainView === "mon-analyse" || mainView === "journal-analyses" || mainView === "historique" || mainView === "evolution" || mainView === "resume-hebdomadaire" || mainView === "support" ? "overflow-y-auto" : "overflow-hidden"
           }`}
         >
           <div className="flex shrink-0 flex-col gap-4">
@@ -913,7 +938,7 @@ export default function DashboardClient() {
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col">
-            {mainView !== "nouvelle-analyse" && mainView !== "mon-analyse" && mainView !== "journal-analyses" && mainView !== "historique" && mainView !== "evolution" && mainView !== "resume-hebdomadaire" ? (
+            {mainView !== "nouvelle-analyse" && mainView !== "mon-analyse" && mainView !== "journal-analyses" && mainView !== "historique" && mainView !== "evolution" && mainView !== "resume-hebdomadaire" && mainView !== "support" ? (
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
                 {renderMainContent()}
               </div>
