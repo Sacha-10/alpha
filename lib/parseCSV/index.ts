@@ -51,7 +51,7 @@ export async function detectAndParse(
 
   throw new Error(
     'Format non reconnu. Nous supportons MT4, MT5, ' +
-    'Binance, Bybit, TradingView et FTMO. Vérifiez que votre ' +
+    'Binance, Bybit, TradingView, FTMO et FundedNext. Vérifiez que votre ' +
     'fichier est bien un export CSV de ces plateformes.'
   )
 }

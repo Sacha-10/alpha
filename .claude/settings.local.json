@@ -71,7 +71,15 @@
       "Bash(git --no-pager diff --stat -- lib/ app/ components/)",
       "Bash(git --no-pager diff -- lib/demoTrades.ts lib/weeklyData.ts lib/parseCSV/parseMT4.ts lib/parseCSV/parseFTMO.ts lib/parseCSV/parseBinance.ts lib/parseCSV/parseBybit.ts lib/parseCSV/parseTradingView.ts)",
       "Bash(git check-ignore *)",
-      "Bash(echo \"exit=$?\")"
+      "Bash(echo \"exit=$?\")",
+      "PowerShell(Add-Type -AssemblyName System.Drawing; $f = Get-Item \"public\\\\logo.png\"; $img = [System.Drawing.Image]::FromFile\\($f.FullName\\); \"logo.png : $\\($img.Width\\) x $\\($img.Height\\) px, $\\([math]::Round\\($f.Length/1KB,1\\)\\) KB \\($\\($f.Length\\) octets\\), format pixel: $\\($img.PixelFormat\\), DPI: $\\($img.HorizontalResolution\\)x$\\($img.VerticalResolution\\)\"; $img.Dispose\\(\\))",
+      "PowerShell(Get-ChildItem .next\\\\server\\\\app | Where-Object { $_.Name -match 'sitemap|robots|graph-image|twitter' } | ForEach-Object { $_.FullName })",
+      "PowerShell(Copy-Item *)",
+      "PowerShell($xml = [xml]\\(Get-Content .next\\\\server\\\\app\\\\sitemap.xml.body -Raw\\); $xml.urlset.url | ForEach-Object { \"$\\($_.loc\\)  —  $\\($_.changefreq\\) / $\\($_.priority\\)\" })",
+      "PowerShell(Remove-Item *)",
+      "PowerShell($files = \"app\\\\twitter-image.tsx\", \"app\\\\robots.ts\", \"app\\\\layout.tsx\"; \"AVANT :\"; foreach \\($f in $files\\) { $i = Get-Item $f; \"{0}  —  création : {1}  —  modification : {2}\" -f $f, $i.CreationTime, $i.LastWriteTime })",
+      "PowerShell(git status *)",
+      "PowerShell($now = Get-Date; $files = \"app\\\\twitter-image.tsx\", \"app\\\\robots.ts\", \"app\\\\layout.tsx\"; foreach \\($f in $files\\) { $i = Get-Item $f; $i.CreationTime = $now; $i.LastWriteTime = $now }; foreach \\($f in $files\\) { $i = Get-Item $f; \"{0}  —  création : {1}  —  modification : {2}\" -f $f, $i.CreationTime, $i.LastWriteTime })"
     ]
   }
 }

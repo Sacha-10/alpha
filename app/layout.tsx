@@ -21,16 +21,19 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://alphatradex.ai'),
   title: "AlphaTradeX - Votre analyste IA personnel sur les marchés",
   description:
-    "Analyze your trades with AI. Find out exactly why you're losing money and fix it before your next session.",
+    "Analysez vos trades avec l'IA. Découvrez exactement pourquoi vous perdez de l'argent et corrigez-le avant votre prochaine session.",
   openGraph: {
     title: "AlphaTradeX — Votre analyste IA personnel sur les marchés",
     description:
-      "Analyze your trades with AI. Find out exactly why you're losing money and fix it before your next session.",
+      "Analysez vos trades avec l'IA. Découvrez exactement pourquoi vous perdez de l'argent et corrigez-le avant votre prochaine session.",
     type: "website",
-    images: ["/logo.svg"],
+    locale: "fr_FR",
   },
   twitter: {
-    images: ["/logo.svg"],
+    card: "summary_large_image",
+    title: "AlphaTradeX — Votre analyste IA personnel sur les marchés",
+    description:
+      "Analysez vos trades avec l'IA. Découvrez exactement pourquoi vous perdez de l'argent et corrigez-le avant votre prochaine session.",
   },
 };
 

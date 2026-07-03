@@ -97,8 +97,7 @@ alpha/
 │   ├── TradeReport.tsx                 ← wrapper "use client" (animations, quota, PDF)
 │   ├── TradeReportBody.tsx             ← contenu pur du rapport (partagé UI)
 │   ├── TradeJournal.tsx                ← journal de trades (calendrier, import/export)
-│   ├── AnalysisHistory.tsx             ← historique des analyses (accordéon)
-│   └── ExportGuide.tsx
+│   └── AnalysisHistory.tsx             ← historique des analyses (accordéon)
 ├── lib/
 │   ├── supabase.ts
 │   ├── openai.ts                       ← analyzeTradesDemo + analyzeTradesMember + computeStats
