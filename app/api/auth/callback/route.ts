@@ -59,13 +59,25 @@ export async function GET(request: NextRequest) {
         await supabase.from('users').update(profile).eq('id', user.id)
         subscriptionStatus = existing.subscription_status ?? null
       } else {
-        await supabase.from('users').insert({
+        const { error: insertError } = await supabase.from('users').insert({
           id: user.id,
           ...profile,
           subscription_plan: null,
           analyses_limit: 0,
           subscription_status: 'inactive',
         })
+        if (insertError && insertError.code !== '23505') {
+          // Échec de création de la ligne users : sans elle, toutes les routes
+          // membres échoueront (compte fantôme). On n'applique PAS les cookies
+          // de session et on renvoie vers une URL d'erreur propre.
+          console.error('[auth/callback] Erreur création ligne users — userId:', user.id, JSON.stringify(insertError))
+          return NextResponse.redirect(
+            `${process.env.NEXT_PUBLIC_APP_URL}/?error=account_creation_failed`
+          )
+        }
+        // 23505 (doublon) = la ligne existe déjà (re-login ou requêtes
+        // concurrentes) : cas légitime, on continue normalement. Une ligne
+        // tout juste créée est 'inactive' dans les deux cas.
         subscriptionStatus = 'inactive'
       }
 

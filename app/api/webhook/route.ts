@@ -3,7 +3,7 @@ import Stripe from 'stripe'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { resend } from '@/lib/resend';
 import { getConfirmationPaiementHTML } from '@/lib/emails/confirmationPaiement';
-import { getPlanLabel } from '@/lib/plans';
+import { getPlanLabel, getPlanLimit } from '@/lib/plans';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -44,6 +44,42 @@ export async function POST(req: NextRequest) {
 
   const admin = getSupabaseAdmin()
 
+  // Idempotence : Stripe peut livrer un même événement plusieurs fois. On
+  // enregistre event.id AVANT traitement ; un doublon (conflit de clé
+  // primaire, code 23505) est acquitté immédiatement sans rien rejouer.
+  let dedupRecorded = false
+  const { error: dedupError } = await admin
+    .from('stripe_webhook_events')
+    .insert({ event_id: event.id })
+
+  if (dedupError) {
+    if (dedupError.code === '23505') {
+      return NextResponse.json({ received: true, duplicate: true })
+    }
+    // Table de dédup indisponible : on traite quand même — la facturation
+    // prime sur la déduplication.
+    console.error('[webhook] Erreur insert stripe_webhook_events (traitement maintenu):', JSON.stringify(dedupError))
+  } else {
+    dedupRecorded = true
+  }
+
+  // Échec d'écriture de l'état d'abonnement → 500 pour que Stripe re-livre
+  // l'événement (mécanisme de retry voulu). On retire alors l'event de la
+  // dédup, sinon la re-livraison serait acquittée comme doublon sans être
+  // rejouée.
+  const failEvent = async () => {
+    if (dedupRecorded) {
+      const { error: cleanupError } = await admin
+        .from('stripe_webhook_events')
+        .delete()
+        .eq('event_id', event.id)
+      if (cleanupError) {
+        console.error('[webhook] Erreur nettoyage dédup après échec:', JSON.stringify(cleanupError))
+      }
+    }
+    return NextResponse.json({ error: 'Erreur interne' }, { status: 500 })
+  }
+
   try {
     // ── checkout.session.completed ────────────────────────────────────
     if (event.type === 'checkout.session.completed') {
@@ -64,55 +100,67 @@ export async function POST(req: NextRequest) {
       }
 
       const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-      const nextReset = new Date(subscription.current_period_end * 1000)
+      // Ancre du cycle de quota : current_period_start, même référentiel que le
+      // reset lazy de /api/analyze (qui compare analyses_reset_date à cycleStart).
+      const cycleAnchor = new Date(subscription.current_period_start * 1000)
 
       const payload = {
         subscription_status: 'active',
         subscription_plan: planName,
-        analyses_limit: parseInt(analysesLimit),
+        analyses_limit: getPlanLimit(planName),
         analyses_used: 0,
-        analyses_reset_date: nextReset.toISOString(),
+        analyses_reset_date: cycleAnchor.toISOString(),
         stripe_customer_id: session.customer as string,
         stripe_subscription_id: subscriptionId,
       }
-      const { data: updateData, error: updateError } = await admin
+      const { error: updateError } = await admin
         .from('users')
         .update(payload)
         .eq('id', userId)
-        .select()
 
       if (updateError) {
-        console.error('[webhook] ERREUR Supabase update:', JSON.stringify(updateError))
+        console.error('[webhook] ERREUR Supabase update — event:', event.type, event.id, 'userId:', userId, JSON.stringify(updateError))
+        return await failEvent()
       }
 
-      // Envoi email confirmation
-      const prenom = session.customer_details?.name?.split(' ')[0] || 'Trader';
-      const renewalDate = new Date(subscription.current_period_end * 1000).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
-      // Libellé propre (Pro/Premium/Élite), jamais la clé brute. Repli sur la
-      // marque si le plan est inconnu (getPlanLabel renvoie '—').
-      const planLabelRaw = getPlanLabel(planName);
-      const planLabel = planLabelRaw === '—' ? 'AlphaTradeX' : planLabelRaw;
-
-      await resend.emails.send({
-        from: 'AlphaTradeX <contact@alphatradex.ai>',
-        to: session.customer_details?.email || '',
-        subject: `${prenom} - votre accès ${planLabel} a été activé`,
-        html: getConfirmationPaiementHTML({
-          prenom,
-          plan: planName,
-          analysesLimit: parseInt(analysesLimit),
-          renewalDate,
-        }),
-      });
-
       // Persist plan info in subscription metadata so the
-      // customer.subscription.updated handler can read it
+      // customer.subscription.updated handler can read it.
+      // Placé AVANT l'email : doit toujours être atteint, même si l'envoi échoue.
       try {
         await stripe.subscriptions.update(subscriptionId, {
           metadata: { planName, analysesLimit },
         })
       } catch (err) {
         console.error('[webhook] Erreur mise à jour metadata subscription Stripe:', err)
+      }
+
+      // Envoi email confirmation — ne doit jamais faire échouer le webhook.
+      const recipientEmail = session.customer_details?.email
+      if (!recipientEmail) {
+        console.error('[webhook] Email confirmation non envoyé (customer_details.email absent) — session:', session.id, 'userId:', userId)
+      } else {
+        const prenom = session.customer_details?.name?.split(' ')[0] || 'Trader';
+        const renewalDate = new Date(subscription.current_period_end * 1000).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+        // Libellé propre (Pro/Premium/Élite), jamais la clé brute. Repli sur la
+        // marque si le plan est inconnu (getPlanLabel renvoie '—').
+        const planLabelRaw = getPlanLabel(planName);
+        const planLabel = planLabelRaw === '—' ? 'AlphaTradeX' : planLabelRaw;
+
+        try {
+          await resend.emails.send({
+            from: 'AlphaTradeX <contact@alphatradex.ai>',
+            to: recipientEmail,
+            subject: `${prenom} - votre accès ${planLabel} a été activé`,
+            html: getConfirmationPaiementHTML({
+              prenom,
+              plan: planName,
+              analysesLimit: parseInt(analysesLimit),
+              renewalDate,
+            }),
+          });
+        } catch (err) {
+          console.error('[webhook] Erreur envoi email confirmation (non bloquant):', err)
+        }
       }
     }
 
@@ -128,9 +176,13 @@ export async function POST(req: NextRequest) {
       // Garder le statut 'active' ; customer.subscription.deleted
       // se déclenchera à la fin de la période
       if (sub.cancel_at_period_end && prev?.cancel_at_period_end === false) {
-        await admin.from('users').update({
+        const { error: cancelError } = await admin.from('users').update({
           subscription_status: 'active',
         }).eq('id', userId)
+        if (cancelError) {
+          console.error('[webhook] Erreur update résiliation programmée — event:', event.type, event.id, 'userId:', userId, JSON.stringify(cancelError))
+          return await failEvent()
+        }
         return NextResponse.json({ received: true })
       }
 
@@ -138,11 +190,18 @@ export async function POST(req: NextRequest) {
       const newPlanName = sub.metadata?.planName ?? ''
       if (!newLimit || !newPlanName) return NextResponse.json({ received: true })
 
-      const { data: userData } = await admin
+      const { data: userData, error: userReadError } = await admin
         .from('users')
         .select('analyses_limit')
         .eq('id', userId)
         .single()
+      // PGRST116 = aucune ligne : utilisateur inconnu en base, rien à muter.
+      // Toute autre erreur = lecture ratée → 500 pour que Stripe re-livre
+      // (sinon l'upgrade/downgrade serait sauté en silence).
+      if (userReadError && userReadError.code !== 'PGRST116') {
+        console.error('[webhook] Erreur lecture users — event:', event.type, event.id, 'userId:', userId, JSON.stringify(userReadError))
+        return await failEvent()
+      }
       if (!userData) return NextResponse.json({ received: true })
 
       const dbLimit = userData.analyses_limit as number
@@ -153,11 +212,15 @@ export async function POST(req: NextRequest) {
       if (isPlanChange) {
         // 1. UPGRADE — mettre à jour analyses_limit immédiatement
         if (newLimit > dbLimit) {
-          await admin.from('users').update({
+          const { error: upgradeError } = await admin.from('users').update({
             subscription_plan: newPlanName,
             analyses_limit: newLimit,
             subscription_status: 'active',
           }).eq('id', userId)
+          if (upgradeError) {
+            console.error('[webhook] Erreur update upgrade — event:', event.type, event.id, 'userId:', userId, JSON.stringify(upgradeError))
+            return await failEvent()
+          }
         }
         // 2. DOWNGRADE — ne rien changer maintenant ;
         //    la DB garde l'ancien quota jusqu'au renouvellement
@@ -166,10 +229,14 @@ export async function POST(req: NextRequest) {
         const isPeriodRenewal = prev?.current_period_end !== undefined
         if (isPeriodRenewal && newLimit < dbLimit) {
           // 2. DOWNGRADE — appliquer le changement différé au renouvellement
-          await admin.from('users').update({
+          const { error: downgradeError } = await admin.from('users').update({
             subscription_plan: newPlanName,
             analyses_limit: newLimit,
           }).eq('id', userId)
+          if (downgradeError) {
+            console.error('[webhook] Erreur update downgrade — event:', event.type, event.id, 'userId:', userId, JSON.stringify(downgradeError))
+            return await failEvent()
+          }
         }
       }
     }
@@ -195,9 +262,17 @@ export async function POST(req: NextRequest) {
       }
 
       if (userId) {
-        await admin.from('users').update(update).eq('id', userId)
+        const { error: cutError } = await admin.from('users').update(update).eq('id', userId)
+        if (cutError) {
+          console.error('[webhook] Erreur coupure accès (par userId) — event:', event.type, event.id, 'userId:', userId, JSON.stringify(cutError))
+          return await failEvent()
+        }
       } else if (customer.email) {
-        await admin.from('users').update(update).eq('email', customer.email)
+        const { error: cutError } = await admin.from('users').update(update).eq('email', customer.email)
+        if (cutError) {
+          console.error('[webhook] Erreur coupure accès (par email) — event:', event.type, event.id, 'email:', customer.email, JSON.stringify(cutError))
+          return await failEvent()
+        }
       } else {
         console.error(
           '[webhook] Impossible d\'identifier l\'utilisateur pour suppression abonnement — customerId:',
@@ -207,7 +282,7 @@ export async function POST(req: NextRequest) {
     }
   } catch (err) {
     console.error('[webhook] Erreur non gérée dans le handler:', err)
-    return NextResponse.json({ error: 'Erreur interne' }, { status: 500 })
+    return await failEvent()
   }
 
   return NextResponse.json({ received: true })

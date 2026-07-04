@@ -103,7 +103,14 @@ export async function GET(req: NextRequest) {
         },
       })
 
-      await admin.from('weekly_email_log').insert({ user_id: m.id, week_key: lastWeekKey })
+      const { error: logError } = await admin
+        .from('weekly_email_log')
+        .insert({ user_id: m.id, week_key: lastWeekKey })
+      if (logError) {
+        // Email déjà parti : on ne bloque pas le lot, mais sans cette ligne de
+        // log l'envoi sera rejoué au prochain run — trace explicite requise.
+        console.error('[cron weekly-summary-email] échec insert weekly_email_log — userId:', m.id, 'week_key:', lastWeekKey, JSON.stringify(logError))
+      }
       sent++
       await sleep(600)
     } catch (e: any) {
