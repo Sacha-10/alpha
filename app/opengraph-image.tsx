@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 
-export const alt = 'AlphaTradeX — Votre analyste IA personnel sur les marchés'
+export const alt = 'AlphaTradeX - Votre analyste IA sur les marchés'
 export const size = {
   width: 1200,
   height: 630,
@@ -44,10 +44,10 @@ export default async function Image() {
           width: '100%',
           height: '100%',
           display: 'flex',
-          flexDirection: 'column',
+          flexDirection: 'row',
+          alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: '#0A0A0F',
-          padding: '0 110px',
           fontFamily: fonts.length > 0 ? 'Inter' : 'sans-serif',
         }}
       >
@@ -66,8 +66,8 @@ export default async function Image() {
           }}
         />
         <svg
-          width={96}
-          height={96}
+          width={120}
+          height={120}
           viewBox="0 0 24 24"
           fill="none"
           stroke="#2D6FFF"
@@ -80,23 +80,14 @@ export default async function Image() {
         </svg>
         <div
           style={{
-            marginTop: 56,
-            fontSize: 92,
+            marginLeft: 44,
+            fontSize: 104,
             fontWeight: 700,
             color: '#F0F4FF',
             letterSpacing: '-0.02em',
           }}
         >
           AlphaTradeX
-        </div>
-        <div
-          style={{
-            marginTop: 24,
-            fontSize: 36,
-            color: '#8892AA',
-          }}
-        >
-          Votre analyste IA personnel sur les marchés
         </div>
       </div>
     ),

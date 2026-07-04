@@ -19,21 +19,21 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://alphatradex.ai'),
-  title: "AlphaTradeX - Votre analyste IA personnel sur les marchés",
+  title: "AlphaTradeX - Votre analyste IA sur les marchés",
   description:
-    "Analysez vos trades avec l'IA. Découvrez exactement pourquoi vous perdez de l'argent et corrigez-le avant votre prochaine session.",
+    "Votre analyste IA décrypte vos trades, mesure votre évolution, affûte vos exécutions.",
   openGraph: {
-    title: "AlphaTradeX — Votre analyste IA personnel sur les marchés",
+    title: "AlphaTradeX - Votre analyste IA sur les marchés",
     description:
-      "Analysez vos trades avec l'IA. Découvrez exactement pourquoi vous perdez de l'argent et corrigez-le avant votre prochaine session.",
+      "Votre analyste IA décrypte vos trades, mesure votre évolution, affûte vos exécutions.",
     type: "website",
     locale: "fr_FR",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AlphaTradeX — Votre analyste IA personnel sur les marchés",
+    title: "AlphaTradeX - Votre analyste IA sur les marchés",
     description:
-      "Analysez vos trades avec l'IA. Découvrez exactement pourquoi vous perdez de l'argent et corrigez-le avant votre prochaine session.",
+      "Votre analyste IA décrypte vos trades, mesure votre évolution, affûte vos exécutions.",
   },
 };
 

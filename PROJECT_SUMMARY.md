@@ -370,7 +370,7 @@ scrollbar-gutter: stable
 ```
 <footer class="mx-auto flex max-w-[1200px] flex-col gap-8 text-secondary">
   Logo SVG 32x32 + "AlphaTradeX" font-bold text-primary
-  "Votre analyste IA personnel sur les marchés" — mt-2 text-sm
+  "Votre analyste IA sur les marchés" — mt-2 text-sm
   a[href="mailto:contact@alphatradex.ai"] — hover:text-primary
   flex flex-wrap items-center gap-4 text-sm :
     <Info h-4 w-4> Link "/about" → "À propos"
@@ -1163,7 +1163,7 @@ JetBrains_Mono({ subsets:["latin"], weight:["400","500"], variable:"--font-jetbr
 
 // Metadata :
 metadataBase: 'https://alphatradex.ai'
-title: "AlphaTradeX - Votre analyste IA personnel sur les marchés"
+title: "AlphaTradeX - Votre analyste IA sur les marchés"
 description: "Analyze your trades with AI. Find out exactly why you're losing money and fix it before your next session."
 openGraph: { title, description, type:"website", images:["/logo.svg"] }
 twitter: { images:["/logo.svg"] }

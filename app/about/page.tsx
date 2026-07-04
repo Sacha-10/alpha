@@ -132,7 +132,7 @@ const timeline: TimelineStep[] = [
   },
   {
     year: "2026",
-    title: "AlphaTradeX — Accès anticipé.",
+    title: "AlphaTradeX · Accès anticipé.",
     description: "200 places. Phase 0 en cours.",
   },
 ];
@@ -307,7 +307,7 @@ export default function AboutPage() {
                   S
                 </div>
                 <div>
-                  <p className="font-semibold text-primary">Sacha — Fondateur d&apos;AlphaTradeX</p>
+                  <p className="font-semibold text-primary">Sacha</p>
                   <p className="mt-1 text-sm text-secondary">Trader depuis 2022</p>
                 </div>
               </div>

@@ -140,7 +140,7 @@ export default function Navbar() {
           href="/"
           onClick={handleBrandClick}
           className="flex items-center gap-2 rounded text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue"
-          aria-label="AlphaTradeX — retour en haut"
+          aria-label="AlphaTradeX · retour en haut"
         >
           <LogoSvg />
           <span className="hidden text-lg font-bold text-primary md:inline">AlphaTradeX</span>

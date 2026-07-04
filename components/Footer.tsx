@@ -38,7 +38,7 @@ export default function Footer() {
             <LogoSvg />
             <span className="font-bold text-primary">AlphaTradeX</span>
           </div>
-          <p className="mt-2 text-sm">Votre analyste IA personnel sur les marchés</p>
+          <p className="mt-2 text-sm">Votre analyste IA sur les marchés</p>
         </div>
 
         <div className="flex flex-col gap-4 text-sm">

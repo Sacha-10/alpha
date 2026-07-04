@@ -833,7 +833,7 @@ export default function DashboardClient() {
             type="button"
             onClick={() => router.push("/")}
             className="flex shrink-0 items-center text-left"
-            aria-label="AlphaTradeX — accueil"
+            aria-label="AlphaTradeX · accueil"
           >
             <LogoSvg />
           </button>
