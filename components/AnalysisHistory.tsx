@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import TradeReport from "@/components/TradeReport"
+import { safeNum } from "@/components/TradeReportBody"
 import type { AiAnalysisResult } from "@/lib/tradingAnalysisTypes"
 
 interface AnalysisRow {
@@ -25,6 +26,7 @@ function formatDate(iso: string): string {
 export default function AnalysisHistory() {
   const [analyses, setAnalyses] = useState<AnalysisRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [errored, setErrored] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -32,9 +34,13 @@ export default function AnalysisHistory() {
       try {
         const res = await fetch("/api/analyses")
         const data = await res.json()
-        if (res.ok) setAnalyses(data.analyses ?? [])
+        if (res.ok) {
+          setAnalyses(data.analyses ?? [])
+        } else {
+          setErrored(true)
+        }
       } catch {
-        // silently fail
+        setErrored(true)
       } finally {
         setLoading(false)
       }
@@ -55,6 +61,20 @@ export default function AnalysisHistory() {
           </svg>
         </div>
       </div>
+    )
+  }
+
+  // État d'erreur réseau/serveur : distinct de l'état vide.
+  if (errored) {
+    return (
+      <>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-primary">Historique</h1>
+        </div>
+        <div className="card p-6 text-center text-sm text-secondary">
+          Une erreur est survenue. Actualisez la page.
+        </div>
+      </>
     )
   }
 
@@ -79,7 +99,7 @@ export default function AnalysisHistory() {
       <div className="space-y-3">
         {analyses.map((a, i) => {
           const isOpen = expandedId === a.id
-          const pnl = a.report.globalStats.totalPnL
+          const pnl = safeNum(a.report?.globalStats?.totalPnL)
           const pnlPositive = pnl >= 0
 
           return (

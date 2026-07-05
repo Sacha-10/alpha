@@ -14,8 +14,12 @@ export function parseBinance(csvText: string): Trade[] {
   const trades: Trade[] = []
   const partialOrders: Record<string, any[]> = {}
 
-  lines.slice(1).forEach(line => {
+  for (const line of lines.slice(1)) {
     const cols = parseLine(line)
+
+    // Ligne tronquée (pied de page, total) : skip silencieux,
+    // les deux formats lisent jusqu'à l'index 6 (Fee).
+    if (cols.length < 7) continue
 
     const time = new Date(cols[0])
     const symbol = cleanSymbol(cols[1])
@@ -73,7 +77,7 @@ export function parseBinance(csvText: string): Trade[] {
       })
       partialOrders[symbol] = []
     }
-  })
+  }
 
   return trades.filter(t => t.symbol && t.entryPrice > 0)
 }

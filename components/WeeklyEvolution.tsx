@@ -75,6 +75,7 @@ function Spinner() {
 export default function WeeklyEvolution({ plan }: Props) {
   const [data, setData] = useState<WeeklyEvolutionResponse | null>(null)
   const [loading, setLoading] = useState(true)
+  const [errored, setErrored] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -90,9 +91,13 @@ export default function WeeklyEvolution({ plan }: Props) {
         const res = await fetch(`/api/weekly-evolution?token=${token}`)
         const json = await res.json()
         if (!active) return
-        setData(res.ok ? json : null)
+        if (res.ok) {
+          setData(json)
+        } else {
+          setErrored(true)
+        }
       } catch {
-        if (active) setData(null)
+        if (active) setErrored(true)
       } finally {
         if (active) setLoading(false)
       }
@@ -106,6 +111,18 @@ export default function WeeklyEvolution({ plan }: Props) {
       <div className="w-full space-y-6 pb-12">
         <h1 className="text-2xl font-bold text-primary">Évolution semaine</h1>
         <Spinner />
+      </div>
+    )
+  }
+
+  // État d'erreur réseau/serveur : distinct de l'état vide.
+  if (errored) {
+    return (
+      <div className="w-full space-y-6 pb-12">
+        <h1 className="text-2xl font-bold text-primary">Évolution semaine</h1>
+        <div className="card p-6 text-center text-sm text-secondary">
+          Une erreur est survenue. Actualisez la page.
+        </div>
       </div>
     )
   }

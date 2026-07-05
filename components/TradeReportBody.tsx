@@ -93,12 +93,14 @@ function sessionPctColorClasses(pct: number): { bar: string; text: string } {
 }
 
 export function TradeReportBody({ report }: { report: AiAnalysisResult }) {
-  const s = report.globalStats;
-  const psych = report.psychologicalProfile;
-  const risk = report.riskManagement;
-  const prop = report.propFirmReadiness;
-  const patterns = report.performancePatterns;
-  const session = report.sessionAnalysis;
+  // Sections IA potentiellement absentes (rapport partiel / ancien format) :
+  // repli sur objet vide, les champs dégradent via safeNum/safeStr/« — ».
+  const s = (report.globalStats ?? {}) as AiAnalysisResult["globalStats"];
+  const psych = (report.psychologicalProfile ?? {}) as AiAnalysisResult["psychologicalProfile"];
+  const risk = (report.riskManagement ?? {}) as AiAnalysisResult["riskManagement"];
+  const prop = (report.propFirmReadiness ?? {}) as AiAnalysisResult["propFirmReadiness"];
+  const patterns = (report.performancePatterns ?? {}) as AiAnalysisResult["performancePatterns"];
+  const session = (report.sessionAnalysis ?? {}) as AiAnalysisResult["sessionAnalysis"];
 
   const winRateRaw = safeNum(s.winRate);
   const winRateNum = winRateRaw <= 1 ? winRateRaw * 100 : winRateRaw;
@@ -133,9 +135,9 @@ export function TradeReportBody({ report }: { report: AiAnalysisResult }) {
     },
     {
       label: "Max Drawdown",
-      value: s.maxDrawdownPercent === null ? "—" : `${displayRate(s.maxDrawdownPercent)}%`,
+      value: s.maxDrawdownPercent == null ? "—" : `${displayRate(s.maxDrawdownPercent)}%`,
       positive: false,
-      valueClass: s.maxDrawdownPercent === null ? "text-secondary" : ddNum > 10 ? "text-red" : "text-cyan",
+      valueClass: s.maxDrawdownPercent == null ? "text-secondary" : ddNum > 10 ? "text-red" : "text-cyan",
     },
     {
       label: "PnL Total",

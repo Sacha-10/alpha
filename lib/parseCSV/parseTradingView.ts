@@ -8,8 +8,13 @@ export function parseTradingView(csvText: string): Trade[] {
   const delimiter = detectDelimiter(lines[0])
   const { line: parseLine, num: parseNum } = makeCSVParser(delimiter)
 
-  return lines.slice(1).map(line => {
+  const result: Trade[] = []
+  for (const line of lines.slice(1)) {
     const cols = parseLine(line)
+
+    // Ligne tronquée (pied de page, résumé) : skip silencieux,
+    // le format lit jusqu'à l'index 8 (Profit).
+    if (cols.length < 9) continue
 
     const openTime = new Date(cols[3])
     const closeTime = new Date(cols[5])
@@ -24,7 +29,7 @@ export function parseTradingView(csvText: string): Trade[] {
     )
     const hour = openTime.getUTCHours()
 
-    return {
+    result.push({
       ticket: cols[0],
       source: 'tradingview',
       symbol: cleanSymbol(cols[2]) || 'UNKNOWN',
@@ -46,6 +51,7 @@ export function parseTradingView(csvText: string): Trade[] {
         hour >= 13 && hour < 22 ? 'New York' :
         hour >= 0 && hour < 8 ? 'Asian' : 'Other'
       ) as Trade['session'],
-    } as Trade
-  }).filter(t => t.entryPrice > 0)
+    } as Trade)
+  }
+  return result.filter(t => t.entryPrice > 0)
 }

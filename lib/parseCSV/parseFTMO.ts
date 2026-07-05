@@ -32,8 +32,13 @@ export function parseFTMO(csvText: string): Trade[] {
   const delimiter = detectDelimiter(lines[0])
   const { line: parseLine, num: parseNum } = makeCSVParser(delimiter)
 
-  return lines.slice(1).map(line => {
+  const result: Trade[] = []
+  for (const line of lines.slice(1)) {
     const cols = parseLine(line)
+
+    // Ligne tronquée (pied de page, solde) : skip silencieux,
+    // le format lit jusqu'à l'index 13 (Profit).
+    if (cols.length < 14) continue
 
     const openTime = new Date(cols[7])
     const closeTime = new Date(cols[9])
@@ -43,7 +48,7 @@ export function parseFTMO(csvText: string): Trade[] {
       cols[2].toLowerCase() === 'buy' ? 'BUY' : 'SELL'
     const sym = cleanSymbol(cols[1])
 
-    return {
+    result.push({
       ticket: cols[0],
       source: 'ftmo',
       symbol: sym,
@@ -63,6 +68,7 @@ export function parseFTMO(csvText: string): Trade[] {
       profitLoss: parseNum(cols[13]),
       profitLossPips: calcPips(sym, entryPrice, exitPrice, direction),
       session: getSession(openTime),
-    } as Trade
-  }).filter(t => t.symbol && t.entryPrice > 0)
+    } as Trade)
+  }
+  return result.filter(t => t.symbol && t.entryPrice > 0)
 }

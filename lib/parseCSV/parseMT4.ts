@@ -59,8 +59,13 @@ export function parseMT4(csvText: string): Trade[] {
 
   const isMT5 = headers.includes('Position')
 
-  const result = lines.slice(1).map(line => {
+  const result: Trade[] = []
+  for (const line of lines.slice(1)) {
     const cols = parseLine(line)
+
+    // Ligne tronquée (pied de page, solde, séparateur) : skip silencieux,
+    // les deux formats lisent jusqu'à l'index 12.
+    if (cols.length < 13) continue
 
     if (isMT5) {
       const openTime = new Date(cols[7])
@@ -72,7 +77,7 @@ export function parseMT4(csvText: string): Trade[] {
         (closeTime.getTime() - openTime.getTime()) / 60000
       )
       const sym = cleanSymbol(cols[1])
-      return {
+      result.push({
         ticket: cols[0],
         source: 'mt5',
         symbol: sym,
@@ -90,7 +95,8 @@ export function parseMT4(csvText: string): Trade[] {
         profitLoss: parseNum(cols[12]),
         profitLossPips: calcPips(sym, entryPrice, exitPrice, direction),
         session: getSession(openTime),
-      } as Trade
+      } as Trade)
+      continue
     }
 
     const openTime = new Date(cols[1])
@@ -104,7 +110,7 @@ export function parseMT4(csvText: string): Trade[] {
     const exitPrice = parseNum(cols[9])
     const sym = cleanSymbol(cols[4])
 
-    return {
+    result.push({
       ticket: cols[0],
       source: 'mt4',
       symbol: sym,
@@ -122,7 +128,7 @@ export function parseMT4(csvText: string): Trade[] {
       profitLoss: parseNum(cols[12]),
       profitLossPips: calcPips(sym, entryPrice, exitPrice, direction),
       session: getSession(openTime),
-    } as Trade
-  }).filter(t => !!(t.symbol && t.entryPrice > 0))
-  return result
+    } as Trade)
+  }
+  return result.filter(t => !!(t.symbol && t.entryPrice > 0))
 }

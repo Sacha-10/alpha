@@ -253,20 +253,6 @@ export default function DashboardClient() {
     void fetchUserData();
   }, [fetchUserData]);
 
-  // Deep-link : ?view=<DashboardView> ouvre directement la vue (ex. bouton
-  // « Voir mon espace » de l'email Résumé semaine).
-  useEffect(() => {
-    const view = searchParams.get("view");
-    const valid: DashboardView[] = [
-      "nouvelle-analyse", "mon-analyse", "historique", "journal-analyses",
-      "evolution", "resume-hebdomadaire", "prop-firm-score",
-      "detection-predictive", "alertes-telegram", "acces-api", "support",
-    ];
-    if (view && (valid as string[]).includes(view)) {
-      setMainView(view as DashboardView);
-    }
-  }, [searchParams]);
-
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
     const onChange = () => {
@@ -439,6 +425,34 @@ export default function DashboardClient() {
   const resumeLocked = !premiumOrAbove;
   const propFirmLocked = !isElite;
   const signauxLocked = !isElite;
+  const supportLocked = !premiumOrAbove;
+
+  // Deep-link : ?view=<DashboardView> ouvre directement la vue (ex. bouton
+  // « Voir mon espace » de l'email Résumé semaine). Même gating que la
+  // sidebar (mêmes booléens) : vue verrouillée pour le plan → paramètre
+  // ignoré, on reste sur nouvelle-analyse. Tant que le plan n'est pas chargé
+  // tout est verrouillé ; l'effet se rejoue quand les booléens changent.
+  useEffect(() => {
+    const view = searchParams.get("view");
+    const valid: DashboardView[] = [
+      "nouvelle-analyse", "mon-analyse", "historique", "journal-analyses",
+      "evolution", "resume-hebdomadaire", "prop-firm-score",
+      "detection-predictive", "alertes-telegram", "acces-api", "support",
+    ];
+    if (!view || !(valid as string[]).includes(view)) return;
+    const viewLocked: Partial<Record<DashboardView, boolean>> = {
+      historique: historiqueLocked,
+      evolution: evolutionLocked,
+      "resume-hebdomadaire": resumeLocked,
+      "prop-firm-score": propFirmLocked,
+      "detection-predictive": signauxLocked,
+      "alertes-telegram": signauxLocked,
+      "acces-api": signauxLocked,
+      support: supportLocked,
+    };
+    if (viewLocked[view as DashboardView]) return;
+    setMainView(view as DashboardView);
+  }, [searchParams, historiqueLocked, evolutionLocked, resumeLocked, propFirmLocked, signauxLocked, supportLocked]);
 
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
 
@@ -566,7 +580,7 @@ export default function DashboardClient() {
             icon={Headphones}
             label="Support prioritaire"
             active={mainView === "support"}
-            locked={!premiumOrAbove}
+            locked={supportLocked}
             lockPlanLabel="Premium"
             lockedPath="/help"
             onSelect={() => setMainView("support")}

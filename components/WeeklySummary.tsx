@@ -148,7 +148,19 @@ export default function WeeklySummary({ plan: _plan }: Props) {
     )
   }
 
-  if (errored || !data || data.status !== "ok") {
+  // État d'erreur réseau/serveur : distinct de l'état vide ci-dessous.
+  if (errored || !data) {
+    return (
+      <div className="w-full space-y-6 pb-12">
+        <h1 className="text-2xl font-bold text-primary">Résumé semaine</h1>
+        <div className="card p-6 text-center text-sm text-secondary">
+          Une erreur est survenue. Actualisez la page.
+        </div>
+      </div>
+    )
+  }
+
+  if (data.status !== "ok") {
     return (
       <div className="w-full space-y-6 pb-12">
         <h1 className="text-2xl font-bold text-primary">Résumé semaine</h1>

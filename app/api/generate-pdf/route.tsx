@@ -2,7 +2,15 @@ export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 import { NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
 import type { AiAnalysisResult, BiasSeverity } from '@/lib/tradingAnalysisTypes';
+
+// Taille maximale du body POST : un rapport d'analyse sérialisé pèse quelques
+// dizaines de Ko — 1 Mo laisse une marge large et bloque les payloads
+// fabriqués géants (abus de ressources Puppeteer).
+const MAX_BODY_BYTES = 1_000_000;
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -91,12 +99,14 @@ function iconX(): string {
 // ── main body renderer ────────────────────────────────────────────────────────
 
 function buildBody(report: AiAnalysisResult): string {
-  const s       = report.globalStats;
-  const psych   = report.psychologicalProfile;
-  const risk    = report.riskManagement;
-  const prop    = report.propFirmReadiness;
-  const patterns = report.performancePatterns;
-  const session = report.sessionAnalysis;
+  // Sections IA potentiellement absentes (payload partiel / ancien format) :
+  // repli sur objet vide, les champs dégradent via safeNum/safeStr/« — ».
+  const s       = (report?.globalStats ?? {}) as AiAnalysisResult['globalStats'];
+  const psych   = (report?.psychologicalProfile ?? {}) as AiAnalysisResult['psychologicalProfile'];
+  const risk    = (report?.riskManagement ?? {}) as AiAnalysisResult['riskManagement'];
+  const prop    = (report?.propFirmReadiness ?? {}) as AiAnalysisResult['propFirmReadiness'];
+  const patterns = (report?.performancePatterns ?? {}) as AiAnalysisResult['performancePatterns'];
+  const session = (report?.sessionAnalysis ?? {}) as AiAnalysisResult['sessionAnalysis'];
 
   const winRateRaw = safeNum(s.winRate);
   const winRateNum = winRateRaw <= 1 ? winRateRaw * 100 : winRateRaw;
@@ -108,7 +118,7 @@ function buildBody(report: AiAnalysisResult): string {
   const keyStats = [
     { label: 'Win Rate',       value: `${displayRate(s.winRate)}%`,            color: winRateNum >= 50              ? 'var(--cyan)' : 'var(--red)' },
     { label: 'Profit Factor',  ...formatSentinelRatio(safeNum(s.profitFactor)) },
-    { label: 'Max Drawdown',   value: s.maxDrawdownPercent === null ? '—' : `${displayRate(s.maxDrawdownPercent)}%`, color: s.maxDrawdownPercent === null ? 'var(--secondary)' : ddNum > 10 ? 'var(--red)' : 'var(--cyan)' },
+    { label: 'Max Drawdown',   value: s.maxDrawdownPercent == null ? '—' : `${displayRate(s.maxDrawdownPercent)}%`, color: s.maxDrawdownPercent == null ? 'var(--secondary)' : ddNum > 10 ? 'var(--red)' : 'var(--cyan)' },
     { label: 'PnL Total',      value: pnlStr,                                  color: pnl < 0                       ? 'var(--red)'  : 'var(--cyan)' },
     { label: 'Trades Total',   value: String(s.totalTrades ?? 0),              color: 'var(--primary)'              },
     { label: 'Sharpe Ratio',   ...formatSentinelRatio(safeNum(s.sharpeRatio)) },
@@ -256,7 +266,7 @@ function buildBody(report: AiAnalysisResult): string {
   <div>
     <h2 style="margin:0 0 16px;font-size:20px;font-weight:bold;">Plan d&apos;action</h2>
     <div style="display:flex;flex-direction:column;gap:16px;">
-      ${(report.actionPlan ?? []).map(item => `
+      ${(report?.actionPlan ?? []).map(item => `
       <div style="border-radius:12px;background:var(--hover);padding:16px;">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
           <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--secondary);flex-shrink:0;">${esc(item.priority)}</span>
@@ -272,7 +282,7 @@ function buildBody(report: AiAnalysisResult): string {
   <!-- Analyste IA -->
   <div>
     <h2 style="margin:0 0 16px;font-size:20px;font-weight:bold;">Analyste IA</h2>
-    <p style="margin:0;font-size:14px;line-height:1.6;color:var(--secondary);">${esc(safeStr(report.personalizedInsight))}</p>
+    <p style="margin:0;font-size:14px;line-height:1.6;color:var(--secondary);">${esc(safeStr(report?.personalizedInsight))}</p>
   </div>
 
 </div>`;
@@ -395,9 +405,72 @@ function buildHtml(report: AiAnalysisResult, date: string, isMobile: boolean): s
 // ── route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  // ── Garde d'accès ────────────────────────────────────────────────────────
+  // Membres : session Supabase valide (cookies envoyés par le fetch
+  // same-origin de TradeReport). Visiteurs anonymes : autorisés UNIQUEMENT
+  // si leur IP a réellement consommé la démo (présente dans
+  // visitor_analyses — insérée par analyze-demo APRÈS le succès de
+  // l'analyse, donc toujours là au moment de l'export). Sinon 401.
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll(); },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {}
+        },
+      },
+    },
+  );
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    const rawForwarded = req.headers.get('x-forwarded-for');
+    const ip =
+      rawForwarded?.split(',')[0]?.trim() ||
+      req.headers.get('x-real-ip') ||
+      'unknown';
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (ip === 'unknown' || !url || !serviceKey) {
+      return Response.json({ error: 'Non autorisé' }, { status: 401 });
+    }
+
+    const admin = createClient(url, serviceKey);
+    const { data: visitor, error } = await admin
+      .from('visitor_analyses')
+      .select('ip_address')
+      .eq('ip_address', ip)
+      .maybeSingle();
+
+    if (error) {
+      console.error('[generate-pdf] Vérification visitor_analyses en échec:', error);
+    }
+    if (error || !visitor) {
+      return Response.json({ error: 'Non autorisé' }, { status: 401 });
+    }
+  }
+
+  // ── Limite de taille du body ─────────────────────────────────────────────
+  const contentLength = Number(req.headers.get('content-length') ?? 0);
+  if (contentLength > MAX_BODY_BYTES) {
+    return Response.json({ error: 'Payload trop volumineux' }, { status: 413 });
+  }
+
   let browser: import('puppeteer-core').Browser | undefined;
   try {
-    const { report, screenWidth: rawWidth } = await req.json() as {
+    const rawBody = await req.text();
+    if (rawBody.length > MAX_BODY_BYTES) {
+      return Response.json({ error: 'Payload trop volumineux' }, { status: 413 });
+    }
+    const { report, screenWidth: rawWidth } = JSON.parse(rawBody) as {
       report: AiAnalysisResult;
       screenWidth?: number;
     };

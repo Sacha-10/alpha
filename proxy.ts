@@ -72,11 +72,24 @@ export async function proxy(req: NextRequest) {
   }
 
   // Connecté mais sans abonnement actif (résilié, impayé, jamais abonné).
-  const { data } = await supabase
+  // maybeSingle : ligne absente → data null (refus légitime), error réservé
+  // aux vraies pannes techniques.
+  const { data, error } = await supabase
     .from('users')
     .select('subscription_status')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
+
+  // Erreur technique Supabase (panne passagère, timeout) : ne JAMAIS éjecter
+  // un abonné actif sur un incident transitoire — on laisse passer, les
+  // routes API derrière re-vérifient le statut.
+  if (error) {
+    console.error(
+      '[proxy] Erreur Supabase sur subscription_status — accès laissé passer (les routes re-vérifient) :',
+      error
+    )
+    return supabaseResponse
+  }
 
   if (!hasActiveAccess(data?.subscription_status)) {
     return isApi

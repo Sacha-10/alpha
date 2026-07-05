@@ -125,35 +125,6 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  try {
-    const { error: insertError } = await supabase
-      .from('visitor_analyses')
-      .insert({ ip_address: ip, used_at: new Date().toISOString() })
-
-    if (insertError) {
-      console.error(
-        '[analyze-demo] Échec étape: supabase insert visitor_analyses (erreur API)',
-        {
-          code: insertError.code,
-          message: insertError.message,
-          details: insertError.details,
-          hint: insertError.hint,
-          ip,
-        }
-      )
-      return NextResponse.json(
-        { error: 'Erreur lors de l’enregistrement démo.' },
-        { status: 500 }
-      )
-    }
-  } catch (err) {
-    console.error('[analyze-demo] Échec étape: supabase insert visitor_analyses (exception)', err)
-    return NextResponse.json(
-      { error: 'Erreur lors de l’enregistrement démo.' },
-      { status: 500 }
-    )
-  }
-
   let report: unknown
   try {
     const targetBestSymbolWinRate = randInt(62, 72)
@@ -246,6 +217,39 @@ export async function POST(req: NextRequest) {
           message ||
           'Erreur lors de l’analyse. Réessayez plus tard.',
       },
+      { status: 500 }
+    )
+  }
+
+  // L'IP n'est brûlée qu'APRÈS le succès de l'analyse OpenAI : un échec
+  // d'analyse ne consomme pas la démo du visiteur. L'insert doit réussir
+  // AVANT de rendre le rapport — sinon 500 sans rapport (le visiteur pourra
+  // réessayer, aucun rapport rendu sans IP enregistrée).
+  try {
+    const { error: insertError } = await supabase
+      .from('visitor_analyses')
+      .insert({ ip_address: ip, used_at: new Date().toISOString() })
+
+    if (insertError) {
+      console.error(
+        '[analyze-demo] Échec étape: supabase insert visitor_analyses (erreur API)',
+        {
+          code: insertError.code,
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+          ip,
+        }
+      )
+      return NextResponse.json(
+        { error: 'Erreur lors de l’enregistrement démo.' },
+        { status: 500 }
+      )
+    }
+  } catch (err) {
+    console.error('[analyze-demo] Échec étape: supabase insert visitor_analyses (exception)', err)
+    return NextResponse.json(
+      { error: 'Erreur lors de l’enregistrement démo.' },
       { status: 500 }
     )
   }

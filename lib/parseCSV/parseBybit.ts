@@ -8,8 +8,13 @@ export function parseBybit(csvText: string): Trade[] {
   const delimiter = detectDelimiter(lines[0])
   const { line: parseLine, num: parseNum } = makeCSVParser(delimiter)
 
-  return lines.slice(1).map(line => {
+  const result: Trade[] = []
+  for (const line of lines.slice(1)) {
     const cols = parseLine(line)
+
+    // Ligne tronquée (pied de page, total) : skip silencieux — indices 0 à 6
+    // obligatoires, l'Order ID (index 7) a déjà un repli.
+    if (cols.length < 7) continue
 
     const time = new Date(cols[0])
     const symbol = cleanSymbol(cols[1])
@@ -21,7 +26,7 @@ export function parseBybit(csvText: string): Trade[] {
     const pnl = parseNum(cols[6])
     const orderId = cols[7]
 
-    return {
+    result.push({
       ticket: orderId || `bybit-${time.getTime()}`,
       source: 'bybit',
       symbol,
@@ -45,6 +50,7 @@ export function parseBybit(csvText: string): Trade[] {
         if (h >= 0 && h < 8) return 'Asian'
         return 'Other'
       })() as Trade['session'],
-    } as Trade
-  }).filter(t => t.symbol && t.entryPrice > 0)
+    } as Trade)
+  }
+  return result.filter(t => t.symbol && t.entryPrice > 0)
 }

@@ -628,6 +628,9 @@ export function computeStats(rawTrades: Trade[]): ComputedStats {
   // PnL par jour (partagé : FTMO consistency + overtrading)
   const byDay: Record<string, { count: number; pnl: number }> = {}
   for (const t of trades) {
+    // Date invalide : trade exclu du regroupement journalier (cohérent avec
+    // la protection du tri chronologique plus haut).
+    if (isNaN(t.openTime.getTime())) continue
     const k = t.openTime.toISOString().slice(0, 10)
     if (!byDay[k]) byDay[k] = { count: 0, pnl: 0 }
     byDay[k].count++
@@ -704,7 +707,9 @@ export function computeStats(rawTrades: Trade[]): ComputedStats {
       relatedData: {
         tradesAfterLoss: revengeCount,
         exampleLosses: losers.slice(0, 3).map(t => ({
-          date: t.openTime.toISOString().slice(0, 10),
+          date: isNaN(t.openTime.getTime())
+            ? 'N/A'
+            : t.openTime.toISOString().slice(0, 10),
           pnl: r2(t.profitLoss),
           symbol: t.symbol,
         })),
@@ -869,12 +874,16 @@ export function computeStats(rawTrades: Trade[]): ComputedStats {
     bestTrade: {
       symbol: bestTrade.symbol,
       pnl: r2(bestTrade.profitLoss),
-      date: bestTrade.openTime.toISOString().slice(0, 10),
+      date: isNaN(bestTrade.openTime.getTime())
+        ? 'N/A'
+        : bestTrade.openTime.toISOString().slice(0, 10),
     },
     worstTrade: {
       symbol: worstTrade.symbol,
       pnl: r2(worstTrade.profitLoss),
-      date: worstTrade.openTime.toISOString().slice(0, 10),
+      date: isNaN(worstTrade.openTime.getTime())
+        ? 'N/A'
+        : worstTrade.openTime.toISOString().slice(0, 10),
     },
     londonWinRate: sessWR['London'],
     londonWins: sessMap['London'].wins,
@@ -1035,15 +1044,19 @@ export async function analyzeTradesMember(
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   const stats = computeStats(trades)
 
-  const tradesSummary = trades.map(t => ({
-    symbol: (t as any).symbol,
-    direction: (t as any).direction,
-    openTime: new Date((t as any).openTime).toISOString().slice(0, 16),
-    closeTime: new Date((t as any).closeTime).toISOString().slice(0, 16),
-    pnl: r2((t as any).profitLoss),
-    durationMinutes: (t as any).durationMinutes,
-    lotSize: (t as any).lotSize,
-  }))
+  const tradesSummary = trades.map(t => {
+    const openD = new Date((t as any).openTime)
+    const closeD = new Date((t as any).closeTime)
+    return {
+      symbol: (t as any).symbol,
+      direction: (t as any).direction,
+      openTime: isNaN(openD.getTime()) ? 'N/A' : openD.toISOString().slice(0, 16),
+      closeTime: isNaN(closeD.getTime()) ? 'N/A' : closeD.toISOString().slice(0, 16),
+      pnl: r2((t as any).profitLoss),
+      durationMinutes: (t as any).durationMinutes,
+      lotSize: (t as any).lotSize,
+    }
+  })
 
   const userMessage =
     `STATS PRÉCALCULÉES (valeurs fixes — ne jamais modifier) :\n` +
