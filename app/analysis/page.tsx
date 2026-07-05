@@ -97,13 +97,13 @@ export default function DemoPage() {
   }, [])
 
   useEffect(() => {
-    if (report) {
+    if (view === 'rapport') {
       document.body.classList.add("hide-glow");
     } else {
       document.body.classList.remove("hide-glow");
     }
     return () => document.body.classList.remove("hide-glow");
-  }, [report])
+  }, [view])
 
   useEffect(() => {
     const prevView = prevViewRef.current
