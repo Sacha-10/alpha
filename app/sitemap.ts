@@ -9,7 +9,6 @@ const legalPages = [
   'cookies',
   'mentions-legales',
   'risque',
-  'terms',
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {

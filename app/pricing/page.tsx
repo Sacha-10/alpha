@@ -384,7 +384,7 @@ export default function PricingPage() {
         <section className="min-h-screen pt-16 flex items-center justify-center px-6 text-center">
           <div className="mx-auto max-w-[1200px] pb-10 pt-10 md:pb-0 md:pt-0">
             <RevealSection>
-              <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-6">Tarifs</p>
+              <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-6">Prix</p>
               <h1 className="text-center text-5xl font-bold leading-tight md:text-7xl">
                 Analysez vos trades.<br />Améliorez vos performances.
               </h1>

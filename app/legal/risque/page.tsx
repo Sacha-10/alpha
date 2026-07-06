@@ -1,4 +1,21 @@
+import type { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
+
+const title = "Mentions de risque - AlphaTradeX";
+const description = "Mentions sur les risques liés au trading.";
+
+export async function generateMetadata(
+  _props: object,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { openGraph, twitter } = await parent;
+  return {
+    title,
+    description,
+    openGraph: { ...openGraph, title, description },
+    twitter: { ...twitter, title, description },
+  };
+}
 
 export default function RisquesPage() {
   return (
