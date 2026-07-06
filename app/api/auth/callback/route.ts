@@ -48,15 +48,21 @@ export async function GET(request: NextRequest) {
       // initialisés qu'à la création d'un nouvel utilisateur. Sur un compte
       // existant, on ne rafraîchit que le profil — jamais subscription_*,
       // sous peine d'écraser un abonnement actif à chaque connexion.
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from('users')
         .select('subscription_status')
         .eq('id', user.id)
         .maybeSingle()
+      if (existingError) {
+        console.error('[auth/callback] échec lecture ligne users — userId:', user.id, JSON.stringify(existingError))
+      }
 
       let subscriptionStatus: string | null
       if (existing) {
-        await supabase.from('users').update(profile).eq('id', user.id)
+        const { error: updateError } = await supabase.from('users').update(profile).eq('id', user.id)
+        if (updateError) {
+          console.error('[auth/callback] échec rafraîchissement profil — userId:', user.id, JSON.stringify(updateError))
+        }
         subscriptionStatus = existing.subscription_status ?? null
       } else {
         const { error: insertError } = await supabase.from('users').insert({

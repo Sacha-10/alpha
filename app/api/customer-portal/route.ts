@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
 
   if (!user) return NextResponse.redirect(new URL('/', req.url))
 
-  const { data: dbUser } = await supabase
+  const { data: dbUser, error: dbUserError } = await supabase
 
     .from('users')
 
@@ -57,6 +57,12 @@ export async function GET(req: NextRequest) {
     .eq('id', user.id)
 
     .single()
+
+  if (dbUserError) {
+
+    console.error('[customer-portal] échec lecture stripe_customer_id — userId:', user.id, JSON.stringify(dbUserError))
+
+  }
 
   if (!dbUser?.stripe_customer_id) {
 

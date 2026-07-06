@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import { RevealSection } from "@/components/RevealSection";
 import { Check, Flame, X, ArrowRight, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getSupabaseClient } from '@/lib/supabase';
@@ -48,58 +49,6 @@ type FaqItem = {
   question: string;
   answer: string;
 };
-
-type RevealSectionProps = {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-};
-
-function useReveal() {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            observer.unobserve(entry.target);
-          }
-        }
-      },
-      { threshold: 0.15 }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  return { ref, visible };
-}
-
-function RevealSection({ children, delay = 0, className = "" }: RevealSectionProps) {
-  const { ref, visible } = useReveal();
-
-  return (
-    <div
-      ref={ref}
-      className={`transition-all ease-out ${className}`}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(28px)",
-        transitionDuration: "700ms",
-        transitionDelay: `${delay}ms`,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
 
 function AccordionItem({ question, answer }: FaqItem) {
   return (
@@ -250,11 +199,12 @@ export default function PricingPage() {
     async function fetchPlan() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('users')
         .select('subscription_plan, subscription_status')
         .eq('id', session.user.id)
         .single();
+      if (error) console.error('[pricing] échec lecture plan — userId:', session.user.id, JSON.stringify(error));
       if (data) {
         setCurrentPlan(data.subscription_plan ?? null);
         setSubscriptionStatus(data.subscription_status ?? null);

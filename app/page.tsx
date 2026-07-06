@@ -1,78 +1,65 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import LogoSvg from "@/components/LogoSvg";
+import { RevealSection } from "@/components/RevealSection";
 import {
   ArrowRight,
   BarChart3,
-  Bell,
   BellRing,
   BrainCircuit,
-  CalendarCheck,
   ChevronDown,
-  CreditCard,
-  Headphones,
-  History,
-  Lock,
   Menu,
-  Radar,
-  Receipt,
-  ScanLine,
-  ScrollText,
   ShieldCheck,
-  Target,
   TrendingUp,
   Trophy,
   Upload,
   UserCircle,
-  Webhook,
+  X,
 } from "lucide-react";
 
-function useReveal() {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [visible, setVisible] = useState(false);
+// Bannière affichée quand le callback d'authentification renvoie vers
+// /?error=account_creation_failed (échec de création de la ligne users).
+// Pilotée par l'URL : toute navigation la fait disparaître. Fermeture via
+// la croix ou auto-dismiss à 10 s ; les deux retirent le paramètre de l'URL
+// (router.replace) pour qu'un refresh ne la réaffiche pas.
+// useSearchParams impose un boundary <Suspense> sur une page prérendue.
+function AccountCreationErrorBanner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const visible = searchParams.get("error") === "account_creation_failed";
+  const [dismissed, setDismissed] = useState(false);
+
+  const dismiss = useCallback(() => {
+    setDismissed(true);
+    router.replace("/", { scroll: false });
+  }, [router]);
 
   useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
+    if (!visible || dismissed) return;
+    const timer = setTimeout(dismiss, 10_000);
+    return () => clearTimeout(timer);
+  }, [visible, dismissed, dismiss]);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            observer.unobserve(entry.target);
-          }
-        }
-      },
-      { threshold: 0.15 }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  return { ref, visible };
-}
-
-function RevealSection({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
-  const { ref, visible } = useReveal();
+  if (!visible || dismissed) return null;
 
   return (
-    <div
-      ref={ref}
-      className={`transition-all ease-out ${className}`}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(28px)",
-        transitionDuration: "700ms",
-        transitionDelay: `${delay}ms`,
-      }}
-    >
-      {children}
+    <div className="fixed inset-x-0 top-20 z-40 flex justify-center px-6">
+      <div className="flex items-center gap-3 rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-sm text-red">
+        Une erreur est survenue. Réessayez de vous connecter.
+        <button
+          type="button"
+          onClick={dismiss}
+          aria-label="Fermer"
+          className="text-secondary transition-colors duration-200 hover:text-primary"
+        >
+          <X className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
     </div>
   );
 }
@@ -151,6 +138,10 @@ export default function HomePage() {
     <div className="min-h-screen bg-background text-primary">
       <Navbar />
 
+      <Suspense fallback={null}>
+        <AccountCreationErrorBanner />
+      </Suspense>
+
       <main className="relative overflow-x-clip">
         <RevealSection className="min-h-screen pt-16 flex items-center justify-center px-6 bg-gradient-to-b from-background to-card">
           <div className="mx-auto max-w-[1200px] pb-10 pt-10 md:pb-0 md:pt-0 text-center">
@@ -202,13 +193,7 @@ export default function HomePage() {
               {/* Topbar desktop */}
               <div className="hidden md:flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
                 <div className="flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 600 600" style={{ borderRadius: '8px', flexShrink: 0 }} aria-hidden>
-                    <rect width="600" height="600" rx="125" ry="125" fill="#0A0A0F" />
-                    <svg x="75" y="75" width="450" height="450" viewBox="0 0 24 24" fill="#0A0A0F" stroke="#2D6FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-                      <polyline points="16 7 22 7 22 13" />
-                    </svg>
-                  </svg>
+                  <LogoSvg size={28} />
                   <span className="font-semibold text-primary">AlphaTradeX</span>
                 </div>
                 <div className="flex min-w-0 flex-1 items-center justify-start pl-6 md:pl-10">
@@ -225,13 +210,7 @@ export default function HomePage() {
               </div>
               {/* Topbar mobile */}
               <div className="relative flex md:hidden h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 600 600" style={{ borderRadius: '8px', flexShrink: 0 }} aria-hidden>
-                  <rect width="600" height="600" rx="125" ry="125" fill="#0A0A0F" />
-                  <svg x="75" y="75" width="450" height="450" viewBox="0 0 24 24" fill="#0A0A0F" stroke="#2D6FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-                    <polyline points="16 7 22 7 22 13" />
-                  </svg>
-                </svg>
+                <LogoSvg size={28} />
                 <span className="absolute left-1/2 -translate-x-1/2 font-semibold text-primary">AlphaTradeX</span>
                 <div className="shrink-0 rounded-md border border-border p-2 text-secondary cursor-default">
                   <Menu className="h-5 w-5" aria-hidden />

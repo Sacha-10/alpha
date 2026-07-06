@@ -1,5 +1,6 @@
 import { Trade } from './parseMT4'
 import { detectDelimiter, makeCSVParser, cleanSymbol } from './utils'
+import { getSession } from './session'
 
 // Format FTMO Metrix (Trading Journal > Export CSV) :
 // Position, Symbol, Type, Volume, Price(open), S/L, T/P, Time(open),
@@ -7,14 +8,6 @@ import { detectDelimiter, makeCSVParser, cleanSymbol } from './utils'
 //
 // Diffère du MT5 standard par la colonne "Fee" à l'index 11,
 // qui décale Swap → [12] et Profit → [13].
-
-function getSession(date: Date): Trade['session'] {
-  const hour = date.getUTCHours()
-  if (hour >= 7 && hour < 16) return 'London'
-  if (hour >= 13 && hour < 22) return 'New York'
-  if (hour >= 0 && hour < 8) return 'Asian'
-  return 'Other'
-}
 
 function calcPips(
   symbol: string,

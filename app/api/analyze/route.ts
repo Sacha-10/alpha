@@ -76,11 +76,15 @@ export async function POST(req: NextRequest) {
     }
     rateLimitMap.set(user.id, Date.now())
 
-    const { data: userData } = await supabase
+    const { data: userData, error: userError } = await supabase
       .from('users')
       .select('*')
       .eq('id', user.id)
       .single()
+
+    if (userError) {
+      console.error('[/api/analyze] échec lecture users — userId:', user.id, JSON.stringify(userError))
+    }
 
     if (!userData) {
       return NextResponse.json(
@@ -158,13 +162,18 @@ export async function POST(req: NextRequest) {
       console.error('[/api/analyze] Erreur RPC increment_analyses_used:', JSON.stringify(incrementError))
     }
 
-    await supabase.from('member_analyses')
+    const { error: saveError } = await supabase.from('member_analyses')
       .insert({
         user_id: user.id,
         report,
         plan: userData.subscription_plan,
         created_at: new Date().toISOString()
       })
+    if (saveError) {
+      // L'analyse est déjà générée et facturée : on la renvoie quand même,
+      // mais l'échec de sauvegarde (historique) doit laisser une trace.
+      console.error('[/api/analyze] échec insert member_analyses — userId:', user.id, JSON.stringify(saveError))
+    }
 
     const usedAfter = typeof newUsed === 'number'
       ? newUsed

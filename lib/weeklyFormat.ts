@@ -79,7 +79,9 @@ export function fmtScore(v: number): string {
 
 export function fmtPnl(v: number): string {
   const abs = Math.abs(v).toFixed(0)
-  return v < 0 ? `-${abs} €` : `+${abs} €`
+  // Format unifié « 123€ » sans espace (même rendu que TradeReportBody,
+  // AnalysisHistory et le PDF).
+  return v < 0 ? `-${abs}€` : `+${abs}€`
 }
 
 export function diff(a: number | null, b: number | null): number | null {

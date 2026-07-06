@@ -5,34 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Menu, UserCircle, X } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase";
-
-const LogoSvg = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="32"
-    height="32"
-    viewBox="0 0 600 600"
-    style={{ borderRadius: "8px", flexShrink: 0 }}
-    aria-hidden
-  >
-    <rect width="600" height="600" rx="125" ry="125" fill="#0A0A0F" />
-    <svg
-      x="75"
-      y="75"
-      width="450"
-      height="450"
-      viewBox="0 0 24 24"
-      fill="#0A0A0F"
-      stroke="#2D6FFF"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-      <polyline points="16 7 22 7 22 13" />
-    </svg>
-  </svg>
-);
+import LogoSvg from "@/components/LogoSvg";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -88,11 +61,12 @@ export default function Navbar() {
     const handlePostLogin = async (userId: string) => {
       if (redirectingRef.current) return
       redirectingRef.current = true
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('users')
         .select('subscription_status')
         .eq('id', userId)
         .single()
+      if (error) console.error('[Navbar] échec lecture subscription_status — userId:', userId, JSON.stringify(error))
       window.location.href = data?.subscription_status === 'active' ? '/dashboard' : '/pricing'
     }
 

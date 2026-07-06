@@ -1,4 +1,5 @@
 import { detectDelimiter, makeCSVParser, cleanSymbol } from './utils'
+import { getSession } from './session'
 
 export type TradeSource =
   | 'mt4'
@@ -28,14 +29,6 @@ export interface Trade {
   profitLoss: number
   profitLossPips: number
   session: 'London' | 'New York' | 'Asian' | 'Other'
-}
-
-function getSession(date: Date): Trade['session'] {
-  const hour = date.getUTCHours()
-  if (hour >= 7 && hour < 16) return 'London'
-  if (hour >= 13 && hour < 22) return 'New York'
-  if (hour >= 0 && hour < 8) return 'Asian'
-  return 'Other'
 }
 
 function calcPips(

@@ -1,5 +1,6 @@
 import OpenAI from 'openai'
 import { Trade } from './parseCSV'
+import type { AiAnalysisResult } from './tradingAnalysisTypes'
 
 type AnalysisTargets = {
   winRate: number
@@ -1040,21 +1041,21 @@ Structure JSON exacte :
 
 export async function analyzeTradesMember(
   trades: Trade[]
-): Promise<any> {
+): Promise<AiAnalysisResult> {
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   const stats = computeStats(trades)
 
   const tradesSummary = trades.map(t => {
-    const openD = new Date((t as any).openTime)
-    const closeD = new Date((t as any).closeTime)
+    const openD = new Date(t.openTime)
+    const closeD = new Date(t.closeTime)
     return {
-      symbol: (t as any).symbol,
-      direction: (t as any).direction,
+      symbol: t.symbol,
+      direction: t.direction,
       openTime: isNaN(openD.getTime()) ? 'N/A' : openD.toISOString().slice(0, 16),
       closeTime: isNaN(closeD.getTime()) ? 'N/A' : closeD.toISOString().slice(0, 16),
-      pnl: r2((t as any).profitLoss),
-      durationMinutes: (t as any).durationMinutes,
-      lotSize: (t as any).lotSize,
+      pnl: r2(t.profitLoss),
+      durationMinutes: t.durationMinutes,
+      lotSize: t.lotSize,
     }
   })
 
@@ -1064,8 +1065,8 @@ export async function analyzeTradesMember(
     `\n\nTRADES BRUTS (${trades.length} trades — pour contexte textuel uniquement) :\n` +
     JSON.stringify(tradesSummary)
 
-  async function callAPI(attempt: number): Promise<any> {
-    let response: any
+  async function callAPI(attempt: number): Promise<AiAnalysisResult> {
+    let response: OpenAI.Chat.Completions.ChatCompletion
     try {
       response = await client.chat.completions.create({
         model: 'gpt-5.4',

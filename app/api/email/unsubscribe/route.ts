@@ -58,7 +58,10 @@ function invalidPage(): NextResponse {
 }
 
 async function setOptOut(userId: string, value: boolean) {
-  await admin().from('users').update({ weekly_email_opt_out: value }).eq('id', userId)
+  const { error } = await admin().from('users').update({ weekly_email_opt_out: value }).eq('id', userId)
+  if (error) {
+    console.error('[email/unsubscribe] échec update weekly_email_opt_out — userId:', userId, 'value:', value, JSON.stringify(error))
+  }
 }
 
 // GET : pages HTML (clic depuis l'email).
@@ -82,11 +85,14 @@ export async function GET(req: NextRequest) {
   }
 
   // Désinscription : distingue le premier opt-out d'un membre déjà désabonné.
-  const { data } = await admin()
+  const { data, error } = await admin()
     .from('users')
     .select('weekly_email_opt_out')
     .eq('id', userId)
     .single()
+  if (error) {
+    console.error('[email/unsubscribe] échec lecture weekly_email_opt_out — userId:', userId, JSON.stringify(error))
+  }
 
   if (data?.weekly_email_opt_out === true) {
     return page({

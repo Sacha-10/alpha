@@ -10,49 +10,10 @@ import { PLANS } from '@/lib/plans'
 import TradeReport from '@/components/TradeReport'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { RevealSection } from '@/components/RevealSection'
+import type { AiAnalysisResult } from '@/lib/tradingAnalysisTypes'
 
 const SESSION_KEY = 'atx_demo_report'
-
-function useReveal() {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            observer.unobserve(entry.target);
-          }
-        }
-      },
-      { threshold: 0.15 }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-  return { ref, visible };
-}
-
-function RevealSection({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
-  const { ref, visible } = useReveal();
-  return (
-    <div
-      ref={ref}
-      className={`transition-all ease-out ${className}`}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(28px)",
-        transitionDuration: "700ms",
-        transitionDelay: `${delay}ms`,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
 
 const steps = [
   {
@@ -81,7 +42,7 @@ const steps = [
 export default function DemoPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [report, setReport] = useState<any>(null)
+  const [report, setReport] = useState<AiAnalysisResult | null>(null)
   const [error, setError] = useState<string>('')
   const [used, setUsed] = useState(false)
   const [view, setView] = useState<'analyse' | 'rapport'>('analyse')
@@ -265,7 +226,7 @@ export default function DemoPage() {
           </div>
         </section>
 
-        {view === 'rapport' && (
+        {view === 'rapport' && report && (
           <div
             style={{
               position: 'fixed',

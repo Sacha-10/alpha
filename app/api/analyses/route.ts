@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { getRetentionFloor, requirePlanFor } from '@/lib/plans'
 
@@ -11,8 +11,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const token = searchParams.get('token')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let supabase: any
+    let supabase: SupabaseClient
     let user: { id: string } | null = null
 
     if (token) {
@@ -47,11 +46,14 @@ export async function GET(req: NextRequest) {
 
     if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
-    const { data: userData } = await supabase
+    const { data: userData, error: userError } = await supabase
       .from('users')
       .select('subscription_plan, created_at')
       .eq('id', user.id)
       .single()
+    if (userError) {
+      console.error('[/api/analyses] échec lecture users — userId:', user.id, JSON.stringify(userError))
+    }
 
     // Palier : Historique des analyses réservé à Premium et au-dessus.
     if (!requirePlanFor('analysesHistory', userData?.subscription_plan)) {

@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import LogoSvg from "@/components/LogoSvg";
 import TradeReport from "@/components/TradeReport";
 import TradeJournal from "@/components/TradeJournal";
 import AnalysisHistory from "@/components/AnalysisHistory";
@@ -41,34 +42,6 @@ import {
 
 const SESSION_KEY_REPORT = "atx_last_report";
 
-const LogoSvg = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="28"
-    height="28"
-    viewBox="0 0 600 600"
-    style={{ borderRadius: "8px", flexShrink: 0 }}
-    aria-hidden
-  >
-    <rect width="600" height="600" rx="125" ry="125" fill="#0A0A0F" />
-    <svg
-      x="75"
-      y="75"
-      width="450"
-      height="450"
-      viewBox="0 0 24 24"
-      fill="#0A0A0F"
-      stroke="#2D6FFF"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-      <polyline points="16 7 22 7 22 13" />
-    </svg>
-  </svg>
-);
-
 type DashboardView =
   | "nouvelle-analyse"
   | "mon-analyse"
@@ -86,6 +59,82 @@ type SectionKey = "analyse" | "performance" | "signaux" | "aide" | "compte";
 function normalizeApiError(message: unknown): string {
   if (typeof message !== "string") return "Erreur d'analyse.";
   return message.replace(/\s+/g, " ").trim();
+}
+
+function SectionLabel({
+  children,
+  isOpen,
+  onToggle,
+}: {
+  children: ReactNode;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex w-full items-center justify-between px-2 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-secondary"
+    >
+      <span>{children}</span>
+      <ChevronDown
+        className={`h-3.5 w-3.5 transition-transform duration-200 ${
+          isOpen ? "rotate-180" : ""
+        }`}
+        aria-hidden
+      />
+    </button>
+  );
+}
+
+function SidebarNavRow({
+  icon: Icon,
+  label,
+  active = false,
+  locked = false,
+  lockPlanLabel,
+  lockedPath = "/pricing",
+  onSelect,
+  onAfterNavigate,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  label: string;
+  active?: boolean;
+  locked?: boolean;
+  lockPlanLabel?: string;
+  lockedPath?: string;
+  onSelect?: () => void;
+  onAfterNavigate?: () => void;
+}) {
+  const router = useRouter();
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (locked) {
+          router.push(lockedPath);
+          onAfterNavigate?.();
+          return;
+        }
+        onSelect?.();
+        onAfterNavigate?.();
+      }}
+      className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-all duration-150 ${
+        locked
+          ? "cursor-not-allowed opacity-40"
+          : active
+            ? "border border-[#2D6FFF25] bg-[#2D6FFF15] text-primary"
+            : "cursor-pointer text-secondary hover:bg-hover hover:text-primary"
+      }`}
+      title={locked && lockPlanLabel ? `Disponible sur plan ${lockPlanLabel}` : undefined}
+    >
+      <span className="flex items-center gap-3">
+        <Icon className="h-4 w-4 shrink-0" />
+        {label}
+      </span>
+      {locked ? <Lock className="h-4 w-4 shrink-0 text-secondary" /> : null}
+    </button>
+  );
 }
 
 function EmptyFeaturePage({
@@ -233,11 +282,12 @@ export default function DashboardClient() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     setUserId(user.id);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("users")
       .select("subscription_plan, subscription_status, analyses_used, analyses_limit, analyses_reset_date")
       .eq("id", user.id)
       .single();
+    if (error) console.error("[DashboardClient] échec lecture users — userId:", user.id, JSON.stringify(error));
     if (data) {
       setSubscriptionPlan(data.subscription_plan ?? null);
       setSubscriptionStatus(data.subscription_status ?? null);
@@ -344,82 +394,6 @@ export default function DashboardClient() {
     router.refresh();
   }
 
-  function SectionLabel({
-    children,
-    sectionKey,
-  }: {
-    children: ReactNode;
-    sectionKey: SectionKey;
-  }) {
-    const isOpen = openSections[sectionKey];
-    return (
-      <button
-        type="button"
-        onClick={() =>
-          setOpenSections((prev) => ({ ...prev, [sectionKey]: !prev[sectionKey] }))
-        }
-        className="flex w-full items-center justify-between px-2 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-secondary"
-      >
-        <span>{children}</span>
-        <ChevronDown
-          className={`h-3.5 w-3.5 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
-          aria-hidden
-        />
-      </button>
-    );
-  }
-
-  function SidebarNavRow({
-    icon: Icon,
-    label,
-    active = false,
-    locked = false,
-    lockPlanLabel,
-    lockedPath = "/pricing",
-    onSelect,
-    onAfterNavigate,
-  }: {
-    icon: ComponentType<{ className?: string }>;
-    label: string;
-    active?: boolean;
-    locked?: boolean;
-    lockPlanLabel?: string;
-    lockedPath?: string;
-    onSelect?: () => void;
-    onAfterNavigate?: () => void;
-  }) {
-    return (
-      <button
-        type="button"
-        onClick={() => {
-          if (locked) {
-            router.push(lockedPath);
-            onAfterNavigate?.();
-            return;
-          }
-          onSelect?.();
-          onAfterNavigate?.();
-        }}
-        className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-all duration-150 ${
-          locked
-            ? "cursor-not-allowed opacity-40"
-            : active
-              ? "border border-[#2D6FFF25] bg-[#2D6FFF15] text-primary"
-              : "cursor-pointer text-secondary hover:bg-hover hover:text-primary"
-        }`}
-        title={locked && lockPlanLabel ? `Disponible sur plan ${lockPlanLabel}` : undefined}
-      >
-        <span className="flex items-center gap-3">
-          <Icon className="h-4 w-4 shrink-0" />
-          {label}
-        </span>
-        {locked ? <Lock className="h-4 w-4 shrink-0 text-secondary" /> : null}
-      </button>
-    );
-  }
-
   const historiqueLocked = !premiumOrAbove;
   const evolutionLocked = !premiumOrAbove;
   const resumeLocked = !premiumOrAbove;
@@ -456,6 +430,9 @@ export default function DashboardClient() {
 
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
 
+  const toggleSection = (key: SectionKey) =>
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+
   function renderQuotaCard() {
     if (!showQuotaCard) return null;
     return (
@@ -479,7 +456,7 @@ export default function DashboardClient() {
   function renderSidebarAccordion(closeMobile?: () => void) {
     return (
       <div className="space-y-1">
-        <SectionLabel sectionKey="analyse">Analyse</SectionLabel>
+        <SectionLabel isOpen={openSections.analyse} onToggle={() => toggleSection("analyse")}>Analyse</SectionLabel>
         {openSections.analyse ? (
           <>
             <SidebarNavRow
@@ -508,7 +485,7 @@ export default function DashboardClient() {
           </>
         ) : null}
 
-        <SectionLabel sectionKey="performance">Performance</SectionLabel>
+        <SectionLabel isOpen={openSections.performance} onToggle={() => toggleSection("performance")}>Performance</SectionLabel>
         {openSections.performance ? (
           <>
             <SidebarNavRow
@@ -541,7 +518,7 @@ export default function DashboardClient() {
           </>
         ) : null}
 
-        <SectionLabel sectionKey="signaux">Signaux</SectionLabel>
+        <SectionLabel isOpen={openSections.signaux} onToggle={() => toggleSection("signaux")}>Signaux</SectionLabel>
         {openSections.signaux ? (
           <>
             <SidebarNavRow
@@ -574,7 +551,7 @@ export default function DashboardClient() {
           </>
         ) : null}
 
-        <SectionLabel sectionKey="aide">Aide</SectionLabel>
+        <SectionLabel isOpen={openSections.aide} onToggle={() => toggleSection("aide")}>Aide</SectionLabel>
         {openSections.aide ? (
           <SidebarNavRow
             icon={Headphones}
@@ -588,7 +565,7 @@ export default function DashboardClient() {
           />
         ) : null}
 
-        <SectionLabel sectionKey="compte">Compte</SectionLabel>
+        <SectionLabel isOpen={openSections.compte} onToggle={() => toggleSection("compte")}>Compte</SectionLabel>
         {openSections.compte ? (
           <>
             <SidebarNavRow
@@ -815,7 +792,7 @@ export default function DashboardClient() {
             onClick={() => router.push("/")}
             className="flex shrink-0 items-center gap-2 text-left"
           >
-            <LogoSvg />
+            <LogoSvg size={28} />
             <span className="font-semibold text-primary">AlphaTradeX</span>
           </button>
           <div className="flex min-w-0 flex-1 items-center justify-start pl-6 md:pl-10">
@@ -849,7 +826,7 @@ export default function DashboardClient() {
             className="flex shrink-0 items-center text-left"
             aria-label="AlphaTradeX · accueil"
           >
-            <LogoSvg />
+            <LogoSvg size={28} />
           </button>
           <Link
             href="/"

@@ -36,11 +36,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Date d'inscription : repli sur APP_LAUNCH si jamais absente.
-    const { data: userData } = await supabase
+    const { data: userData, error: userError } = await supabase
       .from('users')
       .select('created_at')
       .eq('id', user.id)
       .single()
+    if (userError) {
+      console.error('[import-trades] échec lecture created_at — userId:', user.id, JSON.stringify(userError))
+    }
     const registered = userData?.created_at ? new Date(userData.created_at) : APP_LAUNCH
 
     const mapped = trades.map((trade: any) => ({

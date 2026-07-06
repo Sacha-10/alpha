@@ -31,11 +31,14 @@ export async function GET(req: NextRequest) {
     // Fenêtre de rétention calculée CÔTÉ SERVEUR depuis le plan réel + la date
     // d'inscription (jamais à partir du dateMin client). Accessible à tous les
     // plans actifs (pas de palier — statut garanti par le proxy).
-    const { data: userData } = await supabase
+    const { data: userData, error: userError } = await supabase
       .from('users')
       .select('subscription_plan, created_at')
       .eq('id', user.id)
       .single()
+    if (userError) {
+      console.error('[api/trades] échec lecture users — userId:', user.id, JSON.stringify(userError))
+    }
 
     const floor = getRetentionFloor(userData?.subscription_plan, userData?.created_at)
 

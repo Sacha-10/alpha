@@ -64,21 +64,27 @@ export async function GET(req: NextRequest) {
   for (const m of eligible) {
     try {
       // Idempotence : ne pas renvoyer si déjà envoyé pour cette semaine.
-      const { data: logRow } = await admin
+      const { data: logRow, error: logReadError } = await admin
         .from('weekly_email_log')
         .select('user_id')
         .eq('user_id', m.id)
         .eq('week_key', lastWeekKey)
         .maybeSingle()
+      if (logReadError) {
+        console.error('[cron weekly-summary-email] échec lecture weekly_email_log — userId:', m.id, 'week_key:', lastWeekKey, JSON.stringify(logReadError))
+      }
       if (logRow) {
         skipped++
         continue
       }
 
-      const { data: tradeData } = await admin
+      const { data: tradeData, error: tradesError } = await admin
         .from('trades')
         .select('*')
         .eq('user_id', m.id)
+      if (tradesError) {
+        console.error('[cron weekly-summary-email] échec lecture trades — userId:', m.id, JSON.stringify(tradesError))
+      }
       const rows: TradeRow[] = tradeData ?? []
 
       const summary = buildSummaryFromRows(rows, now)

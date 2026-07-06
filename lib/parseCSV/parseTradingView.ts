@@ -1,5 +1,6 @@
 import { Trade } from './parseMT4'
 import { detectDelimiter, makeCSVParser, cleanSymbol } from './utils'
+import { getSession } from './session'
 
 // Format attendu (TradingView Strategy Tester — Liste des trades fermés) :
 // Trade #, Type, Signal, Entry Date/Time, Entry Price, Exit Date/Time, Exit Price, Contracts, Profit, ...
@@ -27,7 +28,6 @@ export function parseTradingView(csvText: string): Trade[] {
     const durationMinutes = Math.round(
       (closeTime.getTime() - openTime.getTime()) / 60000
     )
-    const hour = openTime.getUTCHours()
 
     result.push({
       ticket: cols[0],
@@ -46,11 +46,7 @@ export function parseTradingView(csvText: string): Trade[] {
       swap: 0,
       profitLoss: pnl,
       profitLossPips: 0,
-      session: (
-        hour >= 7 && hour < 16 ? 'London' :
-        hour >= 13 && hour < 22 ? 'New York' :
-        hour >= 0 && hour < 8 ? 'Asian' : 'Other'
-      ) as Trade['session'],
+      session: getSession(openTime),
     } as Trade)
   }
   return result.filter(t => t.entryPrice > 0)

@@ -1,5 +1,6 @@
 import { Trade } from './parseMT4'
 import { detectDelimiter, makeCSVParser, cleanSymbol } from './utils'
+import { getSession } from './session'
 
 // Format Bybit CSV (Trade History export) :
 // Date, Symbol, Side, Price, Quantity, Fee, Realized P&L, Order ID
@@ -43,13 +44,7 @@ export function parseBybit(csvText: string): Trade[] {
       swap: 0,
       profitLoss: pnl,
       profitLossPips: 0,
-      session: (() => {
-        const h = time.getUTCHours()
-        if (h >= 7 && h < 16) return 'London'
-        if (h >= 13 && h < 22) return 'New York'
-        if (h >= 0 && h < 8) return 'Asian'
-        return 'Other'
-      })() as Trade['session'],
+      session: getSession(time),
     } as Trade)
   }
   return result.filter(t => t.symbol && t.entryPrice > 0)
