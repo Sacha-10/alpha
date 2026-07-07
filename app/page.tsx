@@ -24,8 +24,19 @@ import {
 
 // Bannière affichée quand le callback d'authentification renvoie vers
 // /?error=account_creation_failed (échec de création de la ligne users).
-// Pilotée par l'URL : toute navigation la fait disparaître. Fermeture via
-// la croix ou auto-dismiss à 10 s ; les deux retirent le paramètre de l'URL
+// Overlay absolu ancré sur le <main> (relative) : top-16 + mt-6 = haut
+// visible à 88px fixes, sous la navbar (~69px desktop / ~71px mobile),
+// jamais un pixel dessous. Hors flux, empreinte de layout nulle : le hero
+// (items-center dans min-h-screen) reste strictement immobile et le
+// coussin bas du hero ne se comprime pas — en flux dans le bloc centré,
+// sa hauteur (94px marges comprises) se redistribuait en ±47px de part
+// et d'autre par le centrage. Même largeur effective que la navbar (les
+// deux : parent px-6 + conteneur max-w-[1200px]), donc alignée au pixel
+// sur le logo et le bouton. z-10 : au-dessus des fonds opaques des
+// sections (les RevealSection, transformées, peignent après elle), sous
+// la navbar (z-50). Pilotée par l'URL : toute navigation la fait
+// disparaître. Fermeture via la croix ou auto-dismiss à 10 s ; les deux
+// retirent le paramètre de l'URL
 // (router.replace) pour qu'un refresh ne la réaffiche pas.
 // useSearchParams impose un boundary <Suspense> sur une page prérendue.
 function AccountCreationErrorBanner() {
@@ -48,14 +59,14 @@ function AccountCreationErrorBanner() {
   if (!visible || dismissed) return null;
 
   return (
-    <div className="fixed inset-x-0 top-20 z-40 flex justify-center px-6">
-      <div className="flex items-center gap-3 rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-sm text-red">
+    <div className="absolute inset-x-0 top-16 z-10 px-6">
+      <div className="relative mx-auto mt-6 max-w-[1200px] rounded-lg border border-red/30 bg-red/10 px-12 py-3 text-center text-sm text-red">
         Une erreur est survenue. Réessayez de vous connecter.
         <button
           type="button"
           onClick={dismiss}
           aria-label="Fermer"
-          className="text-secondary transition-colors duration-200 hover:text-primary"
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-red/70 transition-colors duration-200 hover:text-red"
         >
           <X className="h-4 w-4" aria-hidden />
         </button>
@@ -138,11 +149,10 @@ export default function HomePage() {
     <div className="min-h-screen bg-background text-primary">
       <Navbar />
 
-      <Suspense fallback={null}>
-        <AccountCreationErrorBanner />
-      </Suspense>
-
       <main className="relative overflow-x-clip">
+        <Suspense fallback={null}>
+          <AccountCreationErrorBanner />
+        </Suspense>
         <RevealSection className="min-h-screen pt-16 flex items-center justify-center px-6 bg-gradient-to-b from-background to-card">
           <div className="mx-auto max-w-[1200px] pb-10 pt-10 md:pb-0 md:pt-0 text-center">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">AlphaTradeX</p>

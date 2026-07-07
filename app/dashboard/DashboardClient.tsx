@@ -156,8 +156,6 @@ export default function DashboardClient() {
   const supabase = getSupabaseClient();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const checkout = searchParams.get("checkout");
-  const paymentSuccess = searchParams.get("success") === "true";
 
   const [analysis, setAnalysis] = useState<AiAnalysisResult | null>(null);
   const [analysesUsed, setAnalysesUsed] = useState<number | undefined>();
@@ -169,9 +167,6 @@ export default function DashboardClient() {
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
   const [userId, setUserId] = useState<string>('');
   const [analysesResetDate, setAnalysesResetDate] = useState<string | null>(null);
-
-  const [showSuccessBanner, setShowSuccessBanner] = useState(paymentSuccess || checkout === "success");
-  const [bannerVisible, setBannerVisible] = useState(true);
 
   const [mainView, setMainView] = useState<DashboardView>("nouvelle-analyse");
 
@@ -264,19 +259,6 @@ export default function DashboardClient() {
       void supabase.removeChannel(channel);
     };
   }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (!showSuccessBanner) return;
-    const url = new URL(window.location.href);
-    url.searchParams.delete("success");
-    url.searchParams.delete("checkout");
-    window.history.replaceState({}, "", url.toString());
-    const autoHide = setTimeout(() => {
-      setBannerVisible(false);
-      setTimeout(() => setShowSuccessBanner(false), 500);
-    }, 10000);
-    return () => clearTimeout(autoHide);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchUserData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -897,37 +879,6 @@ export default function DashboardClient() {
             mainView === "nouvelle-analyse" || mainView === "mon-analyse" || mainView === "journal-analyses" || mainView === "historique" || mainView === "evolution" || mainView === "resume-hebdomadaire" || mainView === "support" ? "overflow-y-auto" : "overflow-hidden"
           }`}
         >
-          <div className="flex shrink-0 flex-col gap-4">
-            {showSuccessBanner ? (
-              <div
-                className={`flex items-center justify-between rounded-lg border border-green/35 bg-green/10 px-4 py-3 text-sm text-green transition-opacity duration-500 ${bannerVisible ? "opacity-100" : "opacity-0"}`}
-              >
-                <span>
-                  {subscriptionPlan
-                    ? `Plan ${getPlanLabel(subscriptionPlan)} activé.`
-                    : "Plan activé."}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setBannerVisible(false);
-                    setTimeout(() => setShowSuccessBanner(false), 500);
-                  }}
-                  className="ml-4 text-green hover:opacity-70"
-                  aria-label="Fermer"
-                >
-                  ×
-                </button>
-              </div>
-            ) : null}
-
-            {checkout === "cancel" ? (
-              <p className="rounded-lg border border-red/35 bg-red/10 px-4 py-3 text-sm text-red">
-                Paiement annulé. Vous pouvez réessayer quand vous voulez.
-              </p>
-            ) : null}
-          </div>
-
           <div className="flex min-h-0 flex-1 flex-col">
             {mainView !== "nouvelle-analyse" && mainView !== "mon-analyse" && mainView !== "journal-analyses" && mainView !== "historique" && mainView !== "evolution" && mainView !== "resume-hebdomadaire" && mainView !== "support" ? (
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
