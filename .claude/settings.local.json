@@ -81,7 +81,11 @@
       "PowerShell(git status *)",
       "PowerShell($now = Get-Date; $files = \"app\\\\twitter-image.tsx\", \"app\\\\robots.ts\", \"app\\\\layout.tsx\"; foreach \\($f in $files\\) { $i = Get-Item $f; $i.CreationTime = $now; $i.LastWriteTime = $now }; foreach \\($f in $files\\) { $i = Get-Item $f; \"{0}  —  création : {1}  —  modification : {2}\" -f $f, $i.CreationTime, $i.LastWriteTime })",
       "PowerShell($p = Get-Content \"C:\\\\Users\\\\sacha\\\\dev\\\\SaasAi\\\\Alpha\\\\alpha\\\\package.json\" -Raw | ConvertFrom-Json; $p.dependencies.next; \"---scripts---\"; $p.scripts)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(node measure-hero.js http://localhost:3000)",
+      "Bash(node -e ' *)",
+      "PowerShell(taskkill *)",
+      "PowerShell(Get-Process *)"
     ]
   }
 }

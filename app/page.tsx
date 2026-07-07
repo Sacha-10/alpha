@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
@@ -24,26 +24,48 @@ import {
 
 // Bannière affichée quand le callback d'authentification renvoie vers
 // /?error=account_creation_failed (échec de création de la ligne users).
-// Overlay absolu ancré sur le <main> (relative) : top-16 + mt-6 = haut
-// visible à 88px fixes, sous la navbar (~69px desktop / ~71px mobile),
-// jamais un pixel dessous. Hors flux, empreinte de layout nulle : le hero
-// (items-center dans min-h-screen) reste strictement immobile et le
-// coussin bas du hero ne se comprime pas — en flux dans le bloc centré,
-// sa hauteur (94px marges comprises) se redistribuait en ±47px de part
-// et d'autre par le centrage. Même largeur effective que la navbar (les
-// deux : parent px-6 + conteneur max-w-[1200px]), donc alignée au pixel
-// sur le logo et le bouton. z-10 : au-dessus des fonds opaques des
-// sections (les RevealSection, transformées, peignent après elle), sous
-// la navbar (z-50). Pilotée par l'URL : toute navigation la fait
-// disparaître. Fermeture via la croix ou auto-dismiss à 10 s ; les deux
-// retirent le paramètre de l'URL
-// (router.replace) pour qu'un refresh ne la réaffiche pas.
-// useSearchParams impose un boundary <Suspense> sur une page prérendue.
-function AccountCreationErrorBanner() {
+// Overlay absolu ancré sur le <main> (relative), hors flux par défaut :
+// empreinte de layout nulle, le hero (items-center dans min-h-screen)
+// reste strictement immobile quand elle est absente.
+// Rythme : la bannière se cale HERO_RHYTHM_GAP (24px) au-dessus de
+// l'eyebrow — le même écart que eyebrow→titre (fusion des marges
+// mb-4/mt-6 → 24px) — à tout viewport. Son top est calculé depuis la
+// position naturelle de l'eyebrow (getBoundingClientRect neutralisé du
+// translateY d'apparition du RevealSection et de l'espaceur courant),
+// plafonné à BANNER_MIN_TOP (88px : l'ancien ancrage top-16 + mt-6),
+// jamais un pixel sous la navbar (~69px desktop / ~73px mobile). Quand
+// 88px ne suffit pas (petits viewports, texte sur 2 lignes), un espaceur
+// en flux AVANT le hero pousse la section entière : l'eyebrow retrouve
+// ses 24px et tout ce qui suit descend d'autant — l'espace bas du hero →
+// « Tableau de bord » est préservé au pixel (pas de compression du
+// coussin de centrage). Recalcul au resize, au chargement des polices et
+// quand la bannière ou le bloc hero changent de hauteur (ResizeObserver) ;
+// le calcul soustrait l'espaceur courant, donc idempotent — pas
+// d'oscillation. Même largeur effective que la navbar (les deux : parent
+// px-6 + conteneur max-w-[1200px]), donc alignée au pixel sur le logo et
+// le bouton. z-10 : au-dessus des fonds opaques des sections (les
+// RevealSection, transformées, peignent après elle), sous la navbar
+// (z-50). Pilotée par l'URL : toute navigation la fait disparaître.
+// Fermeture via la croix ou auto-dismiss à 10 s ; les deux retirent le
+// paramètre de l'URL (router.replace) pour qu'un refresh ne la réaffiche
+// pas. useSearchParams impose un boundary <Suspense> sur une page
+// prérendue.
+const HERO_RHYTHM_GAP = 24;
+const BANNER_MIN_TOP = 88;
+
+function AccountCreationErrorBanner({
+  eyebrowRef,
+}: {
+  eyebrowRef: React.RefObject<HTMLParagraphElement | null>;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const visible = searchParams.get("error") === "account_creation_failed";
   const [dismissed, setDismissed] = useState(false);
+  const boxRef = useRef<HTMLDivElement | null>(null);
+  const spacerRef = useRef<HTMLDivElement | null>(null);
+  const [top, setTop] = useState(BANNER_MIN_TOP);
+  const [spacerHeight, setSpacerHeight] = useState(0);
 
   const dismiss = useCallback(() => {
     setDismissed(true);
@@ -56,22 +78,64 @@ function AccountCreationErrorBanner() {
     return () => clearTimeout(timer);
   }, [visible, dismissed, dismiss]);
 
+  useLayoutEffect(() => {
+    if (!visible || dismissed) return;
+
+    const recompute = () => {
+      const eyebrow = eyebrowRef.current;
+      const box = boxRef.current;
+      if (!eyebrow || !box) return;
+      const reveal = eyebrow.closest<HTMLElement>("main > *");
+      const revealTransform = reveal ? getComputedStyle(reveal).transform : "none";
+      const revealShift = revealTransform === "none" ? 0 : new DOMMatrixReadOnly(revealTransform).m42;
+      const currentSpacer = spacerRef.current?.offsetHeight ?? 0;
+      const eyebrowNaturalTop =
+        eyebrow.getBoundingClientRect().top + window.scrollY - revealShift - currentSpacer;
+      const boxHeight = box.getBoundingClientRect().height;
+      const wantedTop = eyebrowNaturalTop - HERO_RHYTHM_GAP - boxHeight;
+      if (wantedTop >= BANNER_MIN_TOP) {
+        setTop(wantedTop);
+        setSpacerHeight(0);
+      } else {
+        setTop(BANNER_MIN_TOP);
+        setSpacerHeight(BANNER_MIN_TOP + boxHeight + HERO_RHYTHM_GAP - eyebrowNaturalTop);
+      }
+    };
+
+    recompute();
+    window.addEventListener("resize", recompute);
+    const observer = new ResizeObserver(recompute);
+    if (boxRef.current) observer.observe(boxRef.current);
+    if (eyebrowRef.current?.parentElement) observer.observe(eyebrowRef.current.parentElement);
+    void document.fonts?.ready.then(recompute);
+    return () => {
+      window.removeEventListener("resize", recompute);
+      observer.disconnect();
+    };
+  }, [visible, dismissed, eyebrowRef]);
+
   if (!visible || dismissed) return null;
 
   return (
-    <div className="absolute inset-x-0 top-16 z-10 px-6">
-      <div className="relative mx-auto mt-6 max-w-[1200px] rounded-lg border border-red/30 bg-red/10 px-12 py-3 text-center text-sm text-red">
-        Une erreur est survenue. Réessayez de vous connecter.
-        <button
-          type="button"
-          onClick={dismiss}
-          aria-label="Fermer"
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-red/70 transition-colors duration-200 hover:text-red"
+    <>
+      <div className="absolute inset-x-0 z-10 px-6" style={{ top: `${top}px` }}>
+        <div
+          ref={boxRef}
+          className="relative mx-auto max-w-[1200px] rounded-lg border border-red/30 bg-red/10 px-12 py-3 text-center text-sm text-red"
         >
-          <X className="h-4 w-4" aria-hidden />
-        </button>
+          Une erreur est survenue. Réessayez de vous connecter.
+          <button
+            type="button"
+            onClick={dismiss}
+            aria-label="Fermer"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-red/70 transition-colors duration-200 hover:text-red"
+          >
+            <X className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
       </div>
-    </div>
+      <div ref={spacerRef} aria-hidden style={{ height: `${spacerHeight}px` }} />
+    </>
   );
 }
 
@@ -97,6 +161,8 @@ export default function HomePage() {
   const router = useRouter();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const [showTop, setShowTop] = useState(false);
+  // Repère de rythme pour la bannière d'erreur (voir AccountCreationErrorBanner).
+  const heroEyebrowRef = useRef<HTMLParagraphElement | null>(null);
 
   const connectGoogle = async () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -151,11 +217,11 @@ export default function HomePage() {
 
       <main className="relative overflow-x-clip">
         <Suspense fallback={null}>
-          <AccountCreationErrorBanner />
+          <AccountCreationErrorBanner eyebrowRef={heroEyebrowRef} />
         </Suspense>
         <RevealSection className="min-h-screen pt-16 flex items-center justify-center px-6 bg-gradient-to-b from-background to-card">
           <div className="mx-auto max-w-[1200px] pb-10 pt-10 md:pb-0 md:pt-0 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">AlphaTradeX</p>
+          <p ref={heroEyebrowRef} className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">AlphaTradeX</p>
           <h1 className="mx-auto mt-6 max-w-[1200px] text-balance md:[text-wrap:normal] text-5xl font-bold leading-tight text-primary md:text-7xl">
             Les meilleurs traders n&apos;ont pas plus travaillé.
             <br />
