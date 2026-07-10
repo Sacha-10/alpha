@@ -28,10 +28,7 @@ export async function POST(req: NextRequest) {
       NEXT_PUBLIC_SUPABASE_URL: Boolean(url),
       SUPABASE_SERVICE_ROLE_KEY: Boolean(serviceKey),
     })
-    return NextResponse.json(
-      { error: 'Configuration serveur incomplète.' },
-      { status: 500 }
-    )
+    return new NextResponse(null, { status: 500 })
   }
 
   let supabase
@@ -39,10 +36,7 @@ export async function POST(req: NextRequest) {
     supabase = createClient(url, serviceKey)
   } catch (err) {
     console.error('[analyze-demo] Échec étape: createClient Supabase', err)
-    return NextResponse.json(
-      { error: 'Erreur client base de données.' },
-      { status: 500 }
-    )
+    return new NextResponse(null, { status: 500 })
   }
 
   let body: unknown
@@ -50,28 +44,19 @@ export async function POST(req: NextRequest) {
     body = await req.json()
   } catch (err) {
     console.error('[analyze-demo] Échec étape: parse JSON body', err)
-    return NextResponse.json(
-      { error: 'Requête invalide.' },
-      { status: 400 }
-    )
+    return new NextResponse(null, { status: 400 })
   }
 
   let trades: Trade[]
   try {
     const raw = (body as { trades?: unknown })?.trades
     if (!Array.isArray(raw)) {
-      return NextResponse.json(
-        { error: 'Données trades invalides.' },
-        { status: 400 }
-      )
+      return new NextResponse(null, { status: 400 })
     }
     trades = raw as Trade[]
   } catch (err) {
     console.error('[analyze-demo] Échec étape: validation trades (exception)', err)
-    return NextResponse.json(
-      { error: 'Données trades invalides.' },
-      { status: 400 }
-    )
+    return new NextResponse(null, { status: 400 })
   }
 
   const rawForwarded = req.headers.get('x-forwarded-for')
@@ -80,7 +65,11 @@ export async function POST(req: NextRequest) {
     req.headers.get('x-real-ip') ||
     'unknown'
 
-  let existing: { ip_address: string } | null
+  // Check anti-abus : FAIL-OPEN. Un échec technique du select ne bloque plus
+  // le visiteur (console.error + on continue comme si l'IP était inconnue) —
+  // tout vrai problème remontera par le chemin d'erreur unique au clic
+  // (échec OpenAI ou insert). L'insert reste la barrière anti-abus.
+  let existing: { ip_address: string } | null = null
   try {
     const { data, error: selectError } = await supabase
       .from('visitor_analyses')
@@ -90,7 +79,7 @@ export async function POST(req: NextRequest) {
 
     if (selectError) {
       console.error(
-        '[analyze-demo] Échec étape: supabase select visitor_analyses (erreur API)',
+        '[analyze-demo] Échec étape: supabase select visitor_analyses (erreur API) — fail-open',
         {
           code: selectError.code,
           message: selectError.message,
@@ -99,30 +88,18 @@ export async function POST(req: NextRequest) {
           ip,
         }
       )
-      return NextResponse.json(
-        { error: 'Erreur lors de la vérification démo.' },
-        { status: 500 }
-      )
+    } else {
+      existing = data
     }
-    existing = data
   } catch (err) {
-    console.error('[analyze-demo] Échec étape: supabase select visitor_analyses (exception)', err)
-    return NextResponse.json(
-      { error: 'Erreur lors de la vérification démo.' },
-      { status: 500 }
-    )
+    console.error('[analyze-demo] Échec étape: supabase select visitor_analyses (exception) — fail-open', err)
   }
 
   if (existing) {
-    return NextResponse.json(
-      {
-        error:
-          'Vous avez déjà utilisé votre analyse ' +
-          'démo. Créez un compte pour analyser vos ' +
-          'propres trades.',
-      },
-      { status: 429 }
-    )
+    // IP déjà marquée : mur. Pas de re-livraison — l'accès au rapport déjà
+    // produit passe par le bouton « Mon analyse » (session courante, côté
+    // client). OpenAI n'est JAMAIS rappelé pour une IP marquée.
+    return new NextResponse(null, { status: 429 })
   }
 
   let report: unknown
@@ -209,28 +186,26 @@ export async function POST(req: NextRequest) {
     report = await analyzeTradesDemo(shuffled, targets)
   } catch (err) {
     console.error('[analyze-demo] Échec étape: OpenAI analyzeTrades', err)
-    const message =
-      err instanceof Error ? err.message : String(err)
-    return NextResponse.json(
-      {
-        error:
-          message ||
-          'Erreur lors de l’analyse. Réessayez plus tard.',
-      },
-      { status: 500 }
-    )
+    return new NextResponse(null, { status: 500 })
   }
 
   // L'IP n'est brûlée qu'APRÈS le succès de l'analyse OpenAI : un échec
   // d'analyse ne consomme pas la démo du visiteur. L'insert doit réussir
-  // AVANT de rendre le rapport — sinon 500 sans rapport (le visiteur pourra
-  // réessayer, aucun rapport rendu sans IP enregistrée).
+  // AVANT de rendre le rapport — sinon 500 (le visiteur pourra réessayer,
+  // aucun rapport rendu sans IP enregistrée). L'insert est la barrière
+  // anti-abus.
   try {
     const { error: insertError } = await supabase
       .from('visitor_analyses')
       .insert({ ip_address: ip, used_at: new Date().toISOString() })
 
     if (insertError) {
+      // 23505 (IP déjà marquée — check fail-open passé pendant une panne, ou
+      // requêtes concurrentes) : le visiteur a déjà consommé sa démo → mur,
+      // pas de re-livraison.
+      if (insertError.code === '23505') {
+        return new NextResponse(null, { status: 429 })
+      }
       console.error(
         '[analyze-demo] Échec étape: supabase insert visitor_analyses (erreur API)',
         {
@@ -241,26 +216,17 @@ export async function POST(req: NextRequest) {
           ip,
         }
       )
-      return NextResponse.json(
-        { error: 'Erreur lors de l’enregistrement démo.' },
-        { status: 500 }
-      )
+      return new NextResponse(null, { status: 500 })
     }
   } catch (err) {
     console.error('[analyze-demo] Échec étape: supabase insert visitor_analyses (exception)', err)
-    return NextResponse.json(
-      { error: 'Erreur lors de l’enregistrement démo.' },
-      { status: 500 }
-    )
+    return new NextResponse(null, { status: 500 })
   }
 
   try {
     return NextResponse.json(report)
   } catch (err) {
     console.error('[analyze-demo] Échec étape: NextResponse.json(report)', err)
-    return NextResponse.json(
-      { error: 'Erreur lors de la construction de la réponse.' },
-      { status: 500 }
-    )
+    return new NextResponse(null, { status: 500 })
   }
 }

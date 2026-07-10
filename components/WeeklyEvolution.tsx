@@ -120,7 +120,7 @@ export default function WeeklyEvolution({ plan }: Props) {
     return (
       <div className="w-full space-y-6 pb-12">
         <h1 className="text-2xl font-bold text-primary">Évolution semaine</h1>
-        <div className="card p-6 text-center text-sm text-secondary">
+        <div className="rounded-lg border border-red/30 bg-red/10 p-6 text-center text-sm text-red">
           Une erreur est survenue. Actualisez la page.
         </div>
       </div>

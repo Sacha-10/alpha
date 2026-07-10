@@ -85,7 +85,8 @@
       "Bash(node measure-hero.js http://localhost:3000)",
       "Bash(node -e ' *)",
       "PowerShell(taskkill *)",
-      "PowerShell(Get-Process *)"
+      "PowerShell(Get-Process *)",
+      "PowerShell(npm install *)"
     ]
   }
 }

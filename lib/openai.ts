@@ -453,6 +453,65 @@ export function severityOf(freq: number): BiasSeverity {
 }
 
 export function computeStats(rawTrades: Trade[]): ComputedStats {
+  // Garde interne : un tableau vide ne doit JAMAIS crasher (reduce sans valeur
+  // initiale, divisions par n). Le cas « 0 trade valide » est intercepté en
+  // amont par les routes membres (400 métier) — ceci est le filet défensif.
+  if (rawTrades.length === 0) {
+    return {
+      totalTrades: 0,
+      winRate: 0,
+      totalPnL: 0,
+      profitFactor: 0,
+      maxDrawdownAbs: 0,
+      maxDrawdownPct: 0,
+      sharpeRatio: 0,
+      riskReward: 0,
+      avgTradeDuration: '0min',
+      avgWin: 0,
+      avgLoss: 0,
+      totalCommissions: 0,
+      bestTrade: { symbol: 'N/A', pnl: 0, date: 'N/A' },
+      worstTrade: { symbol: 'N/A', pnl: 0, date: 'N/A' },
+      londonWinRate: 0,
+      londonWins: 0,
+      londonLosses: 0,
+      londonTotal: 0,
+      newYorkWinRate: 0,
+      newYorkWins: 0,
+      newYorkLosses: 0,
+      newYorkTotal: 0,
+      tokyoWinRate: 0,
+      tokyoWins: 0,
+      tokyoLosses: 0,
+      tokyoTotal: 0,
+      bestSession: 'N/A',
+      worstSession: 'N/A',
+      bestDay: 'N/A',
+      worstDay: 'N/A',
+      bestHour: 'N/A',
+      worstHour: 'N/A',
+      bestSymbol: 'N/A',
+      bestSymbolWinRate: 0,
+      bestSymbolPnL: 0,
+      worstSymbol: 'N/A',
+      worstSymbolWinRate: 0,
+      worstSymbolPnL: 0,
+      symbolStats: [],
+      minLot: 0,
+      maxLot: 0,
+      stopLossUsage: 0,
+      takeProfitUsage: 0,
+      avgRiskPerTrade: 0,
+      riskConsistency: 'INSUFFISANT',
+      psychoScore: 0,
+      riskScore: 0,
+      propFirmScore: 0,
+      worstDayLossPct: 0,
+      wouldPassFTMO: false,
+      biasPatterns: [],
+    }
+  }
+
   const trades = rawTrades.map(t => ({
     ...t,
     openTime: toDate(t.openTime),

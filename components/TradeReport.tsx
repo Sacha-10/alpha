@@ -47,10 +47,9 @@ export default function TradeReport({
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (err) {
+      // Jamais le message brut (err.message = "NetworkError…") : texte unique.
       console.error("[PDF] échec:", err);
-      setPdfError(
-        err instanceof Error ? err.message : "Téléchargement PDF impossible",
-      );
+      setPdfError("Une erreur est survenue. Réessayez.");
     } finally {
       setPdfLoading(false);
     }
@@ -59,7 +58,6 @@ export default function TradeReport({
   const limit = analysesLimit ?? 0;
   const used = analysesUsed ?? 0;
   const usedPct = limit > 0 ? Math.min(100, (used / limit) * 100) : 0;
-  const isAtLimit = limit > 0 && used >= limit;
 
   return (
     <div className="space-y-6">
@@ -69,7 +67,7 @@ export default function TradeReport({
           <div className="flex items-center gap-3">
             <div className="h-2 w-32 rounded-full bg-hover">
               <div
-                className={`h-full rounded-full ${isAtLimit ? "bg-red" : "bg-blue"}`}
+                className="h-full rounded-full bg-blue"
                 style={{ width: `${usedPct}%` }}
               />
             </div>
@@ -89,7 +87,11 @@ export default function TradeReport({
       </motion.div>
 
       <div className="pb-8 text-center">
-        {pdfError && <p className="mb-3 text-sm text-red">{pdfError}</p>}
+        {pdfError && (
+          <div className="mx-auto mb-3 max-w-md rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-sm text-red">
+            {pdfError}
+          </div>
+        )}
         <button
           type="button"
           onClick={handleDownloadPdf}

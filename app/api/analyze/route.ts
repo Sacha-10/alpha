@@ -151,6 +151,19 @@ export async function POST(req: NextRequest) {
       )
     }
     const { trades } = await req.json()
+    // 400 métier : aucun trade valide après parsing (le parseur skippe les
+    // lignes invalides). Intercepté AVANT l'appel OpenAI — le quota n'est pas
+    // consommé. Même texte exact que le flux d'import du Journal.
+    if (!Array.isArray(trades) || trades.length === 0) {
+      return NextResponse.json(
+        {
+          error:
+            "Aucun trade valide n'a été détecté dans votre fichier. " +
+            'Vérifiez qu\'il contient vos trades.',
+        },
+        { status: 400 }
+      )
+    }
     const report = await analyzeTradesMember(trades)
 
     // Incrément atomique côté base (RPC), à l'abri des requêtes concurrentes.

@@ -81,11 +81,13 @@ export async function proxy(req: NextRequest) {
     .maybeSingle()
 
   // Erreur technique Supabase (panne passagère, timeout) : ne JAMAIS éjecter
-  // un abonné actif sur un incident transitoire — on laisse passer, les
-  // routes API derrière re-vérifient le statut.
+  // un abonné actif sur un incident transitoire — on laisse passer. Les routes
+  // derrière re-vérifient l'auth et le palier/les limites du plan, PAS
+  // subscription_status : fenêtre résiduelle assumée (la résiliation met
+  // analyses_limit à 0, donc aucune analyse consommable sur cette fenêtre).
   if (error) {
     console.error(
-      '[proxy] Erreur Supabase sur subscription_status — accès laissé passer (les routes re-vérifient) :',
+      '[proxy] Erreur Supabase sur subscription_status — accès laissé passer (les routes re-vérifient auth + palier/limites) :',
       error
     )
     return supabaseResponse

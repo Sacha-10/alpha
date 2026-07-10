@@ -1,5 +1,5 @@
 import { Trade } from './parseMT4'
-import { detectDelimiter, makeCSVParser, cleanSymbol } from './utils'
+import { detectDelimiter, makeCSVParser, cleanSymbol, parseTradeDate } from './utils'
 import { getSession } from './session'
 
 // Format attendu (TradingView Strategy Tester — Liste des trades fermés) :
@@ -17,8 +17,10 @@ export function parseTradingView(csvText: string): Trade[] {
     // le format lit jusqu'à l'index 8 (Profit).
     if (cols.length < 9) continue
 
-    const openTime = new Date(cols[3])
-    const closeTime = new Date(cols[5])
+    const openTime = parseTradeDate(cols[3])
+    const closeTime = parseTradeDate(cols[5])
+    // Date invalide : skip silencieux — même politique que la garde cols.length.
+    if (isNaN(openTime.getTime()) || isNaN(closeTime.getTime())) continue
     const direction: Trade['direction'] = cols[1].toUpperCase()
       .includes('LONG') ? 'BUY' : 'SELL'
     const entryPrice = parseNum(cols[4])

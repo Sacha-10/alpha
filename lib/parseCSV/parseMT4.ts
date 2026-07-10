@@ -1,4 +1,4 @@
-import { detectDelimiter, makeCSVParser, cleanSymbol } from './utils'
+import { detectDelimiter, makeCSVParser, cleanSymbol, parseTradeDate } from './utils'
 import { getSession } from './session'
 
 export type TradeSource =
@@ -61,8 +61,10 @@ export function parseMT4(csvText: string): Trade[] {
     if (cols.length < 13) continue
 
     if (isMT5) {
-      const openTime = new Date(cols[7])
-      const closeTime = new Date(cols[9])
+      const openTime = parseTradeDate(cols[7])
+      const closeTime = parseTradeDate(cols[9])
+      // Date invalide : skip silencieux — même politique que la garde cols.length.
+      if (isNaN(openTime.getTime()) || isNaN(closeTime.getTime())) continue
       const entryPrice = parseNum(cols[4])
       const exitPrice = parseNum(cols[8])
       const direction: Trade['direction'] = cols[2] === 'buy' ? 'BUY' : 'SELL'
@@ -92,8 +94,10 @@ export function parseMT4(csvText: string): Trade[] {
       continue
     }
 
-    const openTime = new Date(cols[1])
-    const closeTime = new Date(cols[8])
+    const openTime = parseTradeDate(cols[1])
+    const closeTime = parseTradeDate(cols[8])
+    // Date invalide : skip silencieux — même politique que la garde cols.length.
+    if (isNaN(openTime.getTime()) || isNaN(closeTime.getTime())) continue
     const durationMinutes = Math.round(
       (closeTime.getTime() - openTime.getTime()) / 60000
     )

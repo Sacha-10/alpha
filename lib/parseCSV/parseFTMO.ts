@@ -1,5 +1,5 @@
 import { Trade } from './parseMT4'
-import { detectDelimiter, makeCSVParser, cleanSymbol } from './utils'
+import { detectDelimiter, makeCSVParser, cleanSymbol, parseTradeDate } from './utils'
 import { getSession } from './session'
 
 // Format FTMO Metrix (Trading Journal > Export CSV) :
@@ -33,8 +33,10 @@ export function parseFTMO(csvText: string): Trade[] {
     // le format lit jusqu'à l'index 13 (Profit).
     if (cols.length < 14) continue
 
-    const openTime = new Date(cols[7])
-    const closeTime = new Date(cols[9])
+    const openTime = parseTradeDate(cols[7])
+    const closeTime = parseTradeDate(cols[9])
+    // Date invalide : skip silencieux — même politique que la garde cols.length.
+    if (isNaN(openTime.getTime()) || isNaN(closeTime.getTime())) continue
     const entryPrice = parseNum(cols[4])
     const exitPrice = parseNum(cols[8])
     const direction: Trade['direction'] =

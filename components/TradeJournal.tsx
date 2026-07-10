@@ -198,7 +198,9 @@ function formatDate(dateStr: string): string {
 
 function formatTime(dateStr: string | null): string {
   if (!dateStr) return '--'
-  return new Date(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  // timeZone UTC : l'heure affichée = l'heure LITTÉRALE du fichier importé
+  // (les parseurs construisent les dates en UTC), quel que soit le navigateur.
+  return new Date(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
 }
 
 export default function TradeJournal() {
@@ -293,7 +295,18 @@ export default function TradeJournal() {
         body: JSON.stringify({ trades: parsed })
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Erreur lors de l\'import.')
+      // Statut -> texte décidé côté page, jamais le { error } serveur brut.
+      // 400 = aucun trade valide (même message que « Analyser vos trades ») ;
+      // tout autre échec (500, réseau) = message générique.
+      if (!res.ok) {
+        setImportError(
+          res.status === 400
+            ? "Aucun trade valide n'a été détecté dans votre fichier. " +
+                'Vérifiez qu\'il contient vos trades.'
+            : 'Une erreur est survenue. Réessayez.',
+        )
+        return
+      }
       // Dominance : ce qui a été ajouté prime ; sinon la rétention prime sur les
       // doublons. Une seule phrase, X = le nombre de la catégorie concernée.
       const count = data.count ?? 0
@@ -311,8 +324,10 @@ export default function TradeJournal() {
         setImportSuccess(importMessage(kind, x))
       }
       await loadTrades()
-    } catch (err: any) {
-      setImportError(err.message || 'Erreur lors de l\'import.')
+    } catch (err) {
+      // Parsing / réseau : jamais le message brut, texte générique unique.
+      console.error('[TradeJournal] échec import:', err)
+      setImportError('Une erreur est survenue. Réessayez.')
     } finally {
       setImporting(false)
     }
@@ -459,7 +474,7 @@ export default function TradeJournal() {
         </div>
       )}
       {importSuccess && (
-        <div className="flex items-center justify-between gap-3 bg-green/10 border border-green/30 text-green rounded-lg px-4 py-3 text-sm mb-6">
+        <div className="flex items-center justify-between gap-3 bg-blue/10 border border-blue/30 text-blue rounded-lg px-4 py-3 text-sm mb-6">
           <span>{importSuccess}</span>
           <button onClick={() => setImportSuccess(null)} className="shrink-0 hover:opacity-70 transition-opacity"><X className="h-4 w-4" /></button>
         </div>

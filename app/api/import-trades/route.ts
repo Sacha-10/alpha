@@ -31,8 +31,20 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json()
     const { trades } = body
-    if (!Array.isArray(trades) || trades.length === 0) {
+    if (!Array.isArray(trades)) {
       return NextResponse.json({ error: 'Trades invalides' }, { status: 400 })
+    }
+    // 400 métier : aucun trade valide après parsing (le parseur skippe les
+    // lignes invalides). Même texte exact que la chaîne « Analyser vos trades ».
+    if (trades.length === 0) {
+      return NextResponse.json(
+        {
+          error:
+            "Aucun trade valide n'a été détecté dans votre fichier. " +
+            'Vérifiez qu\'il contient vos trades.',
+        },
+        { status: 400 }
+      )
     }
 
     // Date d'inscription : repli sur APP_LAUNCH si jamais absente.

@@ -19,7 +19,7 @@ import AnalysisHistory from "@/components/AnalysisHistory";
 import WeeklyEvolution from "@/components/WeeklyEvolution";
 import WeeklySummary from "@/components/WeeklySummary";
 import type { AiAnalysisResult } from "@/lib/tradingAnalysisTypes";
-import { isUnlimited, hasActiveAccess, isPremiumOrAbove, normalizePlan, getPlanLabel } from "@/lib/plans";
+import { isUnlimited, hasActiveAccess, isPremiumOrAbove, normalizePlan, getPlanLabel, getPlanLimit } from "@/lib/plans";
 import {
   ArrowRight,
   Bell,
@@ -55,11 +55,6 @@ type DashboardView =
   | "acces-api"
   | "support";
 type SectionKey = "analyse" | "performance" | "signaux" | "aide" | "compte";
-
-function normalizeApiError(message: unknown): string {
-  if (typeof message !== "string") return "Erreur d'analyse.";
-  return message.replace(/\s+/g, " ").trim();
-}
 
 function SectionLabel({
   children,
@@ -162,6 +157,8 @@ export default function DashboardClient() {
   const [analysesLimit, setAnalysesLimit] = useState<number | undefined>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Quota atteint : info (bleu), distinct de l'erreur (rouge). Jamais les deux.
+  const [quotaReached, setQuotaReached] = useState(false);
 
   const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
@@ -297,6 +294,7 @@ export default function DashboardClient() {
   const runAnalyze = useCallback(async (file: File) => {
     setLoading(true);
     setError(null);
+    setQuotaReached(false);
     setAnalysis(null);
     setAnalysesUsed(undefined);
     setAnalysesLimit(undefined);
@@ -308,7 +306,11 @@ export default function DashboardClient() {
     try {
       const trades = await detectAndParse(file);
       if (!trades.length) {
-        setError("Aucun trade trouvé dans le fichier.");
+        // Même texte exact que le 400 métier des routes (une cause = un message).
+        setError(
+          "Aucun trade valide n'a été détecté dans votre fichier. " +
+            "Vérifiez qu'il contient vos trades.",
+        );
         return;
       }
 
@@ -318,8 +320,20 @@ export default function DashboardClient() {
         body: JSON.stringify({ trades }),
       });
       const data = await res.json();
+      // Mapping STATUT -> texte décidé côté page, sans passthrough du serveur.
+      // 403 quota = info bleue (identique membre) ; 400 = message métier ;
+      // tout autre échec (dont panne réseau) = message générique, comme visiteur.
       if (!res.ok) {
-        setError(normalizeApiError(data.error));
+        if (res.status === 403 && data?.upgrade) {
+          setQuotaReached(true);
+        } else if (res.status === 400) {
+          setError(
+            "Aucun trade valide n'a été détecté dans votre fichier. " +
+              "Vérifiez qu'il contient vos trades.",
+          );
+        } else {
+          setError("Une erreur est survenue. Relancez l'analyse.");
+        }
         return;
       }
 
@@ -339,9 +353,9 @@ export default function DashboardClient() {
 
       await fetchUserData();
     } catch (e) {
-      setError(
-        e instanceof Error ? e.message : "Réseau indisponible."
-      );
+      // Panne réseau / parsing : jamais le message brut, texte générique unique.
+      console.error("[DashboardClient] échec analyse:", e);
+      setError("Une erreur est survenue. Relancez l'analyse.");
     } finally {
       setLoading(false);
     }
@@ -649,7 +663,7 @@ export default function DashboardClient() {
           </div>
           <div
             key={uploadZoneKey}
-            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer mb-6 transition-colors ${dragging ? "border-blue bg-blue/5" : pendingFile ? "border-green/50 bg-green/5" : "border-border hover:border-blue/50"}`}
+            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer mb-6 transition-colors ${dragging ? "border-blue bg-blue/5" : pendingFile ? "border-blue/50 bg-blue/5" : "border-border hover:border-blue/50"}`}
             onDragOver={e => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
             onDrop={e => {
@@ -755,10 +769,19 @@ export default function DashboardClient() {
           )}
         </div>
 
+          {/* Zone message unique : erreur rouge / quota bleu / rien. */}
           {error ? (
-            <p className="mt-3 text-sm text-red" role="alert">
+            <div
+              className="mx-auto mt-3 max-w-md rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-sm text-red"
+              role="alert"
+            >
               {error}
-            </p>
+            </div>
+          ) : quotaReached ? (
+            <div className="mx-auto mt-3 max-w-md rounded-lg border border-blue/30 bg-blue/10 px-4 py-3 text-sm text-blue">
+              Vos {getPlanLimit(subscriptionPlan)} analyses ont été utilisées.
+              Passez au plan supérieur pour continuer.
+            </div>
           ) : null}
         </div>
       </div>

@@ -71,7 +71,7 @@ export default function AnalysisHistory() {
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-primary">Historique</h1>
         </div>
-        <div className="card p-6 text-center text-sm text-secondary">
+        <div className="rounded-lg border border-red/30 bg-red/10 p-6 text-center text-sm text-red">
           Une erreur est survenue. Actualisez la page.
         </div>
       </>

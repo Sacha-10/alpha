@@ -99,8 +99,6 @@ export const FEATURE_MIN_PLAN = {
   apiAccess: 'elite',
 } as const satisfies Record<string, PlanKey>
 
-export type FeatureKey = keyof typeof FEATURE_MIN_PLAN
-
 // ── Normalisation ──────────────────────────────────────────────────────────
 
 /**

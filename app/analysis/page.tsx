@@ -4,9 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { ArrowRight, Upload, Brain, FileText, ScrollText } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { useRouter } from 'next/navigation'
 import { demoTrades } from '@/lib/demoTrades'
-import { PLANS } from '@/lib/plans'
 import TradeReport from '@/components/TradeReport'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -40,7 +38,6 @@ const steps = [
 ];
 
 export default function DemoPage() {
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [report, setReport] = useState<AiAnalysisResult | null>(null)
   const [error, setError] = useState<string>('')
@@ -103,18 +100,22 @@ export default function DemoPage() {
         body,
       })
 
-      const data = await res.json()
+      // Mapping code -> état, sans passthrough du texte serveur.
+      // 429 = analyse déjà utilisée (info bleue) ; autre échec = erreur rouge.
+      // Les réponses d'erreur n'ont pas de corps : on ne parse qu'au succès.
       if (!res.ok) {
-        setError(data.error || 'Erreur inconnue')
         if (res.status === 429) setUsed(true)
-      } else {
-        setReport(data)
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify(data))
-        setView('rapport')
+        else setError("Une erreur est survenue. Relancez l'analyse.")
+        return
       }
+
+      const report = await res.json()
+      setReport(report)
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(report))
+      setView('rapport')
     } catch (err) {
       console.error('[demo] Erreur réseau ou lecture réponse', err)
-      setError('Erreur de connexion. Réessayez.')
+      setError("Une erreur est survenue. Relancez l'analyse.")
     } finally {
       setLoading(false)
     }
@@ -190,7 +191,7 @@ export default function DemoPage() {
                 <button
                   type="button"
                   onClick={handleDemo}
-                  disabled={loading || used}
+                  disabled={loading}
                   className="btn-primary inline-flex items-center gap-2 disabled:opacity-50"
                 >
                   Découvrir l&apos;analyse
@@ -207,9 +208,16 @@ export default function DemoPage() {
                   </button>
                 )}
               </div>
-              {used && (
-                <p className="mt-4 text-sm text-red">Analyse utilisée.</p>
-              )}
+              {/* Zone de message unique : erreur rouge / info bleue / rien. */}
+              {error ? (
+                <div className="mx-auto mt-6 max-w-md rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-sm text-red">
+                  {error}
+                </div>
+              ) : used ? (
+                <div className="mx-auto mt-6 max-w-md rounded-lg border border-blue/30 bg-blue/10 px-4 py-3 text-sm text-blue">
+                  L&apos;analyse gratuite a été utilisée. Inscrivez-vous pour analyser vos trades.
+                </div>
+              ) : null}
               {loading && (
                 <div className="mt-8 max-w-md mx-auto">
                   <div className="w-full bg-card rounded-full h-2 overflow-hidden">

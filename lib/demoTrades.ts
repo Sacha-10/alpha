@@ -87,9 +87,11 @@ function roundPrice(symbol: string, value: number): number {
   return Number(value.toFixed(decimalsFor(symbol)))
 }
 
+// Heures STRICTEMENT dans la fenêtre UTC du libellé (Asian 0-7 / London 7-14 /
+// New York 14-24) : l'heure générée ne contredit jamais le champ session.
 function sessionToHourUTC(session: TradeSession, salt: number): number {
-  if (session === 'Asian') return 2 + (salt % 8)
-  if (session === 'London') return 8 + (salt % 8)
+  if (session === 'Asian') return 2 + (salt % 5)
+  if (session === 'London') return 8 + (salt % 6)
   return 14 + (salt % 8)
 }
 

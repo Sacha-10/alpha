@@ -1,5 +1,5 @@
 import { Trade } from './parseMT4'
-import { detectDelimiter, makeCSVParser, cleanSymbol } from './utils'
+import { detectDelimiter, makeCSVParser, cleanSymbol, parseTradeDate } from './utils'
 import { getSession } from './session'
 
 // Format Bybit CSV (Trade History export) :
@@ -13,11 +13,13 @@ export function parseBybit(csvText: string): Trade[] {
   for (const line of lines.slice(1)) {
     const cols = parseLine(line)
 
-    // Ligne tronquée (pied de page, total) : skip silencieux — indices 0 à 6
-    // obligatoires, l'Order ID (index 7) a déjà un repli.
-    if (cols.length < 7) continue
+    // Ligne tronquée (pied de page, total) : skip silencieux — indices 0 à 7
+    // obligatoires, l'Order ID (index 7) est lu plus bas.
+    if (cols.length < 8) continue
 
-    const time = new Date(cols[0])
+    const time = parseTradeDate(cols[0])
+    // Date invalide : skip silencieux — même politique que la garde cols.length.
+    if (isNaN(time.getTime())) continue
     const symbol = cleanSymbol(cols[1])
     const direction: Trade['direction'] =
       cols[2].toUpperCase() === 'BUY' ? 'BUY' : 'SELL'

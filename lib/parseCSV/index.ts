@@ -6,7 +6,6 @@ import { parseBybit } from './parseBybit'
 import { normalizeCSV } from './utils'
 
 export type { Trade }
-export type { NormalizedTrade } from './types'
 
 export async function detectAndParse(
   file: File
@@ -49,9 +48,11 @@ export async function detectAndParse(
     return parseTradingView(text)
   }
 
+  // Message affiché TEL QUEL sur les deux surfaces membres (dropzone « Analyser
+  // vos trades » et import du « Journal de trades ») : une cause = un message.
+  // La liste des plateformes vit sur la dropzone et /help, pas ici.
   throw new Error(
-    'Format non reconnu. Nous supportons MT4, MT5, ' +
-    'Binance, Bybit, TradingView, FTMO et FundedNext. Vérifiez que votre ' +
-    'fichier est bien un export CSV de ces plateformes.'
+    "Votre fichier n'a pas été reconnu. Vérifiez qu'il provient " +
+    "d'une plateforme compatible."
   )
 }

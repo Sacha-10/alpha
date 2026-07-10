@@ -31,7 +31,20 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    await supabase.auth.exchangeCodeForSession(code)
+    const { error: exchangeError } =
+      await supabase.auth.exchangeCodeForSession(code)
+    if (exchangeError) {
+      // Échec de l'échange OAuth : pas de session valide. On n'applique PAS les
+      // cookies (la redirection ci-dessous ne copie pas newCookies) — même
+      // garantie structurelle que le chemin d'erreur de l'insert plus bas.
+      console.error(
+        '[auth/callback] échec exchangeCodeForSession:',
+        JSON.stringify({ message: exchangeError.message, status: exchangeError.status, code: exchangeError.code })
+      )
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_APP_URL}/?error=account_creation_failed`
+      )
+    }
 
     const { data: { user } } = await supabase.auth.getUser()
 
