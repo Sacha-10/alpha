@@ -440,7 +440,7 @@ export async function POST(req: NextRequest) {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (ip === 'unknown' || !url || !serviceKey) {
-      return Response.json({ error: 'Non autorisé' }, { status: 401 });
+      return new Response(null, { status: 401 });
     }
 
     const admin = createClient(url, serviceKey);
@@ -454,21 +454,21 @@ export async function POST(req: NextRequest) {
       console.error('[generate-pdf] Vérification visitor_analyses en échec:', error);
     }
     if (error || !visitor) {
-      return Response.json({ error: 'Non autorisé' }, { status: 401 });
+      return new Response(null, { status: 401 });
     }
   }
 
   // ── Limite de taille du body ─────────────────────────────────────────────
   const contentLength = Number(req.headers.get('content-length') ?? 0);
   if (contentLength > MAX_BODY_BYTES) {
-    return Response.json({ error: 'Payload trop volumineux' }, { status: 413 });
+    return new Response(null, { status: 413 });
   }
 
   let browser: import('puppeteer-core').Browser | undefined;
   try {
     const rawBody = await req.text();
     if (rawBody.length > MAX_BODY_BYTES) {
-      return Response.json({ error: 'Payload trop volumineux' }, { status: 413 });
+      return new Response(null, { status: 413 });
     }
     const { report, screenWidth: rawWidth } = JSON.parse(rawBody) as {
       report: AiAnalysisResult;
@@ -526,13 +526,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error('[generate-pdf]', err);
-    return new Response(
-      JSON.stringify({
-        error: 'PDF generation failed',
-        detail: err instanceof Error ? err.message : String(err),
-      }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
-    );
+    return new Response(null, { status: 500 });
   } finally {
     await browser?.close();
   }

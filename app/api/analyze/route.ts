@@ -61,18 +61,12 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await
       supabase.auth.getUser()
     if (!user) {
-      return NextResponse.json(
-        { error: 'Non autorisé' },
-        { status: 401 }
-      )
+      return new NextResponse(null, { status: 401 })
     }
 
     const lastCall = rateLimitMap.get(user.id) ?? 0
     if (Date.now() - lastCall < RATE_LIMIT_MS) {
-      return NextResponse.json(
-        { error: 'Trop de requêtes. Patientez quelques secondes.' },
-        { status: 429 }
-      )
+      return new NextResponse(null, { status: 429 })
     }
     rateLimitMap.set(user.id, Date.now())
 
@@ -87,10 +81,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!userData) {
-      return NextResponse.json(
-        { error: 'Utilisateur introuvable' },
-        { status: 404 }
-      )
+      return new NextResponse(null, { status: 404 })
     }
 
     // Statut actif garanti en amont par le proxy (garde centralisée). Ici on ne
@@ -139,30 +130,17 @@ export async function POST(req: NextRequest) {
 
     const limit = getPlanLimit(userData.subscription_plan)
 
+    // 403 quota : seul le flag machine reste (lu par le client pour afficher
+    // l'info bleue « quota atteint ») — le texte est décidé côté page.
     if (userData.analyses_used >= limit) {
-      return NextResponse.json(
-        {
-          error: `Vous avez utilisé toutes vos analyses
-          ce mois-ci. Passez au plan supérieur
-          pour continuer.`,
-          upgrade: true
-        },
-        { status: 403 }
-      )
+      return NextResponse.json({ upgrade: true }, { status: 403 })
     }
     const { trades } = await req.json()
     // 400 métier : aucun trade valide après parsing (le parseur skippe les
     // lignes invalides). Intercepté AVANT l'appel OpenAI — le quota n'est pas
-    // consommé. Même texte exact que le flux d'import du Journal.
+    // consommé. Le client mappe le statut 400 sur son texte validé.
     if (!Array.isArray(trades) || trades.length === 0) {
-      return NextResponse.json(
-        {
-          error:
-            "Aucun trade valide n'a été détecté dans votre fichier. " +
-            'Vérifiez qu\'il contient vos trades.',
-        },
-        { status: 400 }
-      )
+      return new NextResponse(null, { status: 400 })
     }
     const report = await analyzeTradesMember(trades)
 
@@ -205,9 +183,6 @@ export async function POST(req: NextRequest) {
       code: error?.code,
       stack: error?.stack,
     })
-    return NextResponse.json(
-      { error: 'Erreur interne du serveur' },
-      { status: 500 }
-    )
+    return new NextResponse(null, { status: 500 })
   }
 }

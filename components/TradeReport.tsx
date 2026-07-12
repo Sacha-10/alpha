@@ -88,7 +88,7 @@ export default function TradeReport({
 
       <div className="pb-8 text-center">
         {pdfError && (
-          <div className="mx-auto mb-3 max-w-md rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-sm text-red">
+          <div className="mx-auto mb-3 max-w-md rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-center text-sm text-red">
             {pdfError}
           </div>
         )}

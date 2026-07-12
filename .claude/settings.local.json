@@ -86,7 +86,21 @@
       "Bash(node -e ' *)",
       "PowerShell(taskkill *)",
       "PowerShell(Get-Process *)",
-      "PowerShell(npm install *)"
+      "PowerShell(npm install *)",
+      "PowerShell(Get-Item *)",
+      "PowerShell(npx next start -p 3005)",
+      "PowerShell($deadline = \\(Get-Date\\).AddSeconds\\(30\\); do { try { $r = Invoke-WebRequest -Uri 'http://localhost:3005/pricing' -UseBasicParsing -TimeoutSec 3; break } catch { Start-Sleep -Milliseconds 500 } } while \\(\\(Get-Date\\) -lt $deadline\\); \"Serveur: $\\($r.StatusCode\\)\")",
+      "PowerShell(node \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\b477b360-640d-44ce-965f-ff160aee2ff1\\\\scratchpad\\\\test-pricing-card.js\")",
+      "PowerShell(git status --short; \"--- DIFF create-checkout ---\"; git diff --stat -- app/api/create-checkout/route.ts; \"--- DIFF pricing ---\"; git diff --stat -- app/pricing/page.tsx)",
+      "PowerShell(node -e \"console.log\\(require\\('puppeteer-core/package.json'\\).version\\)\"; \\(Get-Item 'C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe'\\).VersionInfo.ProductVersion)",
+      "PowerShell(try { Remove-Item -Recurse -Force 'C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\pptr-profile-pricing' -ErrorAction Stop } catch {}; try { $r = Invoke-WebRequest -Uri 'http://localhost:3005/pricing' -UseBasicParsing -TimeoutSec 5; \"Serveur: $\\($r.StatusCode\\)\" } catch { \"Serveur HS\" })",
+      "PowerShell($deadline = \\(Get-Date\\).AddSeconds\\(30\\); do { try { $r = Invoke-WebRequest -Uri 'http://localhost:3005/pricing' -UseBasicParsing -TimeoutSec 3; break } catch { Start-Sleep -Milliseconds 500 } } while \\(\\(Get-Date\\) -lt $deadline\\); \"Serveur: $\\($r.StatusCode\\)\"; try { Remove-Item -Recurse -Force 'C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\pptr-profile-pricing' -ErrorAction Stop } catch {})",
+      "PowerShell($deadline = \\(Get-Date\\).AddSeconds\\(30\\); do { try { $r = Invoke-WebRequest -Uri 'http://localhost:3005/pricing' -UseBasicParsing -TimeoutSec 3; break } catch { Start-Sleep -Milliseconds 500 } } while \\(\\(Get-Date\\) -lt $deadline\\); \"Serveur: $\\($r.StatusCode\\)\"; node \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\b477b360-640d-44ce-965f-ff160aee2ff1\\\\scratchpad\\\\verify-checkout.js\")",
+      "PowerShell(node \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\b477b360-640d-44ce-965f-ff160aee2ff1\\\\scratchpad\\\\inspect-users.js\")",
+      "PowerShell(node \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\b477b360-640d-44ce-965f-ff160aee2ff1\\\\scratchpad\\\\verify-checkout.js\")",
+      "PowerShell(Get-NetTCPConnection *)",
+      "PowerShell($deadline = \\(Get-Date\\).AddSeconds\\(30\\); while \\(\\(Get-Date\\) -lt $deadline\\) { try { $c = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction Stop; if \\($c\\) { break } } catch {}; Start-Sleep -Milliseconds 500 }; node \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\2dfa3d42-1347-42ba-92b1-c3866a47e503\\\\scratchpad\\\\verify-checkout.js\")",
+      "PowerShell(node \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\2dfa3d42-1347-42ba-92b1-c3866a47e503\\\\scratchpad\\\\verify-rls.js\")"
     ]
   }
 }

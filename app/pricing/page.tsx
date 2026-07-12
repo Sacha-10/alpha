@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { RevealSection } from "@/components/RevealSection";
 import { Check, Flame, X, ArrowRight, ChevronDown } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseClient } from '@/lib/supabase';
 import { PLANS, DISABLED_PLANS, isUnlimited, getPlanMonths, planRank, type PlanKey } from '@/lib/plans';
 
@@ -27,6 +27,50 @@ const historyLabel = (plan: PlanKey) => {
 };
 
 type BillingMode = "monthly" | "yearly";
+
+// Carte affichée au retour d'échec du checkout (/api/create-checkout redirige
+// vers /pricing?error=checkout_failed). useSearchParams (réactif, même pattern
+// que la bannière de la home et la carte du dashboard) : se déclenche aussi
+// bien à l'arrivée du flux réel — transition client où l'instance de la page
+// persiste, seuls les searchParams changent — que sur une URL tapée (montage).
+// L'URL est nettoyée via router.replace dès l'affichage ; la carte reste
+// visible (état local) mais ne survit pas à un refresh. useSearchParams
+// impose un boundary <Suspense> LOCAL (fallback null) sur une page prérendue
+// — le Suspense au niveau du composant, pas de la page : /pricing reste
+// statique au build.
+function CheckoutErrorCardInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const flagged = searchParams.get("error") === "checkout_failed";
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!flagged) return;
+    setVisible(true);
+    router.replace("/pricing", { scroll: false });
+    // Filet mesuré en prod locale : au montage (URL tapée, refresh), le
+    // replace du router est avalé par sa phase d'initialisation (même décalé
+    // d'un tick) alors qu'il commit normalement en transition client (flux
+    // réel). L'API history native — officiellement synchronisée par Next —
+    // garantit le nettoyage de la barre d'adresse dans tous les cas.
+    window.history.replaceState(null, "", "/pricing");
+  }, [flagged, router]);
+
+  if (!flagged && !visible) return null;
+  return (
+    <div className="mx-auto mt-8 w-full max-w-md rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-center text-sm text-red">
+      Une erreur est survenue. Réessayez.
+    </div>
+  );
+}
+
+function CheckoutErrorCard() {
+  return (
+    <Suspense fallback={null}>
+      <CheckoutErrorCardInner />
+    </Suspense>
+  );
+}
 
 type Plan = {
   name: string;
@@ -194,7 +238,6 @@ export default function PricingPage() {
   const supabase = getSupabaseClient();
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
-
   useEffect(() => {
     async function fetchPlan() {
       const { data: { session } } = await supabase.auth.getSession();
@@ -461,6 +504,8 @@ export default function PricingPage() {
                 );
               })}
             </div>
+
+            <CheckoutErrorCard />
           </div>
         </section>
 

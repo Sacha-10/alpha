@@ -210,11 +210,11 @@ export default function DemoPage() {
               </div>
               {/* Zone de message unique : erreur rouge / info bleue / rien. */}
               {error ? (
-                <div className="mx-auto mt-6 max-w-md rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-sm text-red">
+                <div className="mx-auto mt-6 max-w-md rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-center text-sm text-red">
                   {error}
                 </div>
               ) : used ? (
-                <div className="mx-auto mt-6 max-w-md rounded-lg border border-blue/30 bg-blue/10 px-4 py-3 text-sm text-blue">
+                <div className="mx-auto mt-6 max-w-md rounded-lg border border-blue/30 bg-blue/10 px-4 py-3 text-center text-sm text-blue">
                   L&apos;analyse gratuite a été utilisée. Inscrivez-vous pour analyser vos trades.
                 </div>
               ) : null}

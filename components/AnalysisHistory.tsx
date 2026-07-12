@@ -33,8 +33,9 @@ export default function AnalysisHistory() {
     async function load() {
       try {
         const res = await fetch("/api/analyses")
-        const data = await res.json()
+        // Les réponses d'erreur n'ont pas de corps : on ne parse qu'au succès.
         if (res.ok) {
+          const data = await res.json()
           setAnalyses(data.analyses ?? [])
         } else {
           setErrored(true)
@@ -71,7 +72,7 @@ export default function AnalysisHistory() {
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-primary">Historique</h1>
         </div>
-        <div className="rounded-lg border border-red/30 bg-red/10 p-6 text-center text-sm text-red">
+        <div className="mx-auto max-w-md rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-center text-sm text-red">
           Une erreur est survenue. Actualisez la page.
         </div>
       </>

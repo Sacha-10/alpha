@@ -214,6 +214,7 @@ export default function TradeJournal() {
 
   const [trades, setTrades] = useState<TradeRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [importing, setImporting] = useState(false)
   const [importError, setImportError] = useState<string | null>(null)
   const [importSuccess, setImportSuccess] = useState<string | null>(null)
@@ -236,22 +237,31 @@ export default function TradeJournal() {
 
   const loadTrades = useCallback(async () => {
     setLoading(true)
-    const { createBrowserClient } = await import('@supabase/ssr')
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-    const { data: { session } } = await supabase.auth.getSession()
-    const token = session?.access_token
-    // Pas de dateMin : la fenêtre de rétention est plafonnée côté serveur.
-    const res = await fetch(`/api/trades?token=${token}`)
-    const json = await res.json()
-    if (!res.ok) {
+    setLoadError(false)
+    try {
+      const { createBrowserClient } = await import('@supabase/ssr')
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      // Pas de dateMin : la fenêtre de rétention est plafonnée côté serveur.
+      const res = await fetch(`/api/trades?token=${token}`)
+      // Les réponses d'erreur n'ont pas de corps : on ne parse qu'au succès.
+      if (!res.ok) {
+        setTrades([])
+        setLoadError(true)
+      } else {
+        const json = await res.json()
+        setTrades(json.trades ?? [])
+      }
+    } catch {
       setTrades([])
-    } else {
-      setTrades(json.trades ?? [])
+      setLoadError(true)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }, [])
 
   useEffect(() => { loadTrades() }, [loadTrades])
@@ -294,7 +304,9 @@ export default function TradeJournal() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ trades: parsed })
       })
-      const data = await res.json()
+      // Les réponses d'erreur n'ont pas de corps : repli {} pour que le
+      // mapping par statut reste atteint (le succès a toujours un corps).
+      const data = await res.json().catch(() => ({}))
       // Statut -> texte décidé côté page, jamais le { error } serveur brut.
       // 400 = aucun trade valide (même message que « Analyser vos trades ») ;
       // tout autre échec (500, réseau) = message générique.
@@ -303,7 +315,7 @@ export default function TradeJournal() {
           res.status === 400
             ? "Aucun trade valide n'a été détecté dans votre fichier. " +
                 'Vérifiez qu\'il contient vos trades.'
-            : 'Une erreur est survenue. Réessayez.',
+            : 'Une erreur est survenue. Réimportez votre fichier.',
         )
         return
       }
@@ -327,7 +339,7 @@ export default function TradeJournal() {
     } catch (err) {
       // Parsing / réseau : jamais le message brut, texte générique unique.
       console.error('[TradeJournal] échec import:', err)
-      setImportError('Une erreur est survenue. Réessayez.')
+      setImportError('Une erreur est survenue. Réimportez votre fichier.')
     } finally {
       setImporting(false)
     }
@@ -537,6 +549,12 @@ export default function TradeJournal() {
 
       {loading ? (
         <div className="card rounded p-8 text-center text-secondary">Chargement...</div>
+      ) : loadError ? (
+        // État d'erreur réseau/serveur : remplace la zone de données (calendrier/
+        // panneaux) — l'en-tête et l'import restent rendus et fonctionnels.
+        <div className="mx-auto max-w-md rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-center text-sm text-red">
+          Une erreur est survenue. Actualisez la page.
+        </div>
       ) : (
         <>
           {/* VUE JOUR — CALENDRIER */}

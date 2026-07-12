@@ -159,6 +159,9 @@ export default function DashboardClient() {
   const [error, setError] = useState<string | null>(null);
   // Quota atteint : info (bleu), distinct de l'erreur (rouge). Jamais les deux.
   const [quotaReached, setQuotaReached] = useState(false);
+  // Retour d'échec du portail Stripe (/api/customer-portal redirige ici avec
+  // ?error=portal_failed) : carte rouge en tête de zone principale.
+  const [portalError, setPortalError] = useState(false);
 
   const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
@@ -319,7 +322,9 @@ export default function DashboardClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ trades }),
       });
-      const data = await res.json();
+      // Les réponses d'erreur n'ont plus de corps (sauf le flag machine du
+      // 403 quota) : repli {} pour que le mapping par statut reste atteint.
+      const data = await res.json().catch(() => ({}));
       // Mapping STATUT -> texte décidé côté page, sans passthrough du serveur.
       // 403 quota = info bleue (identique membre) ; 400 = message métier ;
       // tout autre échec (dont panne réseau) = message générique, comme visiteur.
@@ -423,6 +428,16 @@ export default function DashboardClient() {
     if (viewLocked[view as DashboardView]) return;
     setMainView(view as DashboardView);
   }, [searchParams, historiqueLocked, evolutionLocked, resumeLocked, propFirmLocked, signauxLocked, supportLocked]);
+
+  // Lecture du retour d'échec du portail, puis nettoyage de l'URL en
+  // préservant ?view= (le deep-link ci-dessus reste fonctionnel) — la carte
+  // ne survit pas à un refresh.
+  useEffect(() => {
+    if (searchParams.get("error") !== "portal_failed") return;
+    setPortalError(true);
+    const view = searchParams.get("view");
+    router.replace(view ? `/dashboard?view=${view}` : "/dashboard");
+  }, [searchParams, router]);
 
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
 
@@ -571,7 +586,7 @@ export default function DashboardClient() {
               onAfterNavigate={closeMobile}
             />
             <a
-              href="/api/customer-portal"
+              href={`/api/customer-portal?view=${mainView}`}
               onClick={() => closeMobile?.()}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-secondary transition-all duration-150 hover:bg-hover hover:text-primary"
             >
@@ -772,13 +787,13 @@ export default function DashboardClient() {
           {/* Zone message unique : erreur rouge / quota bleu / rien. */}
           {error ? (
             <div
-              className="mx-auto mt-3 max-w-md rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-sm text-red"
+              className="mx-auto mt-3 max-w-md rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-center text-sm text-red"
               role="alert"
             >
               {error}
             </div>
           ) : quotaReached ? (
-            <div className="mx-auto mt-3 max-w-md rounded-lg border border-blue/30 bg-blue/10 px-4 py-3 text-sm text-blue">
+            <div className="mx-auto mt-3 max-w-md rounded-lg border border-blue/30 bg-blue/10 px-4 py-3 text-center text-sm text-blue">
               Vos {getPlanLimit(subscriptionPlan)} analyses ont été utilisées.
               Passez au plan supérieur pour continuer.
             </div>
@@ -903,6 +918,15 @@ export default function DashboardClient() {
           }`}
         >
           <div className="flex min-h-0 flex-1 flex-col">
+            {/* Retour d'échec du portail Stripe : en tête de zone principale —
+                le lien Factures vit dans l'accordéon Compte (replié après la
+                navigation, invisible menu fermé sur mobile), c'est donc le
+                seul emplacement adjacent garanti visible au retour. */}
+            {portalError && (
+              <div className="mx-auto mb-6 w-full max-w-md shrink-0 rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-center text-sm text-red">
+                Une erreur est survenue. Réessayez.
+              </div>
+            )}
             {mainView !== "nouvelle-analyse" && mainView !== "mon-analyse" && mainView !== "journal-analyses" && mainView !== "historique" && mainView !== "evolution" && mainView !== "resume-hebdomadaire" && mainView !== "support" ? (
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
                 {renderMainContent()}

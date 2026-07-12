@@ -8,6 +8,19 @@ import { cookies } from 'next/headers'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
+// Le lien « Factures » NAVIGUE vers cette route : toute réponse est vue plein
+// écran. Échec → JAMAIS de page blanche ni de JSON, redirection vers la
+// surface d'origine (/dashboard, ?view= préservée — portée par le lien) qui
+// affiche la carte d'erreur standard. Même mécanique que create-checkout →
+// /pricing?error=checkout_failed.
+function portalFailed(req: NextRequest) {
+  const view = new URL(req.url).searchParams.get('view')
+  const url = new URL('/dashboard', req.url)
+  if (view) url.searchParams.set('view', view)
+  url.searchParams.set('error', 'portal_failed')
+  return NextResponse.redirect(url)
+}
+
 export async function GET(req: NextRequest) {
 
   const cookieStore = await cookies()
@@ -56,11 +69,17 @@ export async function GET(req: NextRequest) {
 
     .eq('id', user.id)
 
-    .single()
+    .maybeSingle()
 
+  // maybeSingle (convention maison) : ligne users absente → data null, un ÉTAT
+  // (compte sans customer → /pricing via la branche ci-dessous) ; error réservé
+  // aux vraies pannes techniques — carte d'erreur sur le dashboard, à ne pas
+  // confondre avec « pas de customer » (qui enverrait un abonné vers /pricing).
   if (dbUserError) {
 
     console.error('[customer-portal] échec lecture stripe_customer_id — userId:', user.id, JSON.stringify(dbUserError))
+
+    return portalFailed(req)
 
   }
 
@@ -84,9 +103,9 @@ export async function GET(req: NextRequest) {
 
   } catch (err) {
 
-    const message = err instanceof Error ? err.message : String(err)
+    console.error('[customer-portal] échec création session portail — userId:', user.id, err)
 
-    return NextResponse.json({ error: message }, { status: 500 })
+    return portalFailed(req)
 
   }
 

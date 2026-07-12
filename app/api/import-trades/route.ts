@@ -26,25 +26,19 @@ export async function POST(req: NextRequest) {
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return new NextResponse(null, { status: 401 })
     }
 
     const body = await req.json()
     const { trades } = body
     if (!Array.isArray(trades)) {
-      return NextResponse.json({ error: 'Trades invalides' }, { status: 400 })
+      return new NextResponse(null, { status: 400 })
     }
     // 400 métier : aucun trade valide après parsing (le parseur skippe les
-    // lignes invalides). Même texte exact que la chaîne « Analyser vos trades ».
+    // lignes invalides). Le client mappe le statut 400 sur le même texte
+    // exact que la chaîne « Analyser vos trades ».
     if (trades.length === 0) {
-      return NextResponse.json(
-        {
-          error:
-            "Aucun trade valide n'a été détecté dans votre fichier. " +
-            'Vérifiez qu\'il contient vos trades.',
-        },
-        { status: 400 }
-      )
+      return new NextResponse(null, { status: 400 })
     }
 
     // Date d'inscription : repli sur APP_LAUNCH si jamais absente.
@@ -96,7 +90,8 @@ export async function POST(req: NextRequest) {
         })
         .select('id')
       if (error) {
-        return NextResponse.json({ error: 'Erreur lors de l\'import.' }, { status: 500 })
+        console.error('[import-trades] échec upsert trades — userId:', user.id, JSON.stringify(error))
+        return new NextResponse(null, { status: 500 })
       }
       inserted = insertedRows?.length ?? 0
     }
@@ -109,6 +104,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, count: inserted, skipped, duplicates })
   } catch (error: any) {
     console.error('[import-trades] Erreur 500:', error)
-    return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 })
+    return new NextResponse(null, { status: 500 })
   }
 }

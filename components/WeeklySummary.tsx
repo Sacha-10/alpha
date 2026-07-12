@@ -122,11 +122,13 @@ export default function WeeklySummary({ plan: _plan }: Props) {
         const { data: { session } } = await supabase.auth.getSession()
         const token = session?.access_token
         const res = await fetch(`/api/weekly-summary?token=${token}`, { cache: "no-store" })
-        const json = await res.json()
-        if (!active) return
+        // Les réponses d'erreur n'ont pas de corps : on ne parse qu'au succès.
         if (res.ok) {
+          const json = await res.json()
+          if (!active) return
           setData(json)
         } else {
+          if (!active) return
           setErrored(true)
         }
       } catch {
@@ -153,7 +155,7 @@ export default function WeeklySummary({ plan: _plan }: Props) {
     return (
       <div className="w-full space-y-6 pb-12">
         <h1 className="text-2xl font-bold text-primary">Résumé semaine</h1>
-        <div className="rounded-lg border border-red/30 bg-red/10 p-6 text-center text-sm text-red">
+        <div className="mx-auto max-w-md rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-center text-sm text-red">
           Une erreur est survenue. Actualisez la page.
         </div>
       </div>

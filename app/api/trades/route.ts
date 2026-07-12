@@ -23,10 +23,10 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url)
     const token = searchParams.get('token')
-    if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    if (!token) return new NextResponse(null, { status: 401 })
 
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-    if (!user || authError) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    if (!user || authError) return new NextResponse(null, { status: 401 })
 
     // Fenêtre de rétention calculée CÔTÉ SERVEUR depuis le plan réel + la date
     // d'inscription (jamais à partir du dateMin client). Accessible à tous les
@@ -55,12 +55,13 @@ export async function GET(req: NextRequest) {
       .order('opened_at', { ascending: true })
 
     if (error) {
-      return NextResponse.json({ error: 'Erreur lors du chargement.' }, { status: 500 })
+      console.error('[api/trades] échec lecture trades — userId:', user.id, JSON.stringify(error))
+      return new NextResponse(null, { status: 500 })
     }
 
     return NextResponse.json({ trades: data ?? [] })
   } catch (error: any) {
     console.error('[api/trades] Erreur 500:', error)
-    return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 })
+    return new NextResponse(null, { status: 500 })
   }
 }

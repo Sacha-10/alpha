@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
         { global: { headers: { Authorization: `Bearer ${token}` } } }
       )
       const { data: { user: u }, error } = await supabase.auth.getUser(token)
-      if (!u || error) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      if (!u || error) return new NextResponse(null, { status: 401 })
       user = u
     } else {
       const cookieStore = await cookies()
@@ -43,11 +43,11 @@ export async function GET(req: NextRequest) {
         }
       )
       const { data: { user: u } } = await supabase.auth.getUser()
-      if (!u) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      if (!u) return new NextResponse(null, { status: 401 })
       user = u
     }
 
-    if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    if (!user) return new NextResponse(null, { status: 401 })
 
     // Palier : Résumé semaine réservé à Premium et au-dessus.
     const { data: userData, error: userError } = await supabase
@@ -59,11 +59,10 @@ export async function GET(req: NextRequest) {
       console.error('[/api/weekly-summary] échec lecture users — userId:', user.id, JSON.stringify(userError))
     }
 
+    // Aucun client ne lit le corps de ce 403 (la sidebar verrouille déjà la
+    // vue par plan) : statut nu.
     if (!requirePlanFor('weeklySummary', userData?.subscription_plan)) {
-      return NextResponse.json(
-        { error: 'Réservé au plan Premium et supérieur.', upgrade: true },
-        { status: 403 }
-      )
+      return new NextResponse(null, { status: 403 })
     }
 
     const { data, error } = await supabase
@@ -72,7 +71,8 @@ export async function GET(req: NextRequest) {
       .eq('user_id', user.id)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('[/api/weekly-summary] échec lecture trades — userId:', user.id, JSON.stringify(error))
+      return new NextResponse(null, { status: 500 })
     }
 
     const rows: TradeRow[] = data ?? []
@@ -80,6 +80,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(buildSummaryFromRows(rows, new Date()))
   } catch (error: any) {
     console.error('[/api/weekly-summary] Erreur:', error?.message)
-    return NextResponse.json({ error: 'Erreur interne' }, { status: 500 })
+    return new NextResponse(null, { status: 500 })
   }
 }

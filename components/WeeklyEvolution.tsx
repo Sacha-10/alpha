@@ -72,7 +72,7 @@ function Spinner() {
 
 // ── Composant principal ──────────────────────────────────────────────────
 
-export default function WeeklyEvolution({ plan }: Props) {
+export default function WeeklyEvolution({ plan: _plan }: Props) {
   const [data, setData] = useState<WeeklyEvolutionResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [errored, setErrored] = useState(false)
@@ -89,11 +89,13 @@ export default function WeeklyEvolution({ plan }: Props) {
         const { data: { session } } = await supabase.auth.getSession()
         const token = session?.access_token
         const res = await fetch(`/api/weekly-evolution?token=${token}`)
-        const json = await res.json()
-        if (!active) return
+        // Les réponses d'erreur n'ont pas de corps : on ne parse qu'au succès.
         if (res.ok) {
+          const json = await res.json()
+          if (!active) return
           setData(json)
         } else {
+          if (!active) return
           setErrored(true)
         }
       } catch {
@@ -120,7 +122,7 @@ export default function WeeklyEvolution({ plan }: Props) {
     return (
       <div className="w-full space-y-6 pb-12">
         <h1 className="text-2xl font-bold text-primary">Évolution semaine</h1>
-        <div className="rounded-lg border border-red/30 bg-red/10 p-6 text-center text-sm text-red">
+        <div className="mx-auto max-w-md rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-center text-sm text-red">
           Une erreur est survenue. Actualisez la page.
         </div>
       </div>

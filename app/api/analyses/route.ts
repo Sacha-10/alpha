@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
         { global: { headers: { Authorization: `Bearer ${token}` } } }
       )
       const { data: { user: u }, error } = await supabase.auth.getUser(token)
-      if (!u || error) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      if (!u || error) return new NextResponse(null, { status: 401 })
       user = u
     } else {
       const cookieStore = await cookies()
@@ -40,11 +40,11 @@ export async function GET(req: NextRequest) {
         }
       )
       const { data: { user: u } } = await supabase.auth.getUser()
-      if (!u) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      if (!u) return new NextResponse(null, { status: 401 })
       user = u
     }
 
-    if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    if (!user) return new NextResponse(null, { status: 401 })
 
     const { data: userData, error: userError } = await supabase
       .from('users')
@@ -56,11 +56,10 @@ export async function GET(req: NextRequest) {
     }
 
     // Palier : Historique des analyses réservé à Premium et au-dessus.
+    // Aucun client ne lit le corps de ce 403 (la sidebar verrouille déjà la
+    // vue par plan) : statut nu.
     if (!requirePlanFor('analysesHistory', userData?.subscription_plan)) {
-      return NextResponse.json(
-        { error: 'Historique réservé au plan Premium et supérieur.', upgrade: true },
-        { status: 403 }
-      )
+      return new NextResponse(null, { status: 403 })
     }
 
     // Fenêtre de rétention serveur : la plus récente de (aujourd'hui − rétention
@@ -76,13 +75,14 @@ export async function GET(req: NextRequest) {
 
     if (error) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((error as any).status === 406) return NextResponse.json({ error: 'Token expiré' }, { status: 401 })
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      if ((error as any).status === 406) return new NextResponse(null, { status: 401 })
+      console.error('[/api/analyses] échec lecture member_analyses — userId:', user.id, JSON.stringify(error))
+      return new NextResponse(null, { status: 500 })
     }
 
     return NextResponse.json({ analyses: data ?? [] })
   } catch (error: any) {
     console.error('[/api/analyses] Erreur:', error?.message)
-    return NextResponse.json({ error: 'Erreur interne' }, { status: 500 })
+    return new NextResponse(null, { status: 500 })
   }
 }
