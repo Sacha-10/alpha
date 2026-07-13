@@ -135,7 +135,7 @@ export default function DemoPage() {
               </h1>
               <div className="mx-auto mt-10 h-px w-12 bg-blue" />
               <p className="mx-auto mt-8 max-w-[520px] text-lg leading-relaxed text-secondary">
-                Analyse basée sur 120 trades.
+                Votre première analyse gratuite basée sur 120 trades.
               </p>
             </RevealSection>
           </div>

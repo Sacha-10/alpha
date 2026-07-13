@@ -5,6 +5,7 @@
 
 import { computeStats } from '@/lib/openai'
 import type { Trade } from '@/lib/parseCSV'
+import { parseDbDate } from '@/lib/parseDbDate'
 
 const MONTHS_FR = [
   'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
@@ -104,10 +105,13 @@ export type TradeRow = {
 }
 
 export function toComputeTrade(row: TradeRow): Trade | null {
-  const openTime = row.opened_at ? new Date(row.opened_at) : new Date(NaN)
+  // parseDbDate : les timestamps DB arrivent sans offset — un new Date() nu
+  // les lirait dans le fuseau de l'HÔTE (juste sur Vercel UTC, faux en dev
+  // local). Lecture UTC déterministe local/prod.
+  const openTime = row.opened_at ? parseDbDate(row.opened_at) : new Date(NaN)
   if (isNaN(openTime.getTime())) return null
 
-  let closeTime = row.closed_at ? new Date(row.closed_at) : openTime
+  let closeTime = row.closed_at ? parseDbDate(row.closed_at) : openTime
   if (isNaN(closeTime.getTime())) closeTime = openTime
 
   const durationMinutes = Math.max(0, (closeTime.getTime() - openTime.getTime()) / 60000)

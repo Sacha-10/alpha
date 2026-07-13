@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { detectAndParse } from '@/lib/parseCSV'
+import { parseDbDate } from '@/lib/parseDbDate'
 import { APP_LAUNCH } from '@/lib/plans'
 import { Upload, ChevronLeft, ChevronRight, Download, X } from 'lucide-react'
 import * as Popover from '@radix-ui/react-popover'
@@ -198,9 +199,10 @@ function formatDate(dateStr: string): string {
 
 function formatTime(dateStr: string | null): string {
   if (!dateStr) return '--'
-  // timeZone UTC : l'heure affichée = l'heure LITTÉRALE du fichier importé
-  // (les parseurs construisent les dates en UTC), quel que soit le navigateur.
-  return new Date(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
+  // parseDbDate + timeZone UTC : l'heure affichée = l'heure LITTÉRALE du
+  // fichier importé, quel que soit le navigateur. La chaîne DB arrive sans
+  // offset — un new Date() nu la lirait en heure locale du membre.
+  return parseDbDate(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
 }
 
 export default function TradeJournal() {
