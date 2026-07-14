@@ -128,7 +128,7 @@ const plans: Plan[] = [
     },
     features: [
       { label: analysesLabel(PLANS.pro.limit), included: true },
-      { label: "Analyses IA GPT-5.4", included: true },
+      { label: "Analyses IA GPT-5.6 Sol", included: true },
       { label: "Export PDF", included: true },
       { label: "Journal de vos trades (1 mois)", included: true },
       { label: "Historique de vos analyses", included: false },
@@ -159,7 +159,7 @@ const plans: Plan[] = [
     },
     features: [
       { label: analysesLabel(PLANS.premium.limit), included: true },
-      { label: "Analyses IA GPT-5.4", included: true },
+      { label: "Analyses IA GPT-5.6 Sol", included: true },
       { label: "Export PDF", included: true },
       { label: "Journal de vos trades (1 an)", included: true },
       { label: historyLabel("premium"), included: true },
@@ -189,7 +189,7 @@ const plans: Plan[] = [
     },
     features: [
       { label: analysesLabel(PLANS.elite.limit), included: true },
-      { label: "Analyses IA GPT-5.4", included: true },
+      { label: "Analyses IA GPT-5.6 Sol", included: true },
       { label: "Export PDF", included: true },
       { label: "Journal de vos trades (illimité)", included: true },
       { label: historyLabel("elite"), included: true },

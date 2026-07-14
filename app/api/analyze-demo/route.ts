@@ -3,7 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import { analyzeTradesDemo } from '@/lib/openai'
 import type { Trade } from '@/lib/parseCSV'
 
-export const maxDuration = 60
+// 2 tentatives × 70s mesurés + marge ; les routes sans retry gardent leur limite (décision propriétaire)
+export const maxDuration = 150
 
 function randInt(min: number, max: number): number {
   return Math.min(max, Math.max(min,

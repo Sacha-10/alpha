@@ -69,7 +69,7 @@ export default function MentionsLegalesPage() {
           <div className="mt-4 space-y-3 text-sm leading-relaxed text-secondary">
             <p>
               AlphaTradeX est un{" "}<strong className="text-primary">service d&apos;analyse</strong>{" "}fondé sur des modèles
-              d&apos;intelligence artificielle (notamment{" "}<strong className="text-primary">OpenAI GPT-5.4</strong>) appliqué
+              d&apos;intelligence artificielle (notamment{" "}<strong className="text-primary">OpenAI GPT-5.6 Sol</strong>) appliqué
               aux données d&apos;historique de trading fournies par l&apos;utilisateur.
             </p>
             <p>

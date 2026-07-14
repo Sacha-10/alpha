@@ -89,7 +89,7 @@ export default function CGVPage() {
               Après validation du paiement, l&apos;accès aux fonctionnalités payantes est activé dans les délais
               techniquement raisonnables. Le service repose sur des infrastructures tierces (notamment{" "}
               <strong className="text-primary">Vercel</strong>{" "}pour l&apos;hébergement et{" "}
-              <strong className="text-primary">OpenAI GPT-5.4</strong>{" "}pour l&apos;analyse IA) ; une indisponibilité
+              <strong className="text-primary">OpenAI GPT-5.6 Sol</strong>{" "}pour l&apos;analyse IA) ; une indisponibilité
               ponctuelle ne donne droit à aucune indemnisation au-delà des obligations légales applicables.
             </p>
           </div>
@@ -148,7 +148,7 @@ export default function CGVPage() {
             <p>
               AlphaTradeX ne saurait être tenu responsable des pertes financières résultant des décisions de trading prises
               par l&apos;utilisateur. Les analyses IA sont fournies « en l&apos;état », avec les limites inhérentes aux
-              modèles probabilistes (<strong className="text-primary">GPT-5.4</strong>).
+              modèles probabilistes (<strong className="text-primary">GPT-5.6 Sol</strong>).
             </p>
             <p>
               Les limitations de responsabilité ne s&apos;appliquent pas aux garanties légales ni aux cas où la loi interdit

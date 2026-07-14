@@ -5,7 +5,8 @@ import { analyzeTradesMember } from '@/lib/openai'
 import { getPlanLimit } from '@/lib/plans'
 import Stripe from 'stripe'
 
-export const maxDuration = 60
+// 2 tentatives × 70s mesurés + marge ; les routes sans retry gardent leur limite (décision propriétaire)
+export const maxDuration = 150
 
 // Rate limiting en mémoire — 1 requête toutes les 15 secondes par utilisateur
 const rateLimitMap = new Map<string, number>()

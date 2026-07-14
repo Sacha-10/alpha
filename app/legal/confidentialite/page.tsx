@@ -118,12 +118,12 @@ export default function ConfidentialitePage() {
         </section>
 
         <section className="rounded border border-border bg-card p-6 md:p-8">
-          <h2 className="mb-2 text-xl font-semibold text-primary">4. Intelligence artificielle (OpenAI GPT-5.4)</h2>
+          <h2 className="mb-2 text-xl font-semibold text-primary">4. Intelligence artificielle (OpenAI GPT-5.6 Sol)</h2>
           <div className="mt-4 space-y-3 text-sm leading-relaxed text-secondary">
             <p>
               Pour produire les analyses, des extraits ou agrégats de vos données (y compris issues de vos fichiers CSV)
               peuvent être transmis à{" "}<strong className="text-primary">OpenAI</strong>{" "}via l&apos;API du modèle{" "}
-              <strong className="text-primary">GPT-5.4</strong>, dans le cadre défini contractuellement (confidentialité,
+              <strong className="text-primary">GPT-5.6 Sol</strong>, dans le cadre défini contractuellement (confidentialité,
               sécurité, options d&apos;exclusion de réutilisation pour l&apos;entraînement lorsque disponibles et activées).
             </p>
             <p>

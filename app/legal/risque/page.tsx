@@ -65,10 +65,10 @@ export default function RisquesPage() {
         </section>
 
         <section className="rounded border border-border bg-card p-6 md:p-8">
-          <h2 className="mb-2 text-xl font-semibold text-primary">3. Limites de l&apos;intelligence artificielle (OpenAI GPT-5.4)</h2>
+          <h2 className="mb-2 text-xl font-semibold text-primary">3. Limites de l&apos;intelligence artificielle (OpenAI GPT-5.6 Sol)</h2>
           <div className="mt-4 space-y-3 text-sm leading-relaxed text-secondary">
             <p>
-              Les analyses sont produites notamment via le modèle{" "}<strong className="text-primary">OpenAI GPT-5.4</strong>.
+              Les analyses sont produites notamment via le modèle{" "}<strong className="text-primary">OpenAI GPT-5.6 Sol</strong>.
               Les modèles d&apos;IA peuvent produire des{" "}<strong className="text-primary">erreurs</strong>, des{" "}
               <strong className="text-primary">hallucinations</strong>, des généralisations abusives ou des interprétations
               incomplètes des données fournies.

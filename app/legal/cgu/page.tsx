@@ -45,7 +45,7 @@ export default function CGUPage() {
               AlphaTradeX permet aux utilisateurs de soumettre leurs{" "}<strong className="text-primary">historiques de trades</strong>{" "}
               (notamment sous forme de fichiers{" "}<strong className="text-primary">CSV</strong>) afin d&apos;obtenir une{" "}
               <strong className="text-primary">analyse par intelligence artificielle</strong>{" "}(notamment via{" "}
-              <strong className="text-primary">OpenAI GPT-5.4</strong>) de ces données.
+              <strong className="text-primary">OpenAI GPT-5.6 Sol</strong>) de ces données.
             </p>
             <p>
               Toute création de compte ou utilisation du Service vaut acceptation sans réserve des CGU en vigueur à la date
@@ -134,7 +134,7 @@ export default function CGUPage() {
             <p>
               Le Service est hébergé sur une infrastructure fournie notamment par{" "}<strong className="text-primary">Vercel</strong>.
               Les traitements de données personnelles sont décrits dans la politique de confidentialité. Les analyses IA
-              peuvent impliquer le recours à des API du modèle{" "}<strong className="text-primary">OpenAI GPT-5.4</strong>, sous
+              peuvent impliquer le recours à des API du modèle{" "}<strong className="text-primary">OpenAI GPT-5.6 Sol</strong>, sous
               réserve des paramètres techniques et contractuels en vigueur.
             </p>
           </div>

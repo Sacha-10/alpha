@@ -2,6 +2,10 @@ import OpenAI from 'openai'
 import { Trade } from './parseCSV'
 import type { AiAnalysisResult } from './tradingAnalysisTypes'
 
+// Modèle unique pour toutes les analyses (démo + membre).
+// gpt-5.6-sol n'accepte que temperature par défaut (1) — ne pas en passer.
+const OPENAI_MODEL = 'gpt-5.6-sol'
+
 type AnalysisTargets = {
   winRate: number
   pnl: number
@@ -306,9 +310,8 @@ dans le JSON retourné.`
   async function callAPI(attempt: number): Promise<any> {
     try {
       const response = await client.chat.completions.create({
-        model: 'gpt-5.4',
+        model: OPENAI_MODEL,
         max_completion_tokens: 4000,
-        temperature: 0.7,
         messages: [
           { role: 'system', content: DEMO_SYSTEM_PROMPT },
           {
@@ -1128,9 +1131,8 @@ export async function analyzeTradesMember(
     let response: OpenAI.Chat.Completions.ChatCompletion
     try {
       response = await client.chat.completions.create({
-        model: 'gpt-5.4',
+        model: OPENAI_MODEL,
         max_completion_tokens: 3000,
-        temperature: 0.6,
         messages: [
           { role: 'system', content: MEMBER_SYSTEM_PROMPT },
           { role: 'user', content: userMessage },

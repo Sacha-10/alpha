@@ -402,7 +402,7 @@ export default function HomePage() {
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Technologie</p>
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold leading-tight text-primary">
                 Propulsé par{" "}
-                <span className="text-primary">GPT-5.4</span>.
+                <span className="text-primary">GPT-5.6 Sol</span>.
               </h2>
               <p className="mt-4 max-w-[520px] mx-auto text-base text-secondary">
                 Pendant que les autres vont passer leur temps à deviner, vous savez. Le résultat : la précision du
@@ -416,7 +416,7 @@ export default function HomePage() {
                   <BrainCircuit className="h-8 w-8 text-blue" aria-hidden />
                   <h3 className="mt-5 text-xl font-semibold text-primary">Précision Chirurgicale</h3>
                   <p className="mt-3 text-sm leading-relaxed text-secondary">
-                    GPT-5.4 raisonne comme un analyste senior. Il voit ce que les autres modèles ne peuvent pas voir.
+                    GPT-5.6 Sol raisonne comme un analyste senior. Il voit ce que les autres modèles ne peuvent pas voir.
                   </p>
                 </article>
               </RevealSection>
@@ -425,8 +425,7 @@ export default function HomePage() {
                   <ShieldCheck className="h-8 w-8 text-cyan" aria-hidden />
                   <h3 className="mt-5 text-xl font-semibold text-primary">Fiabilité Inégalée</h3>
                   <p className="mt-3 text-sm leading-relaxed text-secondary">
-                    Au moins 33% moins d&apos;erreurs que les versions précédentes. Chaque analyse est vérifiée, chaque
-                    décision est fondée.
+                    Encore moins d&apos;hallucinations. Chaque analyse est vérifiée, chaque décision est fondée.
                   </p>
                 </article>
               </RevealSection>

@@ -604,10 +604,10 @@ Wrapper : `min-h-screen bg-background text-primary` · `<main className="relativ
   - `BellRing` (text-green) "Alertes sur les schémas" — delay 200
 
 #### Section 5 — "Technologie" (`bg-background`)
-- Eyebrow "Technologie" + H2 "Propulsé par **GPT-5.4**." + texte sur la précision du modèle
+- Eyebrow "Technologie" + H2 "Propulsé par **GPT-5.6 Sol**." + texte sur la précision du modèle
 - `mt-12 grid gap-5 md:grid-cols-3` — 3 `article.card.rounded.p-7.hover:border-blue` :
   - `BrainCircuit` (blue) "Précision Chirurgicale" — delay 0
-  - `ShieldCheck` (cyan) "Fiabilité Inégalée" ("Au moins 33% moins d'erreurs que les versions précédentes.") — delay 100
+  - `ShieldCheck` (cyan) "Fiabilité Inégalée" ("Encore moins d'hallucinations.") — delay 100
   - `TrendingUp` (green) "Exécution immédiate" (analyse < 60s) — delay 200
 
 #### Section 6 — "Système" (`bg-card`)
@@ -694,11 +694,11 @@ async function handleCheckout(planName: string) {
 
 #### Features par plan
 ```
-PRO (3/11 incluses)     : 4 analyses/mois, Analyse IA GPT-5.4, Export PDF,
+PRO (3/11 incluses)     : 4 analyses/mois, Analyse IA GPT-5.6 Sol, Export PDF,
                            Historique✗, Évolution hebdo✗, Résumé hebdo✗,
                            Support prio✗, Score Prop Firm✗, Détection prédictive✗,
                            Alertes Telegram✗, API✗
-PREMIUM (6/11 incluses) : 24 analyses/mois, Analyse IA GPT-5.4, Export PDF,
+PREMIUM (6/11 incluses) : 24 analyses/mois, Analyse IA GPT-5.6 Sol, Export PDF,
                            Historique 6 mois✓, Évolution hebdo✓, Résumé hebdo✓,
                            Support prio✗, Score Prop Firm✗, Détection prédictive✗,
                            Alertes Telegram✗, API✗
@@ -1004,8 +1004,8 @@ Remplace l'ancien `window.print()`. Endpoint `POST /api/generate-pdf { report, s
 
 Le générateur d'analyse est désormais scindé en deux chemins :
 
-- **`analyzeTradesDemo(trades, targets?)`** (route `/api/analyze-demo`) : 100% LLM (`gpt-5.4`, `temperature: 0.7`, `max_completion_tokens: 4000`). Le `DEMO_SYSTEM_PROMPT` impose des règles strictes pour générer un rapport JSON complet et crédible à partir de données factices/randomisées : `totalTrades` toujours 120, PnL toujours négatif (-1000€ à -250€), Win Rate 45-65%, scores 25-75 (jamais identiques), sessions London 55-70% / New York 40-55% / Tokyo 25-40% (jamais 0%), sévérité des biais selon `frequency` (FAIBLE 20-30 / MOYEN 35-45 / ÉLEVÉ 50-60 / CRITIQUE 65-75), `dominantBias` et `estimatedTimeToReady` toujours des phrases complètes, tutoiement systématique, variation d'une analyse à l'autre (`RÈGLE VARIATIONS`).
-- **`analyzeTradesMember(trades)`** (route `/api/analyze`) : **déterministe** — `computeStats(trades)` calcule toutes les valeurs numériques côté serveur (aucune hallucination possible), puis le LLM (`MEMBER_SYSTEM_PROMPT`, `temperature: 0.6`, `max_completion_tokens: 3000`) ne génère que du **contenu qualitatif** (`sessionInsight`, `dominantBias`, `description`/`evidence` par biais, `consecutiveLossesPattern`, `holdingTimeAnalysis`, `riskIssues`, `mainObstacles`, `estimatedTimeToReady`, `actionPlan`, `personalizedInsight`) à partir du bloc `STATS PRÉCALCULÉES`. La fusion finale associe chaque `biasPatterns[i]` (calculé) à son contenu LLM via `patternKey`.
+- **`analyzeTradesDemo(trades, targets?)`** (route `/api/analyze-demo`) : 100% LLM (`gpt-5.6-sol`, temperature par défaut — le modèle rejette toute autre valeur, `max_completion_tokens: 4000`). Le `DEMO_SYSTEM_PROMPT` impose des règles strictes pour générer un rapport JSON complet et crédible à partir de données factices/randomisées : `totalTrades` toujours 120, PnL toujours négatif (-1000€ à -250€), Win Rate 45-65%, scores 25-75 (jamais identiques), sessions London 55-70% / New York 40-55% / Tokyo 25-40% (jamais 0%), sévérité des biais selon `frequency` (FAIBLE 20-30 / MOYEN 35-45 / ÉLEVÉ 50-60 / CRITIQUE 65-75), `dominantBias` et `estimatedTimeToReady` toujours des phrases complètes, tutoiement systématique, variation d'une analyse à l'autre (`RÈGLE VARIATIONS`).
+- **`analyzeTradesMember(trades)`** (route `/api/analyze`) : **déterministe** — `computeStats(trades)` calcule toutes les valeurs numériques côté serveur (aucune hallucination possible), puis le LLM (`MEMBER_SYSTEM_PROMPT`, temperature par défaut, `max_completion_tokens: 3000`) ne génère que du **contenu qualitatif** (`sessionInsight`, `dominantBias`, `description`/`evidence` par biais, `consecutiveLossesPattern`, `holdingTimeAnalysis`, `riskIssues`, `mainObstacles`, `estimatedTimeToReady`, `actionPlan`, `personalizedInsight`) à partir du bloc `STATS PRÉCALCULÉES`. La fusion finale associe chaque `biasPatterns[i]` (calculé) à son contenu LLM via `patternKey`.
 
 **`computeStats()` — formules clés :**
 - **Drawdown** : equity curve chronologique (trades triés par `openTime`), `maxDrawdownAbs` = pic-creux max en valeur absolue, `maxDrawdownPct` = ratio creux/pic max.
