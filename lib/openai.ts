@@ -324,16 +324,20 @@ Ces valeurs doivent être respectées exactement
 dans le JSON retourné.`
     : ''
 
+  // Tâche = rédaction structurée sur stats précalculées par le code ;
+  // low suffit, medium en repli. (Sonde 15/07/2026 : gpt-5.6-sol accepte
+  // none/low/medium/high/xhigh, refuse minimal.)
+  const REASONING_EFFORT = 'low'
+  // Départ de l'analyse entière, retries compris — distinct du startedAt par tentative.
+  const totalStartedAt = Date.now()
+
   async function callAPI(attempt: number): Promise<any> {
     const startedAt = Date.now()
     try {
       const response = await client.chat.completions.create({
         model: OPENAI_MODEL,
         max_completion_tokens: 4000,
-        // Tâche = rédaction structurée sur stats précalculées par le code ;
-        // low suffit, medium en repli. (Sonde 15/07/2026 : gpt-5.6-sol accepte
-        // none/low/medium/high/xhigh, refuse minimal.)
-        reasoning_effort: 'low',
+        reasoning_effort: REASONING_EFFORT,
         messages: [
           { role: 'system', content: DEMO_SYSTEM_PROMPT },
           {
@@ -353,7 +357,17 @@ dans le JSON retourné.`
         .replace(/```/g, '')
         .trim()
 
-      return JSON.parse(clean)
+      const parsed = JSON.parse(clean)
+
+      const usage: any = response.usage
+      console.log(
+        `[DEMO ok] duration=${Date.now() - totalStartedAt}ms attempt=${attempt} ` +
+          `effort=${REASONING_EFFORT} in=${usage?.prompt_tokens ?? '?'} ` +
+          `out=${usage?.completion_tokens ?? '?'} ` +
+          `reasoning=${usage?.completion_tokens_details?.reasoning_tokens ?? '?'}`
+      )
+
+      return parsed
     } catch (error: any) {
       let errorJson = ''
       try {
@@ -1177,6 +1191,13 @@ export async function analyzeTradesMember(
     `\n\nTRADES BRUTS (${tradesSummary.length} trades — pour contexte textuel uniquement) :\n` +
     JSON.stringify(tradesSummary)
 
+  // Tâche = rédaction structurée sur stats précalculées par le code ;
+  // low suffit, medium en repli. (Sonde 15/07/2026 : gpt-5.6-sol accepte
+  // none/low/medium/high/xhigh, refuse minimal.)
+  const REASONING_EFFORT = 'low'
+  // Départ de l'analyse entière, retries compris — distinct du startedAt par tentative.
+  const totalStartedAt = Date.now()
+
   async function callAPI(attempt: number): Promise<AiAnalysisResult> {
     const startedAt = Date.now()
     let response: OpenAI.Chat.Completions.ChatCompletion
@@ -1184,10 +1205,7 @@ export async function analyzeTradesMember(
       response = await client.chat.completions.create({
         model: OPENAI_MODEL,
         max_completion_tokens: 3000,
-        // Tâche = rédaction structurée sur stats précalculées par le code ;
-        // low suffit, medium en repli. (Sonde 15/07/2026 : gpt-5.6-sol accepte
-        // none/low/medium/high/xhigh, refuse minimal.)
-        reasoning_effort: 'low',
+        reasoning_effort: REASONING_EFFORT,
         messages: [
           { role: 'system', content: MEMBER_SYSTEM_PROMPT },
           { role: 'user', content: userMessage },
@@ -1270,6 +1288,14 @@ export async function analyzeTradesMember(
         evidence: llmBias?.evidence ?? '',
       }
     })
+
+    const usage: any = response.usage
+    console.log(
+      `[MEMBER ok] duration=${Date.now() - totalStartedAt}ms attempt=${attempt} ` +
+        `effort=${REASONING_EFFORT} in=${usage?.prompt_tokens ?? '?'} ` +
+        `out=${usage?.completion_tokens ?? '?'} ` +
+        `reasoning=${usage?.completion_tokens_details?.reasoning_tokens ?? '?'}`
+    )
 
     return {
       globalStats: {
