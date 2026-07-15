@@ -3,7 +3,9 @@ import { createClient } from '@supabase/supabase-js'
 import { analyzeTradesDemo } from '@/lib/openai'
 import type { Trade } from '@/lib/parseCSV'
 
-// 2 tentatives × 70s mesurés + marge ; les routes sans retry gardent leur limite (décision propriétaire)
+// Entrée figée 120 trades ; amont mesuré 45–51s en low (15/07/2026) ;
+// 2 tentatives × 70s + 10s d'overhead route = 150 → budget entier consommé
+// par 2 vraies tentatives (timeout par tentative dans lib/openai.ts).
 export const maxDuration = 150
 
 function randInt(min: number, max: number): number {

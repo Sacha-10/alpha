@@ -125,7 +125,20 @@
       "PowerShell(node \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\e6d4e069-4adb-4737-a356-ef31fafe723a\\\\scratchpad\\\\diag-colonnes.cjs\")",
       "Bash(break)",
       "Bash(npm init *)",
-      "Bash(npm i *)"
+      "Bash(npm i *)",
+      "Bash(npx *)",
+      "Bash(cmd //c mklink //J node_modules \"C:\\\\Users\\\\sacha\\\\dev\\\\SaasAi\\\\Alpha\\\\alpha\\\\node_modules\")",
+      "Bash(netstat -ano)",
+      "Bash(mkdir -p \"/c/Users/sacha/AppData/Local/Temp/claude/C--Users-sacha-dev-SaasAi-Alpha-alpha/d3c0e809-6c67-4f58-9a33-6a9d5e6be87e/scratchpad\")",
+      "Bash(cp \"/c/Users/sacha/AppData/Local/Temp/claude/C--Users-sacha-dev-SaasAi-Alpha-alpha/5a0c6055-24e6-43d8-bcea-de9530ae8f3e/scratchpad/probe-timeout.mts\" \"/c/Users/sacha/AppData/Local/Temp/claude/C--Users-sacha-dev-SaasAi-Alpha-alpha/d3c0e809-6c67-4f58-9a33-6a9d5e6be87e/scratchpad/\")",
+      "Bash(ln -sf /c/Users/sacha/dev/SaasAi/Alpha/alpha/node_modules \"/c/Users/sacha/AppData/Local/Temp/claude/C--Users-sacha-dev-SaasAi-Alpha-alpha/d3c0e809-6c67-4f58-9a33-6a9d5e6be87e/scratchpad/node_modules\")",
+      "Bash(powershell -Command \"\\(Get-CimInstance Win32_Process -Filter 'ProcessId=21408'\\).CommandLine\")",
+      "Bash(powershell -Command \"Stop-Process -Id 7720 -Force\")",
+      "Bash(mkdir -p /c/Users/sacha/AppData/Local/Temp/claude/C--Users-sacha-dev-SaasAi-Alpha-alpha/d3c0e809-6c67-4f58-9a33-6a9d5e6be87e/scratchpad/baseline /c/Users/sacha/AppData/Local/Temp/claude/C--Users-sacha-dev-SaasAi-Alpha-alpha/d3c0e809-6c67-4f58-9a33-6a9d5e6be87e/scratchpad/runs)",
+      "Bash(cp /c/Users/sacha/AppData/Local/Temp/claude/C--Users-sacha-dev-SaasAi-Alpha-alpha/8bfea89f-6c6d-4c79-8ff7-2c0f6b878375/scratchpad/member-report.json /c/Users/sacha/AppData/Local/Temp/claude/C--Users-sacha-dev-SaasAi-Alpha-alpha/8bfea89f-6c6d-4c79-8ff7-2c0f6b878375/scratchpad/demo-report.json /c/Users/sacha/AppData/Local/Temp/claude/C--Users-sacha-dev-SaasAi-Alpha-alpha/d3c0e809-6c67-4f58-9a33-6a9d5e6be87e/scratchpad/baseline/)",
+      "Bash(OPENAI_BASE_URL=http://127.0.0.1:3211/v1 npx next *)",
+      "WebSearch",
+      "Read(//c/Users/sacha/dev/SaasAi/Alpha/csv-tests/**)"
     ]
   }
 }

@@ -5,7 +5,10 @@ import { analyzeTradesMember } from '@/lib/openai'
 import { getPlanLimit } from '@/lib/plans'
 import Stripe from 'stripe'
 
-// 2 tentatives × 70s mesurés + marge ; les routes sans retry gardent leur limite (décision propriétaire)
+// Entrée IA bornée à 120 trades (AI_TRADES_CAP, lib/openai.ts) ; amont mesuré
+// 33,5-36,6s en low sur entrée bornée (15/07/2026) ; 2 tentatives × 70s + 10s
+// d'overhead route = 150 → budget entier consommé par 2 vraies tentatives
+// (timeout par tentative dans lib/openai.ts).
 export const maxDuration = 150
 
 // Rate limiting en mémoire — 1 requête toutes les 15 secondes par utilisateur

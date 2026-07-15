@@ -6,6 +6,11 @@ import type { AiAnalysisResult } from './tradingAnalysisTypes'
 // gpt-5.6-sol n'accepte que temperature par défaut (1) — ne pas en passer.
 const OPENAI_MODEL = 'gpt-5.6-sol'
 
+// entrée IA bornée à 120 trades : latence mesurée 47-52s
+// en low (classe de la démo, entrée identique) ; stats
+// code-side sur le fichier ENTIER
+const AI_TRADES_CAP = 120
+
 type AnalysisTargets = {
   winRate: number
   pnl: number
@@ -263,7 +268,19 @@ export async function analyzeTradesDemo(
   trades: Trade[],
   targets?: AnalysisTargets
 ): Promise<any> {
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  // Un seul étage de retry : la boucle callAPI ci-dessous. maxRetries: 0 coupe
+  // les retries internes du SDK (défaut 2) qui empilaient jusqu'à 6 appels HTTP
+  // silencieux (2 tentatives applicatives × 3 appels SDK), chacun borné au
+  // timeout défaut du SDK : 10 minutes — bien au-delà du plafond de route.
+  // timeout: 70s PAR TENTATIVE — entrée figée 120 trades ; amont mesuré
+  // ~45-50s (pire cas exact : 51,1s) en low (15/07/2026) ; 2×70 + 10 = 150 =
+  // maxDuration → budget entier, 2 vraies tentatives. Tentative expirée = APIConnectionTimeoutError →
+  // catch → la boucle retente.
+  const client = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    maxRetries: 0,
+    timeout: 70_000,
+  })
   const tradesData = trades.map(t => ({
     symbol: t.symbol,
     direction: t.direction,
@@ -308,10 +325,15 @@ dans le JSON retourné.`
     : ''
 
   async function callAPI(attempt: number): Promise<any> {
+    const startedAt = Date.now()
     try {
       const response = await client.chat.completions.create({
         model: OPENAI_MODEL,
         max_completion_tokens: 4000,
+        // Tâche = rédaction structurée sur stats précalculées par le code ;
+        // low suffit, medium en repli. (Sonde 15/07/2026 : gpt-5.6-sol accepte
+        // none/low/medium/high/xhigh, refuse minimal.)
+        reasoning_effort: 'low',
         messages: [
           { role: 'system', content: DEMO_SYSTEM_PROMPT },
           {
@@ -340,13 +362,16 @@ dans le JSON retourné.`
         errorJson = `JSON.stringify failed: ${jsonErr?.message || String(jsonErr)}`
       }
 
-      console.error('[OpenAI Error - Detailed]', {
-        message: error?.message,
-        status: error?.status,
-        code: error?.code,
-        type: error?.type,
-        json: errorJson,
-      })
+      console.error(
+        `[DEMO attempt=${attempt}] tentative échouée/expirée après ${Date.now() - startedAt}ms`,
+        {
+          message: error?.message,
+          status: error?.status,
+          code: error?.code,
+          type: error?.type,
+          json: errorJson,
+        }
+      )
       if (attempt < 2) {
         await new Promise(r => setTimeout(r, 1000))
         return callAPI(attempt + 1)
@@ -1104,10 +1129,35 @@ Structure JSON exacte :
 export async function analyzeTradesMember(
   trades: Trade[]
 ): Promise<AiAnalysisResult> {
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  // Un seul étage de retry : la boucle callAPI ci-dessous (même mécanique que
+  // analyzeTradesDemo). maxRetries: 0 — aucun retry SDK empilé sous la boucle.
+  // timeout: 70s PAR TENTATIVE — entrée IA bornée à 120 (AI_TRADES_CAP) ;
+  // amont mesuré 33,5-36,6s en low sur entrée bornée (15/07/2026, pire cas
+  // UI 38,8s) ; 2×70 + 10 = 150 = maxDuration → budget entier, 2 vraies
+  // tentatives. Tentative expirée = APIConnectionTimeoutError → catch → la
+  // boucle retente. 401 transitoires récurrents (dont une paire consécutive
+  // le 15/07) — logs [attempt=] en vigie.
+  const client = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    maxRetries: 0,
+    timeout: 70_000,
+  })
   const stats = computeStats(trades)
 
-  const tradesSummary = trades.map(t => {
+  // Les AI_TRADES_CAP trades les plus récents (tri par date de clôture,
+  // ordre chronologique conservé) ; fichier ≤ cap → tableau intact,
+  // comportement strictement identique.
+  const aiTrades =
+    trades.length > AI_TRADES_CAP
+      ? [...trades]
+          .sort(
+            (a, b) =>
+              new Date(a.closeTime).getTime() - new Date(b.closeTime).getTime()
+          )
+          .slice(-AI_TRADES_CAP)
+      : trades
+
+  const tradesSummary = aiTrades.map(t => {
     const openD = new Date(t.openTime)
     const closeD = new Date(t.closeTime)
     return {
@@ -1124,15 +1174,20 @@ export async function analyzeTradesMember(
   const userMessage =
     `STATS PRÉCALCULÉES (valeurs fixes — ne jamais modifier) :\n` +
     JSON.stringify(stats) +
-    `\n\nTRADES BRUTS (${trades.length} trades — pour contexte textuel uniquement) :\n` +
+    `\n\nTRADES BRUTS (${tradesSummary.length} trades — pour contexte textuel uniquement) :\n` +
     JSON.stringify(tradesSummary)
 
   async function callAPI(attempt: number): Promise<AiAnalysisResult> {
+    const startedAt = Date.now()
     let response: OpenAI.Chat.Completions.ChatCompletion
     try {
       response = await client.chat.completions.create({
         model: OPENAI_MODEL,
         max_completion_tokens: 3000,
+        // Tâche = rédaction structurée sur stats précalculées par le code ;
+        // low suffit, medium en repli. (Sonde 15/07/2026 : gpt-5.6-sol accepte
+        // none/low/medium/high/xhigh, refuse minimal.)
+        reasoning_effort: 'low',
         messages: [
           { role: 'system', content: MEMBER_SYSTEM_PROMPT },
           { role: 'user', content: userMessage },
@@ -1141,13 +1196,16 @@ export async function analyzeTradesMember(
     } catch (apiError: any) {
       let errJson = ''
       try { errJson = JSON.stringify(apiError) } catch { errJson = String(apiError) }
-      console.error(`[MEMBER attempt=${attempt}] ERREUR APPEL OPENAI`, {
-        message: apiError?.message,
-        status: apiError?.status,
-        code: apiError?.code,
-        type: apiError?.type,
-        json: errJson,
-      })
+      console.error(
+        `[MEMBER attempt=${attempt}] ERREUR APPEL OPENAI après ${Date.now() - startedAt}ms`,
+        {
+          message: apiError?.message,
+          status: apiError?.status,
+          code: apiError?.code,
+          type: apiError?.type,
+          json: errJson,
+        }
+      )
       if (attempt < 2) {
         await new Promise(r => setTimeout(r, 1000))
         return callAPI(attempt + 1)
@@ -1160,9 +1218,10 @@ export async function analyzeTradesMember(
 
     const content = response.choices[0]?.message?.content
     if (!content) {
-      console.error(`[MEMBER attempt=${attempt}] ERREUR CONTENU VIDE`, {
-        choices: response.choices,
-      })
+      console.error(
+        `[MEMBER attempt=${attempt}] ERREUR CONTENU VIDE après ${Date.now() - startedAt}ms`,
+        { choices: response.choices }
+      )
       if (attempt < 2) {
         await new Promise(r => setTimeout(r, 1000))
         return callAPI(attempt + 1)
@@ -1182,11 +1241,14 @@ export async function analyzeTradesMember(
     try {
       llm = JSON.parse(clean)
     } catch (parseError: any) {
-      console.error(`[MEMBER attempt=${attempt}] ERREUR JSON.PARSE`, {
-        message: parseError?.message,
-        contentStart: clean.slice(0, 300),
-        contentEnd: clean.slice(-200),
-      })
+      console.error(
+        `[MEMBER attempt=${attempt}] ERREUR JSON.PARSE après ${Date.now() - startedAt}ms`,
+        {
+          message: parseError?.message,
+          contentStart: clean.slice(0, 300),
+          contentEnd: clean.slice(-200),
+        }
+      )
       if (attempt < 2) {
         await new Promise(r => setTimeout(r, 1000))
         return callAPI(attempt + 1)
