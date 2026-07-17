@@ -138,7 +138,19 @@
       "Bash(cp /c/Users/sacha/AppData/Local/Temp/claude/C--Users-sacha-dev-SaasAi-Alpha-alpha/8bfea89f-6c6d-4c79-8ff7-2c0f6b878375/scratchpad/member-report.json /c/Users/sacha/AppData/Local/Temp/claude/C--Users-sacha-dev-SaasAi-Alpha-alpha/8bfea89f-6c6d-4c79-8ff7-2c0f6b878375/scratchpad/demo-report.json /c/Users/sacha/AppData/Local/Temp/claude/C--Users-sacha-dev-SaasAi-Alpha-alpha/d3c0e809-6c67-4f58-9a33-6a9d5e6be87e/scratchpad/baseline/)",
       "Bash(OPENAI_BASE_URL=http://127.0.0.1:3211/v1 npx next *)",
       "WebSearch",
-      "Read(//c/Users/sacha/dev/SaasAi/Alpha/csv-tests/**)"
+      "Read(//c/Users/sacha/dev/SaasAi/Alpha/csv-tests/**)",
+      "PowerShell(Select-String *)",
+      "PowerShell($sp = \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\53c97a0d-660d-4ed2-9f25-371ff8a706fe\\\\scratchpad\"; node \"$sp\\\\harness-setup.mjs\"; node \"$sp\\\\purge-demo-ip.mjs\")",
+      "PowerShell(Stop-Process *)",
+      "PowerShell($deadline = \\(Get-Date\\).AddSeconds\\(30\\); do { Start-Sleep -Milliseconds 500; try { $r = Invoke-WebRequest -Uri \"http://localhost:3000/\" -UseBasicParsing -TimeoutSec 5; break } catch {} } while \\(\\(Get-Date\\) -lt $deadline\\); if \\($r\\) { \"HTTP \" + $r.StatusCode } else { \"serveur pas prêt\" })",
+      "PowerShell($sp = \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\53c97a0d-660d-4ed2-9f25-371ff8a706fe\\\\scratchpad\"; node \"$sp\\\\harness-run.mjs\" http://localhost:3000 member)",
+      "PowerShell($sp = \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\53c97a0d-660d-4ed2-9f25-371ff8a706fe\\\\scratchpad\"; node \"$sp\\\\harness-run.mjs\" http://localhost:3000 demo)",
+      "PowerShell($sp = \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\53c97a0d-660d-4ed2-9f25-371ff8a706fe\\\\scratchpad\"; node \"$sp\\\\purge-demo-ip.mjs\"; node \"$sp\\\\harness-run.mjs\" http://localhost:3000 demo)",
+      "PowerShell($sp = \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\53c97a0d-660d-4ed2-9f25-371ff8a706fe\\\\scratchpad\"; node \"$sp\\\\purge-demo-ip.mjs\"; node \"$sp\\\\demo-run.mjs\" http://localhost:3000)",
+      "PowerShell(node \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\53c97a0d-660d-4ed2-9f25-371ff8a706fe\\\\scratchpad\\\\capture-services.mjs\" http://localhost:3000)",
+      "PowerShell(node \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\53c97a0d-660d-4ed2-9f25-371ff8a706fe\\\\scratchpad\\\\harness-cleanup.mjs\")",
+      "Bash(echo \"---exit $?\")",
+      "Bash(awk '{print $NF}')"
     ]
   }
 }

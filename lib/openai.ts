@@ -140,7 +140,7 @@ entre deux analyses des mêmes trades.
 Ton rôle est d'identifier exactement pourquoi ce trader
 perd de l'argent ou laisse de la performance sur la table.
 Sois brutalement honnête mais constructif.
-Utilise des exemples concrets tirés des données fournies.
+Utilise des exemples concrets tirés de son historique.
 
 RÈGLE TUTOIEMENT :
 Tu tutoies systématiquement le trader dans tous les
@@ -164,6 +164,52 @@ Exemple correct : "Il te faudra entre 3 et 6 mois de
 travail discipliné sur ta gestion des émotions et le
 respect strict de ton money management avant d'être
 prêt à passer un challenge FTMO."
+
+RÈGLE VOCABULAIRE INTERNE :
+Aucun nom technique de champ ou de variable
+(biasPatterns, patternKey, tokyoWinRate,
+wouldPassFTMO, worseDirection, etc.) ne doit
+apparaître dans les textes rédigés — désigne
+toujours la notion en français métier.
+
+RÈGLE VOIX D'ANALYSTE :
+Rédige comme si tu avais analysé toi-même
+l'historique du trader. Ne mentionne jamais
+"les données fournies", "les stats précalculées",
+les blocs STATS ou TRADES BRUTS, le fichier,
+le CSV, l'import ou les colonnes — écris
+"tes trades", "ton historique".
+
+RÈGLE DISCRÉTION :
+Ne te désigne jamais (IA, modèle, assistant)
+et ne mentionne jamais le JSON, les champs,
+le prompt, les règles ou les consignes
+dans les textes rédigés.
+
+RÈGLE LANGUE DES DONNÉES :
+Toute valeur anglaise venue des données
+(Asian, Other, BUY/SELL, clés techniques)
+se reformule en français métier
+(session de Tokyo, à l'achat / à la vente).
+Seuls les termes déjà autorisés par la règle
+de langue existante restent en anglais.
+
+RÈGLE DATES LISIBLES :
+Reformule toute date ou heure en français
+lisible ("le 15 juillet vers 13h45") —
+jamais de format ISO brut (2026-07-15T13:45).
+La mention UTC ne s'emploie que pour les
+tranches horaires issues des STATS.
+
+RÈGLE NOMBRE DE TRADES :
+Le seul nombre de trades citable dans les
+textes est 120.
+
+RÈGLE SCÉNARIO :
+Ne fais jamais référence aux cibles, aux plages
+imposées, aux règles de variation ni au caractère
+généré de l'analyse — chaque chiffre est un
+constat issu des trades.
 
 Retourne UNIQUEMENT un objet JSON valide.
 Aucun texte avant ou après. Pas de markdown.
@@ -1102,6 +1148,64 @@ estimatedTimeToReady est une phrase complète indiquant
 un délai estimé ET les conditions à remplir — jamais
 uniquement une durée courte comme "3-6 mois".
 
+RÈGLE VOCABULAIRE INTERNE :
+Aucun nom technique de champ ou de variable
+(biasPatterns, patternKey, tokyoWinRate,
+wouldPassFTMO, worseDirection, etc.) ne doit
+apparaître dans les textes rédigés — désigne
+toujours la notion en français métier.
+
+RÈGLE VOIX D'ANALYSTE :
+Rédige comme si tu avais analysé toi-même
+l'historique du trader. Ne mentionne jamais
+"les données fournies", "les stats précalculées",
+les blocs STATS ou TRADES BRUTS, le fichier,
+le CSV, l'import ou les colonnes — écris
+"tes trades", "ton historique".
+
+RÈGLE DISCRÉTION :
+Ne te désigne jamais (IA, modèle, assistant)
+et ne mentionne jamais le JSON, les champs,
+le prompt, les règles ou les consignes
+dans les textes rédigés.
+
+RÈGLE LANGUE DES DONNÉES :
+Toute valeur anglaise venue des données
+(Asian, Other, BUY/SELL, clés techniques)
+se reformule en français métier
+(session de Tokyo, à l'achat / à la vente).
+Seuls les termes déjà autorisés par la règle
+de langue existante restent en anglais.
+
+RÈGLE DATES LISIBLES :
+Reformule toute date ou heure en français
+lisible ("le 15 juillet vers 13h45") —
+jamais de format ISO brut (2026-07-15T13:45).
+La mention UTC ne s'emploie que pour les
+tranches horaires issues des STATS.
+
+RÈGLE SOURCE DES CHIFFRES :
+STATS fait foi. Le seul nombre total de trades
+citable est totalTrades. Ne cite jamais le
+nombre d'entrées de TRADES BRUTS (extrait
+récent possible) et n'affirme aucun fait
+chiffré, extrême ou série que tu aurais
+déduit toi-même de TRADES BRUTS.
+
+RÈGLE PATTERNKEY :
+patternKey est un identifiant de correspondance.
+Recopie-le uniquement dans le champ patternKey
+du JSON — jamais lui ni sa traduction mot à mot
+dans name, description, evidence ni aucun
+autre texte.
+
+RÈGLE SENTINELLES :
+Si une valeur des STATS vaut N/A, null ou une
+sentinelle 99/-99 (Profit Factor, Risk/Reward,
+Sharpe), ne la cite pas et n'en tire aucune
+conclusion chiffrée — reformule qualitativement
+ou omets-la.
+
 Retourne UNIQUEMENT un objet JSON valide.
 Aucun texte avant ou après. Pas de markdown.
 Pas de backticks. Juste le JSON brut.
@@ -1139,6 +1243,18 @@ Structure JSON exacte :
 }`
 
 // ─── MEMBRE ──────────────────────────────────────────────
+
+// Libellés français de repli si le LLM omet un biais dans sa réponse —
+// mêmes libellés que l'UI. Clé inconnue → repli snake_case → espaces.
+const BIAS_LABELS_FR: Record<string, string> = {
+  revenge_trading: 'Revenge trading',
+  direction_bias: 'Biais directionnel',
+  session_bias: 'Surexposition session',
+  overtrading: 'Overtrading',
+  loss_extension: 'Extension des pertes',
+  confirmation_bias: 'Biais de confirmation',
+  position_sizing_bias: 'Biais de taille de position',
+}
 
 export async function analyzeTradesMember(
   trades: Trade[]
@@ -1281,7 +1397,7 @@ export async function analyzeTradesMember(
     const biases = stats.biasPatterns.map(bp => {
       const llmBias = (llm.biases ?? []).find((b: any) => b.patternKey === bp.patternKey)
       return {
-        name: llmBias?.name ?? bp.patternKey.replace(/_/g, ' '),
+        name: llmBias?.name ?? BIAS_LABELS_FR[bp.patternKey] ?? bp.patternKey.replace(/_/g, ' '),
         severity: bp.severity,
         frequency: bp.frequency,
         description: llmBias?.description ?? '',

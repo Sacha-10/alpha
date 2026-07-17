@@ -364,7 +364,7 @@ export default function HomePage() {
           <RevealSection className="text-center">
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Services</p>
             <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
-              Tout ce qu&apos;il faut pour trader au plus haut{" "}
+              Tout pour trader au plus haut{" "}
               <span className="text-primary">niveau</span>.
             </h2>
             <p className="mt-4 max-w-[520px] mx-auto text-base leading-relaxed text-secondary">Passez de l&apos;instinct à la stratégie.</p>
@@ -374,22 +374,22 @@ export default function HomePage() {
             <RevealSection delay={0}>
               <ServiceCard
                 icon={<BrainCircuit className="h-8 w-8 text-blue" aria-hidden />}
-                title="Avantage psychologique"
-                body="L&apos;IA détecte le Revenge trading, l&apos;overtrading et vos schémas émotionnels sur tout votre historique"
+                title="Structurer ses décisions"
+                body="Chaque analyse décrypte vos schémas émotionnels, mesure vos métriques au trade près et livre votre plan d&apos;action priorisé."
               />
             </RevealSection>
             <RevealSection delay={100}>
               <ServiceCard
                 icon={<BarChart3 className="h-8 w-8 text-cyan" aria-hidden />}
-                title="Statistiques approfondies"
-                body="Win rate, Sharpe ratio, Drawdown, Profit factor : chaque métrique qui compte vraiment, dans une vue claire"
+                title="Optimiser sa régularité"
+                body="Votre évolution révèle votre trajectoire chaque semaine, délivre le verdict de chacune et désigne votre levier pour la suivante."
               />
             </RevealSection>
             <RevealSection delay={200}>
               <ServiceCard
                 icon={<BellRing className="h-8 w-8 text-green" aria-hidden />}
-                title="Alertes sur les schémas"
-                body="Soyez averti lorsque vous êtes sur le point de répéter votre erreur la plus coûteuse, avant d&apos;entrer en position"
+                title="Maîtriser son exécution"
+                body="L&apos;IA détecte vos setups les plus légitimes, vous dévoile chaque signal et alimente vos exécutions via l&apos;API."
               />
             </RevealSection>
           </div>
