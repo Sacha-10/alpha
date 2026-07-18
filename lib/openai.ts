@@ -90,6 +90,22 @@ Exemple incorrect : "Biais directionnel BUY"
 Le sous-nom (BUY/SELL) doit apparaître uniquement
 dans la description et l'evidence.
 
+RÈGLE NOMENCLATURE DES BIAIS :
+Les noms de biais affichés (champ "name")
+proviennent EXCLUSIVEMENT de cette liste
+fermée — intitulés exacts du produit :
+"Revenge trading", "Biais directionnel",
+"Surexposition session", "Overtrading",
+"Extension des pertes",
+"Biais de confirmation",
+"Biais de taille de position".
+Aucun autre intitulé ("FOMO", "Escalade du
+risque", "Biais de session"...) ne doit
+apparaître comme nom de biais.
+La description et l'evidence restent libres
+et variées — seuls les intitulés sont
+verrouillés.
+
 RÈGLE SYMBOLES :
 bestSymbol = symbole avec le Win Rate le plus élevé.
 worstSymbol = symbole avec le Win Rate le plus bas.
@@ -193,6 +209,15 @@ se reformule en français métier
 (session de Tokyo, à l'achat / à la vente).
 Seuls les termes déjà autorisés par la règle
 de langue existante restent en anglais.
+London, New York et Tokyo sont des SESSIONS
+de trading — jamais des lieux, jamais des
+mots anglais isolés. Formes correctes :
+"la session de Londres", "la session de
+New York", "la session de Tokyo", ou
+"Londres" seul si le contexte de session
+est déjà posé. Formes INTERDITES :
+"à New York", "à London", "sur London",
+"London" ou "NY" employés nus.
 
 RÈGLE DATES LISIBLES :
 Reformule toute date ou heure en français
@@ -200,6 +225,26 @@ lisible ("le 15 juillet vers 13h45") —
 jamais de format ISO brut (2026-07-15T13:45).
 La mention UTC ne s'emploie que pour les
 tranches horaires issues des STATS.
+
+RÈGLE CHAMPS STRUCTURÉS :
+Les champs de DONNÉES du JSON
+(bestTrade.date, worstTrade.date,
+bestSession, worstSession, bestDayOfWeek,
+etc.) gardent un format court et homogène :
+dates "15 juillet 2026" (sans heure sauf si
+le champ l'exige), sessions "Londres" /
+"New York" / "Tokyo", jours "Lundi".
+Aucune phrase dans un champ de donnée.
+Les TEXTES rédigés suivent la RÈGLE DATES
+LISIBLES avec UN format d'heure unique :
+"vers 14h30" pour un instant, "de 09h00 à
+11h00 UTC" pour une tranche — jamais
+"09:00-11:00" ni mélange des formats
+dans les textes.
+Les heures citées dans les textes sont
+celles des trades, reprises telles quelles
+("vers XXhXX") — ne jamais inventer
+d'autres horaires.
 
 RÈGLE NOMBRE DE TRADES :
 Le seul nombre de trades citable dans les
@@ -327,15 +372,29 @@ export async function analyzeTradesDemo(
     maxRetries: 0,
     timeout: 70_000,
   })
-  const tradesData = trades.map(t => ({
+  // Minutes quantifiées en rotation par index (00/02/05/07), secondes à zéro,
+  // heures inchangées — uniquement dans les données envoyées au modèle,
+  // jamais en stockage. Grille alignée sur la RÈGLE CHAMPS STRUCTURÉS
+  // (heures citées reprises telles quelles).
+  const DEMO_MINUTES = [0, 2, 5, 7]
+  // openTime/closeTime peuvent arriver en string au runtime (cf. toDate) ;
+  // copie systématique — ne jamais muter le trade d'origine.
+  const quantizeMinutes = (v: Date, minute: number): Date => {
+    const d = toDate(v)
+    if (isNaN(d.getTime())) return v
+    const q = new Date(d.getTime())
+    q.setUTCMinutes(minute, 0, 0)
+    return q
+  }
+  const tradesData = trades.map((t, i) => ({
     symbol: t.symbol,
     direction: t.direction,
     entryPrice: t.entryPrice,
     exitPrice: t.exitPrice,
     lotSize: t.lotSize,
     profitLoss: t.profitLoss,
-    openTime: t.openTime,
-    closeTime: t.closeTime,
+    openTime: quantizeMinutes(t.openTime, DEMO_MINUTES[i % 4]),
+    closeTime: quantizeMinutes(t.closeTime, DEMO_MINUTES[i % 4]),
     durationMinutes: t.durationMinutes,
     session: t.session,
     stopLoss: t.stopLoss,
@@ -1176,6 +1235,15 @@ se reformule en français métier
 (session de Tokyo, à l'achat / à la vente).
 Seuls les termes déjà autorisés par la règle
 de langue existante restent en anglais.
+London, New York et Tokyo sont des SESSIONS
+de trading — jamais des lieux, jamais des
+mots anglais isolés. Formes correctes :
+"la session de Londres", "la session de
+New York", "la session de Tokyo", ou
+"Londres" seul si le contexte de session
+est déjà posé. Formes INTERDITES :
+"à New York", "à London", "sur London",
+"London" ou "NY" employés nus.
 
 RÈGLE DATES LISIBLES :
 Reformule toute date ou heure en français
