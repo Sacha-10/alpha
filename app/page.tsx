@@ -389,7 +389,7 @@ export default function HomePage() {
               <ServiceCard
                 icon={<BellRing className="h-8 w-8 text-green" aria-hidden />}
                 title="Maîtriser son exécution"
-                body="L&apos;IA détecte vos setups les plus légitimes, vous dévoile chaque signal et alimente vos exécutions via l&apos;API."
+                body="L&apos;IA détecte vos setups les plus légitimes, vous dévoile chacun de ces signaux et alimente vos exécutions via l&apos;API."
               />
             </RevealSection>
           </div>
@@ -397,16 +397,15 @@ export default function HomePage() {
         </section>
 
         <section className="bg-background px-6">
-          <div className="mx-auto max-w-[1200px] py-20 text-center">
-            <RevealSection>
+          <div className="mx-auto max-w-[1200px] py-20">
+            <RevealSection className="text-center">
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-secondary mb-4">Technologie</p>
               <h2 className="mx-auto mt-4 max-w-[700px] text-4xl md:text-5xl font-bold leading-tight text-primary">
                 Propulsé par{" "}
                 <span className="text-primary">GPT-5.6 Sol</span>.
               </h2>
               <p className="mt-4 max-w-[520px] mx-auto text-base text-secondary">
-                Pendant que les autres vont passer leur temps à deviner, vous savez. Le résultat : la précision du
-                modèle IA le plus avancé d&apos;OpenAI dans chaque analyse.
+                Vous savez lorsque les autres vont deviner. Le modèle IA le plus avancé d&apos;OpenAI sur chaque analyse.
               </p>
             </RevealSection>
 
@@ -414,27 +413,27 @@ export default function HomePage() {
               <RevealSection delay={0}>
                 <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                   <BrainCircuit className="h-8 w-8 text-blue" aria-hidden />
-                  <h3 className="mt-5 text-xl font-semibold text-primary">Précision Chirurgicale</h3>
+                  <h3 className="mt-5 text-xl font-semibold text-primary">Précision chirurgicale</h3>
                   <p className="mt-3 text-sm leading-relaxed text-secondary">
-                    GPT-5.6 Sol raisonne comme un analyste senior. Il voit ce que les autres modèles ne peuvent pas voir.
+                    GPT-5.6 Sol raisonne en analyste senior et décèle ce que les autres modèles vont manquer.
                   </p>
                 </article>
               </RevealSection>
               <RevealSection delay={100}>
                 <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                   <ShieldCheck className="h-8 w-8 text-cyan" aria-hidden />
-                  <h3 className="mt-5 text-xl font-semibold text-primary">Fiabilité Inégalée</h3>
+                  <h3 className="mt-5 text-xl font-semibold text-primary">Fiabilité inégalée</h3>
                   <p className="mt-3 text-sm leading-relaxed text-secondary">
-                    Encore moins d&apos;hallucinations. Chaque analyse est vérifiée, chaque décision est fondée.
+                    Encore moins d&apos;hallucinations et aucune sur vos données. L&apos;exacte réalité sur chaque analyse.
                   </p>
                 </article>
               </RevealSection>
               <RevealSection delay={200}>
                 <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                   <TrendingUp className="h-8 w-8 text-green" aria-hidden />
-                  <h3 className="mt-5 text-xl font-semibold text-primary">Exécution immédiate</h3>
+                  <h3 className="mt-5 text-xl font-semibold text-primary">Disponibilité immédiate</h3>
                   <p className="mt-3 text-sm leading-relaxed text-secondary">
-                    Analyse complète générée en moins de 60 secondes. Vous pouvez l&apos;utiliser lorsque vous en avez
+                    Analyse complète générée en 60 secondes. Vous pouvez l&apos;utiliser lorsque vous en avez
                     besoin.
                   </p>
                 </article>

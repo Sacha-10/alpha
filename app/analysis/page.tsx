@@ -26,7 +26,7 @@ const steps = [
     color: "#00E5FF",
     number: "02",
     title: "L'IA décrypte les trades",
-    body: "Les patterns, les biais, les sessions, le profil psychologique. Chaque donnée analysée, résultat en moins de 60 secondes.",
+    body: "Les patterns, les biais, les sessions, le profil psychologique. Chaque donnée analysée, résultat en 60 secondes.",
   },
   {
     icon: FileText,
@@ -149,7 +149,7 @@ export default function DemoPage() {
                 Trois étapes.<br />Zéro friction.
               </h2>
               <p className="mx-auto mt-4 max-w-[520px] text-base leading-relaxed text-secondary">
-                Un compte de trading transformé en mirror en moins de 60 secondes.
+                Un compte de trading transformé en mirror en 60 secondes.
               </p>
             </RevealSection>
             <div className="grid md:grid-cols-3 gap-5 mt-12 text-left">

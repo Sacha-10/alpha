@@ -53,7 +53,7 @@ const processSteps: ProcessStep[] = [
     color: "#00E5FF",
     number: "02",
     title: "L'IA décrypte vos trades",
-    body: "Vos patterns, vos biais, vos sessions, votre profil psychologique. Chaque donnée analysée, résultat en moins de 60 secondes.",
+    body: "Vos patterns, vos biais, vos sessions, votre profil psychologique. Chaque donnée analysée, résultat en 60 secondes.",
   },
   {
     icon: FileText,
@@ -161,7 +161,7 @@ export default function AidePage() {
                 Zéro friction.
               </h2>
               <p className="text-base text-secondary leading-relaxed max-w-[520px] mx-auto mt-4">
-                Votre historique de trades transformé en mirror en moins de 60 secondes.
+                Votre historique de trades transformé en mirror en 60 secondes.
               </p>
             </RevealSection>
 
