@@ -231,8 +231,8 @@ export default function HomePage() {
           <div className="mx-auto mt-10 h-px w-12 bg-blue" />
 
           <p className="mx-auto mt-8 max-w-[520px] leading-relaxed text-lg text-secondary">
-            Notre IA analyse chaque trade, chaque décision, chaque pattern pour que vous ne répétiez plus jamais les
-            mêmes erreurs.
+            L&apos;analyste IA décrypte chaque trade et détecte chaque pattern. Vous ne répétez plus deux fois la
+            même erreur.
           </p>
 
           </div>
@@ -246,7 +246,7 @@ export default function HomePage() {
                 Votre espace.<br />Notre analyse.
               </h2>
               <p className="mx-auto mt-4 max-w-[520px] text-base leading-relaxed text-secondary">
-                Un dashboard pensé pour les traders qui exigent la précision.
+                Un dashboard pensé pour les traders qui vont exiger la précision.
               </p>
             </RevealSection>
             <RevealSection delay={120}>
@@ -449,11 +449,10 @@ export default function HomePage() {
               <h2 className="mx-auto max-w-[700px] text-4xl font-bold text-primary md:text-5xl">
                 Le système que les traders{" "}
                 <span className="text-primary">disciplinés</span>{" "}
-                vont utiliser.
+                vont adopter.
               </h2>
               <p className="mt-4 max-w-[520px] mx-auto text-base text-secondary">
-                Passez d&apos;un trading émotionnel à une exécution maîtrisée, mesurable et optimisée. Éliminer de
-                manière définitive vos erreurs structurelles
+                Passez d&apos;un trading émotionnel à une exécution maîtrisée.
               </p>
             </RevealSection>
 
@@ -462,23 +461,21 @@ export default function HomePage() {
                 <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                   <Trophy className="h-8 w-8 text-blue" aria-hidden />
                   <h3 className="mt-5 text-xl font-semibold text-primary">
-                    Élaboré par les traders. Optimisé pour performer
+                    Élaboré pour les traders
                   </h3>
                   <p className="mt-3 text-sm leading-relaxed text-secondary">
-                    Nous avons affronté les mêmes erreurs, les mêmes doutes, les mêmes pertes. Chaque fonctionnalité a
-                    été mise en place afin de résoudre un problème précis. Notre seule finalité : améliorer vos
-                    résultats.
+                    On a affronté les mêmes pertes. Chaque fonctionnalité vous épargne l&apos;une de ces pertes et ne
+                    sert que vos résultats.
                   </p>
                 </article>
               </RevealSection>
               <RevealSection delay={70}>
                 <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                   <BarChart3 className="h-8 w-8 text-cyan" aria-hidden />
-                  <h3 className="mt-5 text-xl font-semibold text-primary">Des données réelles. Des décisions précises</h3>
+                  <h3 className="mt-5 text-xl font-semibold text-primary">Fondé sur vos données</h3>
                   <p className="mt-3 text-sm leading-relaxed text-secondary">
-                    Votre analyse repose sur vos propres trades, pas sur des données génériques.
-                    Chaque analyse est personnalisée afin de révéler ce qui fonctionne vraiment
-                    et ce qui vous freine.
+                    Votre analyse repose sur vos propres trades. Elle révèle ce que vous maîtrisez et ce que vous
+                    devez améliorer.
                   </p>
                 </article>
               </RevealSection>
@@ -486,12 +483,11 @@ export default function HomePage() {
                 <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                   <BrainCircuit className="h-8 w-8 text-green" aria-hidden />
                   <h3 className="mt-5 text-xl font-semibold text-primary">
-                    Maîtriser votre psychologie avant qu&apos;elle vous coûte.
+                    Armé contre vos biais
                   </h3>
                   <p className="mt-3 text-sm leading-relaxed text-secondary">
-                    La majorité de vos pertes viennent de décisions émotionnelles. Notre IA identifie vos biais
-                    psychologiques en temps réel, pour vous permettre une reprise totale du contrôle avant qu&apos;ils
-                    impactent vos résultats.
+                    Vos émotions ont décidé à votre place. L&apos;IA identifie vos biais émotionnels et vous reprenez
+                    le dessus à partir du prochain trade.
                   </p>
                 </article>
               </RevealSection>
@@ -499,11 +495,11 @@ export default function HomePage() {
                 <article className="card rounded p-7 hover:border-blue transition-colors duration-200">
                   <ShieldCheck className="h-8 w-8 text-blue" aria-hidden />
                   <h3 className="mt-5 text-xl font-semibold text-primary">
-                    Votre analyse exploitable en moins d&apos;une journée.
+                    Adopté en une journée
                   </h3>
                   <p className="mt-3 text-sm leading-relaxed text-secondary">
-                    Importez votre historique dans la journée. Identifiez vos patterns sur votre première analyse.
-                    Tradez avec une vision solide demain.
+                    Importez votre historique, obtenez votre première analyse en 60 secondes et tradez demain avec
+                    une vision précise.
                   </p>
                 </article>
               </RevealSection>
@@ -521,7 +517,7 @@ export default function HomePage() {
                 que les autres ont ignoré.
               </h2>
               <p className="mt-4 max-w-[520px] mx-auto text-base text-secondary">
-                Une lecture précise de leurs erreurs, de leurs forces et de leurs réels leviers de performance.
+              Tout se trouve dans leur historique. Tout se trouve dans votre historique.
               </p>
             </RevealSection>
 
@@ -575,7 +571,7 @@ export default function HomePage() {
               <span className="text-primary">révèle</span> en 60
               secondes.
             </h2>
-            <p className="mt-4 max-w-[520px] mx-auto text-base leading-relaxed text-secondary">Aucune inscription requise</p>
+            <p className="mt-4 max-w-[520px] mx-auto text-base leading-relaxed text-secondary">Aucune inscription requise.</p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <button
                 type="button"

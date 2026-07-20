@@ -121,7 +121,7 @@ const faqItems: FaqItem[] = [
   {
     question: "Qu'est-ce que les Alertes Telegram de vos setups ?",
     answer:
-      "En exclusivité sur le Plan Élite. Vos setups identifiés par l'IA, notifiés en temps réel sur Telegram. Sans connexion requise.",
+      "En exclusivité sur le Plan Élite. Vos setups identifiés par l'IA, chaque signal dévoilé sur Telegram. Sans connexion requise.",
   },
 ];
 
