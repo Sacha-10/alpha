@@ -32,7 +32,7 @@ const truthCards = [
 ];
 
 const stats = [
-  { value: "<60s", label: "Pour analyser votre historique" },
+  { value: "60s", label: "Pour analyser votre historique" },
   { value: "5", label: "Plateformes compatibles" },
   { value: "200", label: "Traders en accès anticipé" },
   { value: "2", label: "Prop Firms compatibles" },
