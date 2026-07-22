@@ -10,6 +10,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { RevealSection } from '@/components/RevealSection'
 import type { AiAnalysisResult } from '@/lib/tradingAnalysisTypes'
+import posthog from 'posthog-js'
 
 const SESSION_KEY = 'atx_demo_report'
 
@@ -87,6 +88,7 @@ export default function DemoPage() {
     setLoading(true)
     setError('')
     sessionStorage.removeItem(SESSION_KEY)
+    posthog.capture('demo_started')
     try {
       const url = `${window.location.origin}/api/analyze-demo`
       const payload = { trades: demoTrades }
@@ -112,6 +114,7 @@ export default function DemoPage() {
       const report = await res.json()
       setReport(report)
       sessionStorage.setItem(SESSION_KEY, JSON.stringify(report))
+      posthog.capture('demo_completed')
       setView('rapport')
     } catch (err) {
       console.error('[demo] Erreur réseau ou lecture réponse', err)

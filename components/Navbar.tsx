@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Menu, UserCircle, X } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase";
 import LogoSvg from "@/components/LogoSvg";
+import posthog from "posthog-js";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -61,6 +62,8 @@ export default function Navbar() {
     const handlePostLogin = async (userId: string) => {
       if (redirectingRef.current) return
       redirectingRef.current = true
+      posthog.identify(userId)
+      posthog.capture("signup_completed")
       const { data, error } = await supabase
         .from('users')
         .select('subscription_status')

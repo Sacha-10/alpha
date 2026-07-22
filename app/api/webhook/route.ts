@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 import { resend } from '@/lib/resend';
 import { getConfirmationPaiementHTML } from '@/lib/emails/confirmationPaiement';
 import { getPlanLabel, getPlanLimit } from '@/lib/plans';
+import { PostHog } from 'posthog-node';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session
 
-      const { userId, planName, analysesLimit } = session.metadata ?? {}
+      const { userId, planName, analysesLimit, billing } = session.metadata ?? {}
 
       if (!userId || !planName || !analysesLimit) {
         console.error('[webhook] ERREUR metadata incomplète — userId:', userId, 'planName:', planName, 'analysesLimit:', analysesLimit)
@@ -121,6 +122,30 @@ export async function POST(req: NextRequest) {
       if (updateError) {
         console.error('[webhook] ERREUR Supabase update — event:', event.type, event.id, 'userId:', userId, JSON.stringify(updateError))
         return await failEvent()
+      }
+
+      // Événement d'achat — source de vérité côté serveur. distinctId = userId
+      // (même id que posthog.identify côté client et que le metadata Stripe),
+      // pour relier le parcours anonyme → identifié → achat.
+      // Non bloquant : une panne PostHog ne doit jamais faire échouer la
+      // réponse au webhook ni déclencher failEvent (re-livraison = re-update
+      // users + second email). shutdown(3000) : le timeout par défaut est
+      // 30 s et REJETTE — on borne l'attente du flush.
+      try {
+        const ph = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY!, { host: 'https://eu.i.posthog.com' })
+        ph.capture({
+          distinctId: userId,
+          event: 'purchase_completed',
+          properties: {
+            plan: planName,
+            billing,
+            value: (session.amount_total || 0) / 100,
+            currency: 'eur',
+          },
+        })
+        await ph.shutdown(3000)
+      } catch (err) {
+        console.error('[webhook] Erreur PostHog purchase_completed (non bloquant):', err)
       }
 
       // Persist plan info in subscription metadata so the

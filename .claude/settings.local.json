@@ -176,7 +176,9 @@
       "PowerShell($deadline = \\(Get-Date\\).AddSeconds\\(30\\); do { Start-Sleep -Milliseconds 1000; $up = Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue } until \\($up -or \\(Get-Date\\) -gt $deadline\\); if \\($up\\) { node \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\31c51d40-ddc4-4b7f-9bdb-1c6d41cd18e6\\\\scratchpad\\\\capture-systeme.mjs\" http://localhost:3001 } else { \"serveur 3001 pas up\" })",
       "PowerShell($deadline = \\(Get-Date\\).AddSeconds\\(30\\); do { Start-Sleep -Milliseconds 1000; $up = Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue } until \\($up -or \\(Get-Date\\) -gt $deadline\\); if \\($up\\) { node \"C:\\\\Users\\\\sacha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-sacha-dev-SaasAi-Alpha-alpha\\\\31c51d40-ddc4-4b7f-9bdb-1c6d41cd18e6\\\\scratchpad\\\\capture-hero.mjs\" http://localhost:3001 } else { \"serveur 3001 pas up\" })",
       "PowerShell($lines = Get-Content -Path \"diff.txt\" -Encoding Unicode; \"=== TOTAL LINES: $\\($lines.Count\\) ===\"; \"=== FIRST 40 LINES ===\"; $lines | Select-Object -First 40; \"=== LAST 20 LINES ===\"; $lines | Select-Object -Last 20)",
-      "PowerShell(Get-FileHash app\\\\icon.svg, app\\\\apple-icon.svg, public\\\\logo.svg -Algorithm MD5 | Format-Table Hash, Path -AutoSize; Get-ChildItem emails-preview; \\(Get-Content diff.txt -TotalCount 0\\); git status --short)"
+      "PowerShell(Get-FileHash app\\\\icon.svg, app\\\\apple-icon.svg, public\\\\logo.svg -Algorithm MD5 | Format-Table Hash, Path -AutoSize; Get-ChildItem emails-preview; \\(Get-Content diff.txt -TotalCount 0\\); git status --short)",
+      "PowerShell(npm i *)",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }

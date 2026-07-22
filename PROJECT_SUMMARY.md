@@ -1,4 +1,4 @@
-# RÉSUMÉ COMPLET — AlphaTradeX (à jour au 20 juillet 2026)
+# RÉSUMÉ — AlphaTradeX (à jour au 20 juillet 2026)
 
 ---
 

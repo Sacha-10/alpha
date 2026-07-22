@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import CookieBanner from "@/components/CookieBanner";
 import { Providers } from "@/components/Providers";
@@ -56,6 +57,10 @@ export default function RootLayout({
       <body style={{ backgroundColor: '#0A0A0F' }}>
         {/* Active les transitions après hydratation complète (double rAF = après le 1er vrai paint) */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){requestAnimationFrame(function(){requestAnimationFrame(function(){document.documentElement.classList.add('hydrated');});});})();` }} />
+        <Script id="rewardful-queue" strategy="beforeInteractive">
+          {`(function(w,r){w._rwq=r;w[r]=w[r]||function(){(w[r].q=w[r].q||[]).push(arguments)}})(window,'rewardful');`}
+        </Script>
+        <Script src="https://r.wdfl.co/rw.js" data-rewardful={process.env.NEXT_PUBLIC_REWARDFUL_API_KEY} strategy="afterInteractive" />
         <div
           aria-hidden
           className="radial-glow"

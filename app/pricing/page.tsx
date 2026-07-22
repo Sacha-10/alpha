@@ -9,6 +9,7 @@ import { Check, Flame, X, ArrowRight, ChevronDown } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseClient } from '@/lib/supabase';
 import { PLANS, DISABLED_PLANS, isUnlimited, getPlanMonths, planRank, type PlanKey } from '@/lib/plans';
+import posthog from "posthog-js";
 
 // Prix « accès anticipé » et nombre d'analyses dérivés de la source de vérité.
 // Les prix barrés / publics restent du contenu marketing (non vendable).
@@ -233,7 +234,7 @@ const faqItems: FaqItem[] = [
 ];
 
 export default function PricingPage() {
-  const [billingMode, setBillingMode] = useState<BillingMode>("monthly");
+  const [billingMode, setBillingMode] = useState<BillingMode>("yearly");
   const router = useRouter();
   const supabase = getSupabaseClient();
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
@@ -267,7 +268,13 @@ export default function PricingPage() {
       return;
     }
 
-    router.push(`/api/create-checkout?plan=${planKey}&billing=${billing}&token=${session.access_token}`);
+    posthog.capture("checkout_started", { plan: planName, billing });
+
+    const referral = (typeof window !== "undefined" && (window as any).Rewardful)
+      ? (window as any).Rewardful.referral : "";
+    let checkoutUrl = `/api/create-checkout?plan=${planKey}&billing=${billing}&token=${session.access_token}`;
+    if (referral) checkoutUrl += `&referral=${encodeURIComponent(referral)}`;
+    router.push(checkoutUrl);
   };
 
   // Mapping libellé d'affichage → clé de plan (l'« ÉLITE » accentué n'est pas

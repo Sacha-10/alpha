@@ -23,6 +23,7 @@ export async function GET(req: NextRequest) {
   const planKey = searchParams.get('plan') as keyof typeof PLANS
   const annual = searchParams.get('billing') === 'annual'
   const token = searchParams.get('token')
+  const referral = searchParams.get('referral')
 
   // Identité PORTÉE par les requêtes — pas seulement validée. L'ancien client
   // anonyme nu validait le JWT via getUser(token) mais n'attachait AUCUNE
@@ -147,7 +148,9 @@ export async function GET(req: NextRequest) {
         userId: user.id,
         planName: planKey,
         analysesLimit: plan.limit.toString(),
+        billing: annual ? 'annual' : 'monthly',
       },
+      ...(referral ? { client_reference_id: referral } : {}),
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
     })

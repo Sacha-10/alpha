@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import posthog from "posthog-js";
 
 const STORAGE_KEY = "alphatradex-cookie-consent";
 
@@ -34,6 +35,11 @@ export default function CookieBanner() {
       localStorage.setItem(STORAGE_KEY, value);
     } catch {
       /* ignore */
+    }
+    if (value === "accepted") {
+      posthog.opt_in_capturing();
+    } else {
+      posthog.opt_out_capturing();
     }
     setExiting(true);
   };
